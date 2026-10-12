@@ -1,0 +1,26 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/app/router/app_router.dart';
+import 'package:sevanest_customer/app/theme/app_theme.dart';
+import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
+
+class SevaNestApp extends ConsumerWidget {
+  const SevaNestApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
+      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
+      theme: AppTheme.light,
+      routerConfig: ref.watch(appRouterProvider),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+    );
+  }
+}

@@ -1,0 +1,118 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sevanest_customer/app/dev/widget_gallery_screen.dart';
+import 'package:sevanest_customer/app/router/main_shell.dart';
+import 'package:sevanest_customer/app/router/redirect.dart';
+import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/core/config/app_config.dart';
+import 'package:sevanest_customer/core/session/auth_state.dart';
+import 'package:sevanest_customer/core/widgets/placeholder_screen.dart';
+import 'package:sevanest_customer/features/addresses/presentation/screens/address_form_screen.dart';
+import 'package:sevanest_customer/features/addresses/presentation/screens/address_list_screen.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/login_screen.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/otp_screen.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/screens/account_screen.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_screen.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_setup_screen.dart';
+import 'package:sevanest_customer/features/home/presentation/screens/home_screen.dart';
+
+GoRoute _placeholder(String path, String title) =>
+    GoRoute(path: path, builder: (context, state) => PlaceholderScreen(title));
+
+/// Real screens replace the placeholders module by module (docs/modules/*).
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final config = ref.watch(appConfigProvider);
+  final refresh = ValueNotifier<int>(0);
+  ref
+    ..onDispose(refresh.dispose)
+    ..listen(authProvider, (_, _) => refresh.value++)
+    ..listen(profileCompleteProvider, (_, _) => refresh.value++);
+
+  return GoRouter(
+    initialLocation: Routes.splash,
+    refreshListenable: refresh,
+    redirect: (context, state) => resolveRedirect(
+      auth: ref.read(authProvider),
+      profileComplete: ref.read(profileCompleteProvider),
+      location: state.uri.path,
+    ),
+    routes: [
+      GoRoute(
+        path: Routes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: Routes.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(path: Routes.otp, builder: (context, state) => const OtpScreen()),
+      GoRoute(
+        path: Routes.profileSetup,
+        builder: (context, state) => const ProfileSetupScreen(),
+      ),
+      GoRoute(
+        path: Routes.profile,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: Routes.addresses,
+        builder: (context, state) => AddressListScreen(
+          selectMode: state.uri.queryParameters['select'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: Routes.addressNew,
+        builder: (context, state) => AddressFormScreen(
+          firstTime: state.uri.queryParameters['firstTime'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: Routes.addressEdit,
+        builder: (context, state) =>
+            AddressFormScreen(addressId: state.pathParameters['id']),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => MainShell(navigationShell: shell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.home,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [_placeholder(Routes.bookings, 'Bookings')],
+          ),
+          StatefulShellBranch(
+            routes: [_placeholder(Routes.favourites, 'Shortlist')],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.account,
+                builder: (context, state) => const AccountScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      // Targets Home links to; each is replaced by its real screen in its own module.
+      _placeholder(Routes.discoverCategory, 'Choose a service'),
+      _placeholder(Routes.discoverEngagement, 'Engagement type'),
+      _placeholder(Routes.notifications, 'Notifications'),
+      _placeholder(Routes.support, 'Support'),
+      _placeholder(Routes.interviewDetail, 'Interview'),
+      _placeholder(Routes.bookingDetail, 'Booking'),
+      _placeholder(Routes.workerDetail, 'Worker'),
+      if (config.env == AppEnv.dev)
+        GoRoute(
+          path: Routes.devGallery,
+          builder: (context, state) => const WidgetGalleryScreen(),
+        ),
+    ],
+  );
+});
