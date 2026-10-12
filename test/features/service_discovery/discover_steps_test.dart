@@ -12,7 +12,6 @@ import 'package:sevanest_customer/features/addresses/presentation/providers/addr
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 
 import '../../helpers/fakes.dart';
@@ -55,8 +54,8 @@ void main() {
         store: InMemorySessionStore((access: 'a', refresh: 'r')),
         repo: auth,
         home: FakeHomeRepository(const HomeData()),
+        catalog: catalog,
         overrides: [
-          catalogRepositoryProvider.overrideWithValue(catalog),
           addressRepositoryProvider.overrideWithValue(addresses),
           locationServiceProvider.overrideWithValue(location),
           customerProfileRepositoryProvider.overrideWithValue(
@@ -118,8 +117,8 @@ void main() {
           store: InMemorySessionStore((access: 'a', refresh: 'r')),
           repo: auth,
           home: FakeHomeRepository(const HomeData()),
+          catalog: catalog,
           overrides: [
-            catalogRepositoryProvider.overrideWithValue(catalog),
             addressRepositoryProvider.overrideWithValue(
               FakeAddressRepository(),
             ),

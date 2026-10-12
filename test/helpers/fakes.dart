@@ -17,6 +17,7 @@ import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 class InMemorySessionStore implements SessionStore {
@@ -120,6 +121,7 @@ Widget testRootApp({
   required SessionStore store,
   required AuthRepository repo,
   HomeRepository? home,
+  CatalogRepository? catalog,
   List<Override> overrides = const [],
 }) => ProviderScope(
   retry: (_, _) => null,
@@ -129,6 +131,9 @@ Widget testRootApp({
     authRepositoryProvider.overrideWithValue(repo),
     heroAutoplayProvider.overrideWithValue(false),
     homeRepositoryProvider.overrideWithValue(home ?? FakeHomeRepository()),
+    catalogRepositoryProvider.overrideWithValue(
+      catalog ?? FakeCatalogRepository(),
+    ),
     ...overrides,
   ],
   child: const SevaNestApp(),
