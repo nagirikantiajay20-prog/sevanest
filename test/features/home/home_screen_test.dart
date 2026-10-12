@@ -334,6 +334,9 @@ void main() {
       await t.tap(find.byKey(const Key('dev_mode_offline')));
       await t.pump();
       expect(c.read(mockApiProvider).mode, MockMode.offline);
+      await t.tap(find.byKey(const Key('dev_mode_loading')));
+      await t.pump();
+      expect(c.read(mockApiProvider).mode, MockMode.loading);
       await t.tap(find.byKey(const Key('dev_user_new')));
       await t.pump();
       expect(c.read(mockApiProvider).returningUser, isFalse);
