@@ -37,6 +37,7 @@ dev_dependencies:
   mocktail: ^1.0.5
   integration_test:
     sdk: flutter
+  geocoding_platform_interface: ^5.0.0
 
 flutter:
   uses-material-design: true
