@@ -18,7 +18,15 @@ import 'package:sevanest_customer/shared/utils/validators.dart';
 /// `/addresses/new` and `/addresses/:id/edit` (modules/02, screen 2.2).
 /// [firstTime] = reached right after profile setup: Skip is offered and Save continues to Home.
 class AddressFormScreen extends ConsumerWidget {
-  const AddressFormScreen({this.addressId, this.firstTime = false, super.key});
+  const AddressFormScreen({
+    this.addressId,
+    this.firstTime = false,
+    this.prefill,
+    super.key,
+  });
+
+  /// Area / city / pincode found from the device location (discovery step 3).
+  final AddressInput? prefill;
 
   final String? addressId;
   final bool firstTime;
@@ -31,7 +39,7 @@ class AddressFormScreen extends ConsumerWidget {
     if (id == null) {
       return Scaffold(
         appBar: AppBar(title: title),
-        body: _AddressForm(firstTime: firstTime),
+        body: _AddressForm(firstTime: firstTime, prefill: prefill),
       );
     }
     final list = ref.watch(addressesProvider);
@@ -53,7 +61,8 @@ class AddressFormScreen extends ConsumerWidget {
 }
 
 class _AddressForm extends ConsumerStatefulWidget {
-  const _AddressForm({required this.firstTime, this.initial});
+  const _AddressForm({required this.firstTime, this.initial, this.prefill});
+  final AddressInput? prefill;
   final Address? initial;
   final bool firstTime;
 
@@ -68,12 +77,14 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   late final _street = TextEditingController(
     text: _split(widget.initial?.line).$2,
   );
-  late final _area = TextEditingController(text: widget.initial?.area ?? '');
+  late final _area = TextEditingController(
+    text: widget.initial?.area ?? widget.prefill?.area ?? '',
+  );
   late final _city = TextEditingController(
-    text: widget.initial?.city ?? defaultCity,
+    text: widget.initial?.city ?? widget.prefill?.city ?? defaultCity,
   );
   late final _pincode = TextEditingController(
-    text: widget.initial?.pincode ?? '',
+    text: widget.initial?.pincode ?? widget.prefill?.pincode ?? '',
   );
   late bool _default = widget.initial?.isDefault ?? false;
   bool _defaultTouched = false;

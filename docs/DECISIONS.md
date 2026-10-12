@@ -2,6 +2,8 @@
 
 | Date | Decision | Reason | Approved by |
 |---|---|---|---|
+| 2026-10-12 | Requirement builder shows "Step n of 6" (design) not 7; Review is the end, not a step | Screens win over the build prompt | Design |
+| 2026-10-12 | Location rows show area as title (no Home/Office labels); "Add address" opens the shared address form, not the map sheet | Backend address has no label/pin; map provider not approved (#15) | Backend contract |
 | 2026-10-12 | Modules without a published backend contract (Home onward) use mock repositories behind the repository interfaces, switched by `mockApiProvider` (dev menu: long-press the Home greeting, non-prod). Auth/profile/address stay on the real backend | Build prompt asks for a mock API with loading/error/offline toggles; backend only publishes auth/profile/address | Build prompt |
 | 2026-10-12 | `ProviderScope(retry: null)`: no hidden Riverpod auto-retries | Riverpod 3 retries failed providers by default, which hid error states and Retry | AGENTS §65 |
 | 2026-10-12 | Profile/address calls use the Swagger paths (`/customers/me`, `PATCH` for edits, `PUT .../default`, `/service-areas`), not the module doc's provisional `/me/*` | AGENTS §2.1: deployed backend contract wins | Backend contract |

@@ -17,7 +17,8 @@
 - [~] 3.1 Profile - setup (`POST /customers/me`), view/edit (`PATCH`), validation, error/loading states DONE, 14 widget + 10 mocked repository tests (+3 validator). NOT built: profile photo (no customer endpoint). NOT verified live: authenticated success shapes (needs SEVANEST_TEST_MOBILE/OTP; `test/live/profile_address_live_test.dart` is ready)
 - [~] 3.2 Addresses - list/add/edit/delete/set-default/select-mode/area picker DONE (`/customers/me/addresses*`, `/service-areas`), 24 widget + 12 mocked repository tests. NOT built: current-location + map pin, address label/line2/state (not in backend)
 - [x] 3.3 Home (design screen 05; mock `HomeRepository` behind the dev-menu API toggle, offline cache, 28 tests; shell back-handling; bell/booking/interview/shortlist/support/hero-service wiring; discover/notifications/support/booking/interview/worker routes are placeholders until their modules)
-- [ ] 4.1 Categories  - [ ] 4.2 Draft  - [ ] 4.3 Search  - [ ] 4.4 Filters  - [ ] 4.5 Card  - [ ] 4.6 Detail  - [ ] 4.7 Favourites  - [ ] 4.8 Empty
+- [x] 4.1 Categories/Service (design 06) + Engagement (07) + Location (08): catalog mock, shared DiscoverScaffold, GPS via geolocator/geocoding behind LocationService, 29 tests. NOT built: add-address *sheet* with map pin (shared full-screen address form reused instead), serviceability check (no backend flag)
+- [x] 4.2 Draft (persisted; `restore()` ready, resume routing in final pass)  - [ ] 4.2b  - [ ] 4.3 Search  - [ ] 4.4 Filters  - [ ] 4.5 Card  - [ ] 4.6 Detail  - [ ] 4.7 Favourites  - [ ] 4.8 Empty
 - [ ] 5.1 Interview request  - [ ] 5.2 Detail  - [ ] 5.3 Decision
 - [ ] 6.1 Confirm  - [ ] 6.2 Booking detail  - [ ] 6.3 List  - [ ] 6.4 Cancel
 - [ ] 7.1 PaymentService  - [ ] 7.2 Flow  - [ ] 7.3 Results  - [ ] 7.4 Recovery  - [ ] 7.5 Receipts

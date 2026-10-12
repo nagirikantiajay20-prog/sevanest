@@ -181,7 +181,13 @@
   "areasUnavailable": "Couldn't load areas. You can type your area instead.",
   "addressMenu": "Address options",
   "homeGreeting": "Namaste, {name}",
-  "@homeGreeting": {"placeholders": {"name": {"type": "String"}}},
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeGreetingNoName": "Namaste",
   "homeSubtitle": "What help do you need today?",
   "homeHeroCook": "Verified cooks near you",
@@ -191,7 +197,13 @@
   "homePlay": "Play",
   "homeNotifications": "Notifications",
   "homeNotificationsUnread": "Notifications, {count} unread",
-  "@homeNotificationsUnread": {"placeholders": {"count": {"type": "int"}}},
+  "@homeNotificationsUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "homeFindWorkerCta": "Find a worker for your home",
   "homeAddAddress": "Add address",
   "homeAddressBanner": "Add an address to find workers",
@@ -201,25 +213,61 @@
   "homeActivity": "Your activity",
   "homeStageInProgress": "In progress",
   "homeBookingRef": "Booking #{ref}",
-  "@homeBookingRef": {"placeholders": {"ref": {"type": "String"}}},
+  "@homeBookingRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
   "homeStageMatched": "Matched",
   "homeStageTrial": "Trial",
   "homeStageActive": "Active",
   "homeViewBooking": "View booking",
   "homeInterviewWith": "Interview with {name}",
-  "@homeInterviewWith": {"placeholders": {"name": {"type": "String"}}},
+  "@homeInterviewWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeTrialVisitWith": "Trial visit with {name}",
-  "@homeTrialVisitWith": {"placeholders": {"name": {"type": "String"}}},
+  "@homeTrialVisitWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeVideoCall": "Video call",
   "homeTrialVisit": "Trial visit",
   "homeToday": "Today",
   "homeTomorrow": "Tomorrow",
   "homeStartsInMinutes": "Starts in {n} min",
-  "@homeStartsInMinutes": {"placeholders": {"n": {"type": "int"}}},
+  "@homeStartsInMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "homeStartsInHours": "Starts in {n, plural, =1{1 hour} other{{n} hours}}",
-  "@homeStartsInHours": {"placeholders": {"n": {"type": "int"}}},
+  "@homeStartsInHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "homeStartsInDays": "Starts in {n, plural, =1{1 day} other{{n} days}}",
-  "@homeStartsInDays": {"placeholders": {"n": {"type": "int"}}},
+  "@homeStartsInDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "homeStartingNow": "Starting now",
   "homeNoBookingsTitle": "No bookings yet",
   "homeNoBookingsBody": "Find your first trusted worker in 3 simple steps",
@@ -235,5 +283,101 @@
   "devMenuApiMode": "API behaviour",
   "devMenuUser": "Customer",
   "devMenuReturning": "Returning",
-  "devMenuNew": "New"
+  "devMenuNew": "New",
+  "discoverTitle": "Find a worker",
+  "discoverStep": "Step {n} of {total}",
+  "@discoverStep": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "discoverContinue": "Continue",
+  "discoverContinueWith": "Continue with {what}",
+  "@discoverContinueWith": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "discoverClose": "Close",
+  "discoverDiscardTitle": "Discard this request?",
+  "discoverDiscardBody": "Your answers so far will be cleared.",
+  "discoverDiscard": "Discard",
+  "discoverKeepEditing": "Keep editing",
+  "discoverChange": "Change",
+  "discoverLoadFailedBody": "Check your connection and try again.",
+  "serviceHeading": "What kind of help do you need?",
+  "serviceSub": "Pick one. You can search again for other services anytime.",
+  "serviceSearchHint": "Search services",
+  "servicePopular": "Popular",
+  "serviceLoadFailedTitle": "We couldn't load services",
+  "serviceEmptyTitle": "No services available right now",
+  "serviceNoMatch": "No services match “{q}”",
+  "@serviceNoMatch": {
+    "placeholders": {
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceNoMatchBody": "Try a different word or choose something else.",
+  "serviceClearSearch": "Clear search",
+  "engagementTitle": "Engagement type",
+  "engagementHeading": "How do you need them to work?",
+  "engagementSub": "Choose the arrangement that suits your home. You can compare options later.",
+  "engagementLoadFailedTitle": "We couldn't load options",
+  "engFullTime": "Full-time",
+  "engFullTimeDesc": "Works fixed hours every day at your home.",
+  "engFullTimeMeta": "6 to 10 hours · Most days",
+  "engPartTime": "Part-time",
+  "engPartTimeDesc": "A few set hours each day, such as mornings.",
+  "engPartTimeMeta": "2 to 5 hours · Most days",
+  "engDaily": "Daily",
+  "engDailyDesc": "Comes on the days you choose, for a set job.",
+  "engDailyMeta": "Pick your days each week",
+  "engHourly": "Hourly",
+  "engHourlyDesc": "Pay by the hour for short or one-off jobs.",
+  "engHourlyMeta": "Book by the hour",
+  "engLiveIn": "Live-in",
+  "engLiveInDesc": "Stays at your home with food and a room.",
+  "engLiveInMeta": "Stays on site",
+  "locationTitle": "Location",
+  "locationHeading": "Where do you need help?",
+  "locationSub": "We'll show workers who serve this area.",
+  "locationUseCurrent": "Use my current location",
+  "locationUseCurrentSub": "Uses GPS, only while you use the app",
+  "locationFinding": "Finding your location...",
+  "locationFindingSub": "This takes a few seconds",
+  "locationSaved": "Saved addresses",
+  "locationSavedCount": "{n} saved",
+  "@locationSavedCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "locationOffTitle": "Location access is off",
+  "locationOffBody": "Turn it on in Settings, or choose a saved address.",
+  "locationOpenSettings": "Open settings",
+  "locationChooseSaved": "Choose a saved address",
+  "locationFailed": "Couldn't get your location. Choose a saved address instead.",
+  "locationNoAddressTitle": "Add your first address",
+  "locationNoAddressBody": "We need it to find workers near you.",
+  "locationLoadFailedTitle": "We couldn't load your addresses",
+  "locationContinueTo": "Continue to {area}",
+  "@locationContinueTo": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "locationMakeDefault": "Make default"
 }

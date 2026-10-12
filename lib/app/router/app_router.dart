@@ -8,6 +8,7 @@ import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/widgets/placeholder_screen.dart';
+import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_form_screen.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_list_screen.dart';
 import 'package:sevanest_customer/features/authentication/presentation/screens/login_screen.dart';
@@ -17,6 +18,9 @@ import 'package:sevanest_customer/features/customer_profile/presentation/screens
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_setup_screen.dart';
 import 'package:sevanest_customer/features/home/presentation/screens/home_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/engagement_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/location_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/service_screen.dart';
 
 GoRoute _placeholder(String path, String title) =>
     GoRoute(path: path, builder: (context, state) => PlaceholderScreen(title));
@@ -66,6 +70,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.addressNew,
         builder: (context, state) => AddressFormScreen(
           firstTime: state.uri.queryParameters['firstTime'] == 'true',
+          prefill: state.extra is AddressInput
+              ? state.extra! as AddressInput
+              : null,
         ),
       ),
       GoRoute(
@@ -101,8 +108,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
       // Targets Home links to; each is replaced by its real screen in its own module.
-      _placeholder(Routes.discoverCategory, 'Choose a service'),
-      _placeholder(Routes.discoverEngagement, 'Engagement type'),
+      GoRoute(
+        path: Routes.discoverCategory,
+        builder: (context, state) =>
+            ServiceScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+      ),
+      GoRoute(
+        path: Routes.discoverEngagement,
+        builder: (context, state) =>
+            EngagementScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+      ),
+      GoRoute(
+        path: Routes.discoverLocation,
+        builder: (context, state) =>
+            LocationScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+      ),
+      _placeholder(Routes.discoverTiming, 'Timing'),
       _placeholder(Routes.notifications, 'Notifications'),
       _placeholder(Routes.support, 'Support'),
       _placeholder(Routes.interviewDetail, 'Interview'),

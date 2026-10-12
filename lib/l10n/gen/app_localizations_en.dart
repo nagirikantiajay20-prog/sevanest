@@ -594,4 +594,193 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get devMenuNew => 'New';
+
+  @override
+  String get discoverTitle => 'Find a worker';
+
+  @override
+  String discoverStep(int n, int total) {
+    return 'Step $n of $total';
+  }
+
+  @override
+  String get discoverContinue => 'Continue';
+
+  @override
+  String discoverContinueWith(String what) {
+    return 'Continue with $what';
+  }
+
+  @override
+  String get discoverClose => 'Close';
+
+  @override
+  String get discoverDiscardTitle => 'Discard this request?';
+
+  @override
+  String get discoverDiscardBody => 'Your answers so far will be cleared.';
+
+  @override
+  String get discoverDiscard => 'Discard';
+
+  @override
+  String get discoverKeepEditing => 'Keep editing';
+
+  @override
+  String get discoverChange => 'Change';
+
+  @override
+  String get discoverLoadFailedBody => 'Check your connection and try again.';
+
+  @override
+  String get serviceHeading => 'What kind of help do you need?';
+
+  @override
+  String get serviceSub =>
+      'Pick one. You can search again for other services anytime.';
+
+  @override
+  String get serviceSearchHint => 'Search services';
+
+  @override
+  String get servicePopular => 'Popular';
+
+  @override
+  String get serviceLoadFailedTitle => 'We couldn\'t load services';
+
+  @override
+  String get serviceEmptyTitle => 'No services available right now';
+
+  @override
+  String serviceNoMatch(String q) {
+    return 'No services match “$q”';
+  }
+
+  @override
+  String get serviceNoMatchBody =>
+      'Try a different word or choose something else.';
+
+  @override
+  String get serviceClearSearch => 'Clear search';
+
+  @override
+  String get engagementTitle => 'Engagement type';
+
+  @override
+  String get engagementHeading => 'How do you need them to work?';
+
+  @override
+  String get engagementSub =>
+      'Choose the arrangement that suits your home. You can compare options later.';
+
+  @override
+  String get engagementLoadFailedTitle => 'We couldn\'t load options';
+
+  @override
+  String get engFullTime => 'Full-time';
+
+  @override
+  String get engFullTimeDesc => 'Works fixed hours every day at your home.';
+
+  @override
+  String get engFullTimeMeta => '6 to 10 hours · Most days';
+
+  @override
+  String get engPartTime => 'Part-time';
+
+  @override
+  String get engPartTimeDesc => 'A few set hours each day, such as mornings.';
+
+  @override
+  String get engPartTimeMeta => '2 to 5 hours · Most days';
+
+  @override
+  String get engDaily => 'Daily';
+
+  @override
+  String get engDailyDesc => 'Comes on the days you choose, for a set job.';
+
+  @override
+  String get engDailyMeta => 'Pick your days each week';
+
+  @override
+  String get engHourly => 'Hourly';
+
+  @override
+  String get engHourlyDesc => 'Pay by the hour for short or one-off jobs.';
+
+  @override
+  String get engHourlyMeta => 'Book by the hour';
+
+  @override
+  String get engLiveIn => 'Live-in';
+
+  @override
+  String get engLiveInDesc => 'Stays at your home with food and a room.';
+
+  @override
+  String get engLiveInMeta => 'Stays on site';
+
+  @override
+  String get locationTitle => 'Location';
+
+  @override
+  String get locationHeading => 'Where do you need help?';
+
+  @override
+  String get locationSub => 'We\'ll show workers who serve this area.';
+
+  @override
+  String get locationUseCurrent => 'Use my current location';
+
+  @override
+  String get locationUseCurrentSub => 'Uses GPS, only while you use the app';
+
+  @override
+  String get locationFinding => 'Finding your location...';
+
+  @override
+  String get locationFindingSub => 'This takes a few seconds';
+
+  @override
+  String get locationSaved => 'Saved addresses';
+
+  @override
+  String locationSavedCount(int n) {
+    return '$n saved';
+  }
+
+  @override
+  String get locationOffTitle => 'Location access is off';
+
+  @override
+  String get locationOffBody =>
+      'Turn it on in Settings, or choose a saved address.';
+
+  @override
+  String get locationOpenSettings => 'Open settings';
+
+  @override
+  String get locationChooseSaved => 'Choose a saved address';
+
+  @override
+  String get locationFailed =>
+      'Couldn\'t get your location. Choose a saved address instead.';
+
+  @override
+  String get locationNoAddressTitle => 'Add your first address';
+
+  @override
+  String get locationNoAddressBody => 'We need it to find workers near you.';
+
+  @override
+  String get locationLoadFailedTitle => 'We couldn\'t load your addresses';
+
+  @override
+  String locationContinueTo(String area) {
+    return 'Continue to $area';
+  }
+
+  @override
+  String get locationMakeDefault => 'Make default';
 }

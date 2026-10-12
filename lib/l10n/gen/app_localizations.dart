@@ -1167,6 +1167,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New'**
   String get devMenuNew;
+
+  /// No description provided for @discoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a worker'**
+  String get discoverTitle;
+
+  /// No description provided for @discoverStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {n} of {total}'**
+  String discoverStep(int n, int total);
+
+  /// No description provided for @discoverContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get discoverContinue;
+
+  /// No description provided for @discoverContinueWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with {what}'**
+  String discoverContinueWith(String what);
+
+  /// No description provided for @discoverClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get discoverClose;
+
+  /// No description provided for @discoverDiscardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this request?'**
+  String get discoverDiscardTitle;
+
+  /// No description provided for @discoverDiscardBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answers so far will be cleared.'**
+  String get discoverDiscardBody;
+
+  /// No description provided for @discoverDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discoverDiscard;
+
+  /// No description provided for @discoverKeepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get discoverKeepEditing;
+
+  /// No description provided for @discoverChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get discoverChange;
+
+  /// No description provided for @discoverLoadFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get discoverLoadFailedBody;
+
+  /// No description provided for @serviceHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of help do you need?'**
+  String get serviceHeading;
+
+  /// No description provided for @serviceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one. You can search again for other services anytime.'**
+  String get serviceSub;
+
+  /// No description provided for @serviceSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search services'**
+  String get serviceSearchHint;
+
+  /// No description provided for @servicePopular.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get servicePopular;
+
+  /// No description provided for @serviceLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load services'**
+  String get serviceLoadFailedTitle;
+
+  /// No description provided for @serviceEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No services available right now'**
+  String get serviceEmptyTitle;
+
+  /// No description provided for @serviceNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No services match “{q}”'**
+  String serviceNoMatch(String q);
+
+  /// No description provided for @serviceNoMatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different word or choose something else.'**
+  String get serviceNoMatchBody;
+
+  /// No description provided for @serviceClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get serviceClearSearch;
+
+  /// No description provided for @engagementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Engagement type'**
+  String get engagementTitle;
+
+  /// No description provided for @engagementHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'How do you need them to work?'**
+  String get engagementHeading;
+
+  /// No description provided for @engagementSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the arrangement that suits your home. You can compare options later.'**
+  String get engagementSub;
+
+  /// No description provided for @engagementLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load options'**
+  String get engagementLoadFailedTitle;
+
+  /// No description provided for @engFullTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Full-time'**
+  String get engFullTime;
+
+  /// No description provided for @engFullTimeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Works fixed hours every day at your home.'**
+  String get engFullTimeDesc;
+
+  /// No description provided for @engFullTimeMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'6 to 10 hours · Most days'**
+  String get engFullTimeMeta;
+
+  /// No description provided for @engPartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-time'**
+  String get engPartTime;
+
+  /// No description provided for @engPartTimeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A few set hours each day, such as mornings.'**
+  String get engPartTimeDesc;
+
+  /// No description provided for @engPartTimeMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'2 to 5 hours · Most days'**
+  String get engPartTimeMeta;
+
+  /// No description provided for @engDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get engDaily;
+
+  /// No description provided for @engDailyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Comes on the days you choose, for a set job.'**
+  String get engDailyDesc;
+
+  /// No description provided for @engDailyMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your days each week'**
+  String get engDailyMeta;
+
+  /// No description provided for @engHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get engHourly;
+
+  /// No description provided for @engHourlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay by the hour for short or one-off jobs.'**
+  String get engHourlyDesc;
+
+  /// No description provided for @engHourlyMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Book by the hour'**
+  String get engHourlyMeta;
+
+  /// No description provided for @engLiveIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Live-in'**
+  String get engLiveIn;
+
+  /// No description provided for @engLiveInDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Stays at your home with food and a room.'**
+  String get engLiveInDesc;
+
+  /// No description provided for @engLiveInMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Stays on site'**
+  String get engLiveInMeta;
+
+  /// No description provided for @locationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationTitle;
+
+  /// No description provided for @locationHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do you need help?'**
+  String get locationHeading;
+
+  /// No description provided for @locationSub.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll show workers who serve this area.'**
+  String get locationSub;
+
+  /// No description provided for @locationUseCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my current location'**
+  String get locationUseCurrent;
+
+  /// No description provided for @locationUseCurrentSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses GPS, only while you use the app'**
+  String get locationUseCurrentSub;
+
+  /// No description provided for @locationFinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your location...'**
+  String get locationFinding;
+
+  /// No description provided for @locationFindingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'This takes a few seconds'**
+  String get locationFindingSub;
+
+  /// No description provided for @locationSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved addresses'**
+  String get locationSaved;
+
+  /// No description provided for @locationSavedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} saved'**
+  String locationSavedCount(int n);
+
+  /// No description provided for @locationOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access is off'**
+  String get locationOffTitle;
+
+  /// No description provided for @locationOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn it on in Settings, or choose a saved address.'**
+  String get locationOffBody;
+
+  /// No description provided for @locationOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get locationOpenSettings;
+
+  /// No description provided for @locationChooseSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a saved address'**
+  String get locationChooseSaved;
+
+  /// No description provided for @locationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get your location. Choose a saved address instead.'**
+  String get locationFailed;
+
+  /// No description provided for @locationNoAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first address'**
+  String get locationNoAddressTitle;
+
+  /// No description provided for @locationNoAddressBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We need it to find workers near you.'**
+  String get locationNoAddressBody;
+
+  /// No description provided for @locationLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your addresses'**
+  String get locationLoadFailedTitle;
+
+  /// No description provided for @locationContinueTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to {area}'**
+  String locationContinueTo(String area);
+
+  /// No description provided for @locationMakeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Make default'**
+  String get locationMakeDefault;
 }
 
 class _AppLocalizationsDelegate

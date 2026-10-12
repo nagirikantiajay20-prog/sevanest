@@ -7,6 +7,7 @@ import 'package:sevanest_customer/app/app.dart';
 import 'package:sevanest_customer/app/theme/app_theme.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
@@ -14,6 +15,8 @@ import 'package:sevanest_customer/features/authentication/presentation/providers
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 class InMemorySessionStore implements SessionStore {
@@ -327,4 +330,43 @@ class FakeHomeRepository implements HomeRepository {
     }
     return data;
   }
+}
+
+/// Instant catalogue for widget tests; [gate] holds the response, [failNext] throws once.
+class FakeCatalogRepository implements CatalogRepository {
+  FakeCatalogRepository([List<ServiceCategory>? seed])
+    : items = seed ?? CatalogRepositoryMock.categories_;
+  List<ServiceCategory> items;
+  Object? failNext;
+  Future<void>? gate;
+  int calls = 0;
+
+  @override
+  Future<List<ServiceCategory>> categories() async {
+    calls++;
+    await gate;
+    final f = failNext;
+    if (f != null) {
+      failNext = null;
+      throw f;
+    }
+    return items;
+  }
+}
+
+class FakeLocationService implements LocationService {
+  LocationResult result = const LocationResult(LocationOutcome.denied);
+  Future<void>? gate;
+  int calls = 0;
+  int settingsCalls = 0;
+
+  @override
+  Future<LocationResult> currentAddress() async {
+    calls++;
+    await gate;
+    return result;
+  }
+
+  @override
+  Future<void> openSettings() async => settingsCalls++;
 }
