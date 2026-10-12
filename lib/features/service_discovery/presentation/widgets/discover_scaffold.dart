@@ -21,6 +21,8 @@ class DiscoverScaffold extends ConsumerWidget {
     this.continueLabel,
     this.confirmBack = false,
     this.padBody = true,
+    this.summary,
+    this.onSummaryTap,
     super.key,
   });
 
@@ -35,6 +37,10 @@ class DiscoverScaffold extends ConsumerWidget {
   /// Step 1: back leaves the flow, so ask first when the draft has values.
   final bool confirmBack;
   final bool padBody;
+
+  /// One line above Continue ("Mornings · 8 AM – 12 PM · Mon to Sat"); tap to edit it.
+  final String? summary;
+  final VoidCallback? onSummaryTap;
 
   Future<bool> _confirmDiscard(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -184,10 +190,30 @@ class DiscoverScaffold extends ConsumerWidget {
               AppSpacing.md,
               AppSpacing.md + MediaQuery.paddingOf(context).bottom,
             ),
-            child: SnButton(
-              key: const Key('discover_next_btn'),
-              label: continueLabel ?? l10n.discoverContinue,
-              onPressed: onContinue,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (summary != null && summary!.isNotEmpty)
+                  InkWell(
+                    key: const Key('discover_summary'),
+                    onTap: onSummaryTap,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                      child: Text(
+                        summary!,
+                        textAlign: TextAlign.center,
+                        style: text.bodyMedium?.copyWith(
+                          color: AppColors.slate,
+                        ),
+                      ),
+                    ),
+                  ),
+                SnButton(
+                  key: const Key('discover_next_btn'),
+                  label: continueLabel ?? l10n.discoverContinue,
+                  onPressed: onContinue,
+                ),
+              ],
             ),
           ),
         ],

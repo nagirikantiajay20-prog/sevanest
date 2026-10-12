@@ -379,5 +379,252 @@
       }
     }
   },
-  "locationMakeDefault": "Make default"
+  "locationMakeDefault": "Make default",
+  "timingTitle": "Timing",
+  "timingHeading": "When do you need them?",
+  "timingSub": "Pick a time window. You'll agree exact timings in the interview.",
+  "timingLoadFailedTitle": "We couldn't load timing options",
+  "timingWindowLabel": "Preferred time of day",
+  "winEarlyMorning": "Early morning",
+  "winMorning": "Morning",
+  "winAfternoon": "Afternoon",
+  "winEvening": "Evening",
+  "winNight": "Night",
+  "winFlexible": "Flexible",
+  "winFlexibleRange": "Any time",
+  "winEarlyMorningPlural": "Early mornings",
+  "winMorningPlural": "Mornings",
+  "winAfternoonPlural": "Afternoons",
+  "winEveningPlural": "Evenings",
+  "winNightPlural": "Nights",
+  "timingShiftHours": "Shift hours",
+  "timingExactHours": "Exact hours",
+  "timingStartTime": "Start time",
+  "timingEndTime": "End time",
+  "timingPickTime": "Choose a time",
+  "timingHoursPerDay": "{d} per day",
+  "@timingHoursPerDay": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "timingHoursPerDayLabel": "Hours per day",
+  "timingHoursChip": "{n} hrs",
+  "@timingHoursChip": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "timingDays": "Days of the week",
+  "daysEvery": "Every day",
+  "daysWeekdays": "Weekdays",
+  "daysWeekends": "Weekends",
+  "daysRange": "{a} to {b}",
+  "@daysRange": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "timingDate": "Date",
+  "timingChooseDate": "Choose a date",
+  "durHours": "{n, plural, =1{1 hour} other{{n} hours}}",
+  "@durHours": {
+    "placeholders": {
+      "n": {
+        "type": "num"
+      }
+    }
+  },
+  "durMinutes": "{n} min",
+  "@durMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "timingErrEnd": "End time must be after the start time.",
+  "timingErrShort": "Choose at least {d}.",
+  "@timingErrShort": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "timingErrLong": "A shift can be at most {d}.",
+  "@timingErrLong": {
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "timingErrDays": "Choose at least one day.",
+  "timingErrDate": "Choose a date.",
+  "timingEditSummary": "Edit times and days",
+  "timeSheetSub": "In 15-minute steps",
+  "timeSheetSet": "Set time",
+  "timeSheetHour": "Hour",
+  "timeSheetMinute": "Minute",
+  "timeSheetPeriod": "AM or PM",
+  "dateSheetTitle": "Select date",
+  "dateSheetSet": "Set date: {date}",
+  "@dateSheetSet": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dateSheetPick": "Select a date",
+  "startTitle": "Start date",
+  "startHeading": "When should they start?",
+  "startSub": "Pick the first day. Workers will confirm they are free.",
+  "startTomorrow": "Tomorrow, {date}",
+  "@startTomorrow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startInDays": "In {n} days, {date}",
+  "@startInDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startNextMonday": "Next Monday, {date}",
+  "@startNextMonday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startPickAnother": "Pick another date",
+  "startLoadFailedTitle": "We couldn't load available dates",
+  "startLimitNote": "You can start up to {n} days from today (by {date}).",
+  "@startLimitNote": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startOutsideTitle": "{date} isn't one of your selected days",
+  "@startOutsideTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startOutsideBody": "You chose {days}. You can continue anyway, or adjust your days.",
+  "@startOutsideBody": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "startAdjustDays": "Adjust days",
+  "calPrev": "Previous month",
+  "calNext": "Next month",
+  "budgetTitle": "Budget",
+  "budgetHeading": "What's your budget?",
+  "budgetSubMonthly": "Set a range per month. You'll see exact prices before you book.",
+  "budgetSubHourly": "Set a range per hour. You'll see exact prices before you book.",
+  "budgetPerMonth": "₹ per month",
+  "budgetPerHour": "₹ per hour",
+  "guidanceTypical": "Typical for a {engagement} {service} in {city}",
+  "@guidanceTypical": {
+    "placeholders": {
+      "engagement": {
+        "type": "String"
+      },
+      "service": {
+        "type": "String"
+      },
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetRangePerMonth": "{range} per month",
+  "@budgetRangePerMonth": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetRangePerHour": "{range} per hour",
+  "@budgetRangePerHour": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "guidanceUse": "Use this range",
+  "guidanceErrTitle": "We couldn't load price guidance",
+  "guidanceErrBody": "You can still enter a range below.",
+  "budgetMinimum": "Minimum",
+  "budgetMaximum": "Maximum",
+  "budgetMinField": "Minimum (₹)",
+  "budgetMaxField": "Maximum (₹)",
+  "budgetAny": "Any budget",
+  "budgetAnyBody": "You'll see workers at every price. Adjust anytime.",
+  "budgetFlexibleLabel": "Flexible budget",
+  "budgetFlexibleBody": "Show workers at every price",
+  "budgetLow": "That's below the usual range, so you may see fewer workers. You can still continue.",
+  "budgetErrMinMax": "Maximum must be at least the minimum.",
+  "budgetErrMissing": "Enter a minimum and a maximum.",
+  "budgetErrHigh": "That amount looks too high. Please check it.",
+  "budgetReview": "Review requirement",
+  "budgetDone": "Done",
+  "budgetSlider": "Budget range",
+  "gapNoService": "Choose a service first.",
+  "gapNoEngagement": "Choose how you need them to work.",
+  "gapNoAddress": "Choose an address.",
+  "gapTiming": "Complete the timing details.",
+  "gapNoStartDate": "Choose a start date.",
+  "gapStartDateRange": "Pick a start date within the allowed window.",
+  "gapBudget": "Check your budget.",
+  "resumeTitle": "Resume your request",
+  "resumeBody": "{what} · Step {n} of {total}",
+  "@resumeBody": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "resumeContinue": "Continue",
+  "resumeDiscard": "Start over"
 }

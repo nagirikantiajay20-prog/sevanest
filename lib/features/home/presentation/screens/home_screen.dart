@@ -6,13 +6,20 @@ import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/mock/dev_menu.dart';
+import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_widgets.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/discover_navigation.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Service ids match module 4's catalogue (`cook`, `driver`, `maid`).
@@ -39,6 +46,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Bring back a requirement left unfinished when the app was closed (shown as a Resume card).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(ref.read(requirementDraftProvider.notifier).restore());
+      }
+    });
     if (ref.read(heroAutoplayProvider)) {
       _timer = Timer.periodic(const Duration(seconds: 4), (_) {
         if (!_paused && mounted) {
@@ -64,6 +77,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _startWithService(String id) {
     ref.read(requirementDraftProvider.notifier).startWithService(id);
     context.push(Routes.discoverEngagement);
+  }
+
+  /// Re-open the requirement builder where it was left, with Back walking through earlier steps.
+  void _resume(DiscoverStep target) {
+    final draft = ref.read(requirementDraftProvider);
+    for (final step in DiscoverStep.values) {
+      if (step.index > target.index) break;
+      if (step == DiscoverStep.startDate && draft.skipsStartDateStep) continue;
+      unawaited(context.push<Object?>(routeForStep(step)));
+    }
   }
 
   Future<void> _pickAddress(List<Address> list) async {
@@ -95,6 +118,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         selected ??
         list.where((a) => a.isDefault).firstOrNull ??
         list.firstOrNull;
+
+    final resumeDraft = ref.watch(requirementDraftProvider);
+    final resumeGap = resumeDraft.serviceId == null
+        ? null
+        : firstIncompleteStep(
+            resumeDraft,
+            today: ref.watch(nowProvider)(),
+            config:
+                ref.watch(scheduleConfigProvider).value ??
+                ScheduleConfig.fallback,
+          );
+    // Nothing missing = it was finished up to the last step; resume on Budget.
+    final resumeTarget = resumeGap?.step ?? DiscoverStep.budget;
 
     final data = home.value;
     final loading = !home.hasValue && !home.hasError;
@@ -143,6 +179,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   if (offline) ...[
                     OfflineBanner(onRetry: _refresh),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  if (resumeGap != null || resumeDraft.serviceId != null) ...[
+                    ResumeCard(
+                      what: [
+                        ?ref.watch(selectedCategoryProvider)?.name,
+                        if (resumeDraft.engagement != null)
+                          engagementLabels(l10n, resumeDraft.engagement!).name,
+                      ].join(' · '),
+                      step: stepNumber(resumeTarget),
+                      onContinue: () => _resume(resumeTarget),
+                      onDiscard: () =>
+                          ref.read(requirementDraftProvider.notifier).reset(),
+                    ),
                     const SizedBox(height: AppSpacing.md),
                   ],
                   if (addresses.hasValue && list.isEmpty) ...[

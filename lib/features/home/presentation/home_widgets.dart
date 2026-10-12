@@ -716,3 +716,68 @@ class SupportShortcut extends StatelessWidget {
     );
   }
 }
+
+/// An unfinished requirement (persisted draft): pick up where it was left, or start over.
+class ResumeCard extends StatelessWidget {
+  const ResumeCard({
+    required this.what,
+    required this.step,
+    required this.onContinue,
+    required this.onDiscard,
+    super.key,
+  });
+
+  final String what;
+  final int step;
+  final VoidCallback onContinue;
+  final VoidCallback onDiscard;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    return Container(
+      key: const Key('home_resume_card'),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAF8F5),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.teal.withValues(alpha: .3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.resumeTitle,
+            style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          Text(
+            l10n.resumeBody(what, step, 6),
+            style: text.bodyMedium?.copyWith(color: AppColors.slate),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: SnButton(
+                  key: const Key('home_resume_btn'),
+                  label: l10n.resumeContinue,
+                  onPressed: onContinue,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              TextButton(
+                key: const Key('home_resume_discard_btn'),
+                onPressed: onDiscard,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(kMinTapTarget, kMinTapTarget),
+                ),
+                child: Text(l10n.resumeDiscard),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

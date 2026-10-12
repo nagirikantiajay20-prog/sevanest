@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 
 /// What the mock API pretends the network is doing. Flipped from the dev menu so every
 /// loading / error / offline / empty state in the design is reachable (build prompt, final pass).
-enum MockMode { normal, slow, error, offline, empty }
+enum MockMode { normal, slow, error, offline, empty, loading }
 
 class MockApiState {
   const MockApiState({this.mode = MockMode.normal, this.returningUser = true});
@@ -39,6 +41,8 @@ final mockApiProvider = NotifierProvider<MockApiNotifier, MockApiState>(
 /// Runs [build] after the mock latency. `error` and `offline` throw (a repository may catch
 /// offline and serve its cache instead of a [NetworkFailure]).
 Future<T> mockCall<T>(MockApiState s, T Function() build) async {
+  // `loading` never answers, so the skeleton / loading design states stay on screen.
+  if (s.mode == MockMode.loading) await Completer<void>().future;
   await Future<void>.delayed(s.latency);
   return switch (s.mode) {
     MockMode.error => throw const ServerFailure(),

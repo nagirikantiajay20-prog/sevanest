@@ -18,9 +18,12 @@ import 'package:sevanest_customer/features/customer_profile/presentation/screens
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_setup_screen.dart';
 import 'package:sevanest_customer/features/home/presentation/screens/home_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/budget_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/engagement_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/location_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/service_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/start_date_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/timing_screen.dart';
 
 GoRoute _placeholder(String path, String title) =>
     GoRoute(path: path, builder: (context, state) => PlaceholderScreen(title));
@@ -123,7 +126,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             LocationScreen(edit: state.uri.queryParameters['edit'] == 'true'),
       ),
-      _placeholder(Routes.discoverTiming, 'Timing'),
+      GoRoute(
+        path: Routes.discoverTiming,
+        builder: (context, state) =>
+            TimingScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+      ),
+      GoRoute(
+        path: Routes.discoverStartDate,
+        builder: (context, state) =>
+            StartDateScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+      ),
+      GoRoute(
+        path: Routes.discoverBudget,
+        builder: (context, state) =>
+            BudgetScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+      ),
+      // Module 5 replaces this with the real Review screen.
+      _placeholder(Routes.discoverReview, 'Review your requirement'),
       _placeholder(Routes.notifications, 'Notifications'),
       _placeholder(Routes.support, 'Support'),
       _placeholder(Routes.interviewDetail, 'Interview'),

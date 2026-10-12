@@ -783,4 +783,353 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationMakeDefault => 'Make default';
+
+  @override
+  String get timingTitle => 'Timing';
+
+  @override
+  String get timingHeading => 'When do you need them?';
+
+  @override
+  String get timingSub =>
+      'Pick a time window. You\'ll agree exact timings in the interview.';
+
+  @override
+  String get timingLoadFailedTitle => 'We couldn\'t load timing options';
+
+  @override
+  String get timingWindowLabel => 'Preferred time of day';
+
+  @override
+  String get winEarlyMorning => 'Early morning';
+
+  @override
+  String get winMorning => 'Morning';
+
+  @override
+  String get winAfternoon => 'Afternoon';
+
+  @override
+  String get winEvening => 'Evening';
+
+  @override
+  String get winNight => 'Night';
+
+  @override
+  String get winFlexible => 'Flexible';
+
+  @override
+  String get winFlexibleRange => 'Any time';
+
+  @override
+  String get winEarlyMorningPlural => 'Early mornings';
+
+  @override
+  String get winMorningPlural => 'Mornings';
+
+  @override
+  String get winAfternoonPlural => 'Afternoons';
+
+  @override
+  String get winEveningPlural => 'Evenings';
+
+  @override
+  String get winNightPlural => 'Nights';
+
+  @override
+  String get timingShiftHours => 'Shift hours';
+
+  @override
+  String get timingExactHours => 'Exact hours';
+
+  @override
+  String get timingStartTime => 'Start time';
+
+  @override
+  String get timingEndTime => 'End time';
+
+  @override
+  String get timingPickTime => 'Choose a time';
+
+  @override
+  String timingHoursPerDay(String d) {
+    return '$d per day';
+  }
+
+  @override
+  String get timingHoursPerDayLabel => 'Hours per day';
+
+  @override
+  String timingHoursChip(int n) {
+    return '$n hrs';
+  }
+
+  @override
+  String get timingDays => 'Days of the week';
+
+  @override
+  String get daysEvery => 'Every day';
+
+  @override
+  String get daysWeekdays => 'Weekdays';
+
+  @override
+  String get daysWeekends => 'Weekends';
+
+  @override
+  String daysRange(String a, String b) {
+    return '$a to $b';
+  }
+
+  @override
+  String get timingDate => 'Date';
+
+  @override
+  String get timingChooseDate => 'Choose a date';
+
+  @override
+  String durHours(num n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durMinutes(int n) {
+    return '$n min';
+  }
+
+  @override
+  String get timingErrEnd => 'End time must be after the start time.';
+
+  @override
+  String timingErrShort(String d) {
+    return 'Choose at least $d.';
+  }
+
+  @override
+  String timingErrLong(String d) {
+    return 'A shift can be at most $d.';
+  }
+
+  @override
+  String get timingErrDays => 'Choose at least one day.';
+
+  @override
+  String get timingErrDate => 'Choose a date.';
+
+  @override
+  String get timingEditSummary => 'Edit times and days';
+
+  @override
+  String get timeSheetSub => 'In 15-minute steps';
+
+  @override
+  String get timeSheetSet => 'Set time';
+
+  @override
+  String get timeSheetHour => 'Hour';
+
+  @override
+  String get timeSheetMinute => 'Minute';
+
+  @override
+  String get timeSheetPeriod => 'AM or PM';
+
+  @override
+  String get dateSheetTitle => 'Select date';
+
+  @override
+  String dateSheetSet(String date) {
+    return 'Set date: $date';
+  }
+
+  @override
+  String get dateSheetPick => 'Select a date';
+
+  @override
+  String get startTitle => 'Start date';
+
+  @override
+  String get startHeading => 'When should they start?';
+
+  @override
+  String get startSub =>
+      'Pick the first day. Workers will confirm they are free.';
+
+  @override
+  String startTomorrow(String date) {
+    return 'Tomorrow, $date';
+  }
+
+  @override
+  String startInDays(int n, String date) {
+    return 'In $n days, $date';
+  }
+
+  @override
+  String startNextMonday(String date) {
+    return 'Next Monday, $date';
+  }
+
+  @override
+  String get startPickAnother => 'Pick another date';
+
+  @override
+  String get startLoadFailedTitle => 'We couldn\'t load available dates';
+
+  @override
+  String startLimitNote(int n, String date) {
+    return 'You can start up to $n days from today (by $date).';
+  }
+
+  @override
+  String startOutsideTitle(String date) {
+    return '$date isn\'t one of your selected days';
+  }
+
+  @override
+  String startOutsideBody(String days) {
+    return 'You chose $days. You can continue anyway, or adjust your days.';
+  }
+
+  @override
+  String get startAdjustDays => 'Adjust days';
+
+  @override
+  String get calPrev => 'Previous month';
+
+  @override
+  String get calNext => 'Next month';
+
+  @override
+  String get budgetTitle => 'Budget';
+
+  @override
+  String get budgetHeading => 'What\'s your budget?';
+
+  @override
+  String get budgetSubMonthly =>
+      'Set a range per month. You\'ll see exact prices before you book.';
+
+  @override
+  String get budgetSubHourly =>
+      'Set a range per hour. You\'ll see exact prices before you book.';
+
+  @override
+  String get budgetPerMonth => '₹ per month';
+
+  @override
+  String get budgetPerHour => '₹ per hour';
+
+  @override
+  String guidanceTypical(String engagement, String service, String city) {
+    return 'Typical for a $engagement $service in $city';
+  }
+
+  @override
+  String budgetRangePerMonth(String range) {
+    return '$range per month';
+  }
+
+  @override
+  String budgetRangePerHour(String range) {
+    return '$range per hour';
+  }
+
+  @override
+  String get guidanceUse => 'Use this range';
+
+  @override
+  String get guidanceErrTitle => 'We couldn\'t load price guidance';
+
+  @override
+  String get guidanceErrBody => 'You can still enter a range below.';
+
+  @override
+  String get budgetMinimum => 'Minimum';
+
+  @override
+  String get budgetMaximum => 'Maximum';
+
+  @override
+  String get budgetMinField => 'Minimum (₹)';
+
+  @override
+  String get budgetMaxField => 'Maximum (₹)';
+
+  @override
+  String get budgetAny => 'Any budget';
+
+  @override
+  String get budgetAnyBody =>
+      'You\'ll see workers at every price. Adjust anytime.';
+
+  @override
+  String get budgetFlexibleLabel => 'Flexible budget';
+
+  @override
+  String get budgetFlexibleBody => 'Show workers at every price';
+
+  @override
+  String get budgetLow =>
+      'That\'s below the usual range, so you may see fewer workers. You can still continue.';
+
+  @override
+  String get budgetErrMinMax => 'Maximum must be at least the minimum.';
+
+  @override
+  String get budgetErrMissing => 'Enter a minimum and a maximum.';
+
+  @override
+  String get budgetErrHigh => 'That amount looks too high. Please check it.';
+
+  @override
+  String get budgetReview => 'Review requirement';
+
+  @override
+  String get budgetDone => 'Done';
+
+  @override
+  String get budgetSlider => 'Budget range';
+
+  @override
+  String get gapNoService => 'Choose a service first.';
+
+  @override
+  String get gapNoEngagement => 'Choose how you need them to work.';
+
+  @override
+  String get gapNoAddress => 'Choose an address.';
+
+  @override
+  String get gapTiming => 'Complete the timing details.';
+
+  @override
+  String get gapNoStartDate => 'Choose a start date.';
+
+  @override
+  String get gapStartDateRange =>
+      'Pick a start date within the allowed window.';
+
+  @override
+  String get gapBudget => 'Check your budget.';
+
+  @override
+  String get resumeTitle => 'Resume your request';
+
+  @override
+  String resumeBody(String what, int n, int total) {
+    return '$what · Step $n of $total';
+  }
+
+  @override
+  String get resumeContinue => 'Continue';
+
+  @override
+  String get resumeDiscard => 'Start over';
 }

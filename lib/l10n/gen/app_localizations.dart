@@ -1515,6 +1515,606 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Make default'**
   String get locationMakeDefault;
+
+  /// No description provided for @timingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Timing'**
+  String get timingTitle;
+
+  /// No description provided for @timingHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'When do you need them?'**
+  String get timingHeading;
+
+  /// No description provided for @timingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a time window. You\'ll agree exact timings in the interview.'**
+  String get timingSub;
+
+  /// No description provided for @timingLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load timing options'**
+  String get timingLoadFailedTitle;
+
+  /// No description provided for @timingWindowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred time of day'**
+  String get timingWindowLabel;
+
+  /// No description provided for @winEarlyMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Early morning'**
+  String get winEarlyMorning;
+
+  /// No description provided for @winMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get winMorning;
+
+  /// No description provided for @winAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon'**
+  String get winAfternoon;
+
+  /// No description provided for @winEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get winEvening;
+
+  /// No description provided for @winNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get winNight;
+
+  /// No description provided for @winFlexible.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get winFlexible;
+
+  /// No description provided for @winFlexibleRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get winFlexibleRange;
+
+  /// No description provided for @winEarlyMorningPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'Early mornings'**
+  String get winEarlyMorningPlural;
+
+  /// No description provided for @winMorningPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'Mornings'**
+  String get winMorningPlural;
+
+  /// No description provided for @winAfternoonPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoons'**
+  String get winAfternoonPlural;
+
+  /// No description provided for @winEveningPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'Evenings'**
+  String get winEveningPlural;
+
+  /// No description provided for @winNightPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'Nights'**
+  String get winNightPlural;
+
+  /// No description provided for @timingShiftHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift hours'**
+  String get timingShiftHours;
+
+  /// No description provided for @timingExactHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact hours'**
+  String get timingExactHours;
+
+  /// No description provided for @timingStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start time'**
+  String get timingStartTime;
+
+  /// No description provided for @timingEndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End time'**
+  String get timingEndTime;
+
+  /// No description provided for @timingPickTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time'**
+  String get timingPickTime;
+
+  /// No description provided for @timingHoursPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'{d} per day'**
+  String timingHoursPerDay(String d);
+
+  /// No description provided for @timingHoursPerDayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours per day'**
+  String get timingHoursPerDayLabel;
+
+  /// No description provided for @timingHoursChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} hrs'**
+  String timingHoursChip(int n);
+
+  /// No description provided for @timingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Days of the week'**
+  String get timingDays;
+
+  /// No description provided for @daysEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get daysEvery;
+
+  /// No description provided for @daysWeekdays.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekdays'**
+  String get daysWeekdays;
+
+  /// No description provided for @daysWeekends.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekends'**
+  String get daysWeekends;
+
+  /// No description provided for @daysRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{a} to {b}'**
+  String daysRange(String a, String b);
+
+  /// No description provided for @timingDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get timingDate;
+
+  /// No description provided for @timingChooseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date'**
+  String get timingChooseDate;
+
+  /// No description provided for @durHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 hour} other{{n} hours}}'**
+  String durHours(num n);
+
+  /// No description provided for @durMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min'**
+  String durMinutes(int n);
+
+  /// No description provided for @timingErrEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after the start time.'**
+  String get timingErrEnd;
+
+  /// No description provided for @timingErrShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least {d}.'**
+  String timingErrShort(String d);
+
+  /// No description provided for @timingErrLong.
+  ///
+  /// In en, this message translates to:
+  /// **'A shift can be at most {d}.'**
+  String timingErrLong(String d);
+
+  /// No description provided for @timingErrDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one day.'**
+  String get timingErrDays;
+
+  /// No description provided for @timingErrDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date.'**
+  String get timingErrDate;
+
+  /// No description provided for @timingEditSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit times and days'**
+  String get timingEditSummary;
+
+  /// No description provided for @timeSheetSub.
+  ///
+  /// In en, this message translates to:
+  /// **'In 15-minute steps'**
+  String get timeSheetSub;
+
+  /// No description provided for @timeSheetSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set time'**
+  String get timeSheetSet;
+
+  /// No description provided for @timeSheetHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Hour'**
+  String get timeSheetHour;
+
+  /// No description provided for @timeSheetMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Minute'**
+  String get timeSheetMinute;
+
+  /// No description provided for @timeSheetPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'AM or PM'**
+  String get timeSheetPeriod;
+
+  /// No description provided for @dateSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get dateSheetTitle;
+
+  /// No description provided for @dateSheetSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Set date: {date}'**
+  String dateSheetSet(String date);
+
+  /// No description provided for @dateSheetPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a date'**
+  String get dateSheetPick;
+
+  /// No description provided for @startTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get startTitle;
+
+  /// No description provided for @startHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'When should they start?'**
+  String get startHeading;
+
+  /// No description provided for @startSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the first day. Workers will confirm they are free.'**
+  String get startSub;
+
+  /// No description provided for @startTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow, {date}'**
+  String startTomorrow(String date);
+
+  /// No description provided for @startInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'In {n} days, {date}'**
+  String startInDays(int n, String date);
+
+  /// No description provided for @startNextMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Monday, {date}'**
+  String startNextMonday(String date);
+
+  /// No description provided for @startPickAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another date'**
+  String get startPickAnother;
+
+  /// No description provided for @startLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load available dates'**
+  String get startLoadFailedTitle;
+
+  /// No description provided for @startLimitNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can start up to {n} days from today (by {date}).'**
+  String startLimitNote(int n, String date);
+
+  /// No description provided for @startOutsideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} isn\'t one of your selected days'**
+  String startOutsideTitle(String date);
+
+  /// No description provided for @startOutsideBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose {days}. You can continue anyway, or adjust your days.'**
+  String startOutsideBody(String days);
+
+  /// No description provided for @startAdjustDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust days'**
+  String get startAdjustDays;
+
+  /// No description provided for @calPrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get calPrev;
+
+  /// No description provided for @calNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get calNext;
+
+  /// No description provided for @budgetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get budgetTitle;
+
+  /// No description provided for @budgetHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your budget?'**
+  String get budgetHeading;
+
+  /// No description provided for @budgetSubMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a range per month. You\'ll see exact prices before you book.'**
+  String get budgetSubMonthly;
+
+  /// No description provided for @budgetSubHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a range per hour. You\'ll see exact prices before you book.'**
+  String get budgetSubHourly;
+
+  /// No description provided for @budgetPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ per month'**
+  String get budgetPerMonth;
+
+  /// No description provided for @budgetPerHour.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ per hour'**
+  String get budgetPerHour;
+
+  /// No description provided for @guidanceTypical.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical for a {engagement} {service} in {city}'**
+  String guidanceTypical(String engagement, String service, String city);
+
+  /// No description provided for @budgetRangePerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{range} per month'**
+  String budgetRangePerMonth(String range);
+
+  /// No description provided for @budgetRangePerHour.
+  ///
+  /// In en, this message translates to:
+  /// **'{range} per hour'**
+  String budgetRangePerHour(String range);
+
+  /// No description provided for @guidanceUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this range'**
+  String get guidanceUse;
+
+  /// No description provided for @guidanceErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load price guidance'**
+  String get guidanceErrTitle;
+
+  /// No description provided for @guidanceErrBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still enter a range below.'**
+  String get guidanceErrBody;
+
+  /// No description provided for @budgetMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get budgetMinimum;
+
+  /// No description provided for @budgetMaximum.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get budgetMaximum;
+
+  /// No description provided for @budgetMinField.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum (₹)'**
+  String get budgetMinField;
+
+  /// No description provided for @budgetMaxField.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum (₹)'**
+  String get budgetMaxField;
+
+  /// No description provided for @budgetAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any budget'**
+  String get budgetAny;
+
+  /// No description provided for @budgetAnyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll see workers at every price. Adjust anytime.'**
+  String get budgetAnyBody;
+
+  /// No description provided for @budgetFlexibleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible budget'**
+  String get budgetFlexibleLabel;
+
+  /// No description provided for @budgetFlexibleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Show workers at every price'**
+  String get budgetFlexibleBody;
+
+  /// No description provided for @budgetLow.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s below the usual range, so you may see fewer workers. You can still continue.'**
+  String get budgetLow;
+
+  /// No description provided for @budgetErrMinMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum must be at least the minimum.'**
+  String get budgetErrMinMax;
+
+  /// No description provided for @budgetErrMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a minimum and a maximum.'**
+  String get budgetErrMissing;
+
+  /// No description provided for @budgetErrHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'That amount looks too high. Please check it.'**
+  String get budgetErrHigh;
+
+  /// No description provided for @budgetReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review requirement'**
+  String get budgetReview;
+
+  /// No description provided for @budgetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get budgetDone;
+
+  /// No description provided for @budgetSlider.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget range'**
+  String get budgetSlider;
+
+  /// No description provided for @gapNoService.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a service first.'**
+  String get gapNoService;
+
+  /// No description provided for @gapNoEngagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how you need them to work.'**
+  String get gapNoEngagement;
+
+  /// No description provided for @gapNoAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an address.'**
+  String get gapNoAddress;
+
+  /// No description provided for @gapTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the timing details.'**
+  String get gapTiming;
+
+  /// No description provided for @gapNoStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a start date.'**
+  String get gapNoStartDate;
+
+  /// No description provided for @gapStartDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a start date within the allowed window.'**
+  String get gapStartDateRange;
+
+  /// No description provided for @gapBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your budget.'**
+  String get gapBudget;
+
+  /// No description provided for @resumeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume your request'**
+  String get resumeTitle;
+
+  /// No description provided for @resumeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{what} · Step {n} of {total}'**
+  String resumeBody(String what, int n, int total);
+
+  /// No description provided for @resumeContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get resumeContinue;
+
+  /// No description provided for @resumeDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get resumeDiscard;
 }
 
 class _AppLocalizationsDelegate

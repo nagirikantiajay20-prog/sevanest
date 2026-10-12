@@ -7,6 +7,7 @@ import 'package:sevanest_customer/app/app.dart';
 import 'package:sevanest_customer/app/theme/app_theme.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
@@ -16,8 +17,12 @@ import 'package:sevanest_customer/features/customer_profile/domain/customer_prof
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/schedule_repository.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 class InMemorySessionStore implements SessionStore {
@@ -122,6 +127,8 @@ Widget testRootApp({
   required AuthRepository repo,
   HomeRepository? home,
   CatalogRepository? catalog,
+  ScheduleRepository? schedule,
+  GuidanceRepository? guidance,
   List<Override> overrides = const [],
 }) => ProviderScope(
   retry: (_, _) => null,
@@ -134,6 +141,13 @@ Widget testRootApp({
     catalogRepositoryProvider.overrideWithValue(
       catalog ?? FakeCatalogRepository(),
     ),
+    scheduleRepositoryProvider.overrideWithValue(
+      schedule ?? FakeScheduleRepository(),
+    ),
+    guidanceRepositoryProvider.overrideWithValue(
+      guidance ?? FakeGuidanceRepository(),
+    ),
+    nowProvider.overrideWithValue(() => testNow),
     ...overrides,
   ],
   child: const SevaNestApp(),
@@ -374,4 +388,54 @@ class FakeLocationService implements LocationService {
 
   @override
   Future<void> openSettings() async => settingsCalls++;
+}
+
+/// Fixed "now" for date rules: Friday 9 Oct 2026, as in the design screens.
+final testNow = DateTime(2026, 10, 9, 10);
+
+class FakeScheduleRepository implements ScheduleRepository {
+  ScheduleConfig value = ScheduleConfig.fallback;
+  Object? failNext;
+  Future<void>? gate;
+  int calls = 0;
+
+  @override
+  Future<ScheduleConfig> config() async {
+    calls++;
+    await gate;
+    final f = failNext;
+    if (f != null) {
+      failNext = null;
+      throw f;
+    }
+    return value;
+  }
+}
+
+class FakeGuidanceRepository implements GuidanceRepository {
+  Guidance? value;
+  Object? failNext;
+  Future<void>? gate;
+  final queries = <GuidanceQuery>[];
+
+  @override
+  Future<Guidance> guidance(GuidanceQuery q) async {
+    queries.add(q);
+    await gate;
+    final f = failNext;
+    if (f != null) {
+      failNext = null;
+      throw f;
+    }
+    return value ??
+        Guidance(
+          min: q.engagement == EngagementType.hourly ? 100 : 6000,
+          max: q.engagement == EngagementType.hourly ? 200 : 10000,
+          period: q.engagement == EngagementType.hourly
+              ? BudgetPeriod.hourly
+              : BudgetPeriod.monthly,
+          city: q.city,
+          basis: 'Based on recent bookings',
+        );
+  }
 }
