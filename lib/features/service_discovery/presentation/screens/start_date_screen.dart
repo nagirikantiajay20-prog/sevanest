@@ -28,7 +28,7 @@ class StartDateScreen extends ConsumerStatefulWidget {
 
 class _StartDateScreenState extends ConsumerState<StartDateScreen> {
   final _calendarKey = GlobalKey();
-  bool _redirected = false;
+  bool _checked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +41,13 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
     final now = ref.watch(nowProvider)();
     final selected = draft.startDate;
 
-    if (draft.skipsStartDateStep && !_redirected) {
-      _redirected = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.pushReplacement(Routes.discoverTiming);
-      });
+    if (!_checked) {
+      _checked = true;
+      if (draft.skipsStartDateStep) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) context.pushReplacement(Routes.discoverTiming);
+        });
+      }
     }
 
     final days = draft.timing?.days ?? const <int>{};

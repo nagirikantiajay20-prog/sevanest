@@ -33,6 +33,13 @@ Future<void> sendToGap(BuildContext context, DraftGap gap) async {
   final l10n = AppLocalizations.of(context);
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(gapMessage(l10n, gap.reason))));
+    ..showSnackBar(
+      SnackBar(
+        content: Text(gapMessage(l10n, gap.reason)),
+        // Floats above the sticky Continue button instead of covering it.
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 104),
+      ),
+    );
   await context.push<Object?>('${routeForStep(gap.step)}?edit=true');
 }

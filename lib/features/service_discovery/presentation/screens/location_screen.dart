@@ -38,7 +38,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     final current = ref.read(requirementDraftProvider).address;
     final stillThere = list.where((a) => a.id == current?.id).firstOrNull;
     if (stillThere != null) {
-      notifier.setAddress(stillThere);
+      // Refresh the snapshot (the address may have been edited), outside the build phase.
+      Future.microtask(() => notifier.setAddress(stillThere));
       return;
     }
     final chip = ref.read(selectedAddressProvider);

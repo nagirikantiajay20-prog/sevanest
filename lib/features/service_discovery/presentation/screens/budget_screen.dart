@@ -55,7 +55,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   final _min = TextEditingController();
   final _max = TextEditingController();
   bool _edited = false;
-  bool _redirected = false;
+  bool _checked = false;
   bool _seeded = false;
 
   @override
@@ -155,11 +155,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         ref.watch(scheduleConfigProvider).value ?? ScheduleConfig.fallback;
     final engagement = draft.engagement;
 
-    if (engagement == null && !_redirected) {
-      _redirected = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.pushReplacement(Routes.discoverEngagement);
-      });
+    if (!_checked) {
+      _checked = true;
+      if (engagement == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) context.pushReplacement(Routes.discoverEngagement);
+        });
+      }
     }
 
     final period = engagement == null
@@ -620,12 +622,17 @@ class _Readout extends StatelessWidget {
           label,
           style: text.bodySmall?.copyWith(fontWeight: FontWeight.w600),
         ),
-        Text(
-          value,
-          key: k,
-          style: text.headlineMedium?.copyWith(
-            color: AppColors.navy,
-            fontWeight: FontWeight.w800,
+        // Scales down instead of overflowing at large text sizes or amounts like ₹4,00,000.
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            key: k,
+            style: text.headlineMedium?.copyWith(
+              color: AppColors.navy,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ],
@@ -633,10 +640,12 @@ class _Readout extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        col(
-          l10n.budgetMinimum,
-          v(budget?.min),
-          const Key('discover_readout_min'),
+        Flexible(
+          child: col(
+            l10n.budgetMinimum,
+            v(budget?.min),
+            const Key('discover_readout_min'),
+          ),
         ),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -645,10 +654,12 @@ class _Readout extends StatelessWidget {
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
           ),
         ),
-        col(
-          l10n.budgetMaximum,
-          v(budget?.max),
-          const Key('discover_readout_max'),
+        Flexible(
+          child: col(
+            l10n.budgetMaximum,
+            v(budget?.max),
+            const Key('discover_readout_max'),
+          ),
         ),
       ],
     );

@@ -37,7 +37,7 @@ class TimingScreen extends ConsumerStatefulWidget {
 
 class _TimingScreenState extends ConsumerState<TimingScreen> {
   final _editorKey = GlobalKey();
-  bool _redirected = false;
+  bool _checked = false;
   bool _seeded = false;
 
   void _update(Timing Function(Timing t) f) {
@@ -97,11 +97,14 @@ class _TimingScreenState extends ConsumerState<TimingScreen> {
     final variant = draft.variant;
 
     // Resumed or deep-linked without an engagement: go choose one first.
-    if (variant == null && !_redirected) {
-      _redirected = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.pushReplacement(Routes.discoverEngagement);
-      });
+    // Decided once on open, so discarding the draft later does not bounce this screen.
+    if (!_checked) {
+      _checked = true;
+      if (variant == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) context.pushReplacement(Routes.discoverEngagement);
+        });
+      }
     }
 
     // First visit to a variant: preset its defaults (Full-time shift, Mon-Sat).

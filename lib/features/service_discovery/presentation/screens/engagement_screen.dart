@@ -21,7 +21,7 @@ class EngagementScreen extends ConsumerStatefulWidget {
 }
 
 class _EngagementScreenState extends ConsumerState<EngagementScreen> {
-  bool _redirected = false;
+  bool _checked = false;
 
   /// "Change" service: the draft may lose its engagement, which is then re-picked on this screen.
   Future<void> _changeService() async {
@@ -36,11 +36,15 @@ class _EngagementScreenState extends ConsumerState<EngagementScreen> {
     final draft = ref.watch(requirementDraftProvider);
 
     // Catalogue loaded but no service chosen (resumed draft / deep link): go pick one.
-    if (categories.hasValue && category == null && !_redirected) {
-      _redirected = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.pushReplacement(Routes.discoverCategory);
-      });
+    // Decided once, when the catalogue first answers: later changes (e.g. a discarded draft)
+    // must not bounce an already-open screen.
+    if (!_checked && (categories.hasValue || categories.hasError)) {
+      _checked = true;
+      if (categories.hasValue && category == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) context.pushReplacement(Routes.discoverCategory);
+        });
+      }
     }
 
     // A single supported option is preselected (DISC-05).
