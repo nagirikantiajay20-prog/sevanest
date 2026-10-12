@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/requirement_draft.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _draftKey = 'requirement_draft_v1';
@@ -28,13 +30,19 @@ class RequirementDraftNotifier extends Notifier<RequirementDraft> {
 
   /// Picking a different service clears everything that depended on it (DISC-03).
   void setService(String id) {
-    if (state.serviceId == id) return;
-    _set(RequirementDraft(serviceId: id, address: state.address));
+    if (state.serviceId != id) _set(state.withService(id));
   }
 
-  void setEngagement(EngagementType t) => _set(state.copyWith(engagement: t));
+  /// A different engagement drops timing it can't use and any budget priced for the old one.
+  void setEngagement(EngagementType t) => _set(state.withEngagement(t));
 
-  void setAddress(Address a) => _set(state.copyWith(address: a));
+  void setAddress(Address a) => _set(state.withAddress(a));
+
+  void setTiming(Timing? t) => _set(state.withTiming(t));
+
+  void setStartDate(DateTime? d) => _set(state.withStartDate(d));
+
+  void setBudget(Budget? b) => _set(state.withBudget(b));
 
   Future<void> restore() async {
     try {
