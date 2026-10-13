@@ -112,3 +112,71 @@ missing or unclear. Until then the app shows nothing rather than inventing data.
   release keystore, and the iOS schemes need the project owner / a Mac. Android signing is already
   wired to read `android/key.properties`.
 - A map provider for the address pin (OPEN_QUESTIONS #15) is a product decision.
+
+---
+
+## Status of modules 1-5: what is still pending (2026-10-13)
+
+The numbered requests above are the backend asks. This section is the whole picture, so the
+backend, product and the app team can see what each pending item blocks and what the app does in
+the meantime.
+
+### 1. Backend endpoints or fields still missing
+
+| Request | What is missing | Affects | App behaviour today |
+|---|---|---|---|
+| 9 | Interview endpoints: create, list, detail, cancel, decision, reschedule, worker slots | Module 5 | Works only in the dev mock. In stg/prod every call answers 404 and the screens show their error state. |
+| 1 | Worker reviews for customers | Module 4 | Reviews list is mock-only in dev and empty in live. |
+| 1 | Rating scale (`RATING_SCALE_MAX`) exposed to clients | Module 4 | Star rating filter and the "4.6" style display are held back. |
+| 4 | Price guidance for the Budget step | Module 4 | Guidance card hidden in live; the customer types a range. |
+| 5 | Budget parameter in search | Module 4 | The range is collected but not used for filtering. |
+| 6 | Days of week and start date in search | Module 4 | Not used for matching; only the time range is sent. |
+| 7 | Home aggregate (active booking, upcoming interview, unread count, shortlist preview) | Module 3 | Live Home shows the new-customer view only. |
+| 8 | Customer profile photo endpoint | Module 3 | "Add a photo" is not built. |
+| 10 | Address label, line 2, state | Module 3 | Address cards show the area instead of a label. |
+| 11 | Coordinates to service-area lookup | Module 3 | After "Use my current location" the customer picks the area when the geocoded name does not match. |
+| 2 | Published response schemas (most 200/201 bodies are empty in the Swagger) | All | Parsers are defensive but have never seen real success bodies. |
+
+### 2. Backend confirmations needed (assumptions the app made)
+
+- Whether `meta.total` is always returned (paging stops when it is missing).
+- The `GET /shortlist` entry shape (the parser accepts the card inline, under `card`, or under `worker`).
+- Whether `GET /search/workers?category=` takes the category `code` (the app sends `code`).
+- The exact error code and status for an expired or locked OTP.
+- The 429 shape: `Retry-After` header versus `details[0].retryAfterSeconds`.
+- Default-address rules (delete or unset the default, first address auto-default).
+- The error code for deleting an address that is used by an active booking.
+- The error code for an unserviceable area.
+- The refresh-token rotation behaviour and request body.
+- `support.phone` and `support.email` in `GET /app-config` are `null`, so the Contact support button is disabled until they are set.
+
+### 3. Integrations that need the project owner (not code)
+
+| Item | Needed from | Blocks |
+|---|---|---|
+| Firebase projects and the per-flavor `google-services.json` / `GoogleService-Info.plist` | Project owner | Push notifications (module 10), step 1.2 |
+| iOS schemes and xcconfig files, iOS builds | A Mac or a CI Mac | Step 1.2, release |
+| Android release keystore (the build already reads `android/key.properties`) | Project owner | Release builds |
+| Map provider for the address pin (OPEN_QUESTIONS #15) | Product decision | Map pin in the address form (current-location fill works without it) |
+| A static test customer (mobile + OTP) with a profile, addresses, visible workers and a shortlist | Backend | Live contract tests (`test/live`) |
+
+### 4. App work deliberately deferred to later modules
+
+- Push token register and unregister on logout (FCM, module 10).
+- A Bookings-tab segment for interviews (module 6). Interviews are reachable from the Account tab and the Home interview card for now.
+- `/bookings/confirm` is a placeholder until module 6; "Confirm this worker" lands there.
+- `/support/new` is a placeholder until module 10; "Contact support" lands there.
+- The worker profile Report / Block menu (module 10 and the safety endpoints).
+- The replacement "Choose" mode on the worker profile (module 9).
+- The notification bell (module 10).
+- Deep links (module 10).
+
+### 5. Known limitations inside the built code
+
+- Everything that touches the live backend is untested against real success responses (see section 1, response schemas).
+- Dev starts on mocks, and stg/prod use the real repositories. Worker search, shortlist, catalogue and addresses have not been exercised live end to end.
+- The "What does verified mean?" sheet uses placeholder copy.
+- Only English is selectable (`GET /app-config` returns `languages: ["en"]`).
+- The Budget step is always shown and every engagement type is offered for every category, because the backend states neither.
+- Force-update and maintenance screens are not built (OPEN_QUESTIONS #30).
+
