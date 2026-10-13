@@ -1,12 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
+import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_remote.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 
-final catalogRepositoryProvider = Provider<CatalogRepository>(
-  (ref) => CatalogRepositoryMock(() => ref.read(mockApiProvider)),
-);
+/// Live backend in stg / prod (and in dev when switched on); seeded mock otherwise.
+final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
+  final live = ref.watch(mockApiProvider.select((s) => s.live));
+  return live
+      ? CatalogRepositoryRemote(ref.watch(dioProvider))
+      : CatalogRepositoryMock(() => ref.read(mockApiProvider));
+});
 
 /// `GET /catalog/categories`. Re-fetches when the dev menu changes the mock behaviour.
 final categoriesProvider = FutureProvider.autoDispose<List<ServiceCategory>>((

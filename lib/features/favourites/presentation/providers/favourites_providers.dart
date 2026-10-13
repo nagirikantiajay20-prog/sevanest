@@ -1,14 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/favourites/data/favourites_repository_mock.dart';
+import 'package:sevanest_customer/features/favourites/data/favourites_repository_remote.dart';
 import 'package:sevanest_customer/features/favourites/domain/favourites.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
 
-// ponytail: mock until worker ids are real (search is mocked too). Swap for
-// FavouritesRepositoryRemote(dio) together with workerSearchRepositoryProvider.
-final favouritesRepositoryProvider = Provider<FavouritesRepository>(
-  (ref) => FavouritesRepositoryMock(() => ref.read(mockApiProvider)),
-);
+/// Live backend in stg / prod (and in dev when switched on); in-memory mock otherwise.
+final favouritesRepositoryProvider = Provider<FavouritesRepository>((ref) {
+  final live = ref.watch(mockApiProvider.select((s) => s.live));
+  return live
+      ? FavouritesRepositoryRemote(ref.watch(dioProvider))
+      : FavouritesRepositoryMock(() => ref.read(mockApiProvider));
+});
 
 /// Which workers are shortlisted, plus the ones with a request in flight.
 class FavouriteState {

@@ -2,11 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/home/data/home_repository_mock.dart';
+import 'package:sevanest_customer/features/home/data/home_repository_remote.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 
-final homeRepositoryProvider = Provider<HomeRepository>(
-  (ref) => HomeRepositoryMock(() => ref.read(mockApiProvider)),
-);
+/// Live: the new-customer Home until bookings / interviews exist (no invented activity).
+final homeRepositoryProvider = Provider<HomeRepository>((ref) {
+  final live = ref.watch(mockApiProvider.select((s) => s.live));
+  return live
+      ? const HomeRepositoryRemote()
+      : HomeRepositoryMock(() => ref.read(mockApiProvider));
+});
 
 /// Home aggregate. Re-fetches when the dev menu changes the mock behaviour.
 class HomeNotifier extends AsyncNotifier<HomeData> {

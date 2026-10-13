@@ -777,5 +777,12 @@
       }
     }
   },
-  "workerSkillsLabel": "Skills"
+  "workerSkillsLabel": "Skills",
+  "addressLocationFailed": "Couldn't get your location. Check the location permission, or fill in the address yourself.",
+  "logout": "Log out",
+  "logoutConfirmTitle": "Log out?",
+  "logoutConfirmBody": "You will need to sign in again with your mobile number.",
+  "devMenuLive": "Backend data",
+  "devMenuLiveOn": "Live",
+  "devMenuLiveOff": "Mock"
 }

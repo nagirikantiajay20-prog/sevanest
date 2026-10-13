@@ -340,6 +340,11 @@ void main() {
       await t.tap(find.byKey(const Key('dev_user_new')));
       await t.pump();
       expect(c.read(mockApiProvider).returningUser, isFalse);
+      // Tests run as the dev flavor: mocks by default, the menu can switch to the live backend.
+      expect(c.read(mockApiProvider).live, isFalse);
+      await t.tap(find.byKey(const Key('dev_live_on')));
+      await t.pump();
+      expect(c.read(mockApiProvider).live, isTrue);
     });
   });
 }

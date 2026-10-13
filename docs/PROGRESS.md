@@ -11,11 +11,11 @@
 - [x] 2.1 Splash (loading / slow / failed states, session restore + GET /customers/me, retry / sign in again / contact support)
 - [x] 2.2 Login (design screen 02; real `POST /auth/otp/request`)
 - [x] 2.3 OTP (design screen 03; real `POST /auth/otp/verify`; Retry-After honoured; no auto-retries)
-- [~] 2.4 Logout - `logoutProvider` (POST /auth/logout best-effort + clear session) is done and tested; the Account-screen button arrives with module 14. FCM unregister joins step 10.3
+- [x] 2.4 Logout - `logoutProvider` (POST /auth/logout best-effort + clear session) plus the Account-screen Log out button with a confirm dialog (tested). FCM unregister joins step 10.3
 - [x] 2.5 Profile-complete routing (404 CUSTOMER_PROFILE_NOT_FOUND -> /profile/setup placeholder)
   - Verified live 2026-10-12 against the deployed backend: request, wrong OTP, verify, /customers/me, refresh rotation, logout (`test/live`, run with SEVANEST_LIVE=1). NOT verified live: 429 / Retry-After, the OTP lock-out error code, real SMS delivery (DLT pending -> 503 SMS_NOT_CONFIGURED)
 - [~] 3.1 Profile - setup (`POST /customers/me`), view/edit (`PATCH`), validation, error/loading states DONE, 14 widget + 10 mocked repository tests (+3 validator). NOT built: profile photo (no customer endpoint). NOT verified live: authenticated success shapes (needs SEVANEST_TEST_MOBILE/OTP; `test/live/profile_address_live_test.dart` is ready)
-- [~] 3.2 Addresses - list/add/edit/delete/set-default/select-mode/area picker DONE (`/customers/me/addresses*`, `/service-areas`), 24 widget + 12 mocked repository tests. NOT built: current-location + map pin, address label/line2/state (not in backend)
+- [~] 3.2 Addresses - "Use my current location" in the address form (fills area/city/pincode, sends lat/lng) added; list/add/edit/delete/set-default/select-mode/area picker DONE (`/customers/me/addresses*`, `/service-areas`), 24 widget + 12 mocked repository tests. NOT built: map pin (no map provider approved, #15), address label/line2/state (not in backend, see docs/BACKEND_REQUESTS.md)
 - [x] 3.3 Home (design screen 05; mock `HomeRepository` behind the dev-menu API toggle, offline cache, 28 tests; shell back-handling; bell/booking/interview/shortlist/support/hero-service wiring; discover/notifications/support/booking/interview/worker routes are placeholders until their modules)
 - [x] 4.1 Categories/Service (design 06) + Engagement (07) + Location (08): catalog mock, shared DiscoverScaffold, GPS via geolocator/geocoding behind LocationService, 29 tests. NOT built: add-address *sheet* with map pin (shared full-screen address form reused instead), serviceability check (no backend flag)
 - [x] 4.2 Draft (persisted, restored on Home, clearing rules, whole-draft validation) 
@@ -34,3 +34,6 @@
 - [ ] 9.1 Replacement request  - [ ] 9.2 Status  - [ ] 9.3 Alternatives
 - [ ] 10.1 Support  - [ ] 10.2 Report/Block  - [ ] 10.3 Push  - [ ] 10.4 Notification centre  - [ ] 10.5 Deep links
 - [ ] 11.1–11.7 Hardening & release
+
+## Live backend switch (2026-10-13)
+stg / prod use the real repositories for categories, worker search + profile, shortlist, guidance (none published) and Home (new-customer view until bookings/interviews exist). Dev starts on mocks; the dev menu has a Live / Mock switch. Remaining external blockers are listed in `docs/BACKEND_REQUESTS.md`; 1.2 (iOS schemes, Firebase files, release keystore) and 3.1 (profile photo) cannot be finished from this repo.

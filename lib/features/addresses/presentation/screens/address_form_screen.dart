@@ -6,6 +6,7 @@ import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
+import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
@@ -87,6 +88,10 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
     text: widget.initial?.pincode ?? widget.prefill?.pincode ?? '',
   );
   late bool _default = widget.initial?.isDefault ?? false;
+  late double? _lat = widget.prefill?.latitude;
+  late double? _lng = widget.prefill?.longitude;
+  bool _locating = false;
+  bool _locationOff = false;
   bool _defaultTouched = false;
 
   Address? get _initial => widget.initial;
@@ -161,6 +166,35 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
     if (discard && mounted) _leave();
   }
 
+  /// Fills area / city / pincode (and keeps the coordinates) from the device location. House and
+  /// street stay for the customer; an area the service-area list doesn't know is left to pick.
+  Future<void> _useCurrentLocation() async {
+    if (_locating) return;
+    setState(() {
+      _locating = true;
+      _locationOff = false;
+    });
+    final res = await ref.read(locationServiceProvider).currentAddress();
+    if (!mounted) return;
+    setState(() => _locating = false);
+    final found = res.input;
+    if (res.outcome != LocationOutcome.found || found == null) {
+      setState(() => _locationOff = true);
+      return;
+    }
+    final known = ref.read(serviceAreasProvider).asData?.value ?? const [];
+    final match = known
+        .where((a) => a.name.toLowerCase() == found.area.toLowerCase())
+        .firstOrNull;
+    setState(() {
+      _area.text = known.isEmpty ? found.area : (match?.name ?? '');
+      if (found.city.isNotEmpty) _city.text = found.city;
+      _pincode.text = found.pincode;
+      _lat = found.latitude;
+      _lng = found.longitude;
+    });
+  }
+
   Future<void> _save() async {
     if (!_valid) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -176,6 +210,8 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
             city: _city.text,
             pincode: _pincode.text,
             isDefault: _default,
+            latitude: _lat,
+            longitude: _lng,
           ),
         );
     if (saved == null || !mounted) return;
@@ -298,6 +334,31 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (!_isEdit) ...[
+                    OutlinedButton.icon(
+                      key: const Key('address_use_location_btn'),
+                      onPressed: form.busy || _locating
+                          ? null
+                          : _useCurrentLocation,
+                      icon: _locating
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.my_location),
+                      label: Text(l10n.locationUseCurrent),
+                    ),
+                    if (_locationOff)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: Text(
+                          l10n.addressLocationFailed,
+                          key: const Key('address_location_error'),
+                          style: const TextStyle(color: AppColors.danger),
+                        ),
+                      ),
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
                   LabeledField(
                     name: 'address_line1_field',
                     label: l10n.houseLabel,

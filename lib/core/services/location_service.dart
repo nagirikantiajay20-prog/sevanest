@@ -59,6 +59,8 @@ class GeolocatorLocationService implements LocationService {
           area: area,
           city: m.locality ?? '',
           pincode: m.postalCode ?? '',
+          latitude: pos.latitude,
+          longitude: pos.longitude,
         ),
       );
     } on Object {

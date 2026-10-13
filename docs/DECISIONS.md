@@ -2,6 +2,10 @@
 
 | Date | Decision | Reason | Approved by |
 |---|---|---|---|
+| 2026-10-13 | `MockApiState.live`: stg/prod always use the real repositories where an endpoint exists; dev defaults to mocks and has a Live/Mock chip in the dev menu | Prod must never show seeded workers, reviews, bookings or prices | Product rule |
+| 2026-10-13 | Live categories come from `/service-categories` (`code` = id); every engagement is offered and the Budget step is always shown because the backend states neither | Swagger | Backend contract |
+| 2026-10-13 | Live: no price guidance (card hidden on 404), no worker reviews, Home = new-customer view. Nothing is invented | No endpoints (BACKEND_REQUESTS 1, 4, 7) | Backend gap |
+| 2026-10-13 | Search waits for `/service-areas` to resolve the area id before the first request | Avoids a rejected request followed by a repeat | Fix |
 | 2026-10-13 | Favourites use the Swagger `/shortlist` (GET paged, PUT/DELETE idempotent), not docs/05's `/favourites`. One `favouriteProvider` holds every heart (ids + in-flight ids) so results, detail and the tab never disagree; it is still the MOCK repo until worker ids are real | Deployed contract wins; FAV-06 | Backend contract |
 | 2026-10-13 | Worker detail = `GET /search/workers/{id}` (same allow-listed card as search). Fields the spec lists but the card lacks (name, photo bytes, about, skills beyond categories) are simply absent | Swagger `WorkerCard` | Backend contract |
 | 2026-10-13 | Worker reviews are MOCK only: no customer endpoint lists a worker's reviews (OPEN_QUESTIONS #41) | Spec 5.4 needs them | Pending backend |

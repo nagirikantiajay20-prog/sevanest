@@ -2529,6 +2529,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Skills'**
   String get workerSkillsLabel;
+
+  /// No description provided for @addressLocationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get your location. Check the location permission, or fill in the address yourself.'**
+  String get addressLocationFailed;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logout;
+
+  /// No description provided for @logoutConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out?'**
+  String get logoutConfirmTitle;
+
+  /// No description provided for @logoutConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need to sign in again with your mobile number.'**
+  String get logoutConfirmBody;
+
+  /// No description provided for @devMenuLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend data'**
+  String get devMenuLive;
+
+  /// No description provided for @devMenuLiveOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get devMenuLiveOn;
+
+  /// No description provided for @devMenuLiveOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock'**
+  String get devMenuLiveOff;
 }
 
 class _AppLocalizationsDelegate

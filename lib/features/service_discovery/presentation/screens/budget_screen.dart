@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
@@ -276,7 +277,8 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          if (guidanceAsync != null)
+          // No published guidance (404) is not an error to show: the customer just types a range.
+          if (guidanceAsync != null && guidanceAsync.error is! NotFoundFailure)
             _GuidanceCard(
               async: guidanceAsync,
               engagementName: engagement == null

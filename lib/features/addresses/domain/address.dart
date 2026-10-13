@@ -29,6 +29,8 @@ class AddressInput {
     required this.city,
     required this.pincode,
     this.isDefault = false,
+    this.latitude,
+    this.longitude,
   });
 
   final String line;
@@ -36,6 +38,10 @@ class AddressInput {
   final String city;
   final String pincode;
   final bool isDefault;
+
+  /// From the device location, when the customer used it (the API accepts both or neither).
+  final double? latitude;
+  final double? longitude;
 }
 
 /// `GET /service-areas` item (success schema unpublished: only id/name/city are read).

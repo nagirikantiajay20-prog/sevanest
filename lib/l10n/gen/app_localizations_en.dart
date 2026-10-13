@@ -1363,4 +1363,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get workerSkillsLabel => 'Skills';
+
+  @override
+  String get addressLocationFailed =>
+      'Couldn\'t get your location. Check the location permission, or fill in the address yourself.';
+
+  @override
+  String get logout => 'Log out';
+
+  @override
+  String get logoutConfirmTitle => 'Log out?';
+
+  @override
+  String get logoutConfirmBody =>
+      'You will need to sign in again with your mobile number.';
+
+  @override
+  String get devMenuLive => 'Backend data';
+
+  @override
+  String get devMenuLiveOn => 'Live';
+
+  @override
+  String get devMenuLiveOff => 'Mock';
 }

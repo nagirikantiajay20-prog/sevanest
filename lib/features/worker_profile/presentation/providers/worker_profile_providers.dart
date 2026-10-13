@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/worker_profile/data/worker_reviews_repository_mock.dart';
+import 'package:sevanest_customer/features/worker_profile/data/worker_reviews_repository_remote.dart';
 import 'package:sevanest_customer/features/worker_profile/domain/worker_review.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
@@ -18,10 +19,15 @@ final workerDetailProvider = FutureProvider.autoDispose
           .detail(id, cancel: cancel);
     });
 
-// ponytail: mock only; the backend has no worker-reviews endpoint for customers (OPEN_QUESTIONS #41).
-final workerReviewsRepositoryProvider = Provider<WorkerReviewsRepository>(
-  (ref) => WorkerReviewsRepositoryMock(() => ref.read(mockApiProvider)),
-);
+/// Live there is no reviews endpoint for customers yet (OPEN_QUESTIONS #41), so none are shown.
+final workerReviewsRepositoryProvider = Provider<WorkerReviewsRepository>((
+  ref,
+) {
+  final live = ref.watch(mockApiProvider.select((s) => s.live));
+  return live
+      ? const WorkerReviewsRepositoryRemote()
+      : WorkerReviewsRepositoryMock(() => ref.read(mockApiProvider));
+});
 
 /// A worker's reviews, newest first, cursor-paged.
 class WorkerReviewsNotifier extends AsyncNotifier<PagedState<WorkerReview>> {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 
 /// What the mock API pretends the network is doing. Flipped from the dev menu so every
@@ -8,17 +9,28 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 enum MockMode { normal, slow, error, offline, empty, loading }
 
 class MockApiState {
-  const MockApiState({this.mode = MockMode.normal, this.returningUser = true});
+  const MockApiState({
+    this.mode = MockMode.normal,
+    this.returningUser = true,
+    this.live = false,
+  });
 
   final MockMode mode;
+
+  /// True = repositories whose endpoints exist talk to the deployed backend (always so in stg /
+  /// prod); false = the seeded mocks, so every state can be reached on a device. The dev flavor
+  /// starts on mocks and can flip this in the dev menu.
+  final bool live;
 
   /// Seeds Home (and later modules) as a returning customer with activity, or a brand-new one.
   final bool returningUser;
 
-  MockApiState copyWith({MockMode? mode, bool? returningUser}) => MockApiState(
-    mode: mode ?? this.mode,
-    returningUser: returningUser ?? this.returningUser,
-  );
+  MockApiState copyWith({MockMode? mode, bool? returningUser, bool? live}) =>
+      MockApiState(
+        mode: mode ?? this.mode,
+        returningUser: returningUser ?? this.returningUser,
+        live: live ?? this.live,
+      );
 
   Duration get latency => switch (mode) {
     MockMode.slow => const Duration(seconds: 4),
@@ -28,7 +40,8 @@ class MockApiState {
 
 class MockApiNotifier extends Notifier<MockApiState> {
   @override
-  MockApiState build() => const MockApiState();
+  MockApiState build() =>
+      MockApiState(live: ref.read(appConfigProvider).env != AppEnv.dev);
 
   // ignore: use_setters_to_change_properties
   void set(MockApiState s) => state = s;

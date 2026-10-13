@@ -70,11 +70,15 @@ class AddressRepositoryRemote implements AddressRepository {
       parseAddress(body) ?? (throw const UnknownFailure());
 }
 
-Map<String, String> _fields(AddressInput i) => {
+Map<String, Object> _fields(AddressInput i) => {
   'line': i.line.trim(),
   'area': i.area.trim(),
   'city': i.city.trim(),
   'pincode': i.pincode.trim(),
+  if (i.latitude != null && i.longitude != null) ...{
+    'latitude': i.latitude!,
+    'longitude': i.longitude!,
+  },
 };
 
 /// Null when the payload has no id (fail closed rather than showing a half-built card).

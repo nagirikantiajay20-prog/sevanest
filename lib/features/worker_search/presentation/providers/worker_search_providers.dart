@@ -1,17 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_mock.dart';
+import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_remote.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
 
-// ponytail: mock until the catalogue is real. Swap for WorkerSearchRepositoryRemote(dio) once
-// category codes come from /service-categories (the mock catalogue ids are not backend codes).
-final workerSearchRepositoryProvider = Provider<WorkerSearchRepository>(
-  (ref) => WorkerSearchRepositoryMock(() => ref.read(mockApiProvider)),
-);
+/// Live backend in stg / prod (and in dev when switched on); seeded mock otherwise.
+final workerSearchRepositoryProvider = Provider<WorkerSearchRepository>((ref) {
+  final live = ref.watch(mockApiProvider.select((s) => s.live));
+  return live
+      ? WorkerSearchRepositoryRemote(ref.watch(dioProvider))
+      : WorkerSearchRepositoryMock(() => ref.read(mockApiProvider));
+});
 
 /// Filters chosen in the sheet. Auto-disposed: they live while Results is open and a new search
 /// starts clean.
@@ -57,6 +61,13 @@ class WorkerSearchNotifier extends AsyncNotifier<PagedState<WorkerSummary>> {
   @override
   Future<PagedState<WorkerSummary>> build() async {
     ref.onDispose(() => _token?.cancel('disposed'));
+    // The search needs the area id, so wait for the service areas (a failed lookup falls back to
+    // the area name) instead of firing a request that would be rejected and then repeated.
+    try {
+      await ref.watch(serviceAreasProvider.future);
+    } on Object {
+      // fall through with the name
+    }
     final q = ref.watch(workerQueryProvider);
     if (q == null) return const PagedState();
     final page = await ref
