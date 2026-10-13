@@ -21,12 +21,22 @@ final class NotFoundFailure extends AppFailure {
 }
 
 final class ConflictFailure extends AppFailure {
-  const ConflictFailure([super.message]);
+  const ConflictFailure([super.message, this.code]);
+
+  /// Backend error code, e.g. `DUPLICATE_BOOKING` or `INVALID_TRANSITION`.
+  final String? code;
 }
 
 final class ValidationFailure extends AppFailure {
-  const ValidationFailure([super.message, this.fieldErrors = const {}]);
+  const ValidationFailure([
+    super.message,
+    this.fieldErrors = const {},
+    this.code,
+  ]);
   final Map<String, String> fieldErrors;
+
+  /// Backend error code, e.g. `WORKER_NOT_ELIGIBLE` or `OUTSIDE_SERVICE_AREA`.
+  final String? code;
 }
 
 final class RateLimitedFailure extends AppFailure {

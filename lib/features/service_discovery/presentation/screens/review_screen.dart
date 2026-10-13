@@ -85,7 +85,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
           step: DiscoverStep.location,
           label: l10n.reviewRowAddress,
           value:
-              '${address.line}, ${address.area}, ${address.city} ${address.pincode}',
+              '${address.fullLine}, ${address.area}, ${address.city} ${address.pincode}',
         ),
       if (d.engagement != null && d.timing != null)
         (

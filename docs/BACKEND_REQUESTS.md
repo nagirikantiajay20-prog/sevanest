@@ -60,22 +60,26 @@ missing or unclear. Until then the app shows nothing rather than inventing data.
 8. **Customer profile photo.** Design 04 shows "Add a photo". Only `/workers/me/photo` exists. Please
    add an equivalent for customers (`POST /customers/me/photo` -> upload URL, `.../confirm`, `GET`) or
    tell us the photo is out of scope for V1.
-9. **Interviews / trial (module 5 is built and waiting for this).** The Swagger has no interview
-   endpoints. The app calls the contract below; please implement it or send the real one:
-   - `POST /interviews` (header `Idempotency-Key`) body `{ workerId, type: "interview"|"trial",
-     date: "YYYY-MM-DD", slot: "HH:mm", note?, requirement: {serviceId, engagement, address,
-     timing, startDate, budget} }` -> the interview. `409` when the slot is taken, `404` when the
-     worker is no longer visible.
-   - `GET /interviews?page&limit` (+ `meta.total`), `GET /interviews/{id}`.
-   - Interview object: `{ id, status: REQUESTED|SCHEDULED|COMPLETED|CANCELLED|DECLINED|CONFIRMED|
-     NOT_A_FIT, type, workerId, worker?: <the search card>, date, slot, note, requirement,
-     timeline?: [{title, state: done|current|upcoming|failed, at}], allowedActions:
-     ["cancel","reschedule","confirm","decline"] }`. The app shows only the actions listed.
-   - `POST /interviews/{id}/cancel {reason?}`, `POST /interviews/{id}/decision
-     {decision:"decline"}`, `POST /interviews/{id}/reschedule {date, slot}`.
-   - `GET /workers/{id}/slots?date=YYYY-MM-DD` -> free start times (`["09:00", ...]`), and the
-     booking horizon (we assume 14 days). Is an interview one hour? If V1 has no interview
-     step, tell us and we will drop module 5.
+9. **Interviews / trial are booking states (modules 5 and 6 are built on this).** We found that the
+   deployed API has no interview resource, so the app drives everything through `/bookings`:
+   `POST /bookings {workerId,...}` (MATCHED), `POST /bookings/{id}/schedule {scheduleType,
+   scheduledAt}`, `.../interview-complete`, `.../confirm-worker {startDate}`, `.../reopen-matching`,
+   `.../cancel {reason}`. Please confirm:
+   - that the CUSTOMER may call `schedule`, `interview-complete`, `confirm-worker`,
+     `reopen-matching` and `cancel` (the Swagger says "Perform a booking action as the customer" but
+     lists admin and worker actions too), and from which states each is allowed;
+   - what state `reopen-matching` returns to (we assume NEW_REQUEST) and what happens to `workerId`;
+   - whether `schedule` can be repeated to reschedule (we assume yes from MATCHED and
+     INTERVIEW_TRIAL_SCHEDULED);
+   - the response shape of `GET /bookings` and `GET /bookings/{id}`. We read: `id, status,
+     category{code,name}, engagement, workerId, worker (the search card), area{name}, addressId,
+     startDate, scheduleType, scheduledAt, budgetMinMinor, budgetMaxMinor, budgetPeriod,
+     requirementNote, timeline[{status, at, note}], allowedActions[], paymentId, previousBookingId,
+     createdAt`. Please add **`allowedActions`** (so the buttons come from you, not from our copy of
+     the state model) and the **status timeline** to the response;
+   - slots: there is no slot or availability-window endpoint. We offer hourly starts inside the
+     worker's availability window, up to 14 days ahead; the backend only checks "a future time".
+     Tell us if it should enforce more.
 10. **Address label, second line, state.** The design shows labels ("Home", "Parents' home"), but
     `CreateAddressDto` has only `line, area, city, pincode, latitude, longitude, isDefault`. Please add
     `label` (nullable string), and optionally `line2`/`state`, or confirm they are not planned.
@@ -84,25 +88,63 @@ missing or unclear. Until then the app shows nothing rather than inventing data.
     there an endpoint to resolve coordinates to a service area (e.g.
     `GET /service-areas/resolve?lat&lng`)? Otherwise we make the customer pick the area.
 
+12. **Fee before payment.** `POST /payments` takes the amount from fee configuration, and there is no
+    quote endpoint, so the customer cannot see the booking fee before the payment step. Please expose
+    it (for example `GET /fees/booking` or the fee on the booking), plus the cancellation / refund /
+    replacement policy text, so the Confirm screen can show "Confirm & pay Rs X" and the policy.
+13. **Cancellation reasons and refund info.** `cancel` takes a free-text `reason`. If you want fixed
+    reasons or to show refund information on the cancel sheet, expose them (e.g. in
+    `/reference-data` and on the booking).
+
 ### P3 - confirmations
 
-12. `GET /search/workers`: `minRating` accepts 1-10. Confirm the scale (see 1) so we can offer a
+14. `GET /search/workers`: `minRating` accepts 1-10. Confirm the scale (see 1) so we can offer a
     rating filter. Also: is `sort` safe to expose (`EXPERIENCE_DESC|EXPERIENCE_ASC|RATING_DESC`)?
-13. Error codes we map today: `CATEGORY_NOT_AVAILABLE`, `AREA_NOT_AVAILABLE` (422),
+15. Error codes we map today: `CATEGORY_NOT_AVAILABLE`, `AREA_NOT_AVAILABLE` (422),
     `WORKER_NOT_FOUND` (404 on card and shortlist PUT), `SHORTLIST_FULL` (422). Please confirm the
     HTTP status for an expired/locked OTP and the exact code (we currently match any `OTP_*` code
     containing LOCK/ATTEMPT/MAX, and HTTP 429), plus the 429 shape (`Retry-After` header vs
     `details[0].retryAfterSeconds`).
-14. Default address rules: can a default address be deleted/unset? Does the first address become
+16. Default address rules: can a default address be deleted/unset? Does the first address become
     default automatically? Which error code for deleting an address used by an active booking
     (we assume 409)? Which code for an unserviceable area?
-15. Support contact (`GET /app-config` -> `support.phone/email`) is `null` today; the Contact support
+17. Support contact (`GET /app-config` -> `support.phone/email`) is `null` today; the Contact support
     button is disabled until it is set. Force-update (`customer.minVersion`) and `maintenance` are
     honoured by the app.
-16. Pagination: `GET /shortlist` and `/search/workers` use `page` + `meta.total`. Is `meta.total`
+18. Pagination: `GET /shortlist` and `/search/workers` use `page` + `meta.total`. Is `meta.total`
     always present? We stop paging when it is missing.
-17. `refresh` endpoint (`POST /auth/token/refresh`): confirm that rotation invalidates the old refresh
+19. `refresh` endpoint (`POST /auth/token/refresh`): confirm that rotation invalidates the old refresh
     token and the exact request body.
+
+### Module 7 - payments (2026-10-13, from the typed OpenAPI)
+
+The app runs on `POST /payments`, `POST /payments/{id}/verify`, `GET /payments/{id}` and
+`GET /payments` (history). The docs/05 assumptions (`/payments/initiate`, `/transactions`) do not
+exist in the backend and are not used.
+
+20. **`checkout` shape.** `CreatePaymentResponse.checkout` is an untyped object ("what the gateway
+    SDK needs"). Please publish its fields and the gateway. The app (Razorpay adapter) reads
+    `key` / `keyId` and `orderId` / `order_id` and otherwise refuses to open the checkout
+    (`CHECKOUT_UNSUPPORTED`, shown as "didn't go through"). Also confirm the gateway is Razorpay,
+    and which SDK fields go into `verify` (`providerPaymentId` = Razorpay `razorpay_payment_id`,
+    `signature` = `razorpay_signature`; is `razorpay_order_id` needed?).
+21. **Receipt file.** There is no `receiptUrl` / PDF route; `PaymentView` has only `receiptNumber`.
+    The receipt screen shows the number, amount, date and refund status; there is no download.
+    Please add a short-lived receipt URL or a `GET /payments/{id}/receipt`.
+22. **Payment method and gateway reference.** `PaymentView` has no masked payment method or gateway
+    reference, which the design's receipt shows. Not shown until published.
+23. **Payment id on the booking.** `BookingView` has no `paymentId`, and `GET /payments` cannot filter
+    by `bookingId` for a customer. The booking's "Receipt" button therefore opens the transactions
+    list. Please add `paymentId` (or `latestPaymentId`) to `BookingView`, or a `bookingId` filter.
+24. **Pending vs created.** Which status does a payment have after the customer opened the checkout
+    but before the gateway answered (`CREATED` or `PENDING`)? The app treats `CREATED` as "can pay",
+    `PENDING` as "confirming" (Pay hidden), and anything unknown as "confirming".
+25. **Failed payment retry.** After `FAILED`, does `POST /payments` for the same booking create a new
+    payment (we assume so and send a fresh Idempotency-Key), or return the failed one?
+26. **Refund filter.** `GET /payments?status=` takes one status, so the "Refunded" chip shows
+    `REFUNDED` only; `REFUND_PENDING` appears under All. A `refunded=true` filter would fix that.
+27. **Failure reason.** `PaymentView` has no failure reason, so the failed screen is generic. Also
+    the statement "no money deducted" is not shown, because the backend does not say so.
 
 ---
 
@@ -125,7 +167,7 @@ the meantime.
 
 | Request | What is missing | Affects | App behaviour today |
 |---|---|---|---|
-| 9 | Interview endpoints: create, list, detail, cancel, decision, reschedule, worker slots | Module 5 | Works only in the dev mock. In stg/prod every call answers 404 and the screens show their error state. |
+| 9 | Confirm that interviews are booking states and the customer may drive them; `allowedActions` + timeline in the booking response; slot rules | Modules 5, 6 | Built on the booking API. Buttons follow the state model until `allowedActions` arrives. Unverified live. |
 | 1 | Worker reviews for customers | Module 4 | Reviews list is mock-only in dev and empty in live. |
 | 1 | Rating scale (`RATING_SCALE_MAX`) exposed to clients | Module 4 | Star rating filter and the "4.6" style display are held back. |
 | 4 | Price guidance for the Budget step | Module 4 | Guidance card hidden in live; the customer types a range. |

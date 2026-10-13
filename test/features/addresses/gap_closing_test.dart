@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
-import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/features/addresses/data/address_repository_remote.dart';
@@ -18,7 +17,6 @@ import 'package:sevanest_customer/features/home/presentation/providers/home_prov
 import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
 import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_remote.dart';
 import 'package:sevanest_customer/features/service_discovery/data/guidance_repository_remote.dart';
-import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
@@ -238,21 +236,6 @@ void main() {
       expect(
         mock.read(favouritesRepositoryProvider),
         isA<FavouritesRepositoryMock>(),
-      );
-    });
-
-    test('live Home and guidance never invent data', () async {
-      expect((await const HomeRepositoryRemote().fetch()).isNewUser, isTrue);
-      expect(
-        const GuidanceRepositoryRemote().guidance(
-          const GuidanceQuery(
-            serviceId: 'COOK',
-            engagement: EngagementType.fullTime,
-            area: 'Madhapur',
-            city: 'Hyderabad',
-          ),
-        ),
-        throwsA(isA<NotFoundFailure>()),
       );
     });
 

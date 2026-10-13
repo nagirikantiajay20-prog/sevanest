@@ -1,15 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/home/data/home_repository_mock.dart';
 import 'package:sevanest_customer/features/home/data/home_repository_remote.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 
-/// Live: the new-customer Home until bookings / interviews exist (no invented activity).
+/// Live: `GET /customers/me/home`; dev's mock mode serves the seeded aggregate.
 final homeRepositoryProvider = Provider<HomeRepository>((ref) {
   final live = ref.watch(mockApiProvider.select((s) => s.live));
   return live
-      ? const HomeRepositoryRemote()
+      ? HomeRepositoryRemote(ref.watch(dioProvider))
       : HomeRepositoryMock(() => ref.read(mockApiProvider));
 });
 

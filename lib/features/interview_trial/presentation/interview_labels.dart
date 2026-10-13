@@ -11,6 +11,7 @@ String interviewStatusLabel(AppLocalizations l, InterviewStatus s) =>
     switch (s) {
       InterviewStatus.requested => l.interviewStatusRequested,
       InterviewStatus.scheduled => l.interviewStatusScheduled,
+      InterviewStatus.rescheduleProposed => l.interviewStatusProposed,
       InterviewStatus.completed => l.interviewStatusCompleted,
       InterviewStatus.cancelled => l.interviewStatusCancelled,
       InterviewStatus.declined => l.interviewStatusDeclined,
@@ -21,7 +22,9 @@ String interviewStatusLabel(AppLocalizations l, InterviewStatus s) =>
 
 SnBadgeTone interviewStatusTone(InterviewStatus s) => switch (s) {
   InterviewStatus.scheduled || InterviewStatus.confirmed => SnBadgeTone.success,
-  InterviewStatus.requested || InterviewStatus.completed => SnBadgeTone.warning,
+  InterviewStatus.requested ||
+  InterviewStatus.rescheduleProposed ||
+  InterviewStatus.completed => SnBadgeTone.warning,
   InterviewStatus.cancelled || InterviewStatus.declined => SnBadgeTone.error,
   InterviewStatus.notAFit || InterviewStatus.unknown => SnBadgeTone.neutral,
 };
@@ -47,6 +50,7 @@ String interviewStatusCopy(AppLocalizations l, Interview i, [String? locale]) {
               when.date,
               when.time,
             ),
+    InterviewStatus.rescheduleProposed => _proposedCopy(l, i, locale),
     InterviewStatus.completed => l.interviewCopyCompleted,
     InterviewStatus.cancelled => l.interviewCopyCancelled,
     InterviewStatus.declined => l.interviewCopyDeclined,
@@ -54,4 +58,13 @@ String interviewStatusCopy(AppLocalizations l, Interview i, [String? locale]) {
     InterviewStatus.notAFit => l.interviewCopyNotAFit,
     InterviewStatus.unknown => l.interviewCopyUnknown,
   };
+}
+
+String _proposedCopy(AppLocalizations l, Interview i, String? locale) {
+  final p = i.proposedAt;
+  if (p == null) return l.interviewStatusProposed;
+  return l.interviewCopyProposed(
+    formatDate(p, locale),
+    formatTime(p.hour * 60 + p.minute),
+  );
 }

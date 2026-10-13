@@ -82,12 +82,16 @@ class GuidanceQuery {
     required this.engagement,
     required this.area,
     required this.city,
+    this.areaId,
   });
 
   final String serviceId;
   final EngagementType engagement;
   final String area;
   final String city;
+
+  /// The service-area id, when known (the backend narrows the band by it).
+  final String? areaId;
 
   // Records give value equality, so this works as a provider family key.
   @override
@@ -96,10 +100,11 @@ class GuidanceQuery {
       other.serviceId == serviceId &&
       other.engagement == engagement &&
       other.area == area &&
-      other.city == city;
+      other.city == city &&
+      other.areaId == areaId;
 
   @override
-  int get hashCode => Object.hash(serviceId, engagement, area, city);
+  int get hashCode => Object.hash(serviceId, engagement, area, city, areaId);
 }
 
 abstract interface class GuidanceRepository {

@@ -134,9 +134,9 @@ class _AddressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final id = address.id;
-    final title = address.area.isEmpty ? address.city : address.area;
+    final title = address.title;
     final detail = [
-      address.line,
+      address.fullLine,
       '${address.city} ${address.pincode}'.trim(),
     ].where((s) => s.isNotEmpty).join(', ');
     return Material(

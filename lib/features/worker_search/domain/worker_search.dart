@@ -24,24 +24,39 @@ const workerLanguages = {
 /// Display name for a worker language, falling back to whatever the backend sent.
 String languageName(String code) => workerLanguages[code] ?? code;
 
-/// Optional narrowing on top of the requirement. Only what `GET /search/workers` supports: a star
-/// rating filter is left out because the rating scale is configurable (OPEN_QUESTIONS #40).
+/// Result order (`sort` on `GET /search/workers`). The backend default is most experienced first,
+/// so that is "no choice" (null in [WorkerFilters.sort]).
+enum WorkerSort {
+  highestRated('RATING_DESC');
+
+  const WorkerSort(this.code);
+  final String code;
+}
+
+/// Optional narrowing on top of the requirement: what `GET /search/workers` supports. [minRating]
+/// is on the backend's rating scale (`ratingScaleMax` in `/reference-data`).
 class WorkerFilters {
   const WorkerFilters({
     this.availability,
     this.language,
     this.minExperienceMonths,
+    this.minRating,
+    this.sort,
   });
 
   final AvailabilityFilter? availability;
   final String? language;
   final int? minExperienceMonths;
+  final int? minRating;
+  final WorkerSort? sort;
 
   /// How many filters are active (the badge on the Filter button).
   int get count => [
     availability,
     language,
     minExperienceMonths,
+    minRating,
+    sort,
   ].where((e) => e != null).length;
 
   @override
@@ -49,10 +64,13 @@ class WorkerFilters {
       other is WorkerFilters &&
       other.availability == availability &&
       other.language == language &&
-      other.minExperienceMonths == minExperienceMonths;
+      other.minExperienceMonths == minExperienceMonths &&
+      other.minRating == minRating &&
+      other.sort == sort;
 
   @override
-  int get hashCode => Object.hash(availability, language, minExperienceMonths);
+  int get hashCode =>
+      Object.hash(availability, language, minExperienceMonths, minRating, sort);
 }
 
 /// What the customer is searching for. Equality makes it a provider key: a changed query is a new
@@ -62,12 +80,16 @@ class WorkerQuery {
     required this.category,
     required this.areaId,
     this.engagement,
+    this.startDate,
     this.filters = const WorkerFilters(),
   });
 
   final String category;
   final String areaId;
   final EngagementType? engagement;
+
+  /// Workers already booked around this date are left out (date only).
+  final DateTime? startDate;
   final WorkerFilters filters;
 
   @override
@@ -76,10 +98,12 @@ class WorkerQuery {
       other.category == category &&
       other.areaId == areaId &&
       other.engagement == engagement &&
+      other.startDate == startDate &&
       other.filters == filters;
 
   @override
-  int get hashCode => Object.hash(category, areaId, engagement, filters);
+  int get hashCode =>
+      Object.hash(category, areaId, engagement, startDate, filters);
 }
 
 class AvailabilityWindow {

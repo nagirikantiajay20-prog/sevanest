@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/worker_profile/domain/worker_review.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// One review: first name, date, rating and text. Nothing else about the reviewer.
-class ReviewTile extends StatelessWidget {
+class ReviewTile extends ConsumerWidget {
   const ReviewTile(this.review, {super.key});
   final WorkerReview review;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
@@ -22,13 +25,17 @@ class ReviewTile extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.star, size: 16, color: AppColors.amber),
-              Text(' ${review.rating.toStringAsFixed(1)}  '),
+              Text(
+                ' ${ratingText(review.rating, ref.watch(ratingScaleMaxProvider).value ?? 5)}  ',
+              ),
               Expanded(
                 child: Text(
-                  l10n.reviewByline(
-                    review.reviewerFirstName,
-                    formatDate(review.date, locale),
-                  ),
+                  review.reviewerFirstName.isEmpty
+                      ? formatDate(review.date, locale)
+                      : l10n.reviewByline(
+                          review.reviewerFirstName,
+                          formatDate(review.date, locale),
+                        ),
                   style: text.bodySmall,
                   overflow: TextOverflow.ellipsis,
                 ),

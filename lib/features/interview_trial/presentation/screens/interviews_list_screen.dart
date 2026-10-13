@@ -6,9 +6,11 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/interview_labels.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/paged_footer.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -91,39 +93,60 @@ class _State extends ConsumerState<InterviewsListScreen> {
                     retryKey: const Key('interviews_load_more_retry_btn'),
                   );
                 }
-                final iv = p.items[i];
-                final when = interviewWhen(iv, locale);
-                return Card(
-                  key: Key('interview_card_${iv.id}'),
-                  margin: EdgeInsets.zero,
-                  child: ListTile(
-                    leading: iv.worker == null
-                        ? const CircleAvatar(child: Icon(Icons.person_outline))
-                        : WorkerAvatar(iv.worker!),
-                    title: Text(
-                      iv.worker?.categories.firstOrNull ??
-                          interviewTypeName(l10n, iv.type),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      when == null
-                          ? interviewTypeName(l10n, iv.type)
-                          : l10n.interviewWhenValue(when.date, when.time),
-                    ),
-                    trailing: SnBadge(
-                      label: interviewStatusLabel(l10n, iv.status),
-                      tone: interviewStatusTone(iv.status),
-                    ),
-                    onTap: () => context.push(
-                      Routes.path(Routes.interviewDetail, {'id': iv.id}),
-                    ),
-                  ),
-                );
+                return _InterviewTile(p.items[i], locale);
               },
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// One row. The live list carries no worker, so it is looked up through the booking (cached per
+/// id) once the row is built.
+class _InterviewTile extends ConsumerWidget {
+  const _InterviewTile(this.iv, this.locale);
+  final Interview iv;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final workerId = iv.workerId.isNotEmpty
+        ? iv.workerId
+        : iv.bookingId.isEmpty
+        ? null
+        : ref.watch(bookingProvider(iv.bookingId)).value?.workerId;
+    final worker =
+        iv.worker ??
+        (workerId == null
+            ? null
+            : ref.watch(workerDetailProvider(workerId)).value);
+    final when = interviewWhen(iv, locale);
+    return Card(
+      key: Key('interview_card_${iv.id}'),
+      margin: EdgeInsets.zero,
+      child: ListTile(
+        leading: worker == null
+            ? const CircleAvatar(child: Icon(Icons.person_outline))
+            : WorkerAvatar(worker),
+        title: Text(
+          worker?.categories.firstOrNull ?? interviewTypeName(l10n, iv.type),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          when == null
+              ? interviewTypeName(l10n, iv.type)
+              : l10n.interviewWhenValue(when.date, when.time),
+        ),
+        trailing: SnBadge(
+          label: interviewStatusLabel(l10n, iv.status),
+          tone: interviewStatusTone(iv.status),
+        ),
+        onTap: () =>
+            context.push(Routes.path(Routes.interviewDetail, {'id': iv.id})),
       ),
     );
   }

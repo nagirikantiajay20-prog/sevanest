@@ -724,6 +724,18 @@ abstract class AppLocalizations {
   /// **'We need it to find workers near you.'**
   String get addFirstAddressHelp;
 
+  /// No description provided for @addressLabelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get addressLabelLabel;
+
+  /// No description provided for @addressLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Home, Parents\' home'**
+  String get addressLabelHint;
+
   /// No description provided for @houseLabel.
   ///
   /// In en, this message translates to:
@@ -2230,6 +2242,30 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get filterLanguage;
 
+  /// No description provided for @filterRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get filterRating;
+
+  /// No description provided for @filterRatingMin.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}+ rating'**
+  String filterRatingMin(String min);
+
+  /// No description provided for @filterSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get filterSort;
+
+  /// No description provided for @filterSortRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest rated'**
+  String get filterSortRating;
+
   /// No description provided for @filterExperience.
   ///
   /// In en, this message translates to:
@@ -2704,6 +2740,12 @@ abstract class AppLocalizations {
   /// **'Scheduled'**
   String get interviewStatusScheduled;
 
+  /// No description provided for @interviewStatusProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'New time suggested'**
+  String get interviewStatusProposed;
+
   /// No description provided for @interviewStatusCompleted.
   ///
   /// In en, this message translates to:
@@ -2745,6 +2787,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for the worker to respond'**
   String get interviewCopyRequested;
+
+  /// No description provided for @interviewCopyProposed.
+  ///
+  /// In en, this message translates to:
+  /// **'The worker suggested {date}, {time}'**
+  String interviewCopyProposed(String date, String time);
+
+  /// No description provided for @interviewAcceptProposal.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept new time'**
+  String get interviewAcceptProposal;
+
+  /// No description provided for @interviewKeepOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep my time'**
+  String get interviewKeepOriginal;
+
+  /// No description provided for @interviewProposalAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'New time accepted'**
+  String get interviewProposalAccepted;
+
+  /// No description provided for @interviewProposalRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept your original time'**
+  String get interviewProposalRejected;
 
   /// No description provided for @interviewCopyCompleted.
   ///
@@ -2943,6 +3015,858 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{date}, {time}'**
   String interviewWhenValue(String date, String time);
+
+  /// No description provided for @bookingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings'**
+  String get bookingsTitle;
+
+  /// No description provided for @bookingsTabCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get bookingsTabCurrent;
+
+  /// No description provided for @bookingsTabPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get bookingsTabPast;
+
+  /// No description provided for @bookingsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookings yet'**
+  String get bookingsEmptyTitle;
+
+  /// No description provided for @bookingsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you hire a worker, your booking appears here.'**
+  String get bookingsEmptyBody;
+
+  /// No description provided for @bookingsPastEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No past bookings'**
+  String get bookingsPastEmpty;
+
+  /// No description provided for @bookingsFind.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a worker'**
+  String get bookingsFind;
+
+  /// No description provided for @bookingsPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete payment'**
+  String get bookingsPay;
+
+  /// No description provided for @bookingDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get bookingDetailTitle;
+
+  /// No description provided for @bookingStatusNewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Request received'**
+  String get bookingStatusNewRequest;
+
+  /// No description provided for @bookingStatusMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker matched'**
+  String get bookingStatusMatched;
+
+  /// No description provided for @bookingStatusScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview scheduled'**
+  String get bookingStatusScheduled;
+
+  /// No description provided for @bookingStatusInterviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview done'**
+  String get bookingStatusInterviewDone;
+
+  /// No description provided for @bookingStatusPendingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due'**
+  String get bookingStatusPendingPayment;
+
+  /// No description provided for @bookingStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get bookingStatusConfirmed;
+
+  /// No description provided for @bookingStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get bookingStatusActive;
+
+  /// No description provided for @bookingStatusReplacementRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement requested'**
+  String get bookingStatusReplacementRequested;
+
+  /// No description provided for @bookingStatusReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced'**
+  String get bookingStatusReplaced;
+
+  /// No description provided for @bookingStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get bookingStatusCompleted;
+
+  /// No description provided for @bookingStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get bookingStatusCancelled;
+
+  /// No description provided for @bookingStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get bookingStatusUnknown;
+
+  /// No description provided for @bookingCopyNewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'We are finding a worker for you'**
+  String get bookingCopyNewRequest;
+
+  /// No description provided for @bookingCopyMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'A worker is matched. Schedule an interview or trial'**
+  String get bookingCopyMatched;
+
+  /// No description provided for @bookingCopyScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview or trial is scheduled'**
+  String get bookingCopyScheduled;
+
+  /// No description provided for @bookingCopyInterviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide whether to confirm this worker'**
+  String get bookingCopyInterviewDone;
+
+  /// No description provided for @bookingCopyPendingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the booking fee to confirm this booking'**
+  String get bookingCopyPendingPayment;
+
+  /// No description provided for @bookingCopyConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking is confirmed'**
+  String get bookingCopyConfirmed;
+
+  /// No description provided for @bookingCopyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'The service is under way'**
+  String get bookingCopyActive;
+
+  /// No description provided for @bookingCopyReplacementRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'We are arranging a replacement'**
+  String get bookingCopyReplacementRequested;
+
+  /// No description provided for @bookingCopyReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking was replaced'**
+  String get bookingCopyReplaced;
+
+  /// No description provided for @bookingCopyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking is complete'**
+  String get bookingCopyCompleted;
+
+  /// No description provided for @bookingCopyCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking was cancelled'**
+  String get bookingCopyCancelled;
+
+  /// No description provided for @bookingCopyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Status updated'**
+  String get bookingCopyUnknown;
+
+  /// No description provided for @bookingServiceRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get bookingServiceRow;
+
+  /// No description provided for @bookingScheduleRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get bookingScheduleRow;
+
+  /// No description provided for @bookingInterviewRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview'**
+  String get bookingInterviewRow;
+
+  /// No description provided for @bookingAreaRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get bookingAreaRow;
+
+  /// No description provided for @bookingBudgetRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get bookingBudgetRow;
+
+  /// No description provided for @bookingNoteRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get bookingNoteRow;
+
+  /// No description provided for @bookingReferenceRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get bookingReferenceRow;
+
+  /// No description provided for @bookingTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get bookingTimeline;
+
+  /// No description provided for @bookingPayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete payment'**
+  String get bookingPayNow;
+
+  /// No description provided for @bookingViewService.
+  ///
+  /// In en, this message translates to:
+  /// **'View active service'**
+  String get bookingViewService;
+
+  /// No description provided for @bookingRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate worker'**
+  String get bookingRate;
+
+  /// No description provided for @bookingReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Request replacement'**
+  String get bookingReplace;
+
+  /// No description provided for @bookingCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get bookingCancel;
+
+  /// No description provided for @bookingReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get bookingReceipt;
+
+  /// No description provided for @bookingSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Get help'**
+  String get bookingSupport;
+
+  /// No description provided for @bookingConfirmWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this worker'**
+  String get bookingConfirmWorker;
+
+  /// No description provided for @bookingSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule interview'**
+  String get bookingSchedule;
+
+  /// No description provided for @bookingInterviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview done'**
+  String get bookingInterviewDone;
+
+  /// No description provided for @bookingNotAFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a fit'**
+  String get bookingNotAFit;
+
+  /// No description provided for @bookingPreviousLink.
+  ///
+  /// In en, this message translates to:
+  /// **'See the replaced booking'**
+  String get bookingPreviousLink;
+
+  /// No description provided for @bookingPaymentDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due'**
+  String get bookingPaymentDue;
+
+  /// No description provided for @bookingPaymentNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment due'**
+  String get bookingPaymentNone;
+
+  /// No description provided for @cancelSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this booking?'**
+  String get cancelSheetTitle;
+
+  /// No description provided for @cancelSheetReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why are you cancelling?'**
+  String get cancelSheetReason;
+
+  /// No description provided for @cancelReasonFound.
+  ///
+  /// In en, this message translates to:
+  /// **'I found another worker'**
+  String get cancelReasonFound;
+
+  /// No description provided for @cancelReasonPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'My plans changed'**
+  String get cancelReasonPlans;
+
+  /// No description provided for @cancelReasonMistake.
+  ///
+  /// In en, this message translates to:
+  /// **'I booked by mistake'**
+  String get cancelReasonMistake;
+
+  /// No description provided for @cancelReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get cancelReasonOther;
+
+  /// No description provided for @cancelNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything you would like to add (optional)'**
+  String get cancelNoteHint;
+
+  /// No description provided for @cancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel booking'**
+  String get cancelConfirm;
+
+  /// No description provided for @cancelDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep booking'**
+  String get cancelDismiss;
+
+  /// No description provided for @cancelRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation requested'**
+  String get cancelRequested;
+
+  /// No description provided for @confirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm worker'**
+  String get confirmTitle;
+
+  /// No description provided for @confirmHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this worker?'**
+  String get confirmHeading;
+
+  /// No description provided for @confirmSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the details, then confirm. You pay the booking fee next.'**
+  String get confirmSub;
+
+  /// No description provided for @confirmStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get confirmStartDate;
+
+  /// No description provided for @confirmEditRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit requirement'**
+  String get confirmEditRequirement;
+
+  /// No description provided for @confirmFeeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The booking fee is shown at the payment step.'**
+  String get confirmFeeNote;
+
+  /// No description provided for @confirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm worker'**
+  String get confirmButton;
+
+  /// No description provided for @confirmButtonBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming...'**
+  String get confirmButtonBusy;
+
+  /// No description provided for @confirmDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker confirmed'**
+  String get confirmDone;
+
+  /// No description provided for @confirmNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking can\'t be confirmed right now.'**
+  String get confirmNotAllowed;
+
+  /// No description provided for @confirmDateInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick today or a later date.'**
+  String get confirmDateInvalid;
+
+  /// No description provided for @bookingCopyScheduledAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} on {date}, {time}'**
+  String bookingCopyScheduledAt(String kind, String date, String time);
+
+  /// No description provided for @bookingBudgetRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{range} {period}'**
+  String bookingBudgetRange(String range, String period);
+
+  /// No description provided for @interviewDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an open request with this worker.'**
+  String get interviewDuplicate;
+
+  /// No description provided for @interviewComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview done'**
+  String get interviewComplete;
+
+  /// No description provided for @interviewSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time'**
+  String get interviewSchedule;
+
+  /// No description provided for @bookingNextWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}'**
+  String bookingNextWhen(String date);
+
+  /// No description provided for @bookingViewInterview.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview details'**
+  String get bookingViewInterview;
+
+  /// No description provided for @bookingPaymentRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get bookingPaymentRow;
+
+  /// No description provided for @payTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payTitle;
+
+  /// No description provided for @payHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your payment'**
+  String get payHeading;
+
+  /// No description provided for @paySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay securely with UPI, cards or net banking.'**
+  String get paySub;
+
+  /// No description provided for @payAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to pay'**
+  String get payAmountLabel;
+
+  /// No description provided for @payButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String payButton(String amount);
+
+  /// No description provided for @payButtonBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening payment…'**
+  String get payButtonBusy;
+
+  /// No description provided for @payVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming your payment…'**
+  String get payVerifying;
+
+  /// No description provided for @payVerifyingWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait, confirming your payment'**
+  String get payVerifyingWait;
+
+  /// No description provided for @payCancelledSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment cancelled. You can try again.'**
+  String get payCancelledSnack;
+
+  /// No description provided for @payLeaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave payment?'**
+  String get payLeaveTitle;
+
+  /// No description provided for @payLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking stays pending.'**
+  String get payLeaveBody;
+
+  /// No description provided for @payLeaveStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get payLeaveStay;
+
+  /// No description provided for @payLeaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get payLeaveConfirm;
+
+  /// No description provided for @paySuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received'**
+  String get paySuccessTitle;
+
+  /// No description provided for @paySuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. We\'re updating your booking.'**
+  String get paySuccessBody;
+
+  /// No description provided for @payReceiptNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt {number}'**
+  String payReceiptNumber(String number);
+
+  /// No description provided for @payViewBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'View booking'**
+  String get payViewBooking;
+
+  /// No description provided for @payViewReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'View receipt'**
+  String get payViewReceipt;
+
+  /// No description provided for @payFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment didn\'t go through'**
+  String get payFailedTitle;
+
+  /// No description provided for @payFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your booking is still waiting for payment. You can try again.'**
+  String get payFailedBody;
+
+  /// No description provided for @payRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get payRetry;
+
+  /// No description provided for @payGetHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Get help'**
+  String get payGetHelp;
+
+  /// No description provided for @payClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get payClose;
+
+  /// No description provided for @payPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re confirming your payment'**
+  String get payPendingTitle;
+
+  /// No description provided for @payPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can take a few minutes. Your booking will update when it\'s done.'**
+  String get payPendingBody;
+
+  /// No description provided for @payRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get payRefresh;
+
+  /// No description provided for @payNotPayableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to pay'**
+  String get payNotPayableTitle;
+
+  /// No description provided for @payNotPayableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking isn\'t waiting for payment. It may already be paid.'**
+  String get payNotPayableBody;
+
+  /// No description provided for @payFeeNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'The booking fee isn\'t set up yet. Please try again later or contact support.'**
+  String get payFeeNotConfigured;
+
+  /// No description provided for @payRecoveredPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment was received.'**
+  String get payRecoveredPaid;
+
+  /// No description provided for @payRecoveredFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your last payment didn\'t go through.'**
+  String get payRecoveredFailed;
+
+  /// No description provided for @payRecoveredPending.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re still confirming your last payment.'**
+  String get payRecoveredPending;
+
+  /// No description provided for @payRecoveredView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get payRecoveredView;
+
+  /// No description provided for @accountTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get accountTransactions;
+
+  /// No description provided for @transactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionsTitle;
+
+  /// No description provided for @transactionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get transactionsEmpty;
+
+  /// No description provided for @transactionsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments you make will show up here.'**
+  String get transactionsEmptyBody;
+
+  /// No description provided for @txnFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get txnFilterAll;
+
+  /// No description provided for @txnFilterPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get txnFilterPaid;
+
+  /// No description provided for @txnFilterRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get txnFilterRefunded;
+
+  /// No description provided for @txnStatusCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not paid'**
+  String get txnStatusCreated;
+
+  /// No description provided for @txnStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming'**
+  String get txnStatusPending;
+
+  /// No description provided for @txnStatusSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get txnStatusSucceeded;
+
+  /// No description provided for @txnStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get txnStatusFailed;
+
+  /// No description provided for @txnStatusRefundPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund pending'**
+  String get txnStatusRefundPending;
+
+  /// No description provided for @txnStatusRefunded.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded'**
+  String get txnStatusRefunded;
+
+  /// No description provided for @txnStatusRefundFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund failed'**
+  String get txnStatusRefundFailed;
+
+  /// No description provided for @txnStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get txnStatusUnknown;
+
+  /// No description provided for @txnRowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking payment'**
+  String get txnRowTitle;
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get receiptTitle;
+
+  /// No description provided for @txnAmountRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get txnAmountRow;
+
+  /// No description provided for @txnStatusRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get txnStatusRow;
+
+  /// No description provided for @txnReceiptRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt number'**
+  String get txnReceiptRow;
+
+  /// No description provided for @txnPaidOnRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid on'**
+  String get txnPaidOnRow;
+
+  /// No description provided for @txnBookingRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get txnBookingRow;
+
+  /// No description provided for @txnNoReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued once the payment succeeds'**
+  String get txnNoReceipt;
+
+  /// No description provided for @txnNeedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help with this payment?'**
+  String get txnNeedHelp;
+
+  /// No description provided for @txnRefundNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds go back to your original payment method.'**
+  String get txnRefundNote;
 }
 
 class _AppLocalizationsDelegate

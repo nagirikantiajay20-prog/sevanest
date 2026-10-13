@@ -7,6 +7,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/requirement_draft.dart';
@@ -71,11 +72,13 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     if (d.serviceId == null || d.engagement == null || d.address == null) {
       return null;
     }
+    final areas = ref.read(serviceAreasProvider).asData?.value ?? const [];
     return GuidanceQuery(
       serviceId: d.serviceId!,
       engagement: d.engagement!,
       area: d.address!.area,
       city: d.address!.city,
+      areaId: areas.where((a) => a.name == d.address!.area).firstOrNull?.id,
     );
   }
 

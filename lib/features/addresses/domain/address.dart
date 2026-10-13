@@ -1,4 +1,4 @@
-/// Saved address (Swagger CreateAddressDto). The backend has no label, line 2 or state field.
+/// Saved address (OpenAPI `CreateAddressDto`). [label], [line2] and [state] are optional.
 class Address {
   const Address({
     required this.id,
@@ -6,19 +6,40 @@ class Address {
     required this.area,
     required this.city,
     required this.pincode,
+    this.label,
+    this.line2,
+    this.state,
     this.latitude,
     this.longitude,
     this.isDefault = false,
   });
 
   final String id;
+
+  /// House / flat.
   final String line;
+
+  /// Building / street.
+  final String? line2;
+
+  /// "Home", "Parents' home" (what the customer calls it).
+  final String? label;
+  final String? state;
   final String area;
   final String city;
   final String pincode;
   final double? latitude;
   final double? longitude;
   final bool isDefault;
+
+  /// House and street on one line.
+  String get fullLine =>
+      [line, line2].where((s) => s != null && s.isNotEmpty).join(', ');
+
+  /// What titles the card: the customer's label, else the area.
+  String get title => label != null && label!.isNotEmpty
+      ? label!
+      : (area.isEmpty ? city : area);
 }
 
 /// Request body for create/edit. [isDefault] is create-only; edit uses `PUT .../default`.
@@ -28,12 +49,18 @@ class AddressInput {
     required this.area,
     required this.city,
     required this.pincode,
+    this.label,
+    this.line2,
+    this.state,
     this.isDefault = false,
     this.latitude,
     this.longitude,
   });
 
   final String line;
+  final String? line2;
+  final String? label;
+  final String? state;
   final String area;
   final String city;
   final String pincode;
@@ -70,4 +97,13 @@ abstract interface class AddressRepository {
 
   /// `GET /service-areas?city=` (enabled areas).
   Future<List<ServiceArea>> serviceAreas({String? city});
+
+  /// `GET /locations/service-area`: the enabled area for a device position and / or a geocoded
+  /// name. Null when none matches (the customer picks the area).
+  Future<ServiceArea?> resolveServiceArea({
+    double? latitude,
+    double? longitude,
+    String? name,
+    String? city,
+  });
 }

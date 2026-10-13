@@ -25,11 +25,12 @@ AppFailure mapDioError(DioException e) {
     400 || 422 => ValidationFailure(
       message,
       _fieldErrors(body['details'] ?? body['fieldErrors']),
+      body['code'] as String?,
     ),
     401 => UnauthorizedFailure(message),
     403 => ForbiddenFailure(message),
     404 || 410 => NotFoundFailure(message),
-    409 => ConflictFailure(message),
+    409 => ConflictFailure(message, body['code'] as String?),
     429 => RateLimitedFailure(message, _retryAfter(e.response, body)),
     final int s when s >= 500 => ServerFailure(message),
     _ => UnknownFailure(message),

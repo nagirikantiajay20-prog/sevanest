@@ -154,6 +154,8 @@
   "editAddressTitle": "Edit address",
   "addFirstAddress": "Add your first address",
   "addFirstAddressHelp": "We need it to find workers near you.",
+  "addressLabelLabel": "Label (optional)",
+  "addressLabelHint": "Home, Parents' home",
   "houseLabel": "House / flat no.",
   "houseHint": "e.g. Flat 402",
   "streetLabel": "Building or street",
@@ -690,6 +692,17 @@
   "filterAfternoon": "Afternoon (12pm-5pm)",
   "filterEvening": "Evening (5pm-9pm)",
   "filterLanguage": "Language",
+  "filterRating": "Rating",
+  "filterRatingMin": "{min}+ rating",
+  "@filterRatingMin": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      }
+    }
+  },
+  "filterSort": "Sort by",
+  "filterSortRating": "Highest rated",
   "filterExperience": "Experience",
   "filterExperienceYears": "{years}+ years",
   "@filterExperienceYears": {
@@ -807,6 +820,7 @@
   "interviewsTitle": "Interviews",
   "interviewStatusRequested": "Requested",
   "interviewStatusScheduled": "Scheduled",
+  "interviewStatusProposed": "New time suggested",
   "interviewStatusCompleted": "Completed",
   "interviewStatusCancelled": "Cancelled",
   "interviewStatusDeclined": "Declined",
@@ -814,6 +828,21 @@
   "interviewStatusNotAFit": "Not a fit",
   "interviewStatusUnknown": "Updated",
   "interviewCopyRequested": "Waiting for the worker to respond",
+  "interviewCopyProposed": "The worker suggested {date}, {time}",
+  "@interviewCopyProposed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewAcceptProposal": "Accept new time",
+  "interviewKeepOriginal": "Keep my time",
+  "interviewProposalAccepted": "New time accepted",
+  "interviewProposalRejected": "Kept your original time",
   "interviewCopyCompleted": "Decide whether to confirm this worker",
   "interviewCopyCancelled": "You cancelled this request",
   "interviewCopyDeclined": "The worker couldn't take this request",
@@ -866,6 +895,192 @@
         "type": "String"
       },
       "time": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingsTitle": "Bookings",
+  "bookingsTabCurrent": "Current",
+  "bookingsTabPast": "Past",
+  "bookingsEmptyTitle": "No bookings yet",
+  "bookingsEmptyBody": "When you hire a worker, your booking appears here.",
+  "bookingsPastEmpty": "No past bookings",
+  "bookingsFind": "Find a worker",
+  "bookingsPay": "Complete payment",
+  "bookingDetailTitle": "Booking",
+  "bookingStatusNewRequest": "Request received",
+  "bookingStatusMatched": "Worker matched",
+  "bookingStatusScheduled": "Interview scheduled",
+  "bookingStatusInterviewDone": "Interview done",
+  "bookingStatusPendingPayment": "Payment due",
+  "bookingStatusConfirmed": "Confirmed",
+  "bookingStatusActive": "Active",
+  "bookingStatusReplacementRequested": "Replacement requested",
+  "bookingStatusReplaced": "Replaced",
+  "bookingStatusCompleted": "Completed",
+  "bookingStatusCancelled": "Cancelled",
+  "bookingStatusUnknown": "Updated",
+  "bookingCopyNewRequest": "We are finding a worker for you",
+  "bookingCopyMatched": "A worker is matched. Schedule an interview or trial",
+  "bookingCopyScheduled": "Interview or trial is scheduled",
+  "bookingCopyInterviewDone": "Decide whether to confirm this worker",
+  "bookingCopyPendingPayment": "Pay the booking fee to confirm this booking",
+  "bookingCopyConfirmed": "Your booking is confirmed",
+  "bookingCopyActive": "The service is under way",
+  "bookingCopyReplacementRequested": "We are arranging a replacement",
+  "bookingCopyReplaced": "This booking was replaced",
+  "bookingCopyCompleted": "This booking is complete",
+  "bookingCopyCancelled": "This booking was cancelled",
+  "bookingCopyUnknown": "Status updated",
+  "bookingServiceRow": "Service",
+  "bookingScheduleRow": "Starts",
+  "bookingInterviewRow": "Interview",
+  "bookingAreaRow": "Area",
+  "bookingBudgetRow": "Budget",
+  "bookingNoteRow": "Note",
+  "bookingReferenceRow": "Reference",
+  "bookingTimeline": "Progress",
+  "bookingPayNow": "Complete payment",
+  "bookingViewService": "View active service",
+  "bookingRate": "Rate worker",
+  "bookingReplace": "Request replacement",
+  "bookingCancel": "Cancel booking",
+  "bookingReceipt": "Receipt",
+  "bookingSupport": "Get help",
+  "bookingConfirmWorker": "Confirm this worker",
+  "bookingSchedule": "Schedule interview",
+  "bookingInterviewDone": "Interview done",
+  "bookingNotAFit": "Not a fit",
+  "bookingPreviousLink": "See the replaced booking",
+  "bookingPaymentDue": "Payment due",
+  "bookingPaymentNone": "No payment due",
+  "cancelSheetTitle": "Cancel this booking?",
+  "cancelSheetReason": "Why are you cancelling?",
+  "cancelReasonFound": "I found another worker",
+  "cancelReasonPlans": "My plans changed",
+  "cancelReasonMistake": "I booked by mistake",
+  "cancelReasonOther": "Other",
+  "cancelNoteHint": "Anything you would like to add (optional)",
+  "cancelConfirm": "Cancel booking",
+  "cancelDismiss": "Keep booking",
+  "cancelRequested": "Cancellation requested",
+  "confirmTitle": "Confirm worker",
+  "confirmHeading": "Confirm this worker?",
+  "confirmSub": "Check the details, then confirm. You pay the booking fee next.",
+  "confirmStartDate": "Start date",
+  "confirmEditRequirement": "Edit requirement",
+  "confirmFeeNote": "The booking fee is shown at the payment step.",
+  "confirmButton": "Confirm worker",
+  "confirmButtonBusy": "Confirming...",
+  "confirmDone": "Worker confirmed",
+  "confirmNotAllowed": "This booking can't be confirmed right now.",
+  "confirmDateInvalid": "Pick today or a later date.",
+  "bookingCopyScheduledAt": "{kind} on {date}, {time}",
+  "@bookingCopyScheduledAt": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingBudgetRange": "{range} {period}",
+  "@bookingBudgetRange": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewDuplicate": "You already have an open request with this worker.",
+  "interviewComplete": "Interview done",
+  "interviewSchedule": "Choose a time",
+  "bookingNextWhen": "{date}",
+  "@bookingNextWhen": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingViewInterview": "Interview details",
+  "bookingPaymentRow": "Payment",
+  "payTitle": "Payment",
+  "payHeading": "Complete your payment",
+  "paySub": "Pay securely with UPI, cards or net banking.",
+  "payAmountLabel": "Amount to pay",
+  "payButton": "Pay {amount}",
+  "payButtonBusy": "Opening payment…",
+  "payVerifying": "Confirming your payment…",
+  "payVerifyingWait": "Please wait, confirming your payment",
+  "payCancelledSnack": "Payment cancelled. You can try again.",
+  "payLeaveTitle": "Leave payment?",
+  "payLeaveBody": "Your booking stays pending.",
+  "payLeaveStay": "Stay",
+  "payLeaveConfirm": "Leave",
+  "paySuccessTitle": "Payment received",
+  "paySuccessBody": "Thank you. We're updating your booking.",
+  "payReceiptNumber": "Receipt {number}",
+  "payViewBooking": "View booking",
+  "payViewReceipt": "View receipt",
+  "payFailedTitle": "Payment didn't go through",
+  "payFailedBody": "Your booking is still waiting for payment. You can try again.",
+  "payRetry": "Try again",
+  "payGetHelp": "Get help",
+  "payClose": "Close",
+  "payPendingTitle": "We're confirming your payment",
+  "payPendingBody": "This can take a few minutes. Your booking will update when it's done.",
+  "payRefresh": "Check again",
+  "payNotPayableTitle": "Nothing to pay",
+  "payNotPayableBody": "This booking isn't waiting for payment. It may already be paid.",
+  "payFeeNotConfigured": "The booking fee isn't set up yet. Please try again later or contact support.",
+  "payRecoveredPaid": "Your payment was received.",
+  "payRecoveredFailed": "Your last payment didn't go through.",
+  "payRecoveredPending": "We're still confirming your last payment.",
+  "payRecoveredView": "View",
+  "accountTransactions": "Transactions",
+  "transactionsTitle": "Transactions",
+  "transactionsEmpty": "No transactions yet",
+  "transactionsEmptyBody": "Payments you make will show up here.",
+  "txnFilterAll": "All",
+  "txnFilterPaid": "Paid",
+  "txnFilterRefunded": "Refunded",
+  "txnStatusCreated": "Not paid",
+  "txnStatusPending": "Confirming",
+  "txnStatusSucceeded": "Paid",
+  "txnStatusFailed": "Failed",
+  "txnStatusRefundPending": "Refund pending",
+  "txnStatusRefunded": "Refunded",
+  "txnStatusRefundFailed": "Refund failed",
+  "txnStatusUnknown": "Updated",
+  "txnRowTitle": "Booking payment",
+  "receiptTitle": "Receipt",
+  "txnAmountRow": "Amount",
+  "txnStatusRow": "Status",
+  "txnReceiptRow": "Receipt number",
+  "txnPaidOnRow": "Paid on",
+  "txnBookingRow": "Booking",
+  "txnNoReceipt": "Issued once the payment succeeds",
+  "txnNeedHelp": "Need help with this payment?",
+  "txnRefundNote": "Refunds go back to your original payment method.",
+  "@payButton": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@payReceiptNumber": {
+    "placeholders": {
+      "number": {
         "type": "String"
       }
     }

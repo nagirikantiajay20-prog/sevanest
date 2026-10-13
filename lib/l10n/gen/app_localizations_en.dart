@@ -343,6 +343,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addFirstAddressHelp => 'We need it to find workers near you.';
 
   @override
+  String get addressLabelLabel => 'Label (optional)';
+
+  @override
+  String get addressLabelHint => 'Home, Parents\' home';
+
+  @override
   String get houseLabel => 'House / flat no.';
 
   @override
@@ -1202,6 +1208,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterLanguage => 'Language';
 
   @override
+  String get filterRating => 'Rating';
+
+  @override
+  String filterRatingMin(String min) {
+    return '$min+ rating';
+  }
+
+  @override
+  String get filterSort => 'Sort by';
+
+  @override
+  String get filterSortRating => 'Highest rated';
+
+  @override
   String get filterExperience => 'Experience';
 
   @override
@@ -1456,6 +1476,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewStatusScheduled => 'Scheduled';
 
   @override
+  String get interviewStatusProposed => 'New time suggested';
+
+  @override
   String get interviewStatusCompleted => 'Completed';
 
   @override
@@ -1475,6 +1498,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get interviewCopyRequested => 'Waiting for the worker to respond';
+
+  @override
+  String interviewCopyProposed(String date, String time) {
+    return 'The worker suggested $date, $time';
+  }
+
+  @override
+  String get interviewAcceptProposal => 'Accept new time';
+
+  @override
+  String get interviewKeepOriginal => 'Keep my time';
+
+  @override
+  String get interviewProposalAccepted => 'New time accepted';
+
+  @override
+  String get interviewProposalRejected => 'Kept your original time';
 
   @override
   String get interviewCopyCompleted => 'Decide whether to confirm this worker';
@@ -1580,4 +1620,453 @@ class AppLocalizationsEn extends AppLocalizations {
   String interviewWhenValue(String date, String time) {
     return '$date, $time';
   }
+
+  @override
+  String get bookingsTitle => 'Bookings';
+
+  @override
+  String get bookingsTabCurrent => 'Current';
+
+  @override
+  String get bookingsTabPast => 'Past';
+
+  @override
+  String get bookingsEmptyTitle => 'No bookings yet';
+
+  @override
+  String get bookingsEmptyBody =>
+      'When you hire a worker, your booking appears here.';
+
+  @override
+  String get bookingsPastEmpty => 'No past bookings';
+
+  @override
+  String get bookingsFind => 'Find a worker';
+
+  @override
+  String get bookingsPay => 'Complete payment';
+
+  @override
+  String get bookingDetailTitle => 'Booking';
+
+  @override
+  String get bookingStatusNewRequest => 'Request received';
+
+  @override
+  String get bookingStatusMatched => 'Worker matched';
+
+  @override
+  String get bookingStatusScheduled => 'Interview scheduled';
+
+  @override
+  String get bookingStatusInterviewDone => 'Interview done';
+
+  @override
+  String get bookingStatusPendingPayment => 'Payment due';
+
+  @override
+  String get bookingStatusConfirmed => 'Confirmed';
+
+  @override
+  String get bookingStatusActive => 'Active';
+
+  @override
+  String get bookingStatusReplacementRequested => 'Replacement requested';
+
+  @override
+  String get bookingStatusReplaced => 'Replaced';
+
+  @override
+  String get bookingStatusCompleted => 'Completed';
+
+  @override
+  String get bookingStatusCancelled => 'Cancelled';
+
+  @override
+  String get bookingStatusUnknown => 'Updated';
+
+  @override
+  String get bookingCopyNewRequest => 'We are finding a worker for you';
+
+  @override
+  String get bookingCopyMatched =>
+      'A worker is matched. Schedule an interview or trial';
+
+  @override
+  String get bookingCopyScheduled => 'Interview or trial is scheduled';
+
+  @override
+  String get bookingCopyInterviewDone =>
+      'Decide whether to confirm this worker';
+
+  @override
+  String get bookingCopyPendingPayment =>
+      'Pay the booking fee to confirm this booking';
+
+  @override
+  String get bookingCopyConfirmed => 'Your booking is confirmed';
+
+  @override
+  String get bookingCopyActive => 'The service is under way';
+
+  @override
+  String get bookingCopyReplacementRequested =>
+      'We are arranging a replacement';
+
+  @override
+  String get bookingCopyReplaced => 'This booking was replaced';
+
+  @override
+  String get bookingCopyCompleted => 'This booking is complete';
+
+  @override
+  String get bookingCopyCancelled => 'This booking was cancelled';
+
+  @override
+  String get bookingCopyUnknown => 'Status updated';
+
+  @override
+  String get bookingServiceRow => 'Service';
+
+  @override
+  String get bookingScheduleRow => 'Starts';
+
+  @override
+  String get bookingInterviewRow => 'Interview';
+
+  @override
+  String get bookingAreaRow => 'Area';
+
+  @override
+  String get bookingBudgetRow => 'Budget';
+
+  @override
+  String get bookingNoteRow => 'Note';
+
+  @override
+  String get bookingReferenceRow => 'Reference';
+
+  @override
+  String get bookingTimeline => 'Progress';
+
+  @override
+  String get bookingPayNow => 'Complete payment';
+
+  @override
+  String get bookingViewService => 'View active service';
+
+  @override
+  String get bookingRate => 'Rate worker';
+
+  @override
+  String get bookingReplace => 'Request replacement';
+
+  @override
+  String get bookingCancel => 'Cancel booking';
+
+  @override
+  String get bookingReceipt => 'Receipt';
+
+  @override
+  String get bookingSupport => 'Get help';
+
+  @override
+  String get bookingConfirmWorker => 'Confirm this worker';
+
+  @override
+  String get bookingSchedule => 'Schedule interview';
+
+  @override
+  String get bookingInterviewDone => 'Interview done';
+
+  @override
+  String get bookingNotAFit => 'Not a fit';
+
+  @override
+  String get bookingPreviousLink => 'See the replaced booking';
+
+  @override
+  String get bookingPaymentDue => 'Payment due';
+
+  @override
+  String get bookingPaymentNone => 'No payment due';
+
+  @override
+  String get cancelSheetTitle => 'Cancel this booking?';
+
+  @override
+  String get cancelSheetReason => 'Why are you cancelling?';
+
+  @override
+  String get cancelReasonFound => 'I found another worker';
+
+  @override
+  String get cancelReasonPlans => 'My plans changed';
+
+  @override
+  String get cancelReasonMistake => 'I booked by mistake';
+
+  @override
+  String get cancelReasonOther => 'Other';
+
+  @override
+  String get cancelNoteHint => 'Anything you would like to add (optional)';
+
+  @override
+  String get cancelConfirm => 'Cancel booking';
+
+  @override
+  String get cancelDismiss => 'Keep booking';
+
+  @override
+  String get cancelRequested => 'Cancellation requested';
+
+  @override
+  String get confirmTitle => 'Confirm worker';
+
+  @override
+  String get confirmHeading => 'Confirm this worker?';
+
+  @override
+  String get confirmSub =>
+      'Check the details, then confirm. You pay the booking fee next.';
+
+  @override
+  String get confirmStartDate => 'Start date';
+
+  @override
+  String get confirmEditRequirement => 'Edit requirement';
+
+  @override
+  String get confirmFeeNote => 'The booking fee is shown at the payment step.';
+
+  @override
+  String get confirmButton => 'Confirm worker';
+
+  @override
+  String get confirmButtonBusy => 'Confirming...';
+
+  @override
+  String get confirmDone => 'Worker confirmed';
+
+  @override
+  String get confirmNotAllowed => 'This booking can\'t be confirmed right now.';
+
+  @override
+  String get confirmDateInvalid => 'Pick today or a later date.';
+
+  @override
+  String bookingCopyScheduledAt(String kind, String date, String time) {
+    return '$kind on $date, $time';
+  }
+
+  @override
+  String bookingBudgetRange(String range, String period) {
+    return '$range $period';
+  }
+
+  @override
+  String get interviewDuplicate =>
+      'You already have an open request with this worker.';
+
+  @override
+  String get interviewComplete => 'Interview done';
+
+  @override
+  String get interviewSchedule => 'Choose a time';
+
+  @override
+  String bookingNextWhen(String date) {
+    return '$date';
+  }
+
+  @override
+  String get bookingViewInterview => 'Interview details';
+
+  @override
+  String get bookingPaymentRow => 'Payment';
+
+  @override
+  String get payTitle => 'Payment';
+
+  @override
+  String get payHeading => 'Complete your payment';
+
+  @override
+  String get paySub => 'Pay securely with UPI, cards or net banking.';
+
+  @override
+  String get payAmountLabel => 'Amount to pay';
+
+  @override
+  String payButton(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get payButtonBusy => 'Opening payment…';
+
+  @override
+  String get payVerifying => 'Confirming your payment…';
+
+  @override
+  String get payVerifyingWait => 'Please wait, confirming your payment';
+
+  @override
+  String get payCancelledSnack => 'Payment cancelled. You can try again.';
+
+  @override
+  String get payLeaveTitle => 'Leave payment?';
+
+  @override
+  String get payLeaveBody => 'Your booking stays pending.';
+
+  @override
+  String get payLeaveStay => 'Stay';
+
+  @override
+  String get payLeaveConfirm => 'Leave';
+
+  @override
+  String get paySuccessTitle => 'Payment received';
+
+  @override
+  String get paySuccessBody => 'Thank you. We\'re updating your booking.';
+
+  @override
+  String payReceiptNumber(String number) {
+    return 'Receipt $number';
+  }
+
+  @override
+  String get payViewBooking => 'View booking';
+
+  @override
+  String get payViewReceipt => 'View receipt';
+
+  @override
+  String get payFailedTitle => 'Payment didn\'t go through';
+
+  @override
+  String get payFailedBody =>
+      'Your booking is still waiting for payment. You can try again.';
+
+  @override
+  String get payRetry => 'Try again';
+
+  @override
+  String get payGetHelp => 'Get help';
+
+  @override
+  String get payClose => 'Close';
+
+  @override
+  String get payPendingTitle => 'We\'re confirming your payment';
+
+  @override
+  String get payPendingBody =>
+      'This can take a few minutes. Your booking will update when it\'s done.';
+
+  @override
+  String get payRefresh => 'Check again';
+
+  @override
+  String get payNotPayableTitle => 'Nothing to pay';
+
+  @override
+  String get payNotPayableBody =>
+      'This booking isn\'t waiting for payment. It may already be paid.';
+
+  @override
+  String get payFeeNotConfigured =>
+      'The booking fee isn\'t set up yet. Please try again later or contact support.';
+
+  @override
+  String get payRecoveredPaid => 'Your payment was received.';
+
+  @override
+  String get payRecoveredFailed => 'Your last payment didn\'t go through.';
+
+  @override
+  String get payRecoveredPending =>
+      'We\'re still confirming your last payment.';
+
+  @override
+  String get payRecoveredView => 'View';
+
+  @override
+  String get accountTransactions => 'Transactions';
+
+  @override
+  String get transactionsTitle => 'Transactions';
+
+  @override
+  String get transactionsEmpty => 'No transactions yet';
+
+  @override
+  String get transactionsEmptyBody => 'Payments you make will show up here.';
+
+  @override
+  String get txnFilterAll => 'All';
+
+  @override
+  String get txnFilterPaid => 'Paid';
+
+  @override
+  String get txnFilterRefunded => 'Refunded';
+
+  @override
+  String get txnStatusCreated => 'Not paid';
+
+  @override
+  String get txnStatusPending => 'Confirming';
+
+  @override
+  String get txnStatusSucceeded => 'Paid';
+
+  @override
+  String get txnStatusFailed => 'Failed';
+
+  @override
+  String get txnStatusRefundPending => 'Refund pending';
+
+  @override
+  String get txnStatusRefunded => 'Refunded';
+
+  @override
+  String get txnStatusRefundFailed => 'Refund failed';
+
+  @override
+  String get txnStatusUnknown => 'Updated';
+
+  @override
+  String get txnRowTitle => 'Booking payment';
+
+  @override
+  String get receiptTitle => 'Receipt';
+
+  @override
+  String get txnAmountRow => 'Amount';
+
+  @override
+  String get txnStatusRow => 'Status';
+
+  @override
+  String get txnReceiptRow => 'Receipt number';
+
+  @override
+  String get txnPaidOnRow => 'Paid on';
+
+  @override
+  String get txnBookingRow => 'Booking';
+
+  @override
+  String get txnNoReceipt => 'Issued once the payment succeeds';
+
+  @override
+  String get txnNeedHelp => 'Need help with this payment?';
+
+  @override
+  String get txnRefundNote =>
+      'Refunds go back to your original payment method.';
 }

@@ -102,6 +102,8 @@ class RequirementDraft {
         : {
             'id': address!.id,
             'line': address!.line,
+            'line2': address!.line2,
+            'label': address!.label,
             'area': address!.area,
             'city': address!.city,
             'pincode': address!.pincode,
@@ -126,6 +128,8 @@ class RequirementDraft {
           : Address(
               id: a['id'] as String,
               line: a['line'] as String,
+              line2: a['line2'] as String?,
+              label: a['label'] as String?,
               area: a['area'] as String,
               city: a['city'] as String,
               pincode: a['pincode'] as String,

@@ -77,6 +77,19 @@ class _State extends ConsumerState<InterviewDetailScreen> {
     await _act((r) => r.cancel(widget.interviewId), l10n.interviewCancelled);
   }
 
+  Future<void> _complete() => _act(
+    (r) => r.complete(widget.interviewId),
+    AppLocalizations.of(context).interviewStatusCompleted,
+  );
+
+  Future<void> _answer({required bool accept}) {
+    final l10n = AppLocalizations.of(context);
+    return _act(
+      (r) => r.answerProposal(widget.interviewId, accept: accept),
+      accept ? l10n.interviewProposalAccepted : l10n.interviewProposalRejected,
+    );
+  }
+
   Future<void> _decline() async {
     final l10n = AppLocalizations.of(context);
     final yes = await confirmDialog(
@@ -123,6 +136,8 @@ class _State extends ConsumerState<InterviewDetailScreen> {
             busy: _busy,
             onCancel: _cancel,
             onDecline: _decline,
+            onComplete: _complete,
+            onAnswer: _answer,
           ),
         ),
       ),
@@ -136,12 +151,16 @@ class _Body extends ConsumerWidget {
     required this.busy,
     required this.onCancel,
     required this.onDecline,
+    required this.onComplete,
+    required this.onAnswer,
   });
 
   final Interview interview;
   final bool busy;
   final VoidCallback onCancel;
   final VoidCallback onDecline;
+  final VoidCallback onComplete;
+  final Future<void> Function({required bool accept}) onAnswer;
 
   /// Backend timeline when it sends one; otherwise a template from the status.
   List<SnTimelineItem> _timeline(AppLocalizations l) {
@@ -163,7 +182,7 @@ class _Body extends ConsumerWidget {
     final ended =
         s == InterviewStatus.cancelled || s == InterviewStatus.declined;
     final reached = switch (s) {
-      InterviewStatus.requested => 0,
+      InterviewStatus.requested || InterviewStatus.rescheduleProposed => 0,
       InterviewStatus.scheduled => 1,
       InterviewStatus.completed => 2,
       InterviewStatus.confirmed || InterviewStatus.notAFit => 3,
@@ -285,14 +304,42 @@ class _Body extends ConsumerWidget {
               onPressed: busy
                   ? null
                   : () => context.push(
-                      '${Routes.bookingConfirm}?interviewId=${Uri.encodeComponent(iv.id)}',
+                      '${Routes.bookingConfirm}?interviewId=${Uri.encodeComponent(iv.bookingId.isEmpty ? iv.id : iv.bookingId)}',
                     ),
             ),
+          if (a.contains(InterviewAction.acceptProposal)) ...[
+            SnButton(
+              key: const Key('interview_accept_proposal_btn'),
+              label: l10n.interviewAcceptProposal,
+              onPressed: busy ? null : () => onAnswer(accept: true),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          if (a.contains(InterviewAction.rejectProposal)) ...[
+            SnButton(
+              key: const Key('interview_reject_proposal_btn'),
+              label: l10n.interviewKeepOriginal,
+              variant: SnButtonVariant.secondary,
+              onPressed: busy ? null : () => onAnswer(accept: false),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          if (a.contains(InterviewAction.complete)) ...[
+            const SizedBox(height: AppSpacing.sm),
+            SnButton(
+              key: const Key('interview_complete_btn'),
+              label: l10n.interviewComplete,
+              variant: SnButtonVariant.secondary,
+              onPressed: busy ? null : onComplete,
+            ),
+          ],
           if (a.contains(InterviewAction.reschedule)) ...[
             const SizedBox(height: AppSpacing.sm),
             SnButton(
               key: const Key('interview_reschedule_btn'),
-              label: l10n.interviewReschedule,
+              label: iv.date == null
+                  ? l10n.interviewSchedule
+                  : l10n.interviewReschedule,
               variant: SnButtonVariant.secondary,
               onPressed: busy
                   ? null

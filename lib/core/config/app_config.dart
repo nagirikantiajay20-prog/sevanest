@@ -10,7 +10,7 @@ class AppConfig {
     required this.useMocks,
   });
 
-  // The deployed backend is the only environment that exists today (dev). stg/prod hosts are TBD.
+  // The deployed backend is the only host that exists today, so stg and prod use it too until real hosts are set up.
   static const dev = AppConfig(
     env: AppEnv.dev,
     apiBaseUrl: 'https://sevanest-backend.onrender.com/api/v1',
@@ -18,12 +18,12 @@ class AppConfig {
   );
   static const stg = AppConfig(
     env: AppEnv.stg,
-    apiBaseUrl: 'https://stg-api.sevanest.example/v1',
+    apiBaseUrl: 'https://sevanest-backend.onrender.com/api/v1',
     useMocks: false,
   );
   static const prod = AppConfig(
     env: AppEnv.prod,
-    apiBaseUrl: 'https://api.sevanest.example/v1',
+    apiBaseUrl: 'https://sevanest-backend.onrender.com/api/v1',
     useMocks: false,
   );
 

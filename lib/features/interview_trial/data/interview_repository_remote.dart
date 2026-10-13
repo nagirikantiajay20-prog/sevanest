@@ -1,13 +1,24 @@
 import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/guarded.dart';
+import 'package:sevanest_customer/features/booking/data/booking_repository_remote.dart';
+import 'package:sevanest_customer/features/booking/domain/booking.dart';
+import 'package:sevanest_customer/features/interview_trial/data/interview_repository_over_bookings.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 
-/// ASSUMED contract (docs/05): the deployed Swagger of 2026-10-12 has no interview endpoints, so
-/// until the backend publishes them every call here answers 404 and the screens show their error
-/// state. Request it: docs/BACKEND_REQUESTS.md item 7.
-class InterviewRepositoryRemote implements InterviewRepository {
-  InterviewRepositoryRemote(this._dio);
+/// `/interviews` (OpenAPI 2026-10-13). An interview belongs to a booking that already names the
+/// worker, so [create] makes the booking first and then the interview. The interview carries no
+/// worker or requirement, so those come from its booking; "confirm" and "not a fit" are booking
+/// actions that open once the interview is completed.
+class InterviewRepositoryRemote extends InterviewRepositoryOverBookings {
+  InterviewRepositoryRemote(
+    this._dio,
+    super.bookings,
+    super.workers, {
+    required super.areaIdFor,
+    super.now,
+  });
+
   final Dio _dio;
 
   static const pageSize = 20;
@@ -15,33 +26,65 @@ class InterviewRepositoryRemote implements InterviewRepository {
   String _item(String id, [String suffix = '']) =>
       '/interviews/${Uri.encodeComponent(id)}$suffix';
 
-  static String _day(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
   Interview _parse(Object? body) =>
-      Interview.fromJson(body is Map ? (body['data'] ?? body) : body) ??
-      (throw const UnknownFailure());
+      Interview.fromJson(body) ?? (throw const UnknownFailure());
+
+  /// A fresh key per user action: the backend needs one on every write.
+  static String _key(String what) =>
+      'iv-$what-${DateTime.now().microsecondsSinceEpoch}';
+
+  Future<Interview> _post(
+    String path,
+    Map<String, Object?> body, {
+    required String key,
+  }) async {
+    final res = await guarded(
+      () => _dio.post<dynamic>(
+        path,
+        options: Options(headers: {'Idempotency-Key': key}),
+        data: body,
+      ),
+    );
+    return _enrich(_parse(res.data));
+  }
+
+  /// Adds worker, requirement and the booking-level actions. The interview itself is already
+  /// valid, so a failed booking read only leaves those out.
+  Future<Interview> _enrich(Interview iv) async {
+    if (iv.bookingId.isEmpty) return iv;
+    try {
+      final b = await bookings.get(iv.bookingId);
+      final decide =
+          iv.status == InterviewStatus.completed &&
+          b.status == BookingStatus.interviewTrialCompleted;
+      return iv.copyWith(
+        workerId: b.workerId,
+        requirement: InterviewRepositoryOverBookings.requirementOf(b),
+        actions: {
+          ...iv.actions,
+          if (decide) ...[InterviewAction.confirm, InterviewAction.decline],
+        },
+      );
+    } on Object {
+      return iv;
+    }
+  }
+
+  static String _iso(DateTime date, String slot) =>
+      InterviewRepositoryOverBookings.at(date, slot).toUtc().toIso8601String();
 
   @override
   Future<Interview> create(
     InterviewRequest r, {
     required String idempotencyKey,
   }) async {
-    final res = await guarded(
-      () => _dio.post<dynamic>(
-        '/interviews',
-        options: Options(headers: {'Idempotency-Key': idempotencyKey}),
-        data: {
-          'workerId': r.workerId,
-          'type': r.type.name,
-          'date': _day(r.date),
-          'slot': r.slot,
-          if (r.note != null && r.note!.isNotEmpty) 'note': r.note,
-          'requirement': r.requirement.toJson(),
-        },
-      ),
-    );
-    return _parse(res.data);
+    final booking = await createBooking(r, '$idempotencyKey-booking');
+    return _post('/interviews', {
+      'bookingId': booking.id,
+      'type': r.type == InterviewType.trial ? 'TRIAL' : 'INTERVIEW',
+      'preferredAt': _iso(r.date, r.slot),
+      if (r.note != null && r.note!.isNotEmpty) 'note': r.note,
+    }, key: '$idempotencyKey-interview');
   }
 
   @override
@@ -50,16 +93,9 @@ class InterviewRepositoryRemote implements InterviewRepository {
     DateTime date,
     String slot, {
     required String idempotencyKey,
-  }) async {
-    await guarded(
-      () => _dio.post<dynamic>(
-        _item(id, '/reschedule'),
-        options: Options(headers: {'Idempotency-Key': idempotencyKey}),
-        data: {'date': _day(date), 'slot': slot},
-      ),
-    );
-    return get(id);
-  }
+  }) => _post(_item(id, '/reschedule'), {
+    'preferredAt': _iso(date, slot),
+  }, key: idempotencyKey);
 
   @override
   Future<InterviewPage> list({String? cursor}) async {
@@ -85,45 +121,51 @@ class InterviewRepositoryRemote implements InterviewRepository {
     final res = await guarded(
       () => _dio.get<dynamic>(_item(id), cancelToken: cancel),
     );
-    return _parse(res.data);
+    return _enrich(_parse(res.data));
   }
 
   @override
-  Future<Interview> cancel(String id, {String? reason}) async {
-    await guarded(
-      () => _dio.post<dynamic>(_item(id, '/cancel'), data: {'reason': ?reason}),
-    );
-    return get(id);
-  }
+  Future<Interview> cancel(String id, {String? reason}) => _post(
+    _item(id, '/cancel'),
+    {'reason': reason ?? 'Cancelled by customer'},
+    key: _key('cancel'),
+  );
 
+  @override
+  Future<Interview> complete(String id) => _post(_item(id, '/complete'), {
+    'outcomeNote': 'The interview took place',
+  }, key: _key('complete'));
+
+  @override
+  Future<Interview> answerProposal(String id, {required bool accept}) => _post(
+    _item(id, accept ? '/accept-proposal' : '/reject-proposal'),
+    {},
+    key: _key('proposal'),
+  );
+
+  /// "Not a fit": the booking goes back to matching. There is no interview route for it.
   @override
   Future<Interview> decline(String id) async {
-    await guarded(
-      () => _dio.post<dynamic>(
-        _item(id, '/decision'),
-        data: {'decision': 'decline'},
-      ),
-    );
+    final iv = await get(id);
+    await bookings.reopenMatching(iv.bookingId);
     return get(id);
   }
 
   @override
   Future<List<InterviewSlot>> slots(String workerId, DateTime date) async {
+    final d = BookingRepositoryRemote.day(date);
     final res = await guarded(
       () => _dio.get<dynamic>(
-        '/workers/${Uri.encodeComponent(workerId)}/slots',
-        queryParameters: {'date': _day(date)},
+        '/search/workers/${Uri.encodeComponent(workerId)}/slots',
+        queryParameters: {'date': d},
       ),
     );
     final body = res.data;
-    final raw = body is Map ? (body['data'] ?? body['slots']) : body;
+    final raw = body is Map ? body['slots'] : null;
     return [
       if (raw is List)
         for (final s in raw)
-          if (s is String && parseSlot(s) != null)
-            InterviewSlot(s)
-          else if (s is Map && parseSlot('${s['id'] ?? s['start']}') != null)
-            InterviewSlot('${s['id'] ?? s['start']}'),
+          if (s is String && parseSlot(s) != null) InterviewSlot(s),
     ];
   }
 }

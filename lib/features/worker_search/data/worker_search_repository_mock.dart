@@ -78,9 +78,15 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
         if (covers(w) &&
             (f.language == null || w.languages.contains(f.language)) &&
             (f.minExperienceMonths == null ||
-                (w.experienceMonths ?? 0) >= f.minExperienceMonths!))
+                (w.experienceMonths ?? 0) >= f.minExperienceMonths!) &&
+            (f.minRating == null || (w.ratingAverage ?? 0) >= f.minRating!))
           w,
     ];
+    if (f.sort == WorkerSort.highestRated) {
+      all.sort(
+        (a, b) => (b.ratingAverage ?? 0).compareTo(a.ratingAverage ?? 0),
+      );
+    }
     final start = int.tryParse(cursor ?? '') ?? 0;
     final end = (start + pageSize).clamp(0, all.length);
     return WorkerPage(

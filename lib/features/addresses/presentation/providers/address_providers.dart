@@ -114,3 +114,20 @@ final addressFormProvider =
     NotifierProvider.autoDispose<AddressFormController, SubmitState>(
       AddressFormController.new,
     );
+
+/// The service area for what the device location found, or null (the customer picks it). The
+/// resolved name is the one the backend knows, so it can be used for search and bookings.
+Future<ServiceArea?> resolveFoundArea(WidgetRef ref, AddressInput found) async {
+  try {
+    return await ref
+        .read(addressRepositoryProvider)
+        .resolveServiceArea(
+          latitude: found.latitude,
+          longitude: found.longitude,
+          name: found.area,
+          city: found.city,
+        );
+  } on Object {
+    return null;
+  }
+}

@@ -18,7 +18,7 @@ import 'package:sevanest_customer/features/worker_profile/presentation/providers
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// How far ahead an interview can be booked (assumed; no backend config yet).
+/// Interviews can be booked today and the next 13 days (the backend's 14-day horizon).
 const interviewWindowDays = 14;
 
 /// `/interviews/new?workerId=` (module 07, screen 7.1). With [rescheduleId] it moves an existing
@@ -66,7 +66,7 @@ class _State extends ConsumerState<InterviewRequestScreen> {
       initialDate: _date ?? today.add(const Duration(days: 1)),
       // Past dates cannot be picked.
       firstDate: today,
-      lastDate: today.add(const Duration(days: interviewWindowDays)),
+      lastDate: today.add(const Duration(days: interviewWindowDays - 1)),
     );
     if (picked == null || !mounted) return;
     setState(() {
@@ -118,7 +118,12 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         );
       }
       _done(result.id, messenger, router, sent: !_isReschedule, l10n: l10n);
-    } on ConflictFailure {
+    } on ConflictFailure catch (e) {
+      if (e.code == 'DUPLICATE_BOOKING') {
+        // Already requested: not a slot problem, so keep the choices and just say so.
+        if (mounted) setState(() => _error = l10n.interviewDuplicate);
+        return;
+      }
       // Someone else took the time: say so and show what is still free.
       ref.invalidate(
         interviewSlotsProvider((workerId: widget.workerId, date: date)),
@@ -158,10 +163,11 @@ class _State extends ConsumerState<InterviewRequestScreen> {
       return page.items
           .where(
             (i) =>
-                i.workerId == widget.workerId &&
+                (i.workerId.isEmpty || i.workerId == widget.workerId) &&
                 i.date == date &&
                 i.slot == slot &&
-                i.status == InterviewStatus.requested,
+                (i.status == InterviewStatus.requested ||
+                    i.status == InterviewStatus.scheduled),
           )
           .firstOrNull
           ?.id;

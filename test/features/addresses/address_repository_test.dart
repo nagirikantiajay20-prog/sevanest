@@ -61,7 +61,7 @@ void main() {
   });
 
   test(
-    'create = POST with line/area/city/pincode/isDefault (no label/state)',
+    'create = POST with the address fields; unset label/line2/state go as null',
     () async {
       respond(one, 201);
       final a = await repo.create(_input);
@@ -72,6 +72,9 @@ void main() {
         'area': 'Madhapur',
         'city': 'Hyderabad',
         'pincode': '500081',
+        'label': null,
+        'line2': null,
+        'state': null,
         'isDefault': true,
       });
       expect(a.id, 'a1');

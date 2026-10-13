@@ -1,21 +1,48 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/features/interview_trial/data/interview_repository_mock.dart';
+import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/interview_trial/data/interview_repository_over_bookings.dart';
 import 'package:sevanest_customer/features/interview_trial/data/interview_repository_remote.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/requirement_draft.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
 
-/// Live backend in stg / prod (assumed contract, not yet published); seeded mock in dev.
+/// Live `/interviews` in stg / prod (and in dev when switched on); in dev's mock mode a view over
+/// the seeded booking state machine.
 final interviewRepositoryProvider = Provider<InterviewRepository>((ref) {
-  final live = ref.watch(mockApiProvider.select((s) => s.live));
-  return live
-      ? InterviewRepositoryRemote(ref.watch(dioProvider))
-      : InterviewRepositoryMock(
-          () => ref.read(mockApiProvider),
-          now: ref.read(nowProvider),
+  Future<String> areaIdFor(RequirementDraft draft) async {
+    final name = draft.address?.area;
+    if (name == null) throw const ValidationFailure('Address is missing');
+    try {
+      final areas = await ref.read(serviceAreasProvider.future);
+      return areas.where((a) => a.name == name).firstOrNull?.id ?? name;
+    } on Object {
+      return name;
+    }
+  }
+
+  final bookings = ref.watch(bookingRepositoryProvider);
+  final workers = ref.watch(workerSearchRepositoryProvider);
+  final now = ref.read(nowProvider);
+  return ref.watch(mockApiProvider.select((s) => s.live))
+      ? InterviewRepositoryRemote(
+          ref.watch(dioProvider),
+          bookings,
+          workers,
+          now: now,
+          areaIdFor: areaIdFor,
+        )
+      : InterviewRepositoryOverBookings(
+          bookings,
+          workers,
+          now: now,
+          areaIdFor: areaIdFor,
         );
 });
 

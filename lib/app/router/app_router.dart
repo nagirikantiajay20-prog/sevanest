@@ -14,6 +14,9 @@ import 'package:sevanest_customer/features/addresses/presentation/screens/addres
 import 'package:sevanest_customer/features/authentication/presentation/screens/login_screen.dart';
 import 'package:sevanest_customer/features/authentication/presentation/screens/otp_screen.dart';
 import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart';
+import 'package:sevanest_customer/features/booking/presentation/screens/booking_detail_screen.dart';
+import 'package:sevanest_customer/features/booking/presentation/screens/bookings_list_screen.dart';
+import 'package:sevanest_customer/features/booking/presentation/screens/confirm_worker_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/account_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_setup_screen.dart';
@@ -22,6 +25,8 @@ import 'package:sevanest_customer/features/home/presentation/screens/home_screen
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_detail_screen.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_request_screen.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interviews_list_screen.dart';
+import 'package:sevanest_customer/features/payment/presentation/screens/payment_screen.dart';
+import 'package:sevanest_customer/features/payment/presentation/screens/transactions_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/budget_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/engagement_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/location_screen.dart';
@@ -103,7 +108,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
           StatefulShellBranch(
-            routes: [_placeholder(Routes.bookings, 'Bookings')],
+            routes: [
+              GoRoute(
+                path: Routes.bookings,
+                builder: (context, state) => const BookingsListScreen(),
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [
@@ -177,10 +187,44 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             InterviewDetailScreen(interviewId: state.pathParameters['id']!),
       ),
-      // Modules 08 and 12 replace these.
-      _placeholder(Routes.bookingConfirm, 'Confirm booking'),
+      // `confirm` must come before `:id`.
+      GoRoute(
+        path: Routes.bookingConfirm,
+        builder: (context, state) => ConfirmWorkerScreen(
+          bookingId: state.uri.queryParameters['interviewId'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: Routes.bookingDetail,
+        builder: (context, state) =>
+            BookingDetailScreen(bookingId: state.pathParameters['id']!),
+      ),
+      // Later modules replace these: payment (07), service / rating (08), replacement (09),
+      // support (10).
+      // `/payments/new?bookingId=` starts a payment; any other id opens that payment.
+      GoRoute(
+        path: Routes.payment,
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return PaymentScreen(
+            paymentId: id == 'new' ? null : id,
+            bookingId: state.uri.queryParameters['bookingId'],
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.transactions,
+        builder: (context, state) => const TransactionsScreen(),
+      ),
+      GoRoute(
+        path: Routes.transactionDetail,
+        builder: (context, state) =>
+            TransactionDetailScreen(paymentId: state.pathParameters['id']!),
+      ),
+      _placeholder(Routes.serviceCurrent, 'Active service'),
+      _placeholder(Routes.rating, 'Rate your worker'),
+      _placeholder(Routes.replacementNew, 'Request replacement'),
       _placeholder(Routes.supportNew, 'New ticket'),
-      _placeholder(Routes.bookingDetail, 'Booking'),
       GoRoute(
         path: Routes.workers,
         builder: (context, state) => const ResultsScreen(),

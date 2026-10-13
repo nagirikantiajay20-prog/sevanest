@@ -186,6 +186,9 @@ void main() {
       expect(find.text('Booking #SN-2048'), findsOneWidget);
       await tapKey(t, 'home_view_booking_btn');
       expect(location(t), '/bookings/bk_2048');
+      // The real detail screen loads; let its request finish.
+      await t.pump(const Duration(seconds: 1));
+      await t.pumpAndSettle();
     });
 
     testWidgets('interview card opens that interview', (t) async {
@@ -321,6 +324,9 @@ void main() {
     testWidgets('HOME-09 back on another tab returns to Home', (t) async {
       await launch(t);
       await t.tap(find.byKey(const Key('nav_bookings')));
+      await t.pumpAndSettle();
+      // The Bookings tab loads its list; let that request finish.
+      await t.pump(const Duration(seconds: 1));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('home_find_worker_btn')), findsNothing);
       await t.binding.handlePopRoute();

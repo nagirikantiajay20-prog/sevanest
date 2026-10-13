@@ -230,6 +230,9 @@ class FakeAddressRepository implements AddressRepository {
   Object? failNext;
   Object? failList;
   Object? failAreas;
+
+  /// What `resolveServiceArea` answers (null = no area matches).
+  ServiceArea? resolved;
   var _seq = 100;
 
   void _maybeFail() {
@@ -248,8 +251,19 @@ class FakeAddressRepository implements AddressRepository {
     return [...items]..sort((a, b) => b.isDefault ? 1 : (a.isDefault ? -1 : 0));
   }
 
+  @override
+  Future<ServiceArea?> resolveServiceArea({
+    double? latitude,
+    double? longitude,
+    String? name,
+    String? city,
+  }) async => resolved;
+
   Address _from(String id, AddressInput i) => Address(
     id: id,
+    label: i.label,
+    line2: i.line2,
+    state: i.state,
     line: i.line,
     area: i.area,
     city: i.city,

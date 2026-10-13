@@ -71,7 +71,20 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     setState(() => _finding = false);
     switch (res.outcome) {
       case LocationOutcome.found:
-        await _add(res.input);
+        final found = res.input;
+        final area = found == null ? null : await resolveFoundArea(ref, found);
+        await _add(
+          found == null || area == null
+              ? found
+              : AddressInput(
+                  line: found.line,
+                  area: area.name,
+                  city: area.city ?? found.city,
+                  pincode: found.pincode,
+                  latitude: found.latitude,
+                  longitude: found.longitude,
+                ),
+        );
       case LocationOutcome.denied || LocationOutcome.deniedForever:
         setState(() => _permissionOff = true);
       case LocationOutcome.unavailable:
@@ -462,9 +475,9 @@ class _AddressRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
-    final title = address.area.isEmpty ? address.city : address.area;
+    final title = address.title;
     final detail = [
-      address.line,
+      address.fullLine,
       '${address.city} ${address.pincode}'.trim(),
     ].where((s) => s.isNotEmpty).join(', ');
     return Semantics(

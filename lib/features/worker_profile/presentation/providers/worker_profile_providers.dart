@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/worker_profile/data/worker_reviews_repository_mock.dart';
 import 'package:sevanest_customer/features/worker_profile/data/worker_reviews_repository_remote.dart';
 import 'package:sevanest_customer/features/worker_profile/domain/worker_review.dart';
@@ -19,13 +20,13 @@ final workerDetailProvider = FutureProvider.autoDispose
           .detail(id, cancel: cancel);
     });
 
-/// Live there is no reviews endpoint for customers yet (OPEN_QUESTIONS #41), so none are shown.
+/// Live: `GET /search/workers/{id}/ratings`; seeded reviews in dev's mock mode.
 final workerReviewsRepositoryProvider = Provider<WorkerReviewsRepository>((
   ref,
 ) {
   final live = ref.watch(mockApiProvider.select((s) => s.live));
   return live
-      ? const WorkerReviewsRepositoryRemote()
+      ? WorkerReviewsRepositoryRemote(ref.watch(dioProvider))
       : WorkerReviewsRepositoryMock(() => ref.read(mockApiProvider));
 });
 

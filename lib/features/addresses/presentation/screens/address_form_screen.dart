@@ -72,12 +72,9 @@ class _AddressForm extends ConsumerStatefulWidget {
 }
 
 class _AddressFormState extends ConsumerState<_AddressForm> {
-  late final _house = TextEditingController(
-    text: _split(widget.initial?.line).$1,
-  );
-  late final _street = TextEditingController(
-    text: _split(widget.initial?.line).$2,
-  );
+  late final _label = TextEditingController(text: widget.initial?.label ?? '');
+  late final _house = TextEditingController(text: _parts(widget.initial).$1);
+  late final _street = TextEditingController(text: _parts(widget.initial).$2);
   late final _area = TextEditingController(
     text: widget.initial?.area ?? widget.prefill?.area ?? '',
   );
@@ -97,17 +94,17 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   Address? get _initial => widget.initial;
   bool get _isEdit => _initial != null;
 
-  /// Backend stores one `line`; the design asks for house/flat and building/street separately.
-  static (String, String) _split(String? line) {
-    if (line == null) return ('', '');
-    final i = line.indexOf(', ');
-    return i < 0 ? (line, '') : (line.substring(0, i), line.substring(i + 2));
+  /// House and street: `line` and `line2`. An address saved before `line2` existed kept both in
+  /// `line` as "house, street".
+  static (String, String) _parts(Address? a) {
+    if (a == null) return ('', '');
+    final line2 = a.line2;
+    if (line2 != null && line2.isNotEmpty) return (a.line, line2);
+    final i = a.line.indexOf(', ');
+    return i < 0
+        ? (a.line, '')
+        : (a.line.substring(0, i), a.line.substring(i + 2));
   }
-
-  String get _line => [
-    _house.text.trim(),
-    _street.text.trim(),
-  ].where((s) => s.isNotEmpty).join(', ');
 
   @override
   void initState() {
@@ -124,7 +121,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
 
   @override
   void dispose() {
-    for (final c in [_house, _street, _area, _city, _pincode]) {
+    for (final c in [_label, _house, _street, _area, _city, _pincode]) {
       c.dispose();
     }
     super.dispose();
@@ -133,11 +130,20 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   bool get _dirty {
     final a = _initial;
     if (a == null) {
-      return [_house, _street, _area, _pincode].any((c) => c.text.isNotEmpty) ||
+      return [
+            _label,
+            _house,
+            _street,
+            _area,
+            _pincode,
+          ].any((c) => c.text.isNotEmpty) ||
           _city.text != defaultCity ||
           _defaultTouched;
     }
-    return _line != a.line ||
+    final (house, street) = _parts(a);
+    return _house.text.trim() != house ||
+        _street.text.trim() != street ||
+        _label.text.trim() != (a.label ?? '') ||
         _area.text.trim() != a.area ||
         _city.text.trim() != a.city ||
         _pincode.text.trim() != a.pincode ||
@@ -186,9 +192,15 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
     final match = known
         .where((a) => a.name.toLowerCase() == found.area.toLowerCase())
         .firstOrNull;
+    // The backend knows the circle of each area: ask it before leaving the customer to pick.
+    final resolved = match ?? await resolveFoundArea(ref, found);
+    if (!mounted) return;
     setState(() {
-      _area.text = known.isEmpty ? found.area : (match?.name ?? '');
-      if (found.city.isNotEmpty) _city.text = found.city;
+      _area.text = known.isEmpty && resolved == null
+          ? found.area
+          : (resolved?.name ?? '');
+      final city = resolved?.city ?? found.city;
+      if (city.isNotEmpty) _city.text = city;
       _pincode.text = found.pincode;
       _lat = found.latitude;
       _lng = found.longitude;
@@ -205,7 +217,10 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
           id: _initial?.id,
           makeDefault: _isEdit && _default && !_initial!.isDefault,
           input: AddressInput(
-            line: _line,
+            line: _house.text.trim(),
+            line2: _street.text.trim(),
+            label: _label.text,
+            state: _initial?.state,
             area: _area.text,
             city: _city.text,
             pincode: _pincode.text,
@@ -359,6 +374,17 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                       ),
                     const SizedBox(height: AppSpacing.lg),
                   ],
+                  LabeledField(
+                    name: 'address_label_field',
+                    label: l10n.addressLabelLabel,
+                    hint: l10n.addressLabelHint,
+                    controller: _label,
+                    enabled: !form.busy,
+                    maxLength: 40,
+                    textInputAction: TextInputAction.next,
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
                   LabeledField(
                     name: 'address_line1_field',
                     label: l10n.houseLabel,

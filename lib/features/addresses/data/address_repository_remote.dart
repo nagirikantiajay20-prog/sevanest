@@ -66,15 +66,54 @@ class AddressRepositoryRemote implements AddressRepository {
     ];
   }
 
+  @override
+  Future<ServiceArea?> resolveServiceArea({
+    double? latitude,
+    double? longitude,
+    String? name,
+    String? city,
+  }) async {
+    try {
+      final res = await guarded(
+        () => _dio.get<dynamic>(
+          '/locations/service-area',
+          queryParameters: {
+            'latitude': ?latitude,
+            'longitude': ?longitude,
+            if (name != null && name.isNotEmpty) 'name': name,
+            if (city != null && city.isNotEmpty) 'city': city,
+          },
+        ),
+      );
+      final m = res.data;
+      return m is Map && m['name'] is String
+          ? ServiceArea(
+              id: '${m['id'] ?? m['name']}',
+              name: m['name'] as String,
+              city: m['city'] as String?,
+            )
+          : null;
+    } on NotFoundFailure {
+      return null;
+    }
+  }
+
   Address _one(Object? body) =>
       parseAddress(body) ?? (throw const UnknownFailure());
 }
 
-Map<String, Object> _fields(AddressInput i) => {
+String? _nullIfBlank(String? s) =>
+    s == null || s.trim().isEmpty ? null : s.trim();
+
+Map<String, Object?> _fields(AddressInput i) => {
   'line': i.line.trim(),
   'area': i.area.trim(),
   'city': i.city.trim(),
   'pincode': i.pincode.trim(),
+  // Null clears the value on an edit.
+  'label': _nullIfBlank(i.label),
+  'line2': _nullIfBlank(i.line2),
+  'state': _nullIfBlank(i.state),
   if (i.latitude != null && i.longitude != null) ...{
     'latitude': i.latitude!,
     'longitude': i.longitude!,
@@ -94,6 +133,9 @@ Address? parseAddress(Object? body) {
     area: s('area'),
     city: s('city'),
     pincode: s('pincode'),
+    label: _nullIfBlank(body['label'] as String?),
+    line2: _nullIfBlank(body['line2'] as String?),
+    state: _nullIfBlank(body['state'] as String?),
     latitude: n('latitude'),
     longitude: n('longitude'),
     isDefault: body['isDefault'] == true,

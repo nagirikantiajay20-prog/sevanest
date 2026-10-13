@@ -31,8 +31,17 @@
 - [x] 5.2 Detail / list - `/interviews/:id` (status chip, backend timeline or a template, only `allowedActions` buttons, cancel with confirm, support) and `/interviews` (also reachable from the Account tab)
 - [x] 5.3 Decision - Confirm worker -> `/bookings/confirm?interviewId=` (placeholder until module 6), Not a fit -> Find another
   - Runs on the ASSUMED contract of docs/05 (the deployed Swagger has no interview endpoints): mock in dev, `InterviewRepositoryRemote` in stg/prod answers 404 until the backend publishes them (docs/BACKEND_REQUESTS.md item 7). 33 new tests, 430 total
-- [ ] 6.1 Confirm  - [ ] 6.2 Booking detail  - [ ] 6.3 List  - [ ] 6.4 Cancel
-- [ ] 7.1 PaymentService  - [ ] 7.2 Flow  - [ ] 7.3 Results  - [ ] 7.4 Recovery  - [ ] 7.5 Receipts
+- [x] 6.1 Confirm worker - `/bookings/confirm?interviewId=` (the booking id): worker, requirement, start date picker, Confirm worker -> `confirm-worker` once (double tap, lost-answer recovery, worker-gone dialog, 409, bad date), then the booking. NO fee/quote screen: the backend has no quote endpoint and sets the fee at payment (module 7)
+- [x] 6.2 Booking detail - `/bookings/:id`: chip + plain-language line, worker, schedule, budget, timeline (backend events or the happy path), payment due row, buttons per allowed actions, refetch on app resume
+- [x] 6.3 Booking list - `/bookings` tab: Current | Past over one paged list, pay button on payment-due cards, empty state
+- [x] 6.4 Cancel - bottom sheet with a required reason (+ note), `cancel` once, inline error on failure
+  - Built on the DEPLOYED booking API (`POST /bookings`, `/bookings/{id}/{action}`). Module 5 now runs on it too: an interview is a booking state, driven by `schedule`, `interview-complete`, `reopen-matching`. `allowedActions` and the timeline are not in the Swagger, so buttons follow the state model until the backend sends them. 35 new tests, 468 total
+- [x] 7.1 PaymentService - `PaymentService.pay(Payment) -> PaymentPaid | PaymentCancelled | PaymentSdkFailed`; `RazorpayPaymentService` (`razorpay_flutter`) and `FakePaymentService` (mock mode / tests); live-vs-mock switch like the other modules
+- [x] 7.2 Flow - `/payments/new?bookingId=` from the booking detail "Complete payment" and the Bookings list card: `POST /payments` (Idempotency-Key), checkout, `POST /payments/{id}/verify` (fresh key), then `GET /payments/{id}` with 2/4/8/16/30 s backoff until settled. Double tap pays once; Back is blocked while confirming; 409 BOOKING_NOT_PAYABLE -> "Nothing to pay"; 422 FEE_NOT_CONFIGURED explained
+- [x] 7.3 Results - success (only when the server says SUCCEEDED; booking, lists and Home refetched), failed (Try again = same booking, new key; Get help; Close), pending (Pay hidden; Check again), cancel (stay on the payment with a note)
+- [x] 7.4 Recovery - payment id stored when the checkout opens, cleared when the result is known; `PaymentRecoveryHost` checks on launch, sign-in and resume (settled -> snackbar + refresh; still confirming -> snackbar with View). NOT built: a pending banner on Home / Booking detail
+- [x] 7.5 Receipts - Account -> Transactions (`GET /payments`, All / Paid / Refunded chips, paged) and `/transactions/:id` (amount, status chip, receipt number, paid date, refund note, booking link, help). NOT built: receipt download (backend has no receipt URL, request 21), payment method / gateway reference (request 22)
+  - 27 widget + 10 repository tests; analyzer clean; full suite 521 passed, 9 live skipped. Verified LIVE (test customer 9999900002, 2026-10-13): 401 without a session, `GET /payments` (+ status filter) parses, 404 on an unknown payment for `GET` and `verify`. NOT verified live: `POST /payments`, `verify`, the `checkout` shape, the Razorpay SDK on a phone (the test customer has no PENDING_PAYMENT booking, and a real checkout needs the gateway test keys from the backend). Requests 20-27 in docs/BACKEND_REQUESTS.md.
 - [ ] 8.1 Active service  - [ ] 8.2 History  - [ ] 8.3 Rating
 - [ ] 9.1 Replacement request  - [ ] 9.2 Status  - [ ] 9.3 Alternatives
 - [ ] 10.1 Support  - [ ] 10.2 Report/Block  - [ ] 10.3 Push  - [ ] 10.4 Notification centre  - [ ] 10.5 Deep links
@@ -40,3 +49,9 @@
 
 ## Live backend switch (2026-10-13)
 stg / prod use the real repositories for categories, worker search + profile, shortlist, guidance (none published) and Home (new-customer view until bookings/interviews exist). Dev starts on mocks; the dev menu has a Live / Mock switch. Remaining external blockers are listed in `docs/BACKEND_REQUESTS.md`; 1.2 (iOS schemes, Firebase files, release keystore) and 3.1 (profile photo) cannot be finished from this repo.
+
+## Backend integration of 2026-10-13 (typed OpenAPI: docs/backend_openapi_2026-10-13.json)
+Wired and tested (484 tests, analyzer clean): live `/interviews` (booking first, then interview; reschedule, cancel, complete, accept / reject proposal, `/slots`), worker reviews, `ratingScaleMax`, search `minRating` / `sort` / `startDate`, `GET /customers/me/home`, `/pricing/guidance` (404 hides the card), address `label` / `line2` / `state`, `/locations/service-area` after "Use my current location".
+Not built by design: budget filter in search, weekday matching, customer profile photo (backend says out of V1).
+Not verified: nothing has run against a live customer (backend not deployed, no test customer). Interview request is built on assumptions the backend marked unconfirmed (1-hour slots, 14-day horizon).
+Modules 7-11 (payment, active service, replacement, support, push, hardening) are not started. Release APK is debug-signed until `android/key.properties` exists.

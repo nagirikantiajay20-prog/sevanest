@@ -369,7 +369,8 @@ void main() {
         await tapKey(t, 'address_save_btn');
 
         expect(addresses.createCalls, 1);
-        expect(addresses.lastInput!.line, 'Flat 7B, Lake View Apartments');
+        expect(addresses.lastInput!.line, 'Flat 7B');
+        expect(addresses.lastInput!.line2, 'Lake View Apartments');
         expect(addresses.lastInput!.city, 'Hyderabad');
         expect(addresses.lastInput!.isDefault, isFalse);
         expect(find.byKey(const Key('addresses_add_btn')), findsOneWidget);

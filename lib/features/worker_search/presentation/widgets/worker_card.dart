@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// "5 yrs experience", "8 months experience" or "Experience not listed".
@@ -33,17 +35,24 @@ class WorkerAvatar extends StatelessWidget {
   }
 }
 
+/// "4.6", or "4.6/10" when the backend's scale is not the usual five.
+String ratingText(double value, int scaleMax) =>
+    '${value.toStringAsFixed(1)}${scaleMax == 5 ? '' : '/$scaleMax'}';
+
 /// "★ 4.6 (23)" or "New" when the worker has no reviews yet.
-class RatingLabel extends StatelessWidget {
+class RatingLabel extends ConsumerWidget {
   const RatingLabel(this.worker, {super.key});
   final WorkerSummary worker;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final style = Theme.of(context).textTheme.bodySmall;
     if (!worker.hasRating) return Text(l10n.workerNew, style: style);
-    final avg = worker.ratingAverage!.toStringAsFixed(1);
+    final avg = ratingText(
+      worker.ratingAverage!,
+      ref.watch(ratingScaleMaxProvider).value ?? 5,
+    );
     return Semantics(
       label: l10n.workerRatingSemantics(avg, worker.ratingCount),
       excludeSemantics: true,

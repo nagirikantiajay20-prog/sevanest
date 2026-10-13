@@ -4,11 +4,15 @@ import 'package:sevanest_customer/features/worker_search/domain/worker_search.da
 
 enum InterviewType { interview, trial }
 
-/// Backend-owned status. Anything we don't know maps to [unknown] and renders neutrally
-/// ("Updated"); it must never crash or be guessed (module 07).
+/// Backend-owned status (`GET /interviews`: REQUESTED, CONFIRMED, RESCHEDULE_PROPOSED, DECLINED,
+/// CANCELLED, COMPLETED). Backend CONFIRMED = the time is agreed, so it is [scheduled] here;
+/// [confirmed] and [notAFit] describe the customer's decision on the worker afterwards (set from
+/// the booking state). Anything unknown maps to [unknown] and renders neutrally ("Updated"); it
+/// must never crash or be guessed (module 07).
 enum InterviewStatus {
   requested,
   scheduled,
+  rescheduleProposed,
   completed,
   cancelled,
   declined,
@@ -19,28 +23,38 @@ enum InterviewStatus {
 
 InterviewStatus interviewStatusFrom(Object? code) =>
     switch (code is String ? code.toUpperCase() : null) {
-      'REQUESTED' || 'PENDING' => InterviewStatus.requested,
-      'SCHEDULED' || 'ACCEPTED' => InterviewStatus.scheduled,
+      'REQUESTED' => InterviewStatus.requested,
+      'CONFIRMED' => InterviewStatus.scheduled,
+      'RESCHEDULE_PROPOSED' => InterviewStatus.rescheduleProposed,
       'COMPLETED' => InterviewStatus.completed,
       'CANCELLED' || 'CANCELED' => InterviewStatus.cancelled,
-      'DECLINED' || 'REJECTED' => InterviewStatus.declined,
-      'CONFIRMED' => InterviewStatus.confirmed,
-      'NOT_A_FIT' || 'CUSTOMER_DECLINED' => InterviewStatus.notAFit,
+      'DECLINED' => InterviewStatus.declined,
       _ => InterviewStatus.unknown,
     };
 
-/// What the customer may do right now. The UI shows exactly these, nothing inferred.
-enum InterviewAction { cancel, reschedule, confirm, decline }
+/// What the customer may do right now. The UI shows exactly these, nothing inferred. The backend's
+/// `allowedActions` are reschedule, cancel, complete, accept-proposal and reject-proposal;
+/// [confirm] and [decline] ("not a fit") come from the booking once the interview is completed.
+enum InterviewAction {
+  cancel,
+  reschedule,
+  complete,
+  confirm,
+  decline,
+  acceptProposal,
+  rejectProposal,
+}
 
 Set<InterviewAction> interviewActionsFrom(Object? raw) => {
   if (raw is List)
     for (final a in raw)
       if (a is String)
-        ...switch (a.toLowerCase()) {
+        ...switch (a.toLowerCase().replaceAll('_', '-')) {
           'cancel' => [InterviewAction.cancel],
           'reschedule' => [InterviewAction.reschedule],
-          'confirm' => [InterviewAction.confirm],
-          'decline' => [InterviewAction.decline],
+          'complete' => [InterviewAction.complete],
+          'accept-proposal' => [InterviewAction.acceptProposal],
+          'reject-proposal' => [InterviewAction.rejectProposal],
           _ => const <InterviewAction>[],
         },
 };
@@ -60,9 +74,11 @@ class Interview {
     required this.status,
     required this.type,
     required this.workerId,
+    this.bookingId = '',
     this.worker,
     this.date,
     this.slot,
+    this.proposedAt,
     this.note,
     this.requirement,
     this.timeline = const [],
@@ -74,12 +90,18 @@ class Interview {
   final InterviewType type;
   final String workerId;
 
+  /// The booking this interview belongs to (it names the worker).
+  final String bookingId;
+
   /// The worker's public card, when the backend embeds it.
   final WorkerSummary? worker;
 
   /// Date only; [slot] is the start time as `HH:mm`.
   final DateTime? date;
   final String? slot;
+
+  /// The other time the worker proposed (status [InterviewStatus.rescheduleProposed]), local.
+  final DateTime? proposedAt;
   final String? note;
   final RequirementDraft? requirement;
   final List<InterviewTimelineEntry> timeline;
@@ -88,34 +110,45 @@ class Interview {
   /// Start as minutes since midnight, from [slot].
   int? get slotMinutes => parseSlot(slot);
 
-  /// Tolerant parse of the assumed contract (docs/05). Null when there is no id.
+  Interview copyWith({
+    String? workerId,
+    RequirementDraft? requirement,
+    Set<InterviewAction>? actions,
+  }) => Interview(
+    id: id,
+    status: status,
+    type: type,
+    workerId: workerId ?? this.workerId,
+    bookingId: bookingId,
+    worker: worker,
+    date: date,
+    slot: slot,
+    proposedAt: proposedAt,
+    note: note,
+    requirement: requirement ?? this.requirement,
+    timeline: timeline,
+    actions: actions ?? this.actions,
+  );
+
+  /// `GET /interviews/{id}` (OpenAPI `InterviewView`). The time shown is the agreed one, else the
+  /// requested one. Worker and requirement come from the booking. Null when there is no id.
   static Interview? fromJson(Object? j) {
     if (j is! Map) return null;
     final id = j['id'];
     if (id is! String || id.isEmpty) return null;
-    RequirementDraft? req;
-    try {
-      final r = j['requirement'];
-      if (r is Map<String, dynamic>) req = RequirementDraft.fromJson(r);
-    } on Object {
-      req = null;
-    }
-    final date = j['date'] is String
-        ? DateTime.tryParse(j['date'] as String)
-        : null;
-    final w = j['worker'];
+    final at = _time(j['scheduledAt']) ?? _time(j['preferredAt']);
     return Interview(
       id: id,
       status: interviewStatusFrom(j['status']),
       type: '${j['type']}'.toLowerCase() == 'trial'
           ? InterviewType.trial
           : InterviewType.interview,
-      workerId: '${j['workerId'] ?? (w is Map ? w['workerId'] : '')}',
-      worker: WorkerSummary.fromJson(w),
-      date: date == null ? null : DateTime(date.year, date.month, date.day),
-      slot: j['slot'] is String ? j['slot'] as String : null,
+      workerId: j['workerId'] is String ? j['workerId'] as String : '',
+      bookingId: j['bookingId'] is String ? j['bookingId'] as String : '',
+      date: at == null ? null : DateTime(at.year, at.month, at.day),
+      slot: at == null ? null : slotId(at.hour * 60 + at.minute),
+      proposedAt: _time(j['proposedAt']),
       note: j['note'] is String ? j['note'] as String : null,
-      requirement: req,
       timeline: [
         if (j['timeline'] is List)
           for (final e in j['timeline'] as List)
@@ -128,12 +161,18 @@ class Interview {
                   'failed' => TimelineState.failed,
                   _ => TimelineState.upcoming,
                 },
-                e['at'] is String ? DateTime.tryParse(e['at'] as String) : null,
+                _time(e['at']),
               ),
       ],
       actions: interviewActionsFrom(j['allowedActions']),
     );
   }
+}
+
+/// ISO time to local time, or null.
+DateTime? _time(Object? v) {
+  final d = v is String ? DateTime.tryParse(v) : null;
+  return d == null ? null : (d.isUtc ? d.toLocal() : d);
 }
 
 /// "17:30" -> 1050, or null when malformed.
@@ -180,7 +219,28 @@ class InterviewPage {
   final String? nextCursor;
 }
 
-/// Assumed contract (docs/05; the deployed Swagger has no interview endpoints yet).
+/// Hourly start times inside a worker's availability window (09:00-18:00 when it states none). On
+/// the current day a slot must start at least an hour from [now]. The backend only checks that the
+/// time is in the future, so the windows are the app's own guard against pointless requests.
+List<InterviewSlot> generateInterviewSlots({
+  required DateTime date,
+  required DateTime now,
+  String? windowStart,
+  String? windowEnd,
+}) {
+  final from = parseSlot(windowStart) ?? 9 * 60;
+  final to = parseSlot(windowEnd) ?? 18 * 60;
+  final isToday =
+      DateTime(date.year, date.month, date.day) ==
+      DateTime(now.year, now.month, now.day);
+  final earliest = isToday ? now.hour * 60 + now.minute + 60 : 0;
+  return [
+    for (var m = from; m + 60 <= to; m += 60)
+      if (m >= earliest) InterviewSlot(slotId(m)),
+  ];
+}
+
+/// The interview screens' view of a booking (see `InterviewRepositoryOverBookings`).
 abstract interface class InterviewRepository {
   /// [idempotencyKey] is generated once per form so a retry cannot create a second request.
   Future<Interview> create(
@@ -201,6 +261,12 @@ abstract interface class InterviewRepository {
 
   /// "Not a fit". Confirming goes through the booking flow instead.
   Future<Interview> decline(String id);
+
+  /// "The interview took place" (backend `interview-complete`).
+  Future<Interview> complete(String id);
+
+  /// Answer the time the worker proposed: accept it, or keep the original.
+  Future<Interview> answerProposal(String id, {required bool accept});
 
   /// Free start times for [workerId] on [date].
   Future<List<InterviewSlot>> slots(String workerId, DateTime date);

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Minimum-experience choices, in months (null = any).
@@ -18,18 +20,20 @@ Future<WorkerFilters?> showFilterSheet(
   builder: (_) => _FilterSheet(current),
 );
 
-class _FilterSheet extends StatefulWidget {
+class _FilterSheet extends ConsumerStatefulWidget {
   const _FilterSheet(this.initial);
   final WorkerFilters initial;
 
   @override
-  State<_FilterSheet> createState() => _FilterSheetState();
+  ConsumerState<_FilterSheet> createState() => _FilterSheetState();
 }
 
-class _FilterSheetState extends State<_FilterSheet> {
+class _FilterSheetState extends ConsumerState<_FilterSheet> {
   late AvailabilityFilter? _availability = widget.initial.availability;
   late String? _language = widget.initial.language;
   late int? _experience = widget.initial.minExperienceMonths;
+  late int? _rating = widget.initial.minRating;
+  late WorkerSort? _sort = widget.initial.sort;
 
   String _availabilityLabel(AppLocalizations l, AvailabilityFilter a) =>
       switch (a) {
@@ -69,6 +73,9 @@ class _FilterSheetState extends State<_FilterSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
+    // Two thresholds on the backend's scale: 60% and 80% (3+ and 4+ out of 5).
+    final ratings = {(scale * 0.6).ceil(), (scale * 0.8).ceil()};
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -120,6 +127,25 @@ class _FilterSheetState extends State<_FilterSheet> {
                 onChanged: (v) => _experience = v,
               ),
           ]),
+          _section(l10n.filterRating, [
+            for (final r in ratings)
+              _chip(
+                key: Key('filter_rating_$r'),
+                label: l10n.filterRatingMin(scale == 5 ? '$r' : '$r/$scale'),
+                value: r,
+                current: _rating,
+                onChanged: (v) => _rating = v,
+              ),
+          ]),
+          _section(l10n.filterSort, [
+            _chip(
+              key: const Key('filter_sort_rating'),
+              label: l10n.filterSortRating,
+              value: WorkerSort.highestRated,
+              current: _sort,
+              onChanged: (v) => _sort = v,
+            ),
+          ]),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
@@ -132,6 +158,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                     _availability = null;
                     _language = null;
                     _experience = null;
+                    _rating = null;
+                    _sort = null;
                   }),
                 ),
               ),
@@ -145,6 +173,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                       availability: _availability,
                       language: _language,
                       minExperienceMonths: _experience,
+                      minRating: _rating,
+                      sort: _sort,
                     ),
                   ),
                 ),

@@ -38,6 +38,10 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
             'language': query.filters.language,
           if (query.filters.minExperienceMonths != null)
             'minExperienceMonths': query.filters.minExperienceMonths,
+          if (query.filters.minRating != null)
+            'minRating': query.filters.minRating,
+          if (query.filters.sort != null) 'sort': query.filters.sort!.code,
+          if (query.startDate != null) 'startDate': _day(query.startDate!),
         },
       ),
     );
@@ -63,6 +67,9 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
     return WorkerSummary.fromJson(res.data) ?? (throw const NotFoundFailure());
   }
 }
+
+String _day(DateTime d) =>
+    '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
 String engagementCode(EngagementType t) => switch (t) {
   EngagementType.fullTime => 'FULL_TIME',
