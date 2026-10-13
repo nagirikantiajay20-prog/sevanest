@@ -2,6 +2,7 @@
 // a pre-built draft, opened straight on the step under test.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
@@ -85,6 +86,7 @@ Future<DiscoverEnv> launchDiscover(
   /// Logical height of the phone surface. Tall surfaces keep long forms fully built, so tests can
   /// read fields without scrolling.
   double height = 844,
+  List<Override> overrides = const [],
 }) async {
   useTestPhone(t);
   if (height != 844) {
@@ -105,6 +107,7 @@ Future<DiscoverEnv> launchDiscover(
       schedule: schedule,
       guidance: guidance,
       overrides: [
+        ...overrides,
         addressRepositoryProvider.overrideWithValue(addr),
         locationServiceProvider.overrideWithValue(location),
         customerProfileRepositoryProvider.overrideWithValue(

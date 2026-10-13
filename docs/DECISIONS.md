@@ -2,6 +2,13 @@
 
 | Date | Decision | Reason | Approved by |
 |---|---|---|---|
+| 2026-10-13 | Favourites use the Swagger `/shortlist` (GET paged, PUT/DELETE idempotent), not docs/05's `/favourites`. One `favouriteProvider` holds every heart (ids + in-flight ids) so results, detail and the tab never disagree; it is still the MOCK repo until worker ids are real | Deployed contract wins; FAV-06 | Backend contract |
+| 2026-10-13 | Worker detail = `GET /search/workers/{id}` (same allow-listed card as search). Fields the spec lists but the card lacks (name, photo bytes, about, skills beyond categories) are simply absent | Swagger `WorkerCard` | Backend contract |
+| 2026-10-13 | Worker reviews are MOCK only: no customer endpoint lists a worker's reviews (OPEN_QUESTIONS #41) | Spec 5.4 needs them | Pending backend |
+| 2026-10-13 | "What does verified mean?" copy is a placeholder (spec: copy TBD); badge and CTA do not use a `canRequestInterview` / pending state because the backend only ever returns VERIFIED workers | Spec 5.3 vs Swagger | Assumption |
+| 2026-10-13 | Worker detail has no Report / Block menu and no replacement "Choose" mode yet: they belong to modules 12 and 11 and call endpoints from those modules | Module split | Deferred |
+| 2026-10-13 | `/interviews/new` is registered as a placeholder (before `/interviews/:id`) so the Request interview CTA has a target until module 07 | Module 07 | Deferred |
+| 2026-10-13 | Review screen (module 04 step 7) is built here, not in module 5 as PROGRESS said: Edit pushes the step in edit mode (its Continue pops back), Search re-runs the whole-draft check and opens `/workers` once | modules/04 | Spec |
 | 2026-10-13 | Filters = availability window (morning / afternoon / evening), language, minimum experience (1 / 3 / 5+ years). NO budget filter (the search API has no budget param) and NO star-rating filter (`minRating` is on the configurable `RATING_SCALE_MAX`, up to 10) | Spec says filters limited to what the backend supports | Backend contract |
 | 2026-10-13 | Filters live in an auto-disposed provider: they apply while Results is open and a new search starts clean. Closing the sheet discards edits; Apply changes the query, which re-searches from page 1 | Spec 5.2 | Spec |
 | 2026-10-13 | Search follows the deployed Swagger, not docs/05: `GET /search/workers?category&areaId&engagement&page&limit` (page-numbered, `meta.total`), not `POST` + cursor. `PagedState.nextCursor` carries the next page number | AGENTS 2.1: deployed contract wins | Backend contract |

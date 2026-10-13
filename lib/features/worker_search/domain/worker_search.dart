@@ -102,6 +102,7 @@ class WorkerSummary {
     this.ratingCount = 0,
     this.photoUrl,
     this.verified = false,
+    this.engagement,
   });
 
   final String id;
@@ -116,6 +117,9 @@ class WorkerSummary {
   /// Short-lived link: never persisted.
   final String? photoUrl;
   final bool verified;
+
+  /// The engagement type the worker prefers (null when not stated or not recognised).
+  final EngagementType? engagement;
 
   bool get hasRating => ratingAverage != null && ratingCount > 0;
 
@@ -162,9 +166,19 @@ class WorkerSummary {
           : null,
       // Badge only from the backend status (AGENTS §27).
       verified: j['verification'] == 'VERIFIED',
+      engagement: _engagementFromCode(j['engagementPreference']),
     );
   }
 }
+
+EngagementType? _engagementFromCode(Object? c) => switch (c) {
+  'FULL_TIME' => EngagementType.fullTime,
+  'PART_TIME' => EngagementType.partTime,
+  'DAILY' => EngagementType.daily,
+  'HOURLY' => EngagementType.hourly,
+  'LIVE_IN' => EngagementType.liveIn,
+  _ => null,
+};
 
 /// One page plus the cursor of the next (null = end).
 class WorkerPage {
@@ -180,4 +194,7 @@ abstract interface class WorkerSearchRepository {
     String? cursor,
     CancelToken? cancel,
   });
+
+  /// One worker's public card. Throws `NotFoundFailure` when the worker is gone or not visible.
+  Future<WorkerSummary> detail(String id, {CancelToken? cancel});
 }

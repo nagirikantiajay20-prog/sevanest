@@ -628,22 +628,61 @@
   "resumeContinue": "Continue",
   "resumeDiscard": "Start over",
   "resultsTitle": "{category} near {area}",
-  "@resultsTitle": {"placeholders": {"category": {"type": "String"}, "area": {"type": "String"}}},
+  "@resultsTitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "area": {
+        "type": "String"
+      }
+    }
+  },
   "resultsEmptyTitle": "No matching workers found",
   "resultsEmptyBody": "Try changing your area, timing or engagement type.",
   "resultsEditRequirement": "Edit requirement",
   "resultsStale": "Showing earlier results",
   "resultsLoadMoreRetry": "Couldn't load more. Retry",
   "workerExperienceYears": "{years} yrs experience",
-  "@workerExperienceYears": {"placeholders": {"years": {"type": "int"}}},
+  "@workerExperienceYears": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
   "workerExperienceMonths": "{months} months experience",
-  "@workerExperienceMonths": {"placeholders": {"months": {"type": "int"}}},
+  "@workerExperienceMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
   "workerExperienceUnknown": "Experience not listed",
   "workerNew": "New",
   "workerRatingSemantics": "Rated {rating} from {count} reviews",
-  "@workerRatingSemantics": {"placeholders": {"rating": {"type": "String"}, "count": {"type": "int"}}},
+  "@workerRatingSemantics": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "workerAvailableWindow": "Available {start} to {end}",
-  "@workerAvailableWindow": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@workerAvailableWindow": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "filterTitle": "Filters",
   "filterButton": "Filter",
   "filterAvailability": "Available",
@@ -653,9 +692,90 @@
   "filterLanguage": "Language",
   "filterExperience": "Experience",
   "filterExperienceYears": "{years}+ years",
-  "@filterExperienceYears": {"placeholders": {"years": {"type": "int"}}},
+  "@filterExperienceYears": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
   "filterApply": "Apply",
   "filterReset": "Reset",
   "filterActiveSemantics": "{count} filters active",
-  "@filterActiveSemantics": {"placeholders": {"count": {"type": "int"}}}
+  "@filterActiveSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "favouriteAdd": "Add to shortlist",
+  "favouriteRemove": "Remove from shortlist",
+  "favouriteFailed": "Couldn't update shortlist. Try again.",
+  "favouriteRemoved": "Removed from shortlist",
+  "favouriteUndo": "Undo",
+  "favsTitle": "Shortlist",
+  "favsEmptyTitle": "Your shortlist is empty",
+  "favsEmptyBody": "Tap the heart on a worker to save them.",
+  "favsFindWorker": "Find a worker",
+  "workerUnavailableTag": "Unavailable",
+  "workerUnavailableTitle": "This worker is no longer available",
+  "workerUnavailableBody": "Let's find another.",
+  "workerFindAnother": "Find another worker",
+  "workerProfileTitle": "Worker profile",
+  "workerVerifiedInfo": "What does verified mean?",
+  "workerVerifiedSheetTitle": "What verified means",
+  "workerVerifiedSheetBody": "Verified workers have passed the identity and background checks SevaNest requires before they can appear in search. We never show ID documents or contact details.",
+  "workerGotIt": "Got it",
+  "workerRequestInterview": "Request interview or trial",
+  "workerExperienceLabel": "Experience",
+  "workerLanguagesLabel": "Languages",
+  "workerAreasLabel": "Areas",
+  "workerAvailabilityLabel": "Availability",
+  "workerEngagementLabel": "Prefers",
+  "reviewsTitle": "Reviews",
+  "reviewsSeeAll": "See all reviews",
+  "reviewsEmpty": "No reviews yet",
+  "workerStartSearchTitle": "Start a search first",
+  "workerStartSearchBody": "Tell us what you need, then request an interview with this worker.",
+  "workerStartSearch": "Start a search",
+  "reviewTitle": "Review your request",
+  "reviewHeading": "Check your requirement",
+  "reviewSub": "Make sure everything looks right before we find workers.",
+  "reviewRowService": "Service",
+  "reviewRowEngagement": "Engagement",
+  "reviewRowAddress": "Address",
+  "reviewRowTiming": "Timing",
+  "reviewRowStartDate": "Start date",
+  "reviewRowBudget": "Budget",
+  "reviewEdit": "Edit",
+  "reviewSearch": "Find workers",
+  "workerMoreChip": "+{count}",
+  "@workerMoreChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewEditSemantics": "Edit {field}",
+  "@reviewEditSemantics": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewByline": "{name} · {date}",
+  "@reviewByline": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "workerSkillsLabel": "Skills"
 }

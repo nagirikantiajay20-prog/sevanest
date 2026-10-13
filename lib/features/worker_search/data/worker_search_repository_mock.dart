@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 
 /// Seeded workers behind the mock-API toggle (same shape as the real `WorkerCard`).
@@ -38,8 +40,23 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
         ratingAverage: i % 4 == 0 ? null : 3.5 + (i % 6) / 4,
         ratingCount: i % 4 == 0 ? 0 : 3 + i,
         verified: true,
+        engagement: EngagementType.values[i % EngagementType.values.length],
       ),
   ];
+
+  /// A seeded worker by id (`cook-3`), or null for an unknown / withdrawn one (any id containing
+  /// `gone` stands for a worker who is no longer visible).
+  static WorkerSummary? byId(String id) {
+    final i = id.lastIndexOf('-');
+    if (i < 0 || id.contains('gone')) return null;
+    final n = int.tryParse(id.substring(i + 1));
+    final seed = _seed(id.substring(0, i));
+    return n == null || n < 1 || n > seed.length ? null : seed[n - 1];
+  }
+
+  @override
+  Future<WorkerSummary> detail(String id, {CancelToken? cancel}) =>
+      mockCall(_state(), () => byId(id) ?? (throw const NotFoundFailure()));
 
   @override
   Future<WorkerPage> search(

@@ -1219,4 +1219,148 @@ class AppLocalizationsEn extends AppLocalizations {
   String filterActiveSemantics(int count) {
     return '$count filters active';
   }
+
+  @override
+  String get favouriteAdd => 'Add to shortlist';
+
+  @override
+  String get favouriteRemove => 'Remove from shortlist';
+
+  @override
+  String get favouriteFailed => 'Couldn\'t update shortlist. Try again.';
+
+  @override
+  String get favouriteRemoved => 'Removed from shortlist';
+
+  @override
+  String get favouriteUndo => 'Undo';
+
+  @override
+  String get favsTitle => 'Shortlist';
+
+  @override
+  String get favsEmptyTitle => 'Your shortlist is empty';
+
+  @override
+  String get favsEmptyBody => 'Tap the heart on a worker to save them.';
+
+  @override
+  String get favsFindWorker => 'Find a worker';
+
+  @override
+  String get workerUnavailableTag => 'Unavailable';
+
+  @override
+  String get workerUnavailableTitle => 'This worker is no longer available';
+
+  @override
+  String get workerUnavailableBody => 'Let\'s find another.';
+
+  @override
+  String get workerFindAnother => 'Find another worker';
+
+  @override
+  String get workerProfileTitle => 'Worker profile';
+
+  @override
+  String get workerVerifiedInfo => 'What does verified mean?';
+
+  @override
+  String get workerVerifiedSheetTitle => 'What verified means';
+
+  @override
+  String get workerVerifiedSheetBody =>
+      'Verified workers have passed the identity and background checks SevaNest requires before they can appear in search. We never show ID documents or contact details.';
+
+  @override
+  String get workerGotIt => 'Got it';
+
+  @override
+  String get workerRequestInterview => 'Request interview or trial';
+
+  @override
+  String get workerExperienceLabel => 'Experience';
+
+  @override
+  String get workerLanguagesLabel => 'Languages';
+
+  @override
+  String get workerAreasLabel => 'Areas';
+
+  @override
+  String get workerAvailabilityLabel => 'Availability';
+
+  @override
+  String get workerEngagementLabel => 'Prefers';
+
+  @override
+  String get reviewsTitle => 'Reviews';
+
+  @override
+  String get reviewsSeeAll => 'See all reviews';
+
+  @override
+  String get reviewsEmpty => 'No reviews yet';
+
+  @override
+  String get workerStartSearchTitle => 'Start a search first';
+
+  @override
+  String get workerStartSearchBody =>
+      'Tell us what you need, then request an interview with this worker.';
+
+  @override
+  String get workerStartSearch => 'Start a search';
+
+  @override
+  String get reviewTitle => 'Review your request';
+
+  @override
+  String get reviewHeading => 'Check your requirement';
+
+  @override
+  String get reviewSub =>
+      'Make sure everything looks right before we find workers.';
+
+  @override
+  String get reviewRowService => 'Service';
+
+  @override
+  String get reviewRowEngagement => 'Engagement';
+
+  @override
+  String get reviewRowAddress => 'Address';
+
+  @override
+  String get reviewRowTiming => 'Timing';
+
+  @override
+  String get reviewRowStartDate => 'Start date';
+
+  @override
+  String get reviewRowBudget => 'Budget';
+
+  @override
+  String get reviewEdit => 'Edit';
+
+  @override
+  String get reviewSearch => 'Find workers';
+
+  @override
+  String workerMoreChip(int count) {
+    return '+$count';
+  }
+
+  @override
+  String reviewEditSemantics(String field) {
+    return 'Edit $field';
+  }
+
+  @override
+  String reviewByline(String name, String date) {
+    return '$name · $date';
+  }
+
+  @override
+  String get workerSkillsLabel => 'Skills';
 }

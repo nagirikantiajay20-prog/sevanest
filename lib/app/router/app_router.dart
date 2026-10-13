@@ -17,13 +17,17 @@ import 'package:sevanest_customer/features/authentication/presentation/screens/s
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/account_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_screen.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_setup_screen.dart';
+import 'package:sevanest_customer/features/favourites/presentation/screens/favourites_screen.dart';
 import 'package:sevanest_customer/features/home/presentation/screens/home_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/budget_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/engagement_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/location_screen.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/screens/review_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/service_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/start_date_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/timing_screen.dart';
+import 'package:sevanest_customer/features/worker_profile/presentation/screens/worker_detail_screen.dart';
+import 'package:sevanest_customer/features/worker_profile/presentation/screens/worker_reviews_screen.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/screens/results_screen.dart';
 
 GoRoute _placeholder(String path, String title) =>
@@ -99,7 +103,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [_placeholder(Routes.bookings, 'Bookings')],
           ),
           StatefulShellBranch(
-            routes: [_placeholder(Routes.favourites, 'Shortlist')],
+            routes: [
+              GoRoute(
+                path: Routes.favourites,
+                builder: (context, state) => const FavouritesScreen(),
+              ),
+            ],
           ),
           StatefulShellBranch(
             routes: [
@@ -142,17 +151,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             BudgetScreen(edit: state.uri.queryParameters['edit'] == 'true'),
       ),
-      // Module 5 replaces this with the real Review screen.
-      _placeholder(Routes.discoverReview, 'Review your requirement'),
+      GoRoute(
+        path: Routes.discoverReview,
+        builder: (context, state) => const ReviewScreen(),
+      ),
       _placeholder(Routes.notifications, 'Notifications'),
       _placeholder(Routes.support, 'Support'),
+      // Module 07 replaces these; `new` must come before `:id`.
+      _placeholder(Routes.interviewNew, 'Request interview'),
       _placeholder(Routes.interviewDetail, 'Interview'),
       _placeholder(Routes.bookingDetail, 'Booking'),
       GoRoute(
         path: Routes.workers,
         builder: (context, state) => const ResultsScreen(),
       ),
-      _placeholder(Routes.workerDetail, 'Worker'),
+      // Reviews is longer than the detail path, so order does not matter, but keep them together.
+      GoRoute(
+        path: Routes.workerReviews,
+        builder: (context, state) =>
+            WorkerReviewsScreen(workerId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: Routes.workerDetail,
+        builder: (context, state) =>
+            WorkerDetailScreen(workerId: state.pathParameters['id']!),
+      ),
       if (config.env == AppEnv.dev)
         GoRoute(
           path: Routes.devGallery,

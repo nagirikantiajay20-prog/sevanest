@@ -4,20 +4,75 @@ import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// Result card. The backend sends no name, so the title is the category; step 4.5 refines this.
+/// "5 yrs experience", "8 months experience" or "Experience not listed".
+String experienceLabel(AppLocalizations l, int? months) {
+  if (months == null) return l.workerExperienceUnknown;
+  return months >= 12
+      ? l.workerExperienceYears(months ~/ 12)
+      : l.workerExperienceMonths(months);
+}
+
+/// Round avatar: the short-lived photo link when there is one, else the category initial.
+class WorkerAvatar extends StatelessWidget {
+  const WorkerAvatar(this.worker, {this.radius = 28, super.key});
+  final WorkerSummary worker;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = worker.categories.isEmpty ? '' : worker.categories.first;
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: AppColors.hairline,
+      // Photo links expire, so they are only shown, never stored.
+      foregroundImage: worker.photoUrl == null
+          ? null
+          : NetworkImage(worker.photoUrl!),
+      child: Text(title.isEmpty ? '?' : title.characters.first.toUpperCase()),
+    );
+  }
+}
+
+/// "★ 4.6 (23)" or "New" when the worker has no reviews yet.
+class RatingLabel extends StatelessWidget {
+  const RatingLabel(this.worker, {super.key});
+  final WorkerSummary worker;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final style = Theme.of(context).textTheme.bodySmall;
+    if (!worker.hasRating) return Text(l10n.workerNew, style: style);
+    final avg = worker.ratingAverage!.toStringAsFixed(1);
+    return Semantics(
+      label: l10n.workerRatingSemantics(avg, worker.ratingCount),
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star, size: 16, color: AppColors.amber),
+          Text(' $avg (${worker.ratingCount})', style: style),
+        ],
+      ),
+    );
+  }
+}
+
+/// Result / shortlist card. The backend sends no name, so the title is the category. Optional
+/// rows disappear when their data is missing. [trailing] is the heart.
 class WorkerCard extends StatelessWidget {
-  const WorkerCard({required this.worker, required this.onTap, super.key});
+  const WorkerCard({
+    required this.worker,
+    required this.onTap,
+    this.trailing,
+    super.key,
+  });
 
   final WorkerSummary worker;
   final VoidCallback onTap;
+  final Widget? trailing;
 
-  String _experience(AppLocalizations l) {
-    final m = worker.experienceMonths;
-    if (m == null) return l.workerExperienceUnknown;
-    return m >= 12
-        ? l.workerExperienceYears(m ~/ 12)
-        : l.workerExperienceMonths(m);
-  }
+  static const _maxChips = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +80,8 @@ class WorkerCard extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final title = worker.categories.isEmpty ? '' : worker.categories.first;
     final window = worker.availability.firstOrNull;
+    final chips = worker.categories.skip(1).toList();
+    final shown = chips.take(_maxChips).toList();
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -35,17 +92,7 @@ class WorkerCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: AppColors.hairline,
-                // Photo links are short-lived and only shown, never stored.
-                foregroundImage: worker.photoUrl == null
-                    ? null
-                    : NetworkImage(worker.photoUrl!),
-                child: Text(
-                  title.isEmpty ? '?' : title.characters.first.toUpperCase(),
-                ),
-              ),
+              WorkerAvatar(worker),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -57,10 +104,20 @@ class WorkerCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: text.titleMedium,
                     ),
-                    Text(_experience(l10n), style: text.bodyMedium),
+                    Text(
+                      experienceLabel(l10n, worker.experienceMonths),
+                      style: text.bodyMedium,
+                    ),
                     if (worker.languages.isNotEmpty)
                       Text(
                         worker.languages.map(languageName).join(', '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall,
+                      ),
+                    if (worker.areas.isNotEmpty)
+                      Text(
+                        worker.areas.join(', '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: text.bodySmall,
@@ -70,45 +127,46 @@ class WorkerCard extends StatelessWidget {
                         l10n.workerAvailableWindow(window.start, window.end),
                         style: text.bodySmall,
                       ),
+                    if (shown.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          for (final c in shown)
+                            Chip(
+                              label: Text(c),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          if (chips.length > _maxChips)
+                            Chip(
+                              label: Text(
+                                l10n.workerMoreChip(chips.length - _maxChips),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.xs,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
+                        // Verified styling comes only from the backend status.
                         if (worker.verified)
                           SnBadge(
                             label: l10n.verified,
                             tone: SnBadgeTone.success,
                           ),
-                        worker.hasRating
-                            ? Semantics(
-                                label: l10n.workerRatingSemantics(
-                                  worker.ratingAverage!.toStringAsFixed(1),
-                                  worker.ratingCount,
-                                ),
-                                excludeSemantics: true,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      size: 16,
-                                      color: AppColors.amber,
-                                    ),
-                                    Text(
-                                      ' ${worker.ratingAverage!.toStringAsFixed(1)} (${worker.ratingCount})',
-                                      style: text.bodySmall,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : Text(l10n.workerNew, style: text.bodySmall),
+                        RatingLabel(worker),
                       ],
                     ),
                   ],
                 ),
               ),
+              ?trailing,
             ],
           ),
         ),

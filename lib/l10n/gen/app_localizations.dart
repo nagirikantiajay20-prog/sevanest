@@ -2259,6 +2259,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} filters active'**
   String filterActiveSemantics(int count);
+
+  /// No description provided for @favouriteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to shortlist'**
+  String get favouriteAdd;
+
+  /// No description provided for @favouriteRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from shortlist'**
+  String get favouriteRemove;
+
+  /// No description provided for @favouriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update shortlist. Try again.'**
+  String get favouriteFailed;
+
+  /// No description provided for @favouriteRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from shortlist'**
+  String get favouriteRemoved;
+
+  /// No description provided for @favouriteUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get favouriteUndo;
+
+  /// No description provided for @favsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortlist'**
+  String get favsTitle;
+
+  /// No description provided for @favsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shortlist is empty'**
+  String get favsEmptyTitle;
+
+  /// No description provided for @favsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart on a worker to save them.'**
+  String get favsEmptyBody;
+
+  /// No description provided for @favsFindWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a worker'**
+  String get favsFindWorker;
+
+  /// No description provided for @workerUnavailableTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get workerUnavailableTag;
+
+  /// No description provided for @workerUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This worker is no longer available'**
+  String get workerUnavailableTitle;
+
+  /// No description provided for @workerUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s find another.'**
+  String get workerUnavailableBody;
+
+  /// No description provided for @workerFindAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Find another worker'**
+  String get workerFindAnother;
+
+  /// No description provided for @workerProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker profile'**
+  String get workerProfileTitle;
+
+  /// No description provided for @workerVerifiedInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'What does verified mean?'**
+  String get workerVerifiedInfo;
+
+  /// No description provided for @workerVerifiedSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What verified means'**
+  String get workerVerifiedSheetTitle;
+
+  /// No description provided for @workerVerifiedSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified workers have passed the identity and background checks SevaNest requires before they can appear in search. We never show ID documents or contact details.'**
+  String get workerVerifiedSheetBody;
+
+  /// No description provided for @workerGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get workerGotIt;
+
+  /// No description provided for @workerRequestInterview.
+  ///
+  /// In en, this message translates to:
+  /// **'Request interview or trial'**
+  String get workerRequestInterview;
+
+  /// No description provided for @workerExperienceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get workerExperienceLabel;
+
+  /// No description provided for @workerLanguagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get workerLanguagesLabel;
+
+  /// No description provided for @workerAreasLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Areas'**
+  String get workerAreasLabel;
+
+  /// No description provided for @workerAvailabilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get workerAvailabilityLabel;
+
+  /// No description provided for @workerEngagementLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Prefers'**
+  String get workerEngagementLabel;
+
+  /// No description provided for @reviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviewsTitle;
+
+  /// No description provided for @reviewsSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all reviews'**
+  String get reviewsSeeAll;
+
+  /// No description provided for @reviewsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews yet'**
+  String get reviewsEmpty;
+
+  /// No description provided for @workerStartSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a search first'**
+  String get workerStartSearchTitle;
+
+  /// No description provided for @workerStartSearchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what you need, then request an interview with this worker.'**
+  String get workerStartSearchBody;
+
+  /// No description provided for @workerStartSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a search'**
+  String get workerStartSearch;
+
+  /// No description provided for @reviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your request'**
+  String get reviewTitle;
+
+  /// No description provided for @reviewHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your requirement'**
+  String get reviewHeading;
+
+  /// No description provided for @reviewSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure everything looks right before we find workers.'**
+  String get reviewSub;
+
+  /// No description provided for @reviewRowService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get reviewRowService;
+
+  /// No description provided for @reviewRowEngagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Engagement'**
+  String get reviewRowEngagement;
+
+  /// No description provided for @reviewRowAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get reviewRowAddress;
+
+  /// No description provided for @reviewRowTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'Timing'**
+  String get reviewRowTiming;
+
+  /// No description provided for @reviewRowStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get reviewRowStartDate;
+
+  /// No description provided for @reviewRowBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget'**
+  String get reviewRowBudget;
+
+  /// No description provided for @reviewEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get reviewEdit;
+
+  /// No description provided for @reviewSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find workers'**
+  String get reviewSearch;
+
+  /// No description provided for @workerMoreChip.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String workerMoreChip(int count);
+
+  /// No description provided for @reviewEditSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {field}'**
+  String reviewEditSemantics(String field);
+
+  /// No description provided for @reviewByline.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {date}'**
+  String reviewByline(String name, String date);
+
+  /// No description provided for @workerSkillsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get workerSkillsLabel;
 }
 
 class _AppLocalizationsDelegate

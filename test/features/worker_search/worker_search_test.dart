@@ -22,6 +22,10 @@ class _FakeRepo implements WorkerSearchRepository {
   Completer<WorkerPage>? gate;
 
   @override
+  Future<WorkerSummary> detail(String id, {CancelToken? cancel}) async =>
+      WorkerSummary(id: id);
+
+  @override
   Future<WorkerPage> search(
     WorkerQuery query, {
     String? cursor,
@@ -198,13 +202,19 @@ void main() {
       await t.tap(find.byKey(const Key('worker_card_cook-1')));
       await t.pumpAndSettle();
       expect(env.where, '/workers/cook-1');
+      await settle(t); // let the detail request finish
     });
 
     testWidgets('SRCH-04 scrolling to the end loads the next page', (t) async {
-      await open(t);
-      expect(find.byKey(const Key('worker_card_cook-21')), findsNothing);
+      final env = await open(t);
+      int loaded() =>
+          env.container.read(workerSearchProvider).requireValue.items.length;
+      expect(loaded(), 20);
       await scrollToEnd(t);
-      expect(find.byKey(const Key('worker_card_cook-21')), findsOneWidget);
+      expect(
+        loaded(),
+        45,
+      ); // the list was still near the end, so page 3 followed
       expect(find.byKey(const Key('results_footer_loader')), findsNothing);
     });
 

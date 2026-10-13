@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
@@ -47,6 +48,19 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
         ? (meta['total'] as num).toInt()
         : 0;
     return WorkerPage(items, page * pageSize < total ? '${page + 1}' : null);
+  }
+
+  /// `GET /search/workers/{id}`: same allow-listed card; 404 `WORKER_NOT_FOUND` also covers a
+  /// worker who is no longer visible.
+  @override
+  Future<WorkerSummary> detail(String id, {CancelToken? cancel}) async {
+    final res = await guarded(
+      () => _dio.get<dynamic>(
+        '/search/workers/${Uri.encodeComponent(id)}',
+        cancelToken: cancel,
+      ),
+    );
+    return WorkerSummary.fromJson(res.data) ?? (throw const NotFoundFailure());
   }
 }
 

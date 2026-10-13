@@ -3,15 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
+import 'package:sevanest_customer/features/favourites/presentation/widgets/favourite_button.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/filter_sheet.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/paged_footer.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
@@ -132,67 +133,44 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
                 onEdit: _editRequirement,
                 onRetry: notifier.refresh,
               ),
-              data: (p) => RefreshIndicator(
-                onRefresh: notifier.refresh,
-                child: ListView.separated(
-                  controller: _scroll,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  itemCount: p.items.length + 1,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (_, i) {
-                    if (i == p.items.length) return _Footer(p, notifier);
-                    final w = p.items[i];
-                    return KeyedSubtree(
-                      key: Key('worker_card_${w.id}'),
-                      child: WorkerCard(
-                        worker: w,
-                        onTap: () => context.push(
-                          Routes.path(Routes.workerDetail, {'id': w.id}),
+              data: (p) {
+                loadMoreIfShort(_scroll, p, notifier.loadMore);
+                return RefreshIndicator(
+                  onRefresh: notifier.refresh,
+                  child: ListView.separated(
+                    controller: _scroll,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount: p.items.length + 1,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.md),
+                    itemBuilder: (_, i) {
+                      if (i == p.items.length) {
+                        return PagedFooter(page: p, onRetry: notifier.loadMore);
+                      }
+                      final w = p.items[i];
+                      return KeyedSubtree(
+                        key: Key('worker_card_${w.id}'),
+                        child: WorkerCard(
+                          worker: w,
+                          trailing: FavouriteButton(
+                            workerId: w.id,
+                            keyName: 'worker_card_fav_btn_${w.id}',
+                          ),
+                          onTap: () => context.push(
+                            Routes.path(Routes.workerDetail, {'id': w.id}),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
     );
-  }
-}
-
-class _Footer extends StatelessWidget {
-  const _Footer(this.page, this.notifier);
-  final PagedState<WorkerSummary> page;
-  final WorkerSearchNotifier notifier;
-
-  @override
-  Widget build(BuildContext context) {
-    if (page.loadMoreError != null) {
-      final l10n = AppLocalizations.of(context);
-      return Center(
-        child: TextButton(
-          key: const Key('results_load_more_retry_btn'),
-          onPressed: notifier.loadMore,
-          child: Text(
-            '${l10n.resultsLoadMoreRetry}\n${failureMessage(l10n, page.loadMoreError!)}',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-    if (page.isLoadingMore) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.sm),
-          child: CircularProgressIndicator(key: Key('results_footer_loader')),
-        ),
-      );
-    }
-    return const SizedBox.shrink();
   }
 }
 

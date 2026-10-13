@@ -44,3 +44,5 @@ Status: `OPEN` | `ANSWERED` | `ASSUMED(temporary)`. Update here; never bury in c
 | 38 | Can a default address be deleted / unset? Does the first address auto-default? | Backend | OPEN | UI pre-selects "default" for the first address; switch is disabled on the current default |
 | 39 | GPS "use current location", reverse geocoding and map pin | Product | OPEN | Needs a location + geocoding provider (#15). Not built |
 | 40 | Rating scale (`RATING_SCALE_MAX`, up to 10) and the `minRating` filter | Backend | OPEN | Star filter not built; the card shows the raw average. Need the configured scale (e.g. from `/app-config`) before showing stars or filtering |
+| 41 | Customer-facing endpoint for a worker's reviews (`/workers/:id/reviews` in the module doc) | Backend | OPEN | Only `/ratings` (my own) and worker-side `/workers/me/ratings` exist. Reviews screen runs on a mock |
+| 42 | `GET /shortlist` entry shape (card inline vs wrapped) and whether `meta.total` is returned | Backend | OPEN | Parser accepts inline, `card` or `worker`; paging stops when `total` is missing |
