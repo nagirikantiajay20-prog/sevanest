@@ -15,10 +15,10 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
     'nanny': 'Nanny',
   };
   static const _langs = [
-    ['Telugu', 'Hindi'],
-    ['Hindi', 'English'],
-    ['Telugu'],
-    ['Tamil', 'Telugu', 'English'],
+    ['te', 'hi'],
+    ['hi', 'en'],
+    ['te'],
+    ['ta', 'te', 'en'],
   ];
 
   /// 45 per category so a second and third page exist.
@@ -30,7 +30,11 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
         categories: [_categoryNames[category] ?? category],
         languages: _langs[i % _langs.length],
         areas: const ['Madhapur', 'Gachibowli'],
-        availability: const [AvailabilityWindow('08:00', '18:00')],
+        availability: [
+          i % 3 == 0
+              ? const AvailabilityWindow('06:00', '21:00')
+              : const AvailabilityWindow('08:00', '18:00'),
+        ],
         ratingAverage: i % 4 == 0 ? null : 3.5 + (i % 6) / 4,
         ratingCount: i % 4 == 0 ? 0 : 3 + i,
         verified: true,
@@ -44,7 +48,22 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
     CancelToken? cancel,
   }) => mockCall(_state(), () {
     if (_state().mode == MockMode.empty) return const WorkerPage([], null);
-    final all = _seed(query.category);
+    final f = query.filters;
+    bool covers(WorkerSummary w) =>
+        f.availability == null ||
+        w.availability.any(
+          (a) =>
+              a.start.compareTo(f.availability!.from) <= 0 &&
+              a.end.compareTo(f.availability!.to) >= 0,
+        );
+    final all = [
+      for (final w in _seed(query.category))
+        if (covers(w) &&
+            (f.language == null || w.languages.contains(f.language)) &&
+            (f.minExperienceMonths == null ||
+                (w.experienceMonths ?? 0) >= f.minExperienceMonths!))
+          w,
+    ];
     final start = int.tryParse(cursor ?? '') ?? 0;
     final end = (start + pageSize).clamp(0, all.length);
     return WorkerPage(

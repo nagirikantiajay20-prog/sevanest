@@ -13,6 +13,21 @@ final workerSearchRepositoryProvider = Provider<WorkerSearchRepository>(
   (ref) => WorkerSearchRepositoryMock(() => ref.read(mockApiProvider)),
 );
 
+/// Filters chosen in the sheet. Auto-disposed: they live while Results is open and a new search
+/// starts clean.
+class WorkerFiltersNotifier extends Notifier<WorkerFilters> {
+  @override
+  WorkerFilters build() => const WorkerFilters();
+
+  // ignore: use_setters_to_change_properties
+  void set(WorkerFilters f) => state = f;
+}
+
+final workerFiltersProvider =
+    NotifierProvider.autoDispose<WorkerFiltersNotifier, WorkerFilters>(
+      WorkerFiltersNotifier.new,
+    );
+
 /// The search the draft describes, or null while it has no service or address yet.
 final workerQueryProvider = Provider.autoDispose<WorkerQuery?>((ref) {
   final d = ref.watch(requirementDraftProvider);
@@ -25,6 +40,7 @@ final workerQueryProvider = Provider.autoDispose<WorkerQuery?>((ref) {
     category: d.serviceId!,
     areaId: areaId ?? address.area,
     engagement: d.engagement,
+    filters: ref.watch(workerFiltersProvider),
   );
 });
 

@@ -1179,4 +1179,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String workerAvailableWindow(String start, String end) {
     return 'Available $start to $end';
   }
+
+  @override
+  String get filterTitle => 'Filters';
+
+  @override
+  String get filterButton => 'Filter';
+
+  @override
+  String get filterAvailability => 'Available';
+
+  @override
+  String get filterMorning => 'Morning (6am-12pm)';
+
+  @override
+  String get filterAfternoon => 'Afternoon (12pm-5pm)';
+
+  @override
+  String get filterEvening => 'Evening (5pm-9pm)';
+
+  @override
+  String get filterLanguage => 'Language';
+
+  @override
+  String get filterExperience => 'Experience';
+
+  @override
+  String filterExperienceYears(int years) {
+    return '$years+ years';
+  }
+
+  @override
+  String get filterApply => 'Apply';
+
+  @override
+  String get filterReset => 'Reset';
+
+  @override
+  String filterActiveSemantics(int count) {
+    return '$count filters active';
+  }
 }

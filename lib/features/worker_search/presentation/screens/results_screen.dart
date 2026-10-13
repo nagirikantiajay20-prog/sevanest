@@ -11,6 +11,7 @@ import 'package:sevanest_customer/features/service_discovery/presentation/provid
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/filter_sheet.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
@@ -46,9 +47,18 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
   void _editRequirement() =>
       context.canPop() ? context.pop() : context.go(Routes.discoverReview);
 
+  Future<void> _openFilters() async {
+    final current = ref.read(workerFiltersProvider);
+    final picked = await showFilterSheet(context, current);
+    // Closing the sheet leaves the filters alone; Apply re-searches from page 1 (the query
+    // changes, which cancels any request still running).
+    if (picked != null) ref.read(workerFiltersProvider.notifier).set(picked);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final filterCount = ref.watch(workerFiltersProvider.select((f) => f.count));
     final draft = ref.watch(requirementDraftProvider);
     final category = ref.watch(selectedCategoryProvider);
     final results = ref.watch(workerSearchProvider);
@@ -71,6 +81,24 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
           onPressed: _editRequirement,
         ),
         title: Text(l10n.resultsTitle(category?.name ?? '', area)),
+        actions: [
+          Semantics(
+            label: filterCount == 0
+                ? l10n.filterButton
+                : l10n.filterActiveSemantics(filterCount),
+            child: IconButton(
+              key: const Key('results_filter_btn'),
+              tooltip: l10n.filterButton,
+              onPressed: _openFilters,
+              icon: Badge(
+                key: const Key('results_filter_badge'),
+                isLabelVisible: filterCount > 0,
+                label: Text('$filterCount'),
+                child: const Icon(Icons.tune),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

@@ -2187,6 +2187,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available {start} to {end}'**
   String workerAvailableWindow(String start, String end);
+
+  /// No description provided for @filterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filterTitle;
+
+  /// No description provided for @filterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filterButton;
+
+  /// No description provided for @filterAvailability.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get filterAvailability;
+
+  /// No description provided for @filterMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning (6am-12pm)'**
+  String get filterMorning;
+
+  /// No description provided for @filterAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon (12pm-5pm)'**
+  String get filterAfternoon;
+
+  /// No description provided for @filterEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening (5pm-9pm)'**
+  String get filterEvening;
+
+  /// No description provided for @filterLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get filterLanguage;
+
+  /// No description provided for @filterExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get filterExperience;
+
+  /// No description provided for @filterExperienceYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{years}+ years'**
+  String filterExperienceYears(int years);
+
+  /// No description provided for @filterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get filterApply;
+
+  /// No description provided for @filterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get filterReset;
+
+  /// No description provided for @filterActiveSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} filters active'**
+  String filterActiveSemantics(int count);
 }
 
 class _AppLocalizationsDelegate

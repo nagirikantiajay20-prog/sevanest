@@ -1,6 +1,60 @@
 import 'package:dio/dio.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 
+/// Time-of-day windows offered as an availability filter. The backend matches a worker whose one
+/// availability window covers the whole range (`availableFrom`..`availableTo`).
+enum AvailabilityFilter {
+  morning('06:00', '12:00'),
+  afternoon('12:00', '17:00'),
+  evening('17:00', '21:00');
+
+  const AvailabilityFilter(this.from, this.to);
+  final String from;
+  final String to;
+}
+
+/// Languages offered in the filter (backend `language` takes a code such as `hi`).
+const workerLanguages = {
+  'en': 'English',
+  'hi': 'Hindi',
+  'te': 'Telugu',
+  'ta': 'Tamil',
+};
+
+/// Display name for a worker language, falling back to whatever the backend sent.
+String languageName(String code) => workerLanguages[code] ?? code;
+
+/// Optional narrowing on top of the requirement. Only what `GET /search/workers` supports: a star
+/// rating filter is left out because the rating scale is configurable (OPEN_QUESTIONS #40).
+class WorkerFilters {
+  const WorkerFilters({
+    this.availability,
+    this.language,
+    this.minExperienceMonths,
+  });
+
+  final AvailabilityFilter? availability;
+  final String? language;
+  final int? minExperienceMonths;
+
+  /// How many filters are active (the badge on the Filter button).
+  int get count => [
+    availability,
+    language,
+    minExperienceMonths,
+  ].where((e) => e != null).length;
+
+  @override
+  bool operator ==(Object other) =>
+      other is WorkerFilters &&
+      other.availability == availability &&
+      other.language == language &&
+      other.minExperienceMonths == minExperienceMonths;
+
+  @override
+  int get hashCode => Object.hash(availability, language, minExperienceMonths);
+}
+
 /// What the customer is searching for. Equality makes it a provider key: a changed query is a new
 /// search. [category] is the backend category code, [areaId] the service-area id.
 class WorkerQuery {
@@ -8,21 +62,24 @@ class WorkerQuery {
     required this.category,
     required this.areaId,
     this.engagement,
+    this.filters = const WorkerFilters(),
   });
 
   final String category;
   final String areaId;
   final EngagementType? engagement;
+  final WorkerFilters filters;
 
   @override
   bool operator ==(Object other) =>
       other is WorkerQuery &&
       other.category == category &&
       other.areaId == areaId &&
-      other.engagement == engagement;
+      other.engagement == engagement &&
+      other.filters == filters;
 
   @override
-  int get hashCode => Object.hash(category, areaId, engagement);
+  int get hashCode => Object.hash(category, areaId, engagement, filters);
 }
 
 class AvailabilityWindow {

@@ -21,7 +21,8 @@
 - [x] 4.2 Draft (persisted, restored on Home, clearing rules, whole-draft validation) 
 - [x] 4.2b Timing (09) / Start date (10) / Budget (11): schedule + guidance mocks behind the API toggle, SnCalendar, time-picker + date sheets, edit mode on all steps, resume card on Home; 129 new tests (350 total, 8 live skipped). NOT built: Review (module 5, route is a placeholder). TODO(final pass): optionally auto-open the builder at launch instead of the Home Resume card
 - [x] 4.3 Search - `/workers` Results screen (summary chips, infinite scroll, pull-to-refresh, empty / error / stale / footer-retry states, CancelToken on re-search), mock + real `GET /search/workers` repositories, basic card; 11 tests (361 total, 8 live skipped). Provider uses the MOCK until the catalogue returns backend category codes. NOT reachable from the UI until module 5 builds Review (open `/workers` directly)
-- [ ] 4.4 Filters  - [ ] 4.5 Card  - [ ] 4.6 Detail  - [ ] 4.7 Favourites  - [ ] 4.8 Empty
+- [x] 4.4 Filters - bottom sheet (availability window, language, minimum experience) with Apply / Reset / Close, count badge on the Filter button, filters sent to `GET /search/workers`; 6 tests. NOT built: budget filter (not a backend search param), star-rating filter (OPEN_QUESTIONS #40)
+- [ ] 4.5 Card  - [ ] 4.6 Detail  - [ ] 4.7 Favourites  - [ ] 4.8 Empty
 - [ ] 5.1 Interview request  - [ ] 5.2 Detail  - [ ] 5.3 Decision
 - [ ] 6.1 Confirm  - [ ] 6.2 Booking detail  - [ ] 6.3 List  - [ ] 6.4 Cancel
 - [ ] 7.1 PaymentService  - [ ] 7.2 Flow  - [ ] 7.3 Results  - [ ] 7.4 Recovery  - [ ] 7.5 Receipts

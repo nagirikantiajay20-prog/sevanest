@@ -43,3 +43,4 @@ Status: `OPEN` | `ANSWERED` | `ASSUMED(temporary)`. Update here; never bury in c
 | 37 | Error codes: unsupported service area; address used by an active booking; whether the area must match `/service-areas` | Backend | OPEN | Handled generically (field error / 409 dialog) |
 | 38 | Can a default address be deleted / unset? Does the first address auto-default? | Backend | OPEN | UI pre-selects "default" for the first address; switch is disabled on the current default |
 | 39 | GPS "use current location", reverse geocoding and map pin | Product | OPEN | Needs a location + geocoding provider (#15). Not built |
+| 40 | Rating scale (`RATING_SCALE_MAX`, up to 10) and the `minRating` filter | Backend | OPEN | Star filter not built; the card shows the raw average. Need the configured scale (e.g. from `/app-config`) before showing stars or filtering |

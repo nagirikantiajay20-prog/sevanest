@@ -29,6 +29,14 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
           'areaId': query.areaId,
           if (query.engagement != null)
             'engagement': engagementCode(query.engagement!),
+          if (query.filters.availability != null) ...{
+            'availableFrom': query.filters.availability!.from,
+            'availableTo': query.filters.availability!.to,
+          },
+          if (query.filters.language != null)
+            'language': query.filters.language,
+          if (query.filters.minExperienceMonths != null)
+            'minExperienceMonths': query.filters.minExperienceMonths,
         },
       ),
     );

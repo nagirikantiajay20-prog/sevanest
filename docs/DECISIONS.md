@@ -2,6 +2,8 @@
 
 | Date | Decision | Reason | Approved by |
 |---|---|---|---|
+| 2026-10-13 | Filters = availability window (morning / afternoon / evening), language, minimum experience (1 / 3 / 5+ years). NO budget filter (the search API has no budget param) and NO star-rating filter (`minRating` is on the configurable `RATING_SCALE_MAX`, up to 10) | Spec says filters limited to what the backend supports | Backend contract |
+| 2026-10-13 | Filters live in an auto-disposed provider: they apply while Results is open and a new search starts clean. Closing the sheet discards edits; Apply changes the query, which re-searches from page 1 | Spec 5.2 | Spec |
 | 2026-10-13 | Search follows the deployed Swagger, not docs/05: `GET /search/workers?category&areaId&engagement&page&limit` (page-numbered, `meta.total`), not `POST` + cursor. `PagedState.nextCursor` carries the next page number | AGENTS 2.1: deployed contract wins | Backend contract |
 | 2026-10-13 | Worker cards have NO name (backend returns anonymous cards); the card title is the category. Budget is not a search parameter, so it is not sent | Swagger `WorkerCard` / search description | Backend contract |
 | 2026-10-13 | `workerSearchRepositoryProvider` returns the mock (seeded cards) behind the dev toggle; `WorkerSearchRepositoryRemote` is built and unit-tested. Flip it when catalogue ids become backend category codes (`HOUSE_MAID`...); `areaId` is resolved from `/service-areas` by area name | Mock catalogue ids (`cook`) are not backend codes | Assumption |

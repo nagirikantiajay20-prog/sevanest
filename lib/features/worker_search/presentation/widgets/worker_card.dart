@@ -60,7 +60,7 @@ class WorkerCard extends StatelessWidget {
                     Text(_experience(l10n), style: text.bodyMedium),
                     if (worker.languages.isNotEmpty)
                       Text(
-                        worker.languages.join(', '),
+                        worker.languages.map(languageName).join(', '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: text.bodySmall,

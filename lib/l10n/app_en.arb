@@ -643,5 +643,19 @@
   "workerRatingSemantics": "Rated {rating} from {count} reviews",
   "@workerRatingSemantics": {"placeholders": {"rating": {"type": "String"}, "count": {"type": "int"}}},
   "workerAvailableWindow": "Available {start} to {end}",
-  "@workerAvailableWindow": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}}
+  "@workerAvailableWindow": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "filterTitle": "Filters",
+  "filterButton": "Filter",
+  "filterAvailability": "Available",
+  "filterMorning": "Morning (6am-12pm)",
+  "filterAfternoon": "Afternoon (12pm-5pm)",
+  "filterEvening": "Evening (5pm-9pm)",
+  "filterLanguage": "Language",
+  "filterExperience": "Experience",
+  "filterExperienceYears": "{years}+ years",
+  "@filterExperienceYears": {"placeholders": {"years": {"type": "int"}}},
+  "filterApply": "Apply",
+  "filterReset": "Reset",
+  "filterActiveSemantics": "{count} filters active",
+  "@filterActiveSemantics": {"placeholders": {"count": {"type": "int"}}}
 }
