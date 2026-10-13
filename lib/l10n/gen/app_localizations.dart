@@ -2115,6 +2115,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start over'**
   String get resumeDiscard;
+
+  /// No description provided for @resultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{category} near {area}'**
+  String resultsTitle(String category, String area);
+
+  /// No description provided for @resultsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching workers found'**
+  String get resultsEmptyTitle;
+
+  /// No description provided for @resultsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try changing your area, timing or engagement type.'**
+  String get resultsEmptyBody;
+
+  /// No description provided for @resultsEditRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit requirement'**
+  String get resultsEditRequirement;
+
+  /// No description provided for @resultsStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing earlier results'**
+  String get resultsStale;
+
+  /// No description provided for @resultsLoadMoreRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load more. Retry'**
+  String get resultsLoadMoreRetry;
+
+  /// No description provided for @workerExperienceYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{years} yrs experience'**
+  String workerExperienceYears(int years);
+
+  /// No description provided for @workerExperienceMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{months} months experience'**
+  String workerExperienceMonths(int months);
+
+  /// No description provided for @workerExperienceUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience not listed'**
+  String get workerExperienceUnknown;
+
+  /// No description provided for @workerNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get workerNew;
+
+  /// No description provided for @workerRatingSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Rated {rating} from {count} reviews'**
+  String workerRatingSemantics(String rating, int count);
+
+  /// No description provided for @workerAvailableWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Available {start} to {end}'**
+  String workerAvailableWindow(String start, String end);
 }
 
 class _AppLocalizationsDelegate

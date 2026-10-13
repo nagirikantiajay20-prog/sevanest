@@ -1132,4 +1132,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resumeDiscard => 'Start over';
+
+  @override
+  String resultsTitle(String category, String area) {
+    return '$category near $area';
+  }
+
+  @override
+  String get resultsEmptyTitle => 'No matching workers found';
+
+  @override
+  String get resultsEmptyBody =>
+      'Try changing your area, timing or engagement type.';
+
+  @override
+  String get resultsEditRequirement => 'Edit requirement';
+
+  @override
+  String get resultsStale => 'Showing earlier results';
+
+  @override
+  String get resultsLoadMoreRetry => 'Couldn\'t load more. Retry';
+
+  @override
+  String workerExperienceYears(int years) {
+    return '$years yrs experience';
+  }
+
+  @override
+  String workerExperienceMonths(int months) {
+    return '$months months experience';
+  }
+
+  @override
+  String get workerExperienceUnknown => 'Experience not listed';
+
+  @override
+  String get workerNew => 'New';
+
+  @override
+  String workerRatingSemantics(String rating, int count) {
+    return 'Rated $rating from $count reviews';
+  }
+
+  @override
+  String workerAvailableWindow(String start, String end) {
+    return 'Available $start to $end';
+  }
 }

@@ -626,5 +626,22 @@
     }
   },
   "resumeContinue": "Continue",
-  "resumeDiscard": "Start over"
+  "resumeDiscard": "Start over",
+  "resultsTitle": "{category} near {area}",
+  "@resultsTitle": {"placeholders": {"category": {"type": "String"}, "area": {"type": "String"}}},
+  "resultsEmptyTitle": "No matching workers found",
+  "resultsEmptyBody": "Try changing your area, timing or engagement type.",
+  "resultsEditRequirement": "Edit requirement",
+  "resultsStale": "Showing earlier results",
+  "resultsLoadMoreRetry": "Couldn't load more. Retry",
+  "workerExperienceYears": "{years} yrs experience",
+  "@workerExperienceYears": {"placeholders": {"years": {"type": "int"}}},
+  "workerExperienceMonths": "{months} months experience",
+  "@workerExperienceMonths": {"placeholders": {"months": {"type": "int"}}},
+  "workerExperienceUnknown": "Experience not listed",
+  "workerNew": "New",
+  "workerRatingSemantics": "Rated {rating} from {count} reviews",
+  "@workerRatingSemantics": {"placeholders": {"rating": {"type": "String"}, "count": {"type": "int"}}},
+  "workerAvailableWindow": "Available {start} to {end}",
+  "@workerAvailableWindow": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}}
 }

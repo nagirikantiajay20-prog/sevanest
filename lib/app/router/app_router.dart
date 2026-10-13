@@ -24,6 +24,7 @@ import 'package:sevanest_customer/features/service_discovery/presentation/screen
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/service_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/start_date_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/timing_screen.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/screens/results_screen.dart';
 
 GoRoute _placeholder(String path, String title) =>
     GoRoute(path: path, builder: (context, state) => PlaceholderScreen(title));
@@ -147,6 +148,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       _placeholder(Routes.support, 'Support'),
       _placeholder(Routes.interviewDetail, 'Interview'),
       _placeholder(Routes.bookingDetail, 'Booking'),
+      GoRoute(
+        path: Routes.workers,
+        builder: (context, state) => const ResultsScreen(),
+      ),
       _placeholder(Routes.workerDetail, 'Worker'),
       if (config.env == AppEnv.dev)
         GoRoute(

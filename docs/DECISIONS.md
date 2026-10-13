@@ -2,6 +2,10 @@
 
 | Date | Decision | Reason | Approved by |
 |---|---|---|---|
+| 2026-10-13 | Search follows the deployed Swagger, not docs/05: `GET /search/workers?category&areaId&engagement&page&limit` (page-numbered, `meta.total`), not `POST` + cursor. `PagedState.nextCursor` carries the next page number | AGENTS 2.1: deployed contract wins | Backend contract |
+| 2026-10-13 | Worker cards have NO name (backend returns anonymous cards); the card title is the category. Budget is not a search parameter, so it is not sent | Swagger `WorkerCard` / search description | Backend contract |
+| 2026-10-13 | `workerSearchRepositoryProvider` returns the mock (seeded cards) behind the dev toggle; `WorkerSearchRepositoryRemote` is built and unit-tested. Flip it when catalogue ids become backend category codes (`HOUSE_MAID`...); `areaId` is resolved from `/service-areas` by area name | Mock catalogue ids (`cook`) are not backend codes | Assumption |
+| 2026-10-13 | Re-search = `invalidateSelf` (Riverpod keeps the old list, a failed refresh shows the stale banner); the superseded request is cancelled via `CancelToken` | Simplest way to get SRCH-10 / SRCH-15 | Assumption |
 | 2026-10-12 | Earliest start date is TOMORROW (`minLeadDays = 1`, remote config); today and earlier are disabled | Design 10 greys out today (ringed) and the shortcuts start at "Tomorrow"; the module brief said "at least today". Rule is config-driven, unit-tested for 0 and 1 | Design |
 | 2026-10-12 | Hourly picks its DATE on the Timing screen (bottom sheet) and skips the Start date step; Start date redirects to Timing for Hourly; Budget still reads "Step 6 of 6" | Design 10 "Hourly date sheet" is drawn over the Timing screen and its summary line carries the date | Design |
 | 2026-10-12 | Budget is a min-max RANGE with slider + two ₹ fields + Flexible ("Any budget"); period (monthly/hourly) comes from the engagement, there is no period switch | Design 11; brief said "amount, period, flexible". `Budget{min,max,flexible,period}` | Design |
