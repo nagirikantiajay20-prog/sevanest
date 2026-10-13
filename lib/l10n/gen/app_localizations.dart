@@ -2571,6 +2571,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mock'**
   String get devMenuLiveOff;
+
+  /// No description provided for @interviewRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request an interview'**
+  String get interviewRequestTitle;
+
+  /// No description provided for @interviewRescheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule'**
+  String get interviewRescheduleTitle;
+
+  /// No description provided for @interviewTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like?'**
+  String get interviewTypeLabel;
+
+  /// No description provided for @interviewTypeInterview.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview'**
+  String get interviewTypeInterview;
+
+  /// No description provided for @interviewTypeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial visit'**
+  String get interviewTypeTrial;
+
+  /// No description provided for @interviewDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get interviewDateLabel;
+
+  /// No description provided for @interviewDateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a date'**
+  String get interviewDateButton;
+
+  /// No description provided for @interviewSlotLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get interviewSlotLabel;
+
+  /// No description provided for @interviewPickDateFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date to see free times.'**
+  String get interviewPickDateFirst;
+
+  /// No description provided for @interviewNoSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'No times are free on this date. Try another day.'**
+  String get interviewNoSlots;
+
+  /// No description provided for @interviewNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the worker (optional)'**
+  String get interviewNoteLabel;
+
+  /// No description provided for @interviewNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything the worker should know'**
+  String get interviewNoteHint;
+
+  /// No description provided for @interviewSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get interviewSubmit;
+
+  /// No description provided for @interviewSubmitReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new time'**
+  String get interviewSubmitReschedule;
+
+  /// No description provided for @interviewSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get interviewSubmitting;
+
+  /// No description provided for @interviewSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get interviewSent;
+
+  /// No description provided for @interviewRescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Time changed'**
+  String get interviewRescheduled;
+
+  /// No description provided for @interviewSlotTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'That time is no longer available. Pick another.'**
+  String get interviewSlotTaken;
+
+  /// No description provided for @interviewDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview'**
+  String get interviewDetailTitle;
+
+  /// No description provided for @interviewsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interviews'**
+  String get interviewsTitle;
+
+  /// No description provided for @interviewStatusRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested'**
+  String get interviewStatusRequested;
+
+  /// No description provided for @interviewStatusScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get interviewStatusScheduled;
+
+  /// No description provided for @interviewStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get interviewStatusCompleted;
+
+  /// No description provided for @interviewStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get interviewStatusCancelled;
+
+  /// No description provided for @interviewStatusDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get interviewStatusDeclined;
+
+  /// No description provided for @interviewStatusConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get interviewStatusConfirmed;
+
+  /// No description provided for @interviewStatusNotAFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a fit'**
+  String get interviewStatusNotAFit;
+
+  /// No description provided for @interviewStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get interviewStatusUnknown;
+
+  /// No description provided for @interviewCopyRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the worker to respond'**
+  String get interviewCopyRequested;
+
+  /// No description provided for @interviewCopyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide whether to confirm this worker'**
+  String get interviewCopyCompleted;
+
+  /// No description provided for @interviewCopyCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'You cancelled this request'**
+  String get interviewCopyCancelled;
+
+  /// No description provided for @interviewCopyDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'The worker couldn\'t take this request'**
+  String get interviewCopyDeclined;
+
+  /// No description provided for @interviewCopyConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'You confirmed this worker'**
+  String get interviewCopyConfirmed;
+
+  /// No description provided for @interviewCopyNotAFit.
+  ///
+  /// In en, this message translates to:
+  /// **'You marked this worker as not a fit'**
+  String get interviewCopyNotAFit;
+
+  /// No description provided for @interviewCopyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Status updated'**
+  String get interviewCopyUnknown;
+
+  /// No description provided for @interviewWhenRow.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get interviewWhenRow;
+
+  /// No description provided for @interviewTypeRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get interviewTypeRow;
+
+  /// No description provided for @interviewRequirementRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Your requirement'**
+  String get interviewRequirementRow;
+
+  /// No description provided for @interviewProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get interviewProgress;
+
+  /// No description provided for @interviewCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get interviewCancel;
+
+  /// No description provided for @interviewCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this request?'**
+  String get interviewCancelTitle;
+
+  /// No description provided for @interviewCancelBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The worker will be told.'**
+  String get interviewCancelBody;
+
+  /// No description provided for @interviewCancelKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep request'**
+  String get interviewCancelKeep;
+
+  /// No description provided for @interviewCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled'**
+  String get interviewCancelled;
+
+  /// No description provided for @interviewReschedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Reschedule'**
+  String get interviewReschedule;
+
+  /// No description provided for @interviewConfirmWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this worker'**
+  String get interviewConfirmWorker;
+
+  /// No description provided for @interviewDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a fit'**
+  String get interviewDecline;
+
+  /// No description provided for @interviewDeclineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a fit?'**
+  String get interviewDeclineTitle;
+
+  /// No description provided for @interviewDeclineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll close this request so you can look for another worker.'**
+  String get interviewDeclineBody;
+
+  /// No description provided for @interviewDeclineConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, not a fit'**
+  String get interviewDeclineConfirm;
+
+  /// No description provided for @interviewDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as not a fit'**
+  String get interviewDeclined;
+
+  /// No description provided for @interviewSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get interviewSupport;
+
+  /// No description provided for @interviewTlRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get interviewTlRequested;
+
+  /// No description provided for @interviewTlScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview scheduled'**
+  String get interviewTlScheduled;
+
+  /// No description provided for @interviewTlCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview completed'**
+  String get interviewTlCompleted;
+
+  /// No description provided for @interviewTlDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Your decision'**
+  String get interviewTlDecision;
+
+  /// No description provided for @interviewsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No interviews yet'**
+  String get interviewsEmptyTitle;
+
+  /// No description provided for @interviewsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Request an interview from a worker\'s profile.'**
+  String get interviewsEmptyBody;
+
+  /// No description provided for @interviewsFind.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a worker'**
+  String get interviewsFind;
+
+  /// No description provided for @accountInterviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Interviews'**
+  String get accountInterviews;
+
+  /// No description provided for @interviewCopyScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} on {date}, {time}'**
+  String interviewCopyScheduled(String kind, String date, String time);
+
+  /// No description provided for @interviewWhenValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, {time}'**
+  String interviewWhenValue(String date, String time);
 }
 
 class _AppLocalizationsDelegate

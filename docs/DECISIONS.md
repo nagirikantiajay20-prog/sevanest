@@ -2,6 +2,12 @@
 
 | Date | Decision | Reason | Approved by |
 |---|---|---|---|
+| 2026-10-13 | Module 5 is built on the ASSUMED docs/05 contract: `POST /interviews` (Idempotency-Key), `GET /interviews`, `GET /interviews/{id}`, `POST .../cancel`, `POST .../decision {decision:'decline'}`, plus assumed `POST .../reschedule` and `GET /workers/{id}/slots?date=` | The deployed Swagger has none; blocked items are in BACKEND_REQUESTS | Assumption |
+| 2026-10-13 | Slots are one hour long, hourly starts inside the worker's availability window (09:00-18:00 when none), today needs 1 h notice; dates run today..+14 days | No backend slot or window config | Assumption |
+| 2026-10-13 | Interview and Trial are both offered (module doc: "only if backend offers both") | Cannot ask the backend | Assumption |
+| 2026-10-13 | Reschedule pops back to the existing detail instead of replacing the form with a second detail | Avoids two stacked copies of the same screen | Deviation from modules/07 |
+| 2026-10-13 | `/interviews` has no Bookings-tab segment yet (module 6 builds that tab): it is reachable from the Account tab and from the Home interview card | Entry points | Deferred |
+| 2026-10-13 | The mock grabs the 17:00 slot once so the 409 path can be seen on a device; the dev menu's empty mode shows the empty list | Dev ergonomics | Dev only |
 | 2026-10-13 | `MockApiState.live`: stg/prod always use the real repositories where an endpoint exists; dev defaults to mocks and has a Live/Mock chip in the dev menu | Prod must never show seeded workers, reviews, bookings or prices | Product rule |
 | 2026-10-13 | Live categories come from `/service-categories` (`code` = id); every engagement is offered and the Budget step is always shown because the backend states neither | Swagger | Backend contract |
 | 2026-10-13 | Live: no price guidance (card hidden on 404), no worker reviews, Home = new-customer view. Nothing is invented | No endpoints (BACKEND_REQUESTS 1, 4, 7) | Backend gap |

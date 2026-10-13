@@ -1386,4 +1386,198 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get devMenuLiveOff => 'Mock';
+
+  @override
+  String get interviewRequestTitle => 'Request an interview';
+
+  @override
+  String get interviewRescheduleTitle => 'Reschedule';
+
+  @override
+  String get interviewTypeLabel => 'What would you like?';
+
+  @override
+  String get interviewTypeInterview => 'Interview';
+
+  @override
+  String get interviewTypeTrial => 'Trial visit';
+
+  @override
+  String get interviewDateLabel => 'Date';
+
+  @override
+  String get interviewDateButton => 'Choose a date';
+
+  @override
+  String get interviewSlotLabel => 'Time';
+
+  @override
+  String get interviewPickDateFirst => 'Pick a date to see free times.';
+
+  @override
+  String get interviewNoSlots =>
+      'No times are free on this date. Try another day.';
+
+  @override
+  String get interviewNoteLabel => 'Note for the worker (optional)';
+
+  @override
+  String get interviewNoteHint => 'Anything the worker should know';
+
+  @override
+  String get interviewSubmit => 'Send request';
+
+  @override
+  String get interviewSubmitReschedule => 'Confirm new time';
+
+  @override
+  String get interviewSubmitting => 'Sending...';
+
+  @override
+  String get interviewSent => 'Request sent';
+
+  @override
+  String get interviewRescheduled => 'Time changed';
+
+  @override
+  String get interviewSlotTaken =>
+      'That time is no longer available. Pick another.';
+
+  @override
+  String get interviewDetailTitle => 'Interview';
+
+  @override
+  String get interviewsTitle => 'Interviews';
+
+  @override
+  String get interviewStatusRequested => 'Requested';
+
+  @override
+  String get interviewStatusScheduled => 'Scheduled';
+
+  @override
+  String get interviewStatusCompleted => 'Completed';
+
+  @override
+  String get interviewStatusCancelled => 'Cancelled';
+
+  @override
+  String get interviewStatusDeclined => 'Declined';
+
+  @override
+  String get interviewStatusConfirmed => 'Confirmed';
+
+  @override
+  String get interviewStatusNotAFit => 'Not a fit';
+
+  @override
+  String get interviewStatusUnknown => 'Updated';
+
+  @override
+  String get interviewCopyRequested => 'Waiting for the worker to respond';
+
+  @override
+  String get interviewCopyCompleted => 'Decide whether to confirm this worker';
+
+  @override
+  String get interviewCopyCancelled => 'You cancelled this request';
+
+  @override
+  String get interviewCopyDeclined => 'The worker couldn\'t take this request';
+
+  @override
+  String get interviewCopyConfirmed => 'You confirmed this worker';
+
+  @override
+  String get interviewCopyNotAFit => 'You marked this worker as not a fit';
+
+  @override
+  String get interviewCopyUnknown => 'Status updated';
+
+  @override
+  String get interviewWhenRow => 'When';
+
+  @override
+  String get interviewTypeRow => 'Type';
+
+  @override
+  String get interviewRequirementRow => 'Your requirement';
+
+  @override
+  String get interviewProgress => 'Progress';
+
+  @override
+  String get interviewCancel => 'Cancel request';
+
+  @override
+  String get interviewCancelTitle => 'Cancel this request?';
+
+  @override
+  String get interviewCancelBody => 'The worker will be told.';
+
+  @override
+  String get interviewCancelKeep => 'Keep request';
+
+  @override
+  String get interviewCancelled => 'Request cancelled';
+
+  @override
+  String get interviewReschedule => 'Reschedule';
+
+  @override
+  String get interviewConfirmWorker => 'Confirm this worker';
+
+  @override
+  String get interviewDecline => 'Not a fit';
+
+  @override
+  String get interviewDeclineTitle => 'Not a fit?';
+
+  @override
+  String get interviewDeclineBody =>
+      'We\'ll close this request so you can look for another worker.';
+
+  @override
+  String get interviewDeclineConfirm => 'Yes, not a fit';
+
+  @override
+  String get interviewDeclined => 'Marked as not a fit';
+
+  @override
+  String get interviewSupport => 'Contact support';
+
+  @override
+  String get interviewTlRequested => 'Request sent';
+
+  @override
+  String get interviewTlScheduled => 'Interview scheduled';
+
+  @override
+  String get interviewTlCompleted => 'Interview completed';
+
+  @override
+  String get interviewTlDecision => 'Your decision';
+
+  @override
+  String get interviewsEmptyTitle => 'No interviews yet';
+
+  @override
+  String get interviewsEmptyBody =>
+      'Request an interview from a worker\'s profile.';
+
+  @override
+  String get interviewsFind => 'Find a worker';
+
+  @override
+  String get accountInterviews => 'Interviews';
+
+  @override
+  String interviewCopyScheduled(String kind, String date, String time) {
+    return '$kind on $date, $time';
+  }
+
+  @override
+  String interviewWhenValue(String date, String time) {
+    return '$date, $time';
+  }
 }

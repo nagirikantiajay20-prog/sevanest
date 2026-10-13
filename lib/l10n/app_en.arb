@@ -784,5 +784,90 @@
   "logoutConfirmBody": "You will need to sign in again with your mobile number.",
   "devMenuLive": "Backend data",
   "devMenuLiveOn": "Live",
-  "devMenuLiveOff": "Mock"
+  "devMenuLiveOff": "Mock",
+  "interviewRequestTitle": "Request an interview",
+  "interviewRescheduleTitle": "Reschedule",
+  "interviewTypeLabel": "What would you like?",
+  "interviewTypeInterview": "Interview",
+  "interviewTypeTrial": "Trial visit",
+  "interviewDateLabel": "Date",
+  "interviewDateButton": "Choose a date",
+  "interviewSlotLabel": "Time",
+  "interviewPickDateFirst": "Pick a date to see free times.",
+  "interviewNoSlots": "No times are free on this date. Try another day.",
+  "interviewNoteLabel": "Note for the worker (optional)",
+  "interviewNoteHint": "Anything the worker should know",
+  "interviewSubmit": "Send request",
+  "interviewSubmitReschedule": "Confirm new time",
+  "interviewSubmitting": "Sending...",
+  "interviewSent": "Request sent",
+  "interviewRescheduled": "Time changed",
+  "interviewSlotTaken": "That time is no longer available. Pick another.",
+  "interviewDetailTitle": "Interview",
+  "interviewsTitle": "Interviews",
+  "interviewStatusRequested": "Requested",
+  "interviewStatusScheduled": "Scheduled",
+  "interviewStatusCompleted": "Completed",
+  "interviewStatusCancelled": "Cancelled",
+  "interviewStatusDeclined": "Declined",
+  "interviewStatusConfirmed": "Confirmed",
+  "interviewStatusNotAFit": "Not a fit",
+  "interviewStatusUnknown": "Updated",
+  "interviewCopyRequested": "Waiting for the worker to respond",
+  "interviewCopyCompleted": "Decide whether to confirm this worker",
+  "interviewCopyCancelled": "You cancelled this request",
+  "interviewCopyDeclined": "The worker couldn't take this request",
+  "interviewCopyConfirmed": "You confirmed this worker",
+  "interviewCopyNotAFit": "You marked this worker as not a fit",
+  "interviewCopyUnknown": "Status updated",
+  "interviewWhenRow": "When",
+  "interviewTypeRow": "Type",
+  "interviewRequirementRow": "Your requirement",
+  "interviewProgress": "Progress",
+  "interviewCancel": "Cancel request",
+  "interviewCancelTitle": "Cancel this request?",
+  "interviewCancelBody": "The worker will be told.",
+  "interviewCancelKeep": "Keep request",
+  "interviewCancelled": "Request cancelled",
+  "interviewReschedule": "Reschedule",
+  "interviewConfirmWorker": "Confirm this worker",
+  "interviewDecline": "Not a fit",
+  "interviewDeclineTitle": "Not a fit?",
+  "interviewDeclineBody": "We'll close this request so you can look for another worker.",
+  "interviewDeclineConfirm": "Yes, not a fit",
+  "interviewDeclined": "Marked as not a fit",
+  "interviewSupport": "Contact support",
+  "interviewTlRequested": "Request sent",
+  "interviewTlScheduled": "Interview scheduled",
+  "interviewTlCompleted": "Interview completed",
+  "interviewTlDecision": "Your decision",
+  "interviewsEmptyTitle": "No interviews yet",
+  "interviewsEmptyBody": "Request an interview from a worker's profile.",
+  "interviewsFind": "Find a worker",
+  "accountInterviews": "Interviews",
+  "interviewCopyScheduled": "{kind} on {date}, {time}",
+  "@interviewCopyScheduled": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewWhenValue": "{date}, {time}",
+  "@interviewWhenValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

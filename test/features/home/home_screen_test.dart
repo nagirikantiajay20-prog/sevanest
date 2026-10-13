@@ -193,6 +193,9 @@ void main() {
       expect(find.text('Interview with Sunita R.'), findsOneWidget);
       await tapKey(t, 'home_interview_card');
       expect(location(t), '/interviews/iv_301');
+      // The real detail screen now loads; let its request finish.
+      await t.pump(const Duration(seconds: 1));
+      await t.pumpAndSettle();
     });
 
     testWidgets('sections the backend omits are hidden (no placeholders)', (

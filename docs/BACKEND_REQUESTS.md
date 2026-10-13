@@ -60,9 +60,22 @@ missing or unclear. Until then the app shows nothing rather than inventing data.
 8. **Customer profile photo.** Design 04 shows "Add a photo". Only `/workers/me/photo` exists. Please
    add an equivalent for customers (`POST /customers/me/photo` -> upload URL, `.../confirm`, `GET`) or
    tell us the photo is out of scope for V1.
-9. **Interviews / trial.** The PRD flow is Search -> worker profile -> interview/trial -> booking.
-   The Swagger has no interview endpoints (`POST /interviews`, list, detail, decision). Module 5 is
-   blocked on these. Please publish them or tell us the flow is booking-only in V1.
+9. **Interviews / trial (module 5 is built and waiting for this).** The Swagger has no interview
+   endpoints. The app calls the contract below; please implement it or send the real one:
+   - `POST /interviews` (header `Idempotency-Key`) body `{ workerId, type: "interview"|"trial",
+     date: "YYYY-MM-DD", slot: "HH:mm", note?, requirement: {serviceId, engagement, address,
+     timing, startDate, budget} }` -> the interview. `409` when the slot is taken, `404` when the
+     worker is no longer visible.
+   - `GET /interviews?page&limit` (+ `meta.total`), `GET /interviews/{id}`.
+   - Interview object: `{ id, status: REQUESTED|SCHEDULED|COMPLETED|CANCELLED|DECLINED|CONFIRMED|
+     NOT_A_FIT, type, workerId, worker?: <the search card>, date, slot, note, requirement,
+     timeline?: [{title, state: done|current|upcoming|failed, at}], allowedActions:
+     ["cancel","reschedule","confirm","decline"] }`. The app shows only the actions listed.
+   - `POST /interviews/{id}/cancel {reason?}`, `POST /interviews/{id}/decision
+     {decision:"decline"}`, `POST /interviews/{id}/reschedule {date, slot}`.
+   - `GET /workers/{id}/slots?date=YYYY-MM-DD` -> free start times (`["09:00", ...]`), and the
+     booking horizon (we assume 14 days). Is an interview one hour? If V1 has no interview
+     step, tell us and we will drop module 5.
 10. **Address label, second line, state.** The design shows labels ("Home", "Parents' home"), but
     `CreateAddressDto` has only `line, area, city, pincode, latitude, longitude, isDefault`. Please add
     `label` (nullable string), and optionally `line2`/`state`, or confirm they are not planned.

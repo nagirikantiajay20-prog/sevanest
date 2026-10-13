@@ -48,6 +48,13 @@ class AccountScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(Routes.addresses),
           ),
+          ListTile(
+            key: const Key('account_interviews_tile'),
+            leading: const Icon(Icons.event_available_outlined),
+            title: Text(l10n.accountInterviews),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.interviews),
+          ),
           const Divider(),
           ListTile(
             key: const Key('account_logout_btn'),

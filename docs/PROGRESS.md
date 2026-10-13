@@ -27,7 +27,10 @@
 - [x] 4.7 Favourites - shared optimistic heart with rollback + snackbar, one request per tap burst, shortlist tab (`/shortlist`) with pull-to-refresh, paging, remove + Undo, unavailable rows, empty state
 - [x] 4.8 Empty search - criteria chips, Edit requirement (back to Review), Retry
 - [x] 4.9 Review (step 7) - requirement card with per-row Edit (edit mode, later values kept), Find workers validates the whole draft then opens Results once (module-04 doc, DISC-14..17); 21 new tests (Flow B + C), 388 total, 8 live skipped
-- [ ] 5.1 Interview request  - [ ] 5.2 Detail  - [ ] 5.3 Decision
+- [x] 5.1 Interview request - `/interviews/new?workerId=` (type, date <= today..+14 d, hourly slots, note <= 300, Submit once with one Idempotency-Key per form, 409 slot-taken, worker-gone dialog, lost-answer recovery, discard dialog); reschedule mode (`&rescheduleId=`)
+- [x] 5.2 Detail / list - `/interviews/:id` (status chip, backend timeline or a template, only `allowedActions` buttons, cancel with confirm, support) and `/interviews` (also reachable from the Account tab)
+- [x] 5.3 Decision - Confirm worker -> `/bookings/confirm?interviewId=` (placeholder until module 6), Not a fit -> Find another
+  - Runs on the ASSUMED contract of docs/05 (the deployed Swagger has no interview endpoints): mock in dev, `InterviewRepositoryRemote` in stg/prod answers 404 until the backend publishes them (docs/BACKEND_REQUESTS.md item 7). 33 new tests, 430 total
 - [ ] 6.1 Confirm  - [ ] 6.2 Booking detail  - [ ] 6.3 List  - [ ] 6.4 Cancel
 - [ ] 7.1 PaymentService  - [ ] 7.2 Flow  - [ ] 7.3 Results  - [ ] 7.4 Recovery  - [ ] 7.5 Receipts
 - [ ] 8.1 Active service  - [ ] 8.2 History  - [ ] 8.3 Rating

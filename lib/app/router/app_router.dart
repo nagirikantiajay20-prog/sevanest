@@ -19,6 +19,9 @@ import 'package:sevanest_customer/features/customer_profile/presentation/screens
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/profile_setup_screen.dart';
 import 'package:sevanest_customer/features/favourites/presentation/screens/favourites_screen.dart';
 import 'package:sevanest_customer/features/home/presentation/screens/home_screen.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_detail_screen.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_request_screen.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/screens/interviews_list_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/budget_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/engagement_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/location_screen.dart';
@@ -157,9 +160,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       _placeholder(Routes.notifications, 'Notifications'),
       _placeholder(Routes.support, 'Support'),
-      // Module 07 replaces these; `new` must come before `:id`.
-      _placeholder(Routes.interviewNew, 'Request interview'),
-      _placeholder(Routes.interviewDetail, 'Interview'),
+      // `new` must come before `:id`.
+      GoRoute(
+        path: Routes.interviews,
+        builder: (context, state) => const InterviewsListScreen(),
+      ),
+      GoRoute(
+        path: Routes.interviewNew,
+        builder: (context, state) => InterviewRequestScreen(
+          workerId: state.uri.queryParameters['workerId'] ?? '',
+          rescheduleId: state.uri.queryParameters['rescheduleId'],
+        ),
+      ),
+      GoRoute(
+        path: Routes.interviewDetail,
+        builder: (context, state) =>
+            InterviewDetailScreen(interviewId: state.pathParameters['id']!),
+      ),
+      // Modules 08 and 12 replace these.
+      _placeholder(Routes.bookingConfirm, 'Confirm booking'),
+      _placeholder(Routes.supportNew, 'New ticket'),
       _placeholder(Routes.bookingDetail, 'Booking'),
       GoRoute(
         path: Routes.workers,
