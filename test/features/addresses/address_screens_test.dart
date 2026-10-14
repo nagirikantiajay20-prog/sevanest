@@ -63,7 +63,7 @@ void main() {
   Future<void> openList(WidgetTester t) async {
     await t.tap(find.byKey(const Key('nav_account')));
     await t.pumpAndSettle();
-    await t.tap(find.byKey(const Key('account_addresses_tile')));
+    await t.tap(find.byKey(const Key('account_addresses_btn')));
     await t.pumpAndSettle();
   }
 
@@ -106,7 +106,7 @@ void main() {
       await launch(t);
       await t.tap(find.byKey(const Key('nav_account')));
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const Key('account_addresses_tile')));
+      await t.tap(find.byKey(const Key('account_addresses_btn')));
       // Home already warmed the address list, so the screen shows data straight away.
       await t.pumpAndSettle();
 

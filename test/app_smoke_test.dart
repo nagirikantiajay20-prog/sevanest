@@ -32,7 +32,7 @@ void main() {
 
       await t.tap(find.byKey(const Key('nav_account')));
       await t.pumpAndSettle();
-      expect(find.byKey(const Key('account_profile_tile')), findsOneWidget);
+      expect(find.byKey(const Key('account_profile_btn')), findsOneWidget);
     },
   );
 }

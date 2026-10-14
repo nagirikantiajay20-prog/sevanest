@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/app/app.dart';
+import 'package:sevanest_customer/app/session_reset_host.dart';
 import 'package:sevanest_customer/app/theme/app_theme.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
@@ -143,8 +144,7 @@ Widget testRootApp({
   SafetyRepository? safety,
   PushService? push,
   List<Override> overrides = const [],
-}) => ProviderScope(
-  retry: (_, _) => null,
+}) => SessionResetHost(
   overrides: [
     appConfigProvider.overrideWithValue(AppConfig.dev),
     sessionStoreProvider.overrideWithValue(store),

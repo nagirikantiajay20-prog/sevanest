@@ -60,6 +60,10 @@ void main() {
       'Cancel keeps the session; Confirm calls logout and signs out',
       (t) async {
         useTestPhone(t);
+        t.view.physicalSize = const Size(
+          1170,
+          4200,
+        ); // the Account list is long
         final auth = FakeAuthRepository()..onProfile = () async => true;
         await t.pumpWidget(
           testRootApp(
@@ -73,14 +77,14 @@ void main() {
 
         await t.tap(find.byKey(const Key('account_logout_btn')));
         await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('dialog_cancel_btn')));
+        await t.tap(find.byKey(const Key('account_logout_cancel_btn')));
         await t.pumpAndSettle();
         expect(auth.logoutCalls, 0);
         expect(find.byKey(const Key('account_logout_btn')), findsOneWidget);
 
         await t.tap(find.byKey(const Key('account_logout_btn')));
         await t.pumpAndSettle();
-        await t.tap(find.byKey(const Key('logout_confirm_btn')));
+        await t.tap(find.byKey(const Key('account_logout_confirm_btn')));
         await t.pumpAndSettle();
         expect(auth.logoutCalls, 1);
         expect(find.byKey(const Key('login_mobile_field')), findsOneWidget);

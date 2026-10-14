@@ -209,6 +209,7 @@ Future<bool> confirmDialog(
   required String confirmLabel,
   required String cancelLabel,
   required Key confirmKey,
+  Key cancelKey = const Key('dialog_cancel_btn'),
   bool destructive = false,
 }) async {
   final ok = await showDialog<bool>(
@@ -218,7 +219,7 @@ Future<bool> confirmDialog(
       content: Text(body),
       actions: [
         TextButton(
-          key: const Key('dialog_cancel_btn'),
+          key: cancelKey,
           onPressed: () => Navigator.of(ctx).pop(false),
           child: Text(cancelLabel),
         ),

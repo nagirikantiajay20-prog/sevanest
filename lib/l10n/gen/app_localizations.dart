@@ -2581,7 +2581,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Log out?'**
+  /// **'Log out of SevaNest?'**
   String get logoutConfirmTitle;
 
   /// No description provided for @logoutConfirmBody.
@@ -5955,6 +5955,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your review is too long. Please shorten it to {max} characters.'**
   String ratingReviewTooLong(int max);
+
+  /// No description provided for @accountShortlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortlist'**
+  String get accountShortlist;
+
+  /// No description provided for @accountBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'My bookings'**
+  String get accountBookings;
+
+  /// No description provided for @accountLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get accountLanguage;
+
+  /// No description provided for @accountTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get accountTerms;
+
+  /// No description provided for @accountPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get accountPrivacy;
+
+  /// No description provided for @accountAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About SevaNest'**
+  String get accountAbout;
+
+  /// No description provided for @accountVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String accountVersion(String version);
+
+  /// No description provided for @accountLegalUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available yet. We\'ll publish this soon.'**
+  String get accountLegalUnavailable;
 }
 
 class _AppLocalizationsDelegate

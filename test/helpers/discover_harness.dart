@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
@@ -93,6 +94,7 @@ Future<DiscoverEnv> launchDiscover(
   SupportRepository? support,
   SafetyRepository? safety,
   PushService? push,
+  CustomerProfileRepository? profiles,
   List<Override> overrides = const [],
 }) async {
   useTestPhone(t);
@@ -122,7 +124,7 @@ Future<DiscoverEnv> launchDiscover(
         addressRepositoryProvider.overrideWithValue(addr),
         locationServiceProvider.overrideWithValue(location),
         customerProfileRepositoryProvider.overrideWithValue(
-          FakeProfileRepository(),
+          profiles ?? FakeProfileRepository(),
         ),
       ],
     ),

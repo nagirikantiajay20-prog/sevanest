@@ -759,7 +759,7 @@ void main() {
           overrides: [interviewRepositoryProvider.overrideWithValue(_Spy())],
         );
         await env.tapKey('nav_account');
-        await env.tapKey('account_interviews_tile');
+        await env.tapKey('account_interviews_btn');
         expect(env.where, '/interviews');
         await settle(t); // let the list request finish
       });

@@ -97,6 +97,7 @@ void main() {
       final order = <String>[];
       auth.onLogout = () async => order.add('logout:${push.unregisterCalls}');
       useTestPhone(t);
+      t.view.physicalSize = const Size(1170, 4200); // the Account list is long
       await t.pumpWidget(
         testRootApp(
           store: InMemorySessionStore((access: 'a', refresh: 'r')),
@@ -109,7 +110,7 @@ void main() {
       await settle(t);
       await t.tap(k('account_logout_btn'));
       await settle(t);
-      await t.tap(k('logout_confirm_btn'));
+      await t.tap(k('account_logout_confirm_btn'));
       await settle(t);
       expect(push.unregisterCalls, 1);
       // unregister ran first: by the time POST /auth/logout ran the count was already 1.
@@ -283,7 +284,7 @@ void main() {
       expect(find.text('Off'), findsOneWidget);
       expect(k('notif_open_settings_btn'), findsOneWidget);
       // The app itself works.
-      expect(k('account_profile_tile'), findsOneWidget);
+      expect(k('account_profile_btn'), findsOneWidget);
       await t.tap(k('notif_open_settings_btn'));
       await t.pump();
       expect(push.settingsCalls, 1);
@@ -316,7 +317,7 @@ void main() {
         );
         await env.go('/account');
         await settle(t);
-        expect(k('account_notifications_tile'), findsOneWidget);
+        expect(k('account_notifications_btn'), findsOneWidget);
         expect(k('account_notifications_status'), findsNothing);
         expect(k('notif_open_settings_btn'), findsNothing);
       },

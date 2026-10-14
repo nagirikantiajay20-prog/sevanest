@@ -782,7 +782,7 @@ void main() {
     testWidgets('account tab links to Transactions', (t) async {
       final env = await open(t, route: '/home');
       await tapKey(t, 'nav_account');
-      await tapKey(t, 'account_transactions_tile');
+      await tapKey(t, 'account_transactions_btn');
       expect(env.where, '/transactions');
     });
 

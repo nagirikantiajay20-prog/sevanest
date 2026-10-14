@@ -793,7 +793,7 @@
   "workerSkillsLabel": "Skills",
   "addressLocationFailed": "Couldn't get your location. Check the location permission, or fill in the address yourself.",
   "logout": "Log out",
-  "logoutConfirmTitle": "Log out?",
+  "logoutConfirmTitle": "Log out of SevaNest?",
   "logoutConfirmBody": "You will need to sign in again with your mobile number.",
   "devMenuLive": "Backend data",
   "devMenuLiveOn": "Live",
@@ -1621,5 +1621,20 @@
         "type": "int"
       }
     }
-  }
+  },
+  "accountShortlist": "Shortlist",
+  "accountBookings": "My bookings",
+  "accountLanguage": "Language",
+  "accountTerms": "Terms of Service",
+  "accountPrivacy": "Privacy Policy",
+  "accountAbout": "About SevaNest",
+  "accountVersion": "Version {version}",
+  "@accountVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "accountLegalUnavailable": "Not available yet. We'll publish this soon."
 }

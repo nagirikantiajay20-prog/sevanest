@@ -353,3 +353,8 @@ the meantime.
 - The Budget step is always shown and every engagement type is offered for every category, because the backend states neither.
 - Force-update and maintenance screens are not built (OPEN_QUESTIONS #30).
 
+
+## Module 14: Account & Settings (2026-10-14)
+
+55. **Legal URLs** - `GET /app-config` -> `legal.terms.url` / `legal.privacy.url` are null today. The Account screen opens them in the in-app browser when set; please publish both (OPEN_QUESTIONS #17).
+56. **Delete account** - no endpoint or retention policy is defined (OPEN_QUESTIONS #18). The row is hidden; tell us the route and what happens to bookings / payments before we build it.

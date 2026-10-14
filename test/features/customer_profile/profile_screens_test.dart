@@ -48,7 +48,7 @@ void main() {
   Future<void> openProfile(WidgetTester t) async {
     await t.tap(find.byKey(const Key('nav_account')));
     await t.pumpAndSettle();
-    await t.tap(find.byKey(const Key('account_profile_tile')));
+    await t.tap(find.byKey(const Key('account_profile_btn')));
     await t.pumpAndSettle();
   }
 

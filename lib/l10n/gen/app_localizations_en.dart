@@ -1392,7 +1392,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'Log out';
 
   @override
-  String get logoutConfirmTitle => 'Log out?';
+  String get logoutConfirmTitle => 'Log out of SevaNest?';
 
   @override
   String get logoutConfirmBody =>
@@ -3222,4 +3222,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String ratingReviewTooLong(int max) {
     return 'Your review is too long. Please shorten it to $max characters.';
   }
+
+  @override
+  String get accountShortlist => 'Shortlist';
+
+  @override
+  String get accountBookings => 'My bookings';
+
+  @override
+  String get accountLanguage => 'Language';
+
+  @override
+  String get accountTerms => 'Terms of Service';
+
+  @override
+  String get accountPrivacy => 'Privacy Policy';
+
+  @override
+  String get accountAbout => 'About SevaNest';
+
+  @override
+  String accountVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get accountLegalUnavailable =>
+      'Not available yet. We\'ll publish this soon.';
 }

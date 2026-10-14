@@ -688,7 +688,7 @@ void main() {
       );
       await t.tap(k('nav_account'));
       await settle(t);
-      await env.tapKey('account_history_tile');
+      await env.tapKey('account_history_btn');
       await settle(t);
       expect(where(t), '/services/history');
       expect(k('history_card_c2'), findsOneWidget);
@@ -932,7 +932,7 @@ void main() {
         await settle(t);
         await t.tap(k('nav_account'));
         await settle(t);
-        await env.tapKey('account_history_tile');
+        await env.tapKey('account_history_btn');
         await settle(t);
         expect(where(t), '/services/history');
         expect(k('history_card_bk_2048'), findsOneWidget);
