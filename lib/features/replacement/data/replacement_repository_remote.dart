@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
+import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 
 class ReplacementRepositoryRemote implements ReplacementRepository {
   ReplacementRepositoryRemote(this._dio);
@@ -38,12 +39,34 @@ class ReplacementRepositoryRemote implements ReplacementRepository {
   );
 
   @override
-  Future<ReplacementPage> list({String? cursor}) async {
+  Future<ReplacementPage> list({String? cursor, String? bookingId}) async {
+    final (body, next) = await _page('/replacement-requests', cursor, {
+      'bookingId': ?bookingId,
+    });
+    return ReplacementPage([
+      for (final m in listOf(body)) ?Replacement.fromJson(m),
+    ], next);
+  }
+
+  @override
+  Future<WorkerPage> alternatives(String id, {String? cursor}) async {
+    final (body, next) = await _page(_path(id, '/alternatives'), cursor);
+    return WorkerPage([
+      for (final m in listOf(body)) ?WorkerSummary.fromJson(m),
+    ], next);
+  }
+
+  /// One numbered page; the next page number is the cursor while `meta.total` says more is left.
+  Future<(Object?, String?)> _page(
+    String path,
+    String? cursor, [
+    Map<String, Object> extra = const {},
+  ]) async {
     final page = int.tryParse(cursor ?? '') ?? 1;
     final res = await guarded(
       () => _dio.get<dynamic>(
-        '/replacement-requests',
-        queryParameters: {'page': page, 'limit': pageSize},
+        path,
+        queryParameters: {'page': page, 'limit': pageSize, ...extra},
       ),
     );
     final body = res.data;
@@ -51,9 +74,7 @@ class ReplacementRepositoryRemote implements ReplacementRepository {
     final total = meta is Map && meta['total'] is num
         ? (meta['total'] as num).toInt()
         : 0;
-    return ReplacementPage([
-      for (final m in listOf(body)) ?Replacement.fromJson(m),
-    ], page * pageSize < total ? '${page + 1}' : null);
+    return (body, page * pageSize < total ? '${page + 1}' : null);
   }
 
   @override

@@ -77,8 +77,6 @@ void main() {
         expect(r.id, isNotEmpty);
         expect(r.bookingId, isNotEmpty);
         expect(r.status, isNot(ReplacementStatus.unknown));
-        // The customer view carries no alternatives (BACKEND_REQUESTS 39).
-        expect(r.alternatives, isEmpty);
       }
       if (mine.items.isNotEmpty) {
         final one = await repo.get(mine.items.first.id);

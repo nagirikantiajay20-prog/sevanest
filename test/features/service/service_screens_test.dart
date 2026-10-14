@@ -54,15 +54,43 @@ class _Att implements AttendanceRepository {
     );
   }
 
+  AttendanceSummary? summaryOverride;
+
   @override
   Future<AttendanceSummary> summary(String bookingId, String month) async {
     int c(AttendanceStatus s) => entries.where((e) => e.status == s).length;
-    return AttendanceSummary(
-      month: month,
-      present: c(AttendanceStatus.present),
-      absent: c(AttendanceStatus.absent),
-      exception: c(AttendanceStatus.exception),
+    return summaryOverride ??
+        AttendanceSummary(
+          month: month,
+          present: c(AttendanceStatus.present),
+          absent: c(AttendanceStatus.absent),
+          exception: c(AttendanceStatus.exception),
+          late: c(AttendanceStatus.late),
+          leave: c(AttendanceStatus.leave),
+        );
+  }
+
+  final raised = <(String, String, String)>[];
+  Object? raiseFails;
+
+  @override
+  Future<AttendanceEntry> raiseException(
+    String bookingId, {
+    required String date,
+    required String note,
+    required String idempotencyKey,
+  }) async {
+    final f = raiseFails;
+    if (f != null) throw f;
+    raised.add((bookingId, date, note));
+    final e = AttendanceEntry(
+      id: date,
+      date: date,
+      status: AttendanceStatus.exception,
+      note: note,
     );
+    entries = [e, ...entries];
+    return e;
   }
 }
 
@@ -110,6 +138,28 @@ class _Bookings implements BookingRepository {
   List<Booking> items;
   int pageSize = 20;
   Object? listFails;
+  HistoryFilter? lastFilter;
+  final rebooked = <String>[];
+
+  @override
+  Future<BookingPage> history(HistoryFilter filter, {String? cursor}) {
+    lastFilter = filter;
+    return list(cursor: cursor);
+  }
+
+  @override
+  Future<HistorySummary> historySummary(HistoryFilter filter) async =>
+      HistorySummary(
+        totalServices: items.length,
+        distinctWorkers: 2,
+        totalSpent: 12500,
+      );
+
+  @override
+  Future<Booking> rebook(String bookingId, {DateTime? startDate}) async {
+    rebooked.add(bookingId);
+    return _booking('new1', BookingStatus.newRequest);
+  }
 
   @override
   Future<BookingPage> list({String? cursor}) async {
@@ -139,9 +189,13 @@ Booking _booking(
   String id,
   BookingStatus status, {
   Set<BookingAction>? actions,
+  int? ratingScore,
+  WorkerIdentity? identity,
 }) => Booking(
   id: id,
   status: status,
+  ratingScore: ratingScore,
+  identity: identity,
   categoryName: 'Cook',
   engagement: EngagementType.fullTime,
   workerId: 'cook-7',
@@ -216,6 +270,104 @@ void main() {
       GoRouter.of(t.element(find.byType(Scaffold).first)).pop();
 
   group('active service (10.1)', () {
+    testWidgets(
+      'LATE and LEAVE rows, check times, window and the worker name',
+      (t) async {
+        att.entries = [
+          AttendanceEntry(
+            id: 'l',
+            date: '2026-10-09',
+            status: AttendanceStatus.late,
+            checkInAt: DateTime(2026, 10, 9, 8, 25),
+            checkOutAt: DateTime(2026, 10, 9, 12, 5),
+          ),
+          _e('2026-10-08', AttendanceStatus.leave),
+        ];
+        att.summaryOverride = const AttendanceSummary(
+          month: '2026-10',
+          present: 4,
+          absent: 0,
+          exception: 0,
+          late: 2,
+          leave: 1,
+          scheduledFrom: '08:00',
+          scheduledTo: '12:00',
+        );
+        books.items = [
+          _booking(
+            'a1',
+            BookingStatus.active,
+            identity: const WorkerIdentity(
+              displayName: 'Ramesh K.',
+              initials: 'RK',
+            ),
+          ),
+        ];
+        await open(t, '/services/current?bookingId=a1');
+        expect(find.text('Ramesh K.'), findsOneWidget);
+        expect(find.text('Scheduled 8 AM – 12 PM'), findsOneWidget);
+        Finder inRow(String d, String s) =>
+            find.descendant(of: k('attendance_row_$d'), matching: find.text(s));
+        expect(inRow('2026-10-09', 'Late'), findsOneWidget);
+        expect(inRow('2026-10-08', 'On leave'), findsOneWidget);
+        expect(
+          find.text('In 8:25 AM · Out 12:05 PM'),
+          findsNWidgets(2),
+        ); // today + row
+        expect(k('attendance_times_2026-10-08'), findsNothing);
+        final card = find.descendant(
+          of: k('service_summary_card'),
+          matching: find.text('2'),
+        );
+        expect(card, findsOneWidget);
+      },
+    );
+
+    testWidgets('no report-a-missing-day unless the booking is ACTIVE', (
+      t,
+    ) async {
+      books.items = [_booking('a1', BookingStatus.replacementRequested)];
+      await open(t, '/services/current?bookingId=a1');
+      expect(k('service_report_missing_btn'), findsNothing);
+    });
+
+    testWidgets('report a missing day: posts date and note once', (t) async {
+      await open(t, '/services/current?bookingId=a1');
+      await tapKey(t, 'service_report_missing_btn');
+      expect(t.widget<SnButton>(k('exception_submit_btn')).onPressed, isNull);
+      await t.tap(k('exception_date_btn'));
+      await settle(t);
+      await t.tap(find.text('OK'));
+      await settle(t);
+      await t.enterText(k('exception_note_field'), 'Did not come');
+      await t.pump();
+      await t.tap(k('exception_submit_btn'));
+      await settle(t);
+      expect(att.raised.length, 1);
+      expect(att.raised.single.$1, 'a1');
+      expect(att.raised.single.$3, 'Did not come');
+      expect(k('exception_submit_btn'), findsNothing);
+      expect(find.text('Exception'), findsWidgets);
+    });
+
+    testWidgets('a 409 on the day shows the reason and keeps the form', (
+      t,
+    ) async {
+      att.raiseFails = const ConflictFailure('exists');
+      await open(t, '/services/current?bookingId=a1');
+      await tapKey(t, 'service_report_missing_btn');
+      await t.tap(k('exception_date_btn'));
+      await settle(t);
+      await t.tap(find.text('OK'));
+      await settle(t);
+      await t.enterText(k('exception_note_field'), 'x');
+      await t.pump();
+      await t.tap(k('exception_submit_btn'));
+      await settle(t);
+      expect(k('exception_error'), findsOneWidget);
+      expect(find.text('That day already has an entry.'), findsOneWidget);
+    });
+
     testWidgets(
       'SVC-01 shows today, the month and every status, unknown as Updated',
       (t) async {
@@ -392,10 +544,63 @@ void main() {
   });
 
   group('service history (10.2)', () {
+    testWidgets('summary line, filters reach the server, worker name shown', (
+      t,
+    ) async {
+      books = _Bookings([
+        _booking(
+          'c1',
+          BookingStatus.completed,
+          identity: const WorkerIdentity(displayName: 'Ramesh K.'),
+        ),
+      ]);
+      await open(t, '/services/history');
+      expect(
+        find.text('1 services · 2 workers · ₹12,500 total spent'),
+        findsOneWidget,
+      );
+      expect(find.text('Ramesh K.'), findsOneWidget);
+      expect(books.lastFilter, const HistoryFilter());
+      await t.enterText(k('history_search_field'), 'ramesh');
+      await t.pump(const Duration(milliseconds: 500));
+      await settle(t);
+      expect(books.lastFilter!.search, 'ramesh');
+      await t.ensureVisible(k('history_status_filter'));
+      await t.tap(k('history_status_filter'));
+      await settle(t);
+      await t.tap(find.text('Cancelled').last);
+      await settle(t);
+      expect(books.lastFilter!.status, BookingStatus.cancelled);
+      expect(books.lastFilter!.search, 'ramesh');
+    });
+
+    testWidgets(
+      'Hire again only with the rebook action, then opens the new booking',
+      (t) async {
+        books = _Bookings([
+          _booking(
+            'c1',
+            BookingStatus.completed,
+            actions: {BookingAction.rebook},
+          ),
+          _booking(
+            'c2',
+            BookingStatus.completed,
+            actions: {BookingAction.rate},
+          ),
+        ]);
+        await open(t, '/services/history');
+        expect(k('hire_again_btn_c2'), findsNothing);
+        await tapKey(t, 'hire_again_btn_c1');
+        expect(books.rebooked, ['c1']);
+        expect(where(t), '/bookings/new1');
+      },
+    );
+
     setUp(() {
       books = _Bookings([
         _booking('a1', BookingStatus.active),
-        _booking('c1', BookingStatus.completed),
+        _booking('c1', BookingStatus.completed, ratingScore: 4),
         _booking('c2', BookingStatus.completed),
         _booking('x1', BookingStatus.cancelled),
         _booking('r1', BookingStatus.replaced),

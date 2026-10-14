@@ -50,9 +50,45 @@ enum ReplacementReason {
   }
 }
 
-/// `ReplacementView` (Swagger). The alternatives are NOT in the Swagger (the customer has no
-/// candidates route, BACKEND_REQUESTS 39): they are read from `alternatives` / `candidates` when the
-/// backend sends them and are empty otherwise.
+/// Who made a timeline entry (`actor`). Staff are never named to the customer.
+enum ReplacementActor { customer, staff, system, unknown }
+
+/// One `timeline` entry of `ReplacementView`, oldest first. `remarks` is set only on APPROVED and
+/// REJECTED entries and is written for the customer.
+class ReplacementEvent {
+  const ReplacementEvent({
+    required this.status,
+    required this.at,
+    this.actor = ReplacementActor.unknown,
+    this.remarks,
+  });
+
+  final ReplacementStatus status;
+  final DateTime at;
+  final ReplacementActor actor;
+  final String? remarks;
+
+  static ReplacementEvent? fromJson(Object? j) {
+    if (j is! Map) return null;
+    final raw = j['at'] is String ? DateTime.tryParse(j['at'] as String) : null;
+    if (raw == null) return null;
+    final remarks = j['remarks'];
+    return ReplacementEvent(
+      status: replacementStatusFrom(j['status']),
+      at: raw.isUtc ? raw.toLocal() : raw,
+      actor: switch (j['actor']) {
+        'CUSTOMER' => ReplacementActor.customer,
+        'STAFF' => ReplacementActor.staff,
+        'SYSTEM' => ReplacementActor.system,
+        _ => ReplacementActor.unknown,
+      },
+      remarks: remarks is String && remarks.isNotEmpty ? remarks : null,
+    );
+  }
+}
+
+/// `ReplacementView` (Swagger). The alternatives are a separate call
+/// (`GET /replacement-requests/{id}/alternatives`, see [ReplacementRepository.alternatives]).
 class Replacement {
   const Replacement({
     required this.id,
@@ -65,7 +101,7 @@ class Replacement {
     this.createdAt,
     this.decidedAt,
     this.completedAt,
-    this.alternatives = const [],
+    this.timeline = const [],
   });
 
   final String id;
@@ -78,7 +114,20 @@ class Replacement {
   final DateTime? createdAt;
   final DateTime? decidedAt;
   final DateTime? completedAt;
-  final List<WorkerSummary> alternatives;
+  final List<ReplacementEvent> timeline;
+
+  /// When the request reached [status]: the latest timeline entry, else the matching date field.
+  DateTime? at(ReplacementStatus status) {
+    for (final e in timeline.reversed) {
+      if (e.status == status) return e.at;
+    }
+    return switch (status) {
+      ReplacementStatus.requested => createdAt,
+      ReplacementStatus.approved || ReplacementStatus.rejected => decidedAt,
+      ReplacementStatus.completed || ReplacementStatus.cancelled => completedAt,
+      _ => null,
+    };
+  }
 
   /// "RP-3104" style reference taken from the id.
   String get reference {
@@ -97,7 +146,7 @@ class Replacement {
       return t != null && t.isUtc ? t.toLocal() : t;
     }
 
-    final raw = j['alternatives'] ?? j['candidates'];
+    final events = j['timeline'];
     return Replacement(
       id: id,
       bookingId: '${j['bookingId']}',
@@ -109,11 +158,9 @@ class Replacement {
       createdAt: d(j['createdAt']),
       decidedAt: d(j['decidedAt']),
       completedAt: d(j['completedAt']),
-      alternatives: [
-        if (raw is List)
-          for (final e in raw)
-            ?(WorkerSummary.fromJson(e) ??
-                (e is Map ? WorkerSummary.fromJson(e['worker']) : null)),
+      timeline: [
+        if (events is List)
+          for (final e in events) ?ReplacementEvent.fromJson(e),
       ],
     );
   }
@@ -166,7 +213,7 @@ class ChainEntry {
 /// `/replacement-requests` of the deployed backend (docs/backend_openapi_2026-10-13.json).
 abstract interface class ReplacementRepository {
   /// `POST /replacement-requests`. One key per form: repeating it returns the first request.
-  /// 404 not mine, 422 `REPLACEMENT_NOT_ELIGIBLE`, 409 while one is open.
+  /// 404 `BOOKING_NOT_FOUND`, 422 `REPLACEMENT_NOT_ELIGIBLE`, 409 `REPLACEMENT_ALREADY_OPEN`.
   Future<Replacement> create({
     required String bookingId,
     required String reason,
@@ -174,15 +221,21 @@ abstract interface class ReplacementRepository {
     required String idempotencyKey,
   });
 
-  /// `GET /replacement-requests`: mine, newest first.
-  Future<ReplacementPage> list({String? cursor});
+  /// `GET /replacement-requests`: mine, newest first. [bookingId] keeps only that booking's requests.
+  Future<ReplacementPage> list({String? cursor, String? bookingId});
+
+  /// `GET /replacement-requests/{id}/alternatives`: customer-safe worker cards (no name), never the
+  /// worker being replaced. Only while the request is APPROVED; any other status is 409
+  /// `INVALID_TRANSITION`.
+  Future<WorkerPage> alternatives(String id, {String? cursor});
 
   Future<Replacement> get(String id);
 
   /// `POST /replacement-requests/{id}/cancel`: withdraw an open request.
   Future<Replacement> cancel(String id, {required String idempotencyKey});
 
-  /// `POST /replacement-requests/{id}/select {workerId}`.
+  /// `POST /replacement-requests/{id}/select {workerId}`. Creates the new MATCHED booking. 409
+  /// `WORKER_UNAVAILABLE` / `INVALID_TRANSITION`, 422 `WORKER_NOT_ELIGIBLE` / `SAME_WORKER`.
   Future<Replacement> select(
     String id,
     String workerId, {

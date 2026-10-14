@@ -15,6 +15,7 @@ import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
 import 'package:sevanest_customer/features/replacement/presentation/providers/replacement_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_labels.dart';
@@ -27,7 +28,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
 /// What the screen shows. Derived only from what the backend sent: the status, the alternatives it
-/// attached and the start date of the replacement booking.
+/// lists and the start date of the replacement booking.
 enum ReplacementView {
   review,
   finding,
@@ -42,12 +43,13 @@ enum ReplacementView {
 /// Table-driven: the same mapper feeds the banner, the timeline and the buttons.
 ReplacementView replacementView(
   Replacement r, {
+  List<WorkerSummary> alternatives = const [],
   Booking? replacementBooking,
   required DateTime today,
 }) => switch (r.status) {
   ReplacementStatus.requested => ReplacementView.review,
   ReplacementStatus.approved =>
-    r.alternatives.isEmpty ? ReplacementView.finding : ReplacementView.ready,
+    alternatives.isEmpty ? ReplacementView.finding : ReplacementView.ready,
   ReplacementStatus.completed =>
     replacementBooking?.startDate != null &&
             replacementBooking!.startDate!.isAfter(today)
@@ -94,8 +96,20 @@ class _State extends ConsumerState<ReplacementStatusScreen>
   /// The decision is made by staff while the app is in the background.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.invalidate(replacementProvider(_id));
+    if (state == AppLifecycleState.resumed) _reload();
+  }
+
+  /// Read the request, its alternatives and its booking again (a rejection puts the booking back
+  /// to ACTIVE).
+  void _reload() {
+    final booking = ref.read(replacementProvider(_id)).value?.bookingId;
+    ref
+      ..invalidate(replacementProvider(_id))
+      ..invalidate(replacementAlternativesProvider(_id));
+    if (booking != null) {
+      ref
+        ..invalidate(bookingProvider(booking))
+        ..invalidate(openReplacementProvider(booking));
     }
   }
 
@@ -104,7 +118,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
       _offline = false;
       _error = null;
     });
-    ref.invalidate(replacementProvider(_id));
+    _reload();
     try {
       await ref.read(replacementProvider(_id).future);
     } on Object {
@@ -115,6 +129,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
   void _changed(Replacement r) {
     ref
       ..invalidate(replacementProvider(_id))
+      ..invalidate(replacementAlternativesProvider(_id))
       ..invalidate(bookingProvider(r.bookingId))
       ..invalidate(bookingListProvider)
       ..invalidate(openReplacementProvider(r.bookingId));
@@ -144,13 +159,17 @@ class _State extends ConsumerState<ReplacementStatusScreen>
           .read(replacementRepositoryProvider)
           .cancel(_id, idempotencyKey: _withdrawKey);
       _changed(done);
-    } on Object {
+    } on Object catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.repWithdrawFail)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e is ConflictFailure ? l10n.repChanged : l10n.repWithdrawFail,
+            ),
+          ),
+        );
       }
-      ref.invalidate(replacementProvider(_id));
+      _reload();
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -184,10 +203,14 @@ class _State extends ConsumerState<ReplacementStatusScreen>
           .select(_id, worker, idempotencyKey: _selectKey);
       _changed(done);
       if (mounted) setState(() => _picked = null);
-    } on ConflictFailure {
-      _lost(l10n.repSelectGone);
-    } on ValidationFailure {
-      _lost(l10n.repSelectGone);
+    } on ConflictFailure catch (e) {
+      // WORKER_UNAVAILABLE: booked meanwhile. INVALID_TRANSITION: the request is no longer APPROVED.
+      _lost(
+        e.code == 'INVALID_TRANSITION' ? l10n.repChanged : l10n.repSelectGone,
+      );
+    } on ValidationFailure catch (e) {
+      // WORKER_NOT_ELIGIBLE, SAME_WORKER.
+      _lost(e.code == 'SAME_WORKER' ? l10n.repSelectSame : l10n.repSelectGone);
     } on NetworkFailure {
       if (mounted) setState(() => _offline = true);
     } on Object {
@@ -209,7 +232,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
 
   /// The chosen worker is gone: show the list the backend has now.
   void _lost(String message) {
-    ref.invalidate(replacementProvider(_id));
+    _reload();
     if (!mounted) return;
     setState(() {
       _picked = null;
@@ -222,6 +245,8 @@ class _State extends ConsumerState<ReplacementStatusScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final value = ref.watch(replacementProvider(_id));
+    // "Alternatives ready" and similar arrive as notifications: read the request again.
+    ref.listen(notificationTickProvider, (_, _) => _reload());
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -249,7 +274,16 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     final fresh = r.replacementBookingId == null
         ? null
         : ref.watch(bookingProvider(r.replacementBookingId!)).value;
-    final view = replacementView(r, replacementBooking: fresh, today: today);
+    final alts = r.status == ReplacementStatus.approved
+        ? ref.watch(replacementAlternativesProvider(_id))
+        : null;
+    final choices = alts?.value ?? const <WorkerSummary>[];
+    final view = replacementView(
+      r,
+      alternatives: choices,
+      replacementBooking: fresh,
+      today: today,
+    );
     final text = Theme.of(context).textTheme;
 
     String when(DateTime d) =>
@@ -273,7 +307,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
       ),
       ReplacementView.ready => (
         Icons.groups_outlined,
-        l10n.repBannerReadyTitle(r.alternatives.length),
+        l10n.repBannerReadyTitle(choices.length),
         l10n.repBannerReadyBody,
         const Color(0xFFF0FDFA),
         AppColors.teal,
@@ -323,7 +357,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
         : engagementLabels(l10n, old!.engagement!).name;
 
     final body = <Widget>[
-      if (stale || _offline)
+      if (stale || _offline || (alts?.hasError ?? false))
         Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: ReplacementNotice(
@@ -448,7 +482,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
           child: SnTimeline(items: steps),
         ),
       ),
-      if (view == ReplacementView.ready) ..._choices(l10n, r),
+      if (view == ReplacementView.ready) ..._choices(l10n, choices),
       if (_error != null)
         Padding(
           padding: const EdgeInsets.only(top: AppSpacing.md),
@@ -517,7 +551,11 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     const done = SnTimelineState.done;
     const now = SnTimelineState.current;
     const next = SnTimelineState.upcoming;
-    final received = item(l10n.repStepReceived, done, at: r.createdAt);
+    final received = item(
+      l10n.repStepReceived,
+      done,
+      at: r.at(ReplacementStatus.requested),
+    );
     return switch (view) {
       ReplacementView.review => [
         received,
@@ -528,43 +566,47 @@ class _State extends ConsumerState<ReplacementStatusScreen>
       ],
       ReplacementView.finding => [
         received,
-        item(l10n.repStepReview, done, at: r.decidedAt),
+        item(l10n.repStepReview, done, at: r.at(ReplacementStatus.approved)),
         item(l10n.repStepReady, now),
         item(l10n.repStepChoose, next),
         item(l10n.repStepStarts, next),
       ],
       ReplacementView.ready => [
         received,
-        item(l10n.repStepReview, done, at: r.decidedAt),
+        item(l10n.repStepReview, done, at: r.at(ReplacementStatus.approved)),
         item(l10n.repStepReady, now),
         item(l10n.repStepChoose, next),
         item(l10n.repStepStarts, next),
       ],
       ReplacementView.scheduled => [
         received,
-        item(l10n.repStepReview, done, at: r.decidedAt),
+        item(l10n.repStepReview, done, at: r.at(ReplacementStatus.approved)),
         item(l10n.repStepReady, done),
-        item(l10n.repStepChoose, done, at: r.completedAt),
+        item(l10n.repStepChoose, done, at: r.at(ReplacementStatus.completed)),
         item(l10n.repStepStarts, now),
       ],
       ReplacementView.complete => [
         received,
-        item(l10n.repStepReview, done, at: r.decidedAt),
+        item(l10n.repStepReview, done, at: r.at(ReplacementStatus.approved)),
         item(l10n.repStepReady, done),
-        item(l10n.repStepChoose, done, at: r.completedAt),
+        item(l10n.repStepChoose, done, at: r.at(ReplacementStatus.completed)),
         item(l10n.repStepStarts, done),
       ],
       ReplacementView.rejected => [
         received,
         item(l10n.repStepReview, done),
-        item(l10n.repStepRejected, SnTimelineState.failed, at: r.decidedAt),
+        item(
+          l10n.repStepRejected,
+          SnTimelineState.failed,
+          at: r.at(ReplacementStatus.rejected),
+        ),
       ],
       ReplacementView.cancelled => [
         received,
         item(
           l10n.repStepCancelled,
           SnTimelineState.failed,
-          at: r.completedAt ?? r.decidedAt,
+          at: r.at(ReplacementStatus.cancelled),
           subtitle: l10n.repStepCancelledSub,
         ),
       ],
@@ -572,14 +614,14 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     };
   }
 
-  List<Widget> _choices(AppLocalizations l10n, Replacement r) {
+  List<Widget> _choices(AppLocalizations l10n, List<WorkerSummary> workers) {
     final text = Theme.of(context).textTheme;
     return [
       const SizedBox(height: AppSpacing.lg),
       Text(l10n.repChooseTitle, style: text.titleLarge),
       Text(l10n.repChooseSub, style: text.bodyMedium),
       const SizedBox(height: AppSpacing.sm),
-      for (final w in r.alternatives)
+      for (final w in workers)
         _Alternative(
           worker: w,
           selected: _picked == w.id,
@@ -678,7 +720,20 @@ class _State extends ConsumerState<ReplacementStatusScreen>
         ),
       ],
       ReplacementView.rejected => <Widget>[
-        btn('replacement_support_btn', l10n.contactSupport, () => _support(r)),
+        btn(
+          'replacement_again_btn',
+          l10n.repRequestAgain,
+          () => context.pushReplacement(
+            '${Routes.replacementNew}?bookingId=${Uri.encodeComponent(r.bookingId)}',
+          ),
+        ),
+        gap,
+        btn(
+          'replacement_support_btn',
+          l10n.contactSupport,
+          () => _support(r),
+          variant: SnButtonVariant.secondary,
+        ),
         gap,
         btn(
           'replacement_find_worker_btn',

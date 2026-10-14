@@ -57,6 +57,7 @@ enum BookingAction {
   rate,
   replace,
   receipt,
+  rebook,
 }
 
 Set<BookingAction> bookingActionsFrom(Object? raw) => {
@@ -77,11 +78,12 @@ BookingAction? _actionByName(String a) =>
       'rate' => BookingAction.rate,
       'replace' => BookingAction.replace,
       'receipt' => BookingAction.receipt,
+      'rebook' => BookingAction.rebook,
       _ => null,
     };
 
-/// The Swagger does not send `allowedActions`, so until it does the buttons follow the state model
-/// (BACKEND_REQUESTS). A backend-supplied list always wins.
+/// Used only when a response carries no `allowedActions` list at all (mock data, old fixtures). A
+/// backend-supplied list always wins, even an empty one (a rated or REPLACED booking has no `rate`).
 Set<BookingAction> derivedBookingActions(BookingStatus s) => switch (s) {
   BookingStatus.newRequest => {BookingAction.cancel},
   BookingStatus.matched => {BookingAction.schedule, BookingAction.cancel},
@@ -109,6 +111,35 @@ Set<BookingAction> derivedBookingActions(BookingStatus s) => switch (s) {
   BookingStatus.unknown => const {},
 };
 
+/// `worker` on a customer booking (from the interview stage on): name, initials and a short-lived
+/// photo link. No phone or address. The image is cached by [cacheKey], not by its expiring URL.
+class WorkerIdentity {
+  const WorkerIdentity({
+    required this.displayName,
+    this.initials,
+    this.photoUrl,
+    this.cacheKey,
+  });
+
+  final String displayName;
+  final String? initials;
+  final String? photoUrl;
+  final String? cacheKey;
+
+  static WorkerIdentity? fromJson(Object? j) {
+    if (j is! Map) return null;
+    final name = _s(j['displayName']);
+    if (name == null) return null;
+    final photo = j['photo'];
+    return WorkerIdentity(
+      displayName: name,
+      initials: _s(j['initials']),
+      photoUrl: photo is Map ? _s(photo['url']) : null,
+      cacheKey: photo is Map ? _s(photo['cacheKey']) : null,
+    );
+  }
+}
+
 class BookingTimelineEntry {
   const BookingTimelineEntry(this.status, this.at, [this.note]);
   final BookingStatus status;
@@ -125,6 +156,9 @@ class Booking {
     this.engagement,
     this.workerId,
     this.worker,
+    this.identity,
+    this.ratingScore,
+    this.ratingReview,
     this.areaName,
     this.addressId,
     this.startDate,
@@ -148,6 +182,11 @@ class Booking {
   final EngagementType? engagement;
   final String? workerId;
   final WorkerSummary? worker;
+  final WorkerIdentity? identity;
+
+  /// My rating of this booking (`rating` on every customer booking), null when not rated.
+  final int? ratingScore;
+  final String? ratingReview;
   final String? areaName;
   final String? addressId;
   final DateTime? startDate;
@@ -184,7 +223,8 @@ class Booking {
     final area = j['area'] ?? j['serviceArea'];
     final w = j['worker'];
     final at = _date(j['scheduledAt']);
-    final explicit = bookingActionsFrom(j['allowedActions']);
+    final allowed = j['allowedActions'];
+    final rating = j['rating'];
     return Booking(
       id: id,
       status: status,
@@ -195,6 +235,11 @@ class Booking {
       engagement: _engagement(j['engagement']),
       workerId: _s(j['workerId']) ?? (w is Map ? _s(w['workerId']) : null),
       worker: WorkerSummary.fromJson(w),
+      identity: WorkerIdentity.fromJson(w),
+      ratingScore: rating is Map && rating['score'] is num
+          ? (rating['score'] as num).toInt()
+          : null,
+      ratingReview: rating is Map ? _s(rating['review']) : null,
       areaName: area is Map ? _s(area['name']) : _s(j['areaName']),
       addressId: _s(j['addressId']),
       startDate: _date(j['startDate'], dateOnly: true),
@@ -213,7 +258,9 @@ class Booking {
       },
       note: _s(j['requirementNote']),
       timeline: _timeline(j['timeline'] ?? j['events'] ?? j['history']),
-      actions: explicit.isNotEmpty ? explicit : derivedBookingActions(status),
+      actions: allowed is List
+          ? bookingActionsFrom(allowed)
+          : derivedBookingActions(status),
       paymentId: _s(j['paymentId']),
       previousBookingId: _s(
         j['replacesBookingId'] ?? j['previousBookingId'] ?? j['replacedFromId'],
@@ -316,4 +363,104 @@ abstract interface class BookingRepository {
 
   /// `cancel`: the reason is required.
   Future<Booking> cancel(String id, String reason);
+
+  /// `POST /bookings/rebook`: a new booking for the same worker. Offered only with `rebook`.
+  Future<Booking> rebook(String bookingId, {DateTime? startDate});
+
+  /// `GET /customers/me/booking-history`, newest first.
+  Future<BookingPage> history(HistoryFilter filter, {String? cursor});
+
+  /// `GET /customers/me/booking-history/summary` for the same filters.
+  Future<HistorySummary> historySummary(HistoryFilter filter);
+}
+
+/// Filters of the history screen; null / empty means "any".
+class HistoryFilter {
+  const HistoryFilter({
+    this.year,
+    this.category,
+    this.search = '',
+    this.status,
+  });
+
+  final int? year;
+  final String? category;
+  final String search;
+  final BookingStatus? status;
+
+  HistoryFilter copyWith({
+    int? Function()? year,
+    String? Function()? category,
+    String? search,
+    BookingStatus? Function()? status,
+  }) => HistoryFilter(
+    year: year != null ? year() : this.year,
+    category: category != null ? category() : this.category,
+    search: search ?? this.search,
+    status: status != null ? status() : this.status,
+  );
+
+  Map<String, Object> get query => {
+    'year': ?year,
+    'category': ?category,
+    if (search.trim().isNotEmpty) 'search': search.trim(),
+    if (status != null) 'status': bookingStatusCode(status!),
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      other is HistoryFilter &&
+      other.year == year &&
+      other.category == category &&
+      other.search == search &&
+      other.status == status;
+
+  @override
+  int get hashCode => Object.hash(year, category, search, status);
+}
+
+/// Wire code of a status, for the `status` filter.
+String bookingStatusCode(BookingStatus s) => switch (s) {
+  BookingStatus.newRequest => 'NEW_REQUEST',
+  BookingStatus.matched => 'MATCHED',
+  BookingStatus.interviewTrialScheduled => 'INTERVIEW_TRIAL_SCHEDULED',
+  BookingStatus.interviewTrialCompleted => 'INTERVIEW_TRIAL_COMPLETED',
+  BookingStatus.pendingPayment => 'PENDING_PAYMENT',
+  BookingStatus.confirmed => 'CONFIRMED',
+  BookingStatus.active => 'ACTIVE',
+  BookingStatus.replacementRequested => 'REPLACEMENT_REQUESTED',
+  BookingStatus.replaced => 'REPLACED',
+  BookingStatus.completed => 'COMPLETED',
+  BookingStatus.cancelled => 'CANCELLED',
+  BookingStatus.unknown => 'UNKNOWN',
+};
+
+/// `{totalServices, distinctWorkers, totalSpentMinor, currency}`. "Spent" includes money still held
+/// (Q-104, open), so the screen only shows the number the server sends.
+class HistorySummary {
+  const HistorySummary({
+    required this.totalServices,
+    required this.distinctWorkers,
+    required this.totalSpent,
+    this.currency = 'INR',
+  });
+
+  final int totalServices;
+  final int distinctWorkers;
+
+  /// Whole rupees (the API speaks paise).
+  final int totalSpent;
+  final String currency;
+
+  static HistorySummary? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final j = json['data'] is Map ? json['data'] as Map : json;
+    int n(Object? v) => v is num ? v.toInt() : 0;
+    return HistorySummary(
+      totalServices: n(j['totalServices']),
+      distinctWorkers: n(j['distinctWorkers']),
+      totalSpent: (n(j['totalSpentMinor']) / 100).round(),
+      currency: _s(j['currency']) ?? 'INR',
+    );
+  }
 }

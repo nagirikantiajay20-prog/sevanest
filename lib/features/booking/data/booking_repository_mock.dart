@@ -54,7 +54,10 @@ class BookingRepositoryMock implements BookingRepository {
         for (var i = 0; i < path.length; i++)
           BookingTimelineEntry(path[i], base.add(Duration(days: i))),
       ],
-      actions: derivedBookingActions(status),
+      actions: {
+        ...derivedBookingActions(status),
+        if (status == BookingStatus.completed) BookingAction.rebook,
+      },
       createdAt: base,
     );
   }
@@ -250,6 +253,60 @@ class BookingRepositoryMock implements BookingRepository {
     if (_state().mode == MockMode.empty) return const BookingPage([], null);
     return BookingPage(List.of(_items), null);
   });
+
+  Iterable<Booking> _filtered(HistoryFilter f) {
+    if (_state().mode == MockMode.empty) return const [];
+    final q = f.search.trim().toLowerCase();
+    return _items.where(
+      (b) =>
+          (f.year == null || (b.startDate ?? b.createdAt)?.year == f.year) &&
+          (f.category == null || b.categoryCode == f.category) &&
+          (f.status == null || b.status == f.status) &&
+          (q.isEmpty ||
+              '${b.categoryName} ${b.identity?.displayName}'
+                  .toLowerCase()
+                  .contains(q)),
+    );
+  }
+
+  @override
+  Future<BookingPage> history(HistoryFilter filter, {String? cursor}) =>
+      mockCall(_state(), () => BookingPage(_filtered(filter).toList(), null));
+
+  @override
+  Future<HistorySummary> historySummary(HistoryFilter filter) =>
+      mockCall(_state(), () {
+        final l = _filtered(filter).toList();
+        return HistorySummary(
+          totalServices: l.length,
+          distinctWorkers: {for (final b in l) ?b.workerId}.length,
+          totalSpent: 0,
+        );
+      });
+
+  /// A new NEW_REQUEST booking for the same worker, as `POST /bookings/rebook` does.
+  @override
+  Future<Booking> rebook(String bookingId, {DateTime? startDate}) =>
+      mockCall(_state(), () {
+        final old = _items[_index(bookingId)];
+        final made = Booking(
+          id: 'bk_${++_seq}',
+          status: BookingStatus.newRequest,
+          categoryCode: old.categoryCode,
+          categoryName: old.categoryName,
+          engagement: old.engagement,
+          workerId: old.workerId,
+          worker: old.worker,
+          areaName: old.areaName,
+          addressId: old.addressId,
+          startDate: startDate ?? _today.add(const Duration(days: 1)),
+          timeline: [BookingTimelineEntry(BookingStatus.newRequest, _now())],
+          actions: derivedBookingActions(BookingStatus.newRequest),
+          createdAt: _now(),
+        );
+        _items.insert(0, made);
+        return made;
+      });
 
   /// For the payment mock: only a PENDING_PAYMENT booking can be paid.
   bool isPayable(String id) =>

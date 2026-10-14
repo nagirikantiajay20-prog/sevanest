@@ -43,4 +43,21 @@ class AttendanceRepositoryRemote implements AttendanceRepository {
     return AttendanceSummary.fromJson(res.data) ??
         (throw const UnknownFailure());
   }
+
+  @override
+  Future<AttendanceEntry> raiseException(
+    String bookingId, {
+    required String date,
+    required String note,
+    required String idempotencyKey,
+  }) async {
+    final res = await guarded(
+      () => _dio.post<dynamic>(
+        _path(bookingId, '/exceptions'),
+        options: Options(headers: {'Idempotency-Key': idempotencyKey}),
+        data: {'date': date, 'note': note},
+      ),
+    );
+    return AttendanceEntry.fromJson(res.data) ?? (throw const UnknownFailure());
+  }
 }

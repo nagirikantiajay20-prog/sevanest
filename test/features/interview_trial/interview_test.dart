@@ -18,8 +18,11 @@ import 'package:sevanest_customer/features/service_discovery/domain/budget.dart'
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_mock.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../helpers/discover_harness.dart';
 import '../../helpers/fakes.dart';
+import '../../helpers/notification_fakes.dart';
 
 /// Chained mock calls each need their own wait: pumpAndSettle ignores the latency timers.
 Future<void> settle(WidgetTester t) async {
@@ -366,10 +369,12 @@ void main() {
       required String route,
       _Spy? spy,
       bool returning = true,
+      FakePushService? push,
     }) async {
       final s = spy ?? _Spy(returning: returning);
       final env = await launchDiscover(
         t,
+        push: push,
         overrides: [interviewRepositoryProvider.overrideWithValue(s)],
       );
       env.stepsOneToThree(EngagementType.fullTime);
@@ -427,6 +432,21 @@ void main() {
         expect(p.firstDate, DateTime(2026, 10, 9));
         expect(p.lastDate, DateTime(2026, 10, 22));
       });
+
+      testWidgets(
+        'the first request offers notifications once, via the pre-prompt',
+        (t) async {
+          SharedPreferences.setMockInitialValues({});
+          final push = FakePushService();
+          await open(t, route: newRoute, push: push);
+          await pickDateAndSlot(t);
+          await tapKey(t, 'interview_submit_btn');
+          expect(find.byKey(const Key('notif_prompt')), findsOneWidget);
+          expect(push.requestCalls, 0);
+          await tapKey(t, 'notif_prompt_allow_btn');
+          expect(push.requestCalls, 1);
+        },
+      );
 
       testWidgets('INT-03 success replaces the form with the detail', (
         t,

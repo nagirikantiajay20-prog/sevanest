@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +14,8 @@ import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
+import 'package:sevanest_customer/features/notifications/presentation/push_prompt.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
@@ -197,7 +201,18 @@ class _State extends ConsumerState<InterviewRequestScreen> {
     if (!mounted) return;
     if (sent) {
       // Replace the form so Back cannot resubmit it.
+      final push = ref.read(pushControllerProvider);
       router.pushReplacement(Routes.path(Routes.interviewDetail, {'id': id}));
+      // The first meaningful action: offer notifications once the detail is on screen (never at
+      // launch). The form is gone by then, so the navigator's context is used.
+      WidgetsBinding.instance
+        ..addPostFrameCallback((_) {
+          // The overlay sits below the navigator, so a dialog can find it.
+          final c =
+              router.routerDelegate.navigatorKey.currentState?.overlay?.context;
+          if (c != null && c.mounted) unawaited(askForPushAfterAction(c, push));
+        })
+        ..scheduleFrame();
     } else if (router.canPop()) {
       router.pop();
     } else {

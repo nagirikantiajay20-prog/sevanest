@@ -12,14 +12,18 @@ import 'package:sevanest_customer/features/booking/presentation/booking_labels.d
 import 'package:sevanest_customer/features/booking/presentation/booking_navigation.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/booking/presentation/widgets/cancel_sheet.dart';
+import 'package:sevanest_customer/features/booking/presentation/widgets/hire_again_button.dart';
+import 'package:sevanest_customer/features/booking/presentation/widgets/worker_identity_tile.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/interview_labels.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_links.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/safety_actions.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -92,6 +96,11 @@ class _State extends ConsumerState<BookingDetailScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final value = ref.watch(bookingProvider(widget.bookingId));
+    // A notification arrived (payment confirmed, interview confirmed...): read the booking again.
+    ref.listen(
+      notificationTickProvider,
+      (_, _) => ref.invalidate(bookingProvider(widget.bookingId)),
+    );
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -102,6 +111,11 @@ class _State extends ConsumerState<BookingDetailScreen>
               context.canPop() ? context.pop() : context.go(Routes.bookings),
         ),
         title: Text(l10n.bookingDetailTitle),
+        actions: [
+          // Report / block the worker of this booking (module 12), named by the booking.
+          if (value.hasValue && value.requireValue.workerId != null)
+            SafetyMenuButton(bookingId: widget.bookingId),
+        ],
       ),
       body: AsyncValueView<Booking>(
         value: value,
@@ -248,7 +262,15 @@ class _Body extends StatelessWidget {
             style: text.titleMedium,
           ),
           const SizedBox(height: AppSpacing.md),
-          if (b.worker != null)
+          if (b.identity != null && b.workerId != null)
+            WorkerIdentityTile(
+              key: const Key('booking_worker_card'),
+              identity: b.identity!,
+              onTap: () => context.push(
+                Routes.path(Routes.workerDetail, {'id': b.workerId!}),
+              ),
+            )
+          else if (b.worker != null)
             WorkerCard(
               key: const Key('booking_worker_card'),
               worker: b.worker!,
@@ -343,6 +365,14 @@ class _Body extends StatelessWidget {
               l10n.bookingRate,
               () => context.push(Routes.path(Routes.rating, {'id': b.id})),
               variant: SnButtonVariant.primary,
+            ),
+          if (a.contains(BookingAction.rebook))
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: HireAgainButton(
+                bookingId: b.id,
+                variant: SnButtonVariant.primary,
+              ),
             ),
           if (a.contains(BookingAction.replace))
             action(

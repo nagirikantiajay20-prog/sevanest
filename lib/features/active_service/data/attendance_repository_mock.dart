@@ -1,3 +1,4 @@
+import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/active_service/domain/attendance.dart';
 
@@ -12,10 +13,13 @@ class AttendanceRepositoryMock implements AttendanceRepository {
   static String _day(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
+  final _raised = <AttendanceEntry>[];
+
   List<AttendanceEntry> _entries() {
     final n = _now();
     final today = DateTime(n.year, n.month, n.day);
     return [
+      ..._raised,
       for (var i = 0; i < 3; i++)
         AttendanceEntry(
           id: 'at_$i',
@@ -49,6 +53,28 @@ class AttendanceRepositoryMock implements AttendanceRepository {
           present: c(AttendanceStatus.present),
           absent: c(AttendanceStatus.absent),
           exception: c(AttendanceStatus.exception),
+          late: c(AttendanceStatus.late),
+          leave: c(AttendanceStatus.leave),
         );
       });
+
+  @override
+  Future<AttendanceEntry> raiseException(
+    String bookingId, {
+    required String date,
+    required String note,
+    required String idempotencyKey,
+  }) => mockCall(_state(), () {
+    if (_entries().any((e) => e.date == date)) {
+      throw const ConflictFailure('Entry exists', 'ATTENDANCE_EXISTS');
+    }
+    final e = AttendanceEntry(
+      id: 'at_x${_raised.length}',
+      date: date,
+      status: AttendanceStatus.exception,
+      note: note,
+    );
+    _raised.add(e);
+    return e;
+  });
 }

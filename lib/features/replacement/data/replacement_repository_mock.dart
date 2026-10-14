@@ -3,6 +3,7 @@ import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_mock.dart';
+import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 
 /// In-memory replacement requests behind the dev mock toggle. Staff decide in the real system, so
 /// with [autoApprove] a request becomes APPROVED (with three alternatives) on its second read;
@@ -20,6 +21,7 @@ class ReplacementRepositoryMock implements ReplacementRepository {
   final bool autoApprove;
 
   final _items = <Replacement>[];
+  final _alts = <String, List<WorkerSummary>>{};
   final _reads = <String, int>{};
   final _keys = <String, String>{};
   var _seq = 3103;
@@ -45,6 +47,11 @@ class ReplacementRepositoryMock implements ReplacementRepository {
     String? newBooking,
   }) {
     final n = _now();
+    if (s == ReplacementStatus.approved) {
+      _alts[o.id] = [
+        for (final w in alternativeIds) ?WorkerSearchRepositoryMock.byId(w),
+      ];
+    }
     return _items[_index(o.id)] = Replacement(
       id: o.id,
       bookingId: o.bookingId,
@@ -62,14 +69,20 @@ class ReplacementRepositoryMock implements ReplacementRepository {
           s == ReplacementStatus.completed || s == ReplacementStatus.cancelled
           ? n
           : o.completedAt,
-      alternatives: s == ReplacementStatus.approved
-          ? [
-              for (final w in alternativeIds)
-                ?WorkerSearchRepositoryMock.byId(w),
-            ]
-          : s == ReplacementStatus.completed
-          ? const []
-          : o.alternatives,
+      timeline: [
+        ...o.timeline,
+        ReplacementEvent(
+          status: s,
+          at: n,
+          actor: s == ReplacementStatus.requested
+              ? ReplacementActor.customer
+              : ReplacementActor.staff,
+          remarks:
+              s == ReplacementStatus.approved || s == ReplacementStatus.rejected
+              ? remarks
+              : null,
+        ),
+      ],
     );
   }
 
@@ -93,7 +106,10 @@ class ReplacementRepositoryMock implements ReplacementRepository {
     if (_items.any(
       (r) => r.bookingId == bookingId && replacementIsOpen(r.status),
     )) {
-      throw const ConflictFailure('Already requested', 'REPLACEMENT_REQUESTED');
+      throw const ConflictFailure(
+        'Already requested',
+        'REPLACEMENT_ALREADY_OPEN',
+      );
     }
     final r = Replacement(
       id: 'rp_${++_seq}',
@@ -102,6 +118,13 @@ class ReplacementRepositoryMock implements ReplacementRepository {
       reason: reason.trim(),
       notes: notes == null || notes.trim().isEmpty ? null : notes.trim(),
       createdAt: _now(),
+      timeline: [
+        ReplacementEvent(
+          status: ReplacementStatus.requested,
+          at: _now(),
+          actor: ReplacementActor.customer,
+        ),
+      ],
     );
     _items.add(r);
     _keys[idempotencyKey] = r.id;
@@ -109,8 +132,22 @@ class ReplacementRepositoryMock implements ReplacementRepository {
   });
 
   @override
-  Future<ReplacementPage> list({String? cursor}) =>
-      mockCall(_state(), () => ReplacementPage(List.of(_items.reversed), null));
+  Future<ReplacementPage> list({String? cursor, String? bookingId}) => mockCall(
+    _state(),
+    () => ReplacementPage([
+      for (final r in _items.reversed)
+        if (bookingId == null || r.bookingId == bookingId) r,
+    ], null),
+  );
+
+  @override
+  Future<WorkerPage> alternatives(String id, {String? cursor}) =>
+      mockCall(_state(), () {
+        if (_items[_index(id)].status != ReplacementStatus.approved) {
+          throw const ConflictFailure('Not approved', 'INVALID_TRANSITION');
+        }
+        return WorkerPage(_alts[id] ?? const [], null);
+      });
 
   @override
   Future<Replacement> get(String id) => mockCall(_state(), () {
@@ -128,7 +165,7 @@ class ReplacementRepositoryMock implements ReplacementRepository {
         final r = _items[_index(id)];
         if (r.status == ReplacementStatus.cancelled) return r;
         if (!replacementIsOpen(r.status)) {
-          throw const ConflictFailure('Not open', 'REPLACEMENT_NOT_OPEN');
+          throw const ConflictFailure('Not open', 'INVALID_TRANSITION');
         }
         return _put(r, ReplacementStatus.cancelled);
       });
@@ -142,12 +179,12 @@ class ReplacementRepositoryMock implements ReplacementRepository {
     final r = _items[_index(id)];
     if (r.status == ReplacementStatus.completed) return r;
     if (r.status != ReplacementStatus.approved) {
-      throw const ConflictFailure('Not approved', 'REPLACEMENT_NOT_APPROVED');
+      throw const ConflictFailure('Not approved', 'INVALID_TRANSITION');
     }
     if (unavailable.contains(workerId)) {
       throw const ConflictFailure('Worker unavailable', 'WORKER_UNAVAILABLE');
     }
-    if (!r.alternatives.any((w) => w.id == workerId)) {
+    if (!(_alts[id] ?? const []).any((w) => w.id == workerId)) {
       throw const ValidationFailure(
         'Worker not eligible',
         {},

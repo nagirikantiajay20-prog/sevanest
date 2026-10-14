@@ -380,7 +380,7 @@ class _Body extends ConsumerWidget {
             label: l10n.interviewSupport,
             variant: SnButtonVariant.text,
             onPressed: () => context.push(
-              '${Routes.supportNew}?bookingOrInterviewId=${Uri.encodeComponent(iv.id)}',
+              '${Routes.supportNew}?bookingId=${Uri.encodeComponent(iv.bookingId.isEmpty ? iv.id : iv.bookingId)}',
             ),
           ),
         ],

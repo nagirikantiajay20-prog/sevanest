@@ -16,6 +16,7 @@ import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
 import 'package:sevanest_customer/features/replacement/presentation/providers/replacement_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_mock.dart';
+import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 
 import '../../helpers/discover_harness.dart';
 
@@ -80,11 +81,31 @@ class _Rep implements ReplacementRepository {
     return items[r.id] = r;
   }
 
+  Object? alternativesFails;
+  var alternativesCalls = 0;
+  String? lastListBooking;
+
   @override
-  Future<ReplacementPage> list({String? cursor}) async {
+  Future<ReplacementPage> list({String? cursor, String? bookingId}) async {
+    lastListBooking = bookingId;
     final f = listFails;
     if (f != null) throw f;
-    return ReplacementPage(items.values.toList().reversed.toList(), null);
+    return ReplacementPage([
+      for (final r in items.values.toList().reversed)
+        if (bookingId == null || r.bookingId == bookingId) r,
+    ], null);
+  }
+
+  @override
+  Future<WorkerPage> alternatives(String id, {String? cursor}) async {
+    alternativesCalls++;
+    final f = alternativesFails;
+    if (f != null) throw f;
+    final r = items[id] ?? (throw const NotFoundFailure());
+    if (r.status != ReplacementStatus.approved) {
+      throw const ConflictFailure('x', 'INVALID_TRANSITION');
+    }
+    return WorkerPage(_altStore[id] ?? const [], null);
   }
 
   @override
@@ -146,6 +167,9 @@ class _Rep implements ReplacementRepository {
   ];
 }
 
+/// The cards `GET .../alternatives` answers per request id; `_r` records them.
+final _altStore = <String, List<WorkerSummary>>{};
+
 Replacement _r({
   String id = 'rp_3104',
   ReplacementStatus status = ReplacementStatus.requested,
@@ -154,6 +178,29 @@ Replacement _r({
   String? replacementBookingId,
   String? remarks,
   String reason = 'Work quality is not good',
+  String? notes,
+}) {
+  _altStore[id] = [
+    for (final w in alternatives) ?WorkerSearchRepositoryMock.byId(w),
+  ];
+  return _r2(
+    id: id,
+    bookingId: bookingId,
+    status: status,
+    replacementBookingId: replacementBookingId,
+    remarks: remarks,
+    reason: reason,
+    notes: notes,
+  );
+}
+
+Replacement _r2({
+  required String id,
+  required String bookingId,
+  required ReplacementStatus status,
+  String? replacementBookingId,
+  String? remarks,
+  required String reason,
   String? notes,
 }) => Replacement(
   id: id,
@@ -166,8 +213,12 @@ Replacement _r({
   createdAt: DateTime(2026, 10, 9, 20, 15),
   decidedAt: DateTime(2026, 10, 9, 21, 40),
   completedAt: DateTime(2026, 10, 10, 11, 30),
-  alternatives: [
-    for (final w in alternatives) ?WorkerSearchRepositoryMock.byId(w),
+  timeline: [
+    ReplacementEvent(
+      status: ReplacementStatus.requested,
+      at: DateTime(2026, 10, 9, 20, 15),
+      actor: ReplacementActor.customer,
+    ),
   ],
 );
 
@@ -212,6 +263,7 @@ void main() {
   late _Bookings books;
 
   setUp(() {
+    _altStore.clear();
     rep = _Rep();
     books = _Bookings([
       _booking('b1', BookingStatus.active),
@@ -447,7 +499,7 @@ void main() {
       t,
     ) async {
       rep.items['rp_old'] = _r(id: 'rp_old');
-      rep.createFails = const ConflictFailure('x', 'REPLACEMENT_REQUESTED');
+      rep.createFails = const ConflictFailure('x', 'REPLACEMENT_ALREADY_OPEN');
       await open(t, '/replacements/new?bookingId=b1');
       await submitReason(t, 'replacement_reason_notOnTime');
       await tapKey(t, 'replacement_submit_btn');
@@ -690,6 +742,7 @@ void main() {
             ),
             'rejected',
             [
+              'replacement_again_btn',
               'replacement_support_btn',
               'replacement_find_worker_btn',
               'replacement_back_booking_btn',
@@ -756,7 +809,9 @@ void main() {
       await open(t, '/replacements/rp1');
       expect(find.text('Replacement confirmed'), findsOneWidget);
       expect(
-        find.text('Your new worker starts on Mon, 12 Oct.'),
+        find.text(
+          'Your new booking is set to start on Mon, 12 Oct. Open it to follow the next steps.',
+        ),
         findsOneWidget,
       );
     });
@@ -1077,6 +1132,45 @@ void main() {
       expect(k('replacement_select_error'), findsOneWidget);
     });
 
+    testWidgets(
+      '422 SAME_WORKER and 409 INVALID_TRANSITION say what happened',
+      (t) async {
+        rep.items['rp1'] = ready();
+        rep.selectFails = const ValidationFailure('x', {}, 'SAME_WORKER');
+        await open(t, '/replacements/rp1');
+        await tapKey(t, 'replacement_alt_cook-5');
+        await tapKey(t, 'replacement_select_btn');
+        await tapKey(t, 'replacement_select_confirm_btn');
+        expect(
+          find.text('That is your current worker. Please choose someone else.'),
+          findsOneWidget,
+        );
+        rep.selectFails = const ConflictFailure('x', 'INVALID_TRANSITION');
+        await tapKey(t, 'replacement_alt_cook-5');
+        await tapKey(t, 'replacement_select_btn');
+        await tapKey(t, 'replacement_select_confirm_btn');
+        expect(
+          find.text('This request has changed. Here is its latest status.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'alternatives come from the alternatives route, not the request',
+      (t) async {
+        rep.items['rp1'] = ready();
+        final env = await open(t, '/replacements/rp1');
+        expect(rep.alternativesCalls, greaterThan(0));
+        rep.alternativesFails = const NetworkFailure();
+        env.container.invalidate(replacementAlternativesProvider('rp1'));
+        await settle(t);
+        // The choices already loaded stay, with the offline banner.
+        expect(k('replacement_offline_banner'), findsOneWidget);
+        expect(k('replacement_alt_cook-5'), findsOneWidget);
+      },
+    );
+
     testWidgets('a lost answer: the selection that went through is shown', (
       t,
     ) async {
@@ -1183,6 +1277,7 @@ void main() {
       rep.items['rp1'] = _r(id: 'rp1');
       await open(t, '/bookings/b1');
       expect(k('booking_replace_btn'), findsNothing);
+      expect(rep.lastListBooking, 'b1');
       await tapKey(t, 'booking_replacement_btn');
       expect(where(t), '/replacements/rp1');
     });

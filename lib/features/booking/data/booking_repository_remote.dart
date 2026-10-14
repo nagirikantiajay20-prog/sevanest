@@ -55,12 +55,18 @@ class BookingRepositoryRemote implements BookingRepository {
   }
 
   @override
-  Future<BookingPage> list({String? cursor}) async {
-    final page = int.tryParse(cursor ?? '') ?? 1;
+  Future<BookingPage> list({String? cursor}) =>
+      _page('/bookings', int.tryParse(cursor ?? '') ?? 1, const {});
+
+  Future<BookingPage> _page(
+    String path,
+    int page,
+    Map<String, Object> query,
+  ) async {
     final res = await guarded(
       () => _dio.get<dynamic>(
-        '/bookings',
-        queryParameters: {'page': page, 'limit': pageSize},
+        path,
+        queryParameters: {...query, 'page': page, 'limit': pageSize},
       ),
     );
     final body = res.data;
@@ -71,6 +77,40 @@ class BookingRepositoryRemote implements BookingRepository {
     return BookingPage([
       for (final m in listOf(body)) ?Booking.fromJson(m),
     ], page * pageSize < total ? '${page + 1}' : null);
+  }
+
+  @override
+  Future<BookingPage> history(HistoryFilter filter, {String? cursor}) => _page(
+    '/customers/me/booking-history',
+    int.tryParse(cursor ?? '') ?? 1,
+    filter.query,
+  );
+
+  @override
+  Future<HistorySummary> historySummary(HistoryFilter filter) async {
+    final res = await guarded(
+      () => _dio.get<dynamic>(
+        '/customers/me/booking-history/summary',
+        queryParameters: filter.query,
+      ),
+    );
+    return HistorySummary.fromJson(res.data) ?? (throw const UnknownFailure());
+  }
+
+  /// The route is `/bookings/rebook`, never `/bookings/{id}/rebook` (that path would be read as
+  /// the `/:id/:action` transitions).
+  @override
+  Future<Booking> rebook(String bookingId, {DateTime? startDate}) async {
+    final res = await guarded(
+      () => _dio.post<dynamic>(
+        '/bookings/rebook',
+        data: {
+          'bookingId': bookingId,
+          if (startDate != null) 'startDate': day(startDate),
+        },
+      ),
+    );
+    return _parse(res.data);
   }
 
   @override

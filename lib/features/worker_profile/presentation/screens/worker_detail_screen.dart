@@ -12,6 +12,7 @@ import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/favourites/presentation/widgets/favourite_button.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/safety_actions.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/widgets/review_tile.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
@@ -90,6 +91,13 @@ class WorkerDetailScreen extends ConsumerWidget {
             FavouriteButton(
               workerId: workerId,
               keyName: 'worker_detail_fav_btn',
+            ),
+          // Report / block (module 12): only for a worker that is still there.
+          if (detail.hasValue)
+            SafetyMenuButton(
+              workerId: workerId,
+              onBlocked: () =>
+                  context.canPop() ? context.pop() : context.go(Routes.workers),
             ),
         ],
       ),

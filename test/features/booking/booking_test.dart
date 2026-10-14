@@ -87,6 +87,18 @@ class _Spy implements BookingRepository {
   Future<Booking> reopenMatching(String id) => inner.reopenMatching(id);
 
   @override
+  Future<Booking> rebook(String bookingId, {DateTime? startDate}) =>
+      inner.rebook(bookingId, startDate: startDate);
+
+  @override
+  Future<BookingPage> history(HistoryFilter filter, {String? cursor}) =>
+      inner.history(filter, cursor: cursor);
+
+  @override
+  Future<HistorySummary> historySummary(HistoryFilter filter) =>
+      inner.historySummary(filter);
+
+  @override
   Future<Booking> cancel(String id, String reason) async {
     cancelCalls++;
     lastReason = reason;

@@ -5,6 +5,7 @@ import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/home/data/home_repository_mock.dart';
 import 'package:sevanest_customer/features/home/data/home_repository_remote.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 
 /// Live: `GET /customers/me/home`; dev's mock mode serves the seeded aggregate.
 final homeRepositoryProvider = Provider<HomeRepository>((ref) {
@@ -37,9 +38,12 @@ final homeProvider = AsyncNotifierProvider.autoDispose<HomeNotifier, HomeData>(
   HomeNotifier.new,
 );
 
-/// Bell badge. Module 11 swaps this to the notification store.
+/// Bell badge: `GET /notifications/unread-count`, falling back to the Home aggregate until it is read.
 final unreadCountProvider = Provider.autoDispose<int>(
-  (ref) => ref.watch(homeProvider).value?.unreadCount ?? 0,
+  (ref) =>
+      ref.watch(notificationUnreadProvider).value ??
+      ref.watch(homeProvider).value?.unreadCount ??
+      0,
 );
 
 /// Address picked from Home's chip. Scopes discovery only; the server default is untouched

@@ -86,6 +86,10 @@ class _State extends ConsumerState<RatingScreen> {
         } else if (e.code == 'RATING_SCORE_OUT_OF_SCALE') {
           _score = null;
           _error = l10n.ratingScaleError;
+        } else if (_comment.text.trim().length >
+            ref.read(ratingReviewMaxProvider)) {
+          // 400 for a review over `ratingReviewMax` (the field cap makes this rare).
+          _error = l10n.ratingReviewTooLong(ref.read(ratingReviewMaxProvider));
         } else {
           _error = l10n.errorGeneric;
         }

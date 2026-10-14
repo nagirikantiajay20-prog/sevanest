@@ -4,6 +4,7 @@ import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/ratings/data/rating_repository_mock.dart';
 import 'package:sevanest_customer/features/ratings/data/rating_repository_remote.dart';
 import 'package:sevanest_customer/features/ratings/domain/rating.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 
 final ratingRepositoryProvider = Provider<RatingRepository>((ref) {
   final live = ref.watch(mockApiProvider.select((s) => s.live));
@@ -12,9 +13,12 @@ final ratingRepositoryProvider = Provider<RatingRepository>((ref) {
       : RatingRepositoryMock(() => ref.read(mockApiProvider));
 });
 
-/// Longest review the form accepts. The Swagger caps `review` at 2000 and `/reference-data` has no
-/// field for it (BACKEND_REQUESTS 28); tests and a future config override this provider.
-final ratingReviewMaxProvider = Provider<int>((ref) => 2000);
+/// Longest review the form accepts: `ratingReviewMax` of `/reference-data` (300 by default; the
+/// server answers 400 to a longer one). Tests override this provider.
+final ratingReviewMaxProvider = Provider<int>((ref) {
+  final max = ref.watch(referenceDataProvider).value?['ratingReviewMax'];
+  return max is num && max >= 1 ? max.toInt() : 300;
+});
 
 /// My rating of one booking, or null when it is not rated yet.
 final bookingRatingProvider = FutureProvider.autoDispose

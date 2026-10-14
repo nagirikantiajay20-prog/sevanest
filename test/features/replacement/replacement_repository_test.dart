@@ -112,33 +112,45 @@ void main() {
       expect(r.replacementBookingId, 'b2');
       expect(r.decisionRemarks, 'Approved by Priya');
       expect(r.createdAt, isNotNull);
-      expect(r.alternatives, isEmpty);
+      expect(r.timeline, isEmpty);
       expect(r.reference, '234567'.toUpperCase());
     });
 
-    test(
-      'alternatives are read when sent, in either shape; none otherwise',
-      () {
-        final r = Replacement.fromJson({
-          'id': 'r1',
-          'bookingId': 'b1',
-          'status': 'APPROVED',
-          'reason': 'x',
-          'alternatives': [
-            {
-              'workerId': 'w1',
-              'categories': <Object>[],
-              'serviceAreas': <Object>[],
-            },
-            {
-              'worker': {'workerId': 'w2'},
-            },
-            {'nothing': true},
-          ],
-        })!;
-        expect(r.alternatives.map((w) => w.id), ['w1', 'w2']);
-      },
-    );
+    test('the timeline is read oldest first with actor and remarks', () {
+      final r = Replacement.fromJson({
+        'id': 'r1',
+        'bookingId': 'b1',
+        'status': 'REJECTED',
+        'reason': 'x',
+        'decidedAt': '2026-10-09T16:00:00.000Z',
+        'timeline': [
+          {
+            'status': 'REQUESTED',
+            'at': '2026-10-09T14:45:00.000Z',
+            'actor': 'CUSTOMER',
+            'remarks': null,
+          },
+          {
+            'status': 'REJECTED',
+            'at': '2026-10-09T16:00:00.000Z',
+            'actor': 'STAFF',
+            'remarks': 'No worker is free',
+          },
+          {'status': 'APPROVED'},
+        ],
+      })!;
+      expect(r.timeline.map((e) => e.status), [
+        ReplacementStatus.requested,
+        ReplacementStatus.rejected,
+      ]);
+      expect(r.timeline.first.actor, ReplacementActor.customer);
+      expect(r.timeline.first.remarks, isNull);
+      expect(r.timeline.last.actor, ReplacementActor.staff);
+      expect(r.timeline.last.remarks, 'No worker is free');
+      expect(r.at(ReplacementStatus.rejected), r.timeline.last.at);
+      // No entry for the status: the date field of the view is the fallback.
+      expect(r.at(ReplacementStatus.approved), r.decidedAt);
+    });
 
     test(
       'an object without an id is no request; an unknown status is kept',
@@ -204,6 +216,38 @@ void main() {
       );
       expect((seen.single.data as Map).containsKey('notes'), isFalse);
     });
+
+    test('list can be filtered to one booking', () async {
+      final repo = ReplacementRepositoryRemote(
+        dio((o) async => jsonBody('{"data":[],"meta":{"total":0}}', 200)),
+      );
+      await repo.list(bookingId: 'b1');
+      expect(seen.single.queryParameters, {
+        'page': 1,
+        'limit': 20,
+        'bookingId': 'b1',
+      });
+    });
+
+    test(
+      'alternatives are customer-safe cards from the alternatives route',
+      () async {
+        final repo = ReplacementRepositoryRemote(
+          dio(
+            (o) async => jsonBody(
+              '{"data":[{"workerId":"w1","categories":[],"serviceAreas":[]},'
+              '{"nothing":true}],"meta":{"page":1,"limit":20,"total":21}}',
+              200,
+            ),
+          ),
+        );
+        final p = await repo.alternatives('rp 1');
+        expect(seen.single.path, '/replacement-requests/rp%201/alternatives');
+        expect(seen.single.queryParameters, {'page': 1, 'limit': 20});
+        expect(p.items.map((w) => w.id), ['w1']);
+        expect(p.nextCursor, '2');
+      },
+    );
 
     test('list pages 20 at a time and builds the next cursor', () async {
       final repo = ReplacementRepositoryRemote(
@@ -339,10 +383,22 @@ void main() {
           reason: 'Other',
           idempotencyKey: 'key-1',
         );
-        expect((await repo.get(a.id)).alternatives, isEmpty);
+        await expectLater(
+          repo.alternatives(a.id),
+          throwsA(
+            isA<ConflictFailure>().having(
+              (e) => e.code,
+              'code',
+              'INVALID_TRANSITION',
+            ),
+          ),
+        );
         repo.approve(a.id);
-        final ready = await repo.get(a.id);
-        expect(ready.alternatives, hasLength(3));
+        expect((await repo.alternatives(a.id)).items, hasLength(3));
+        expect((await repo.get(a.id)).timeline.map((e) => e.status), [
+          ReplacementStatus.requested,
+          ReplacementStatus.approved,
+        ]);
         repo.unavailable.add('cook-2');
         await expectLater(
           repo.select(a.id, 'cook-2', idempotencyKey: 'k'),

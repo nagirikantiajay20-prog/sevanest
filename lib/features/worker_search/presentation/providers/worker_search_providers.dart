@@ -49,17 +49,22 @@ final workerQueryProvider = Provider.autoDispose<WorkerQuery?>((ref) {
   );
 });
 
+/// `GET /reference-data` (only when live; empty otherwise or on any failure).
+final referenceDataProvider = FutureProvider<Map<String, Object?>>((ref) async {
+  if (!ref.watch(mockApiProvider.select((s) => s.live))) return const {};
+  try {
+    final res = await ref.watch(dioProvider).get<dynamic>('/reference-data');
+    return res.data is Map ? Map<String, Object?>.from(res.data as Map) : {};
+  } on Object {
+    return const {};
+  }
+});
+
 /// The top of the rating scale (`ratingScaleMax` in `GET /reference-data`). Ratings and `minRating`
 /// use it; 5 until the backend answers.
 final ratingScaleMaxProvider = FutureProvider<int>((ref) async {
-  if (!ref.watch(mockApiProvider.select((s) => s.live))) return 5;
-  try {
-    final res = await ref.watch(dioProvider).get<dynamic>('/reference-data');
-    final max = res.data is Map ? (res.data as Map)['ratingScaleMax'] : null;
-    return max is num && max >= 1 ? max.toInt() : 5;
-  } on Object {
-    return 5;
-  }
+  final max = (await ref.watch(referenceDataProvider.future))['ratingScaleMax'];
+  return max is num && max >= 1 ? max.toInt() : 5;
 });
 
 /// Results of the current query. A changed query rebuilds (cancelling the old request);

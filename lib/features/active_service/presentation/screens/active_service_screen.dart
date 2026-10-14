@@ -11,12 +11,15 @@ import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/active_service/domain/attendance.dart';
 import 'package:sevanest_customer/features/active_service/presentation/providers/service_providers.dart';
+import 'package:sevanest_customer/features/active_service/presentation/widgets/raise_exception_sheet.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/booking/presentation/widgets/worker_identity_tile.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_links.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/safety_actions.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -24,6 +27,8 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 String attendanceLabel(AppLocalizations l, AttendanceStatus s) => switch (s) {
   AttendanceStatus.present => l.attendancePresent,
   AttendanceStatus.absent => l.attendanceAbsent,
+  AttendanceStatus.late => l.attendanceLate,
+  AttendanceStatus.leave => l.attendanceLeave,
   AttendanceStatus.exception => l.attendanceException,
   AttendanceStatus.unknown => l.attendanceUnknown,
 };
@@ -31,6 +36,8 @@ String attendanceLabel(AppLocalizations l, AttendanceStatus s) => switch (s) {
 SnBadgeTone _tone(AttendanceStatus s) => switch (s) {
   AttendanceStatus.present => SnBadgeTone.success,
   AttendanceStatus.absent => SnBadgeTone.error,
+  AttendanceStatus.late => SnBadgeTone.warning,
+  AttendanceStatus.leave => SnBadgeTone.neutral,
   AttendanceStatus.exception => SnBadgeTone.warning,
   AttendanceStatus.unknown => SnBadgeTone.neutral,
 };
@@ -88,6 +95,10 @@ class _State extends ConsumerState<ActiveServiceScreen>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
         title: Text(l10n.serviceTitle),
+        actions: [
+          // Report / block the worker of this service (module 12), named by the booking.
+          if (id != null) SafetyMenuButton(bookingId: id),
+        ],
       ),
       body: id == null ? const _Picker() : _Service(bookingId: id),
     );
@@ -98,6 +109,30 @@ class _State extends ConsumerState<ActiveServiceScreen>
 bool _isActive(Booking b) =>
     b.status == BookingStatus.active ||
     b.status == BookingStatus.replacementRequested;
+
+/// "8:02 AM" for a local time.
+String _clock(DateTime t) => formatTime(t.hour * 60 + t.minute);
+
+/// "In 8:02 AM · Out 12:05 PM", or null when the worker has not checked in or out.
+String? _checkTimes(AppLocalizations l, AttendanceEntry e) {
+  final parts = [
+    if (e.checkInAt != null) l.attendanceCheckIn(_clock(e.checkInAt!)),
+    if (e.checkOutAt != null) l.attendanceCheckOut(_clock(e.checkOutAt!)),
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}
+
+/// "8 AM – 12 PM" from the backend's `HH:mm` pair; null if it is not in that form.
+String? _window(AttendanceSummary? s) {
+  int? mins(String? v) {
+    final m = RegExp(r'^(\d{1,2}):(\d{2})').firstMatch(v ?? '');
+    return m == null ? null : int.parse(m[1]!) * 60 + int.parse(m[2]!);
+  }
+
+  final a = mins(s?.scheduledFrom);
+  final b = mins(s?.scheduledTo);
+  return a == null || b == null ? null : formatTimeSpan(a, b);
+}
 
 class _Picker extends ConsumerWidget {
   const _Picker();
@@ -199,11 +234,13 @@ class _Body extends ConsumerWidget {
     final today = attendance.asData?.value.items
         .where((e) => e.date == todayKey)
         .firstOrNull;
-    final worker =
-        b.worker ??
-        (b.workerId == null
-            ? null
-            : ref.watch(workerDetailProvider(b.workerId!)).value);
+    final identity = b.identity ?? summary?.worker;
+    final worker = identity != null
+        ? null
+        : b.worker ??
+              (b.workerId == null
+                  ? null
+                  : ref.watch(workerDetailProvider(b.workerId!)).value);
 
     Widget action(
       String key,
@@ -224,7 +261,15 @@ class _Body extends ConsumerWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.md),
       children: [
-        if (worker != null)
+        if (identity != null && b.workerId != null)
+          WorkerIdentityTile(
+            key: const Key('service_worker_card'),
+            identity: identity,
+            onTap: () => context.push(
+              Routes.path(Routes.workerDetail, {'id': b.workerId!}),
+            ),
+          )
+        else if (worker != null)
           WorkerCard(
             key: const Key('service_worker_card'),
             worker: worker,
@@ -274,6 +319,15 @@ class _Body extends ConsumerWidget {
               ],
             ),
           ),
+        if (_window(summary) != null)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(
+              l10n.serviceScheduled(_window(summary)!),
+              key: const Key('service_window'),
+              style: text.bodyMedium,
+            ),
+          ),
         const SizedBox(height: AppSpacing.md),
         Card(
           key: const Key('service_today_card'),
@@ -301,6 +355,12 @@ class _Body extends ConsumerWidget {
                     key: const Key('service_today_status'),
                     style: text.bodySmall,
                   ),
+                if (today != null && _checkTimes(l10n, today) != null)
+                  Text(
+                    _checkTimes(l10n, today)!,
+                    key: const Key('service_today_times'),
+                    style: text.bodySmall,
+                  ),
               ],
             ),
           ),
@@ -320,7 +380,9 @@ class _Body extends ConsumerWidget {
                     runSpacing: AppSpacing.sm,
                     children: [
                       _Count(l10n.attendancePresent, summary.present),
+                      _Count(l10n.attendanceLate, summary.late),
                       _Count(l10n.attendanceAbsent, summary.absent),
+                      _Count(l10n.attendanceLeave, summary.leave),
                       _Count(l10n.attendanceException, summary.exception),
                     ],
                   ),
@@ -354,6 +416,31 @@ class _Body extends ConsumerWidget {
             ),
           ),
         ReplacementLinks(booking: b),
+        if (b.status == BookingStatus.active)
+          action(
+            'service_report_missing_btn',
+            l10n.serviceReportMissing,
+            () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final done = await showModalBottomSheet<bool>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => RaiseExceptionSheet(
+                  bookingId: b.id,
+                  first: b.startDate ?? now,
+                  today: DateTime(now.year, now.month, now.day),
+                ),
+              );
+              if (done ?? false) {
+                ref
+                  ..invalidate(attendanceProvider(b.id))
+                  ..invalidate(attendanceSummaryProvider(b.id));
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.exceptionSent)),
+                );
+              }
+            },
+          ),
         action(
           'service_support_btn',
           l10n.serviceSupport,
@@ -454,6 +541,12 @@ class _RowState extends State<_Row> {
           key: Key('attendance_row_${e.date}'),
           contentPadding: EdgeInsets.zero,
           title: Text(day == null ? e.date : formatDate(day, locale)),
+          subtitle: _checkTimes(l10n, e) == null
+              ? null
+              : Text(
+                  _checkTimes(l10n, e)!,
+                  key: Key('attendance_times_${e.date}'),
+                ),
           trailing: SnBadge(
             label: attendanceLabel(l10n, e.status),
             tone: _tone(e.status),
