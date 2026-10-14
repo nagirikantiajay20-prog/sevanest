@@ -7,7 +7,6 @@ import 'package:sevanest_customer/app/router/redirect.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
-import 'package:sevanest_customer/core/widgets/placeholder_screen.dart';
 import 'package:sevanest_customer/features/active_service/presentation/screens/active_service_screen.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_form_screen.dart';
@@ -26,6 +25,8 @@ import 'package:sevanest_customer/features/home/presentation/screens/home_screen
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_detail_screen.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_request_screen.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interviews_list_screen.dart';
+import 'package:sevanest_customer/features/notifications/presentation/screens/deep_link_screen.dart';
+import 'package:sevanest_customer/features/notifications/presentation/screens/notification_centre_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/payment_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/transactions_screen.dart';
 import 'package:sevanest_customer/features/ratings/presentation/screens/rating_screen.dart';
@@ -39,12 +40,12 @@ import 'package:sevanest_customer/features/service_discovery/presentation/screen
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/start_date_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/timing_screen.dart';
 import 'package:sevanest_customer/features/service_history/presentation/screens/service_history_screen.dart';
+import 'package:sevanest_customer/features/support/presentation/screens/new_ticket_screen.dart';
+import 'package:sevanest_customer/features/support/presentation/screens/support_home_screen.dart';
+import 'package:sevanest_customer/features/support/presentation/screens/ticket_detail_screen.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/screens/worker_detail_screen.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/screens/worker_reviews_screen.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/screens/results_screen.dart';
-
-GoRoute _placeholder(String path, String title) =>
-    GoRoute(path: path, builder: (context, state) => PlaceholderScreen(title));
 
 /// Real screens replace the placeholders module by module (docs/modules/*).
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -173,8 +174,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: Routes.discoverReview,
         builder: (context, state) => const ReviewScreen(),
       ),
-      _placeholder(Routes.notifications, 'Notifications'),
-      _placeholder(Routes.support, 'Support'),
+      GoRoute(
+        path: Routes.notifications,
+        builder: (context, state) => const NotificationCentreScreen(),
+      ),
+      GoRoute(
+        path: Routes.open,
+        builder: (context, state) =>
+            DeepLinkScreen(to: state.uri.queryParameters['to'] ?? ''),
+      ),
+      GoRoute(
+        path: Routes.support,
+        builder: (context, state) => const SupportHomeScreen(),
+      ),
       // `new` must come before `:id`.
       GoRoute(
         path: Routes.interviews,
@@ -253,7 +265,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             ReplacementStatusScreen(replacementId: state.pathParameters['id']!),
       ),
-      _placeholder(Routes.supportNew, 'New ticket'),
+      // `new` must come before `:id`.
+      GoRoute(
+        path: Routes.supportNew,
+        builder: (context, state) {
+          final q = state.uri.queryParameters;
+          return NewTicketScreen(
+            bookingId: q['bookingId'],
+            paymentId: q['paymentId'],
+            replacementId: q['replacementId'],
+            interviewId: q['interviewId'],
+            categoryId: q['categoryId'],
+            safety: q['safety'] == 'true',
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.supportDetail,
+        builder: (context, state) =>
+            TicketDetailScreen(ticketId: state.pathParameters['id']!),
+      ),
       GoRoute(
         path: Routes.workers,
         builder: (context, state) => const ResultsScreen(),

@@ -2311,7 +2311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repNext2 => 'We suggest verified alternatives';
 
   @override
-  String get repNext3 => 'You choose, and we arrange the switch';
+  String get repNext3 => 'You choose, and a new booking is created';
 
   @override
   String get repStaysActive =>
@@ -2449,14 +2449,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String repBannerScheduledBody(String date) {
-    return 'Your new worker starts on $date.';
+    return 'Your new booking is set to start on $date. Open it to follow the next steps.';
   }
 
   @override
   String get repBannerCompleteTitle => 'Replacement complete';
 
   @override
-  String get repBannerCompleteBody => 'Your new worker is now with you.';
+  String get repBannerCompleteBody =>
+      'Your new booking has been created. Open it to follow the next steps.';
 
   @override
   String get repBannerRejectedTitle => 'We couldn\'t take this request forward';
@@ -2556,7 +2557,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repSelectBody =>
-      'Your current booking will end and a new booking will start with the worker you chose.';
+      'A new booking will be created with the worker you chose, and your current booking will be marked as replaced. The new booking then follows the usual steps.';
 
   @override
   String get repSelectYes => 'Yes, confirm';
@@ -2564,6 +2565,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get repSelectGone =>
       'That worker is no longer available. Please choose another.';
+
+  @override
+  String get repSelectSame =>
+      'That is your current worker. Please choose someone else.';
+
+  @override
+  String get repChanged =>
+      'This request has changed. Here is its latest status.';
+
+  @override
+  String get repRequestAgain => 'Request a new replacement';
 
   @override
   String get repSelectFail =>
@@ -2623,4 +2635,591 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repViewRequest => 'View replacement request';
+
+  @override
+  String get supTitle => 'Support';
+
+  @override
+  String get supHeadline => 'How can we help?';
+
+  @override
+  String get supSubtitle => 'You\'ll be notified in the app when we reply.';
+
+  @override
+  String get supSafetyTitle => 'Feeling unsafe or facing an emergency?';
+
+  @override
+  String get supSafetyBody =>
+      'Call local emergency services first, then tell us.';
+
+  @override
+  String get supSafetyBtn => 'Report a safety issue';
+
+  @override
+  String get supQuickHelp => 'Quick help';
+
+  @override
+  String get supLoadErrorTitle => 'We couldn\'t load support';
+
+  @override
+  String get supLoadErrorBody => 'Please try again.';
+
+  @override
+  String get supOfflineBanner => 'You\'re offline. Tickets need a connection.';
+
+  @override
+  String get supOfflineHint => 'Connect to the internet to create a ticket.';
+
+  @override
+  String get supCreate => 'Create a ticket';
+
+  @override
+  String get supContactUs => 'Contact us';
+
+  @override
+  String get supCall => 'Call support';
+
+  @override
+  String get supEmail => 'Email support';
+
+  @override
+  String get supContactNA => 'Not available right now';
+
+  @override
+  String get supYourTickets => 'Your tickets';
+
+  @override
+  String get supNoTickets => 'No tickets yet';
+
+  @override
+  String get supNoTicketsBody => 'When you raise a ticket it appears here.';
+
+  @override
+  String get supTicketsError => 'We couldn\'t load your tickets.';
+
+  @override
+  String get supLoadMore => 'Load more';
+
+  @override
+  String supUpdated(String when) {
+    return 'Updated $when';
+  }
+
+  @override
+  String get tkStatusOpen => 'Open';
+
+  @override
+  String get tkStatusInProgress => 'In progress';
+
+  @override
+  String get tkStatusClosed => 'Closed';
+
+  @override
+  String get tkStatusUnknown => 'Updated';
+
+  @override
+  String get tkNewTitle => 'New ticket';
+
+  @override
+  String get tkNewAbout => 'What is this about?';
+
+  @override
+  String get tkNewRelated => 'Related booking (optional)';
+
+  @override
+  String get tkNewRelatedHint => 'Choose a booking';
+
+  @override
+  String get tkNewRelatedHelp => 'Attach one so we can help faster.';
+
+  @override
+  String tkNewAttached(String ref) {
+    return 'Attached: Booking #$ref';
+  }
+
+  @override
+  String get tkNewRemove => 'Remove';
+
+  @override
+  String get tkNewPickerTitle => 'Related booking';
+
+  @override
+  String get tkNewPickerSub => 'Recent bookings';
+
+  @override
+  String get tkNewPickerNone => 'None';
+
+  @override
+  String get tkNewPickerEmpty => 'You don\'t have any bookings yet.';
+
+  @override
+  String get tkNewDescribe => 'Describe the problem';
+
+  @override
+  String get tkNewDescribeHint =>
+      'What happened? Include dates and times if you can.';
+
+  @override
+  String get tkNewDescribeShort => 'Please add a little more detail';
+
+  @override
+  String get tkNewPrivacy => 'Don\'t share OTPs, card numbers or passwords.';
+
+  @override
+  String get tkNewNotified => 'You\'ll be notified in the app when we reply.';
+
+  @override
+  String get tkNewSubmit => 'Submit ticket';
+
+  @override
+  String get tkNewSubmitting => 'Submitting…';
+
+  @override
+  String get tkNewTryAgain => 'Try again';
+
+  @override
+  String get tkNewHintCategory => 'Choose a category to continue';
+
+  @override
+  String get tkNewHintDescribe => 'Describe the problem to continue';
+
+  @override
+  String get tkNewHintMore => 'Add a little more detail to continue';
+
+  @override
+  String get tkNewHintOffline => 'Connect to the internet to submit';
+
+  @override
+  String get tkNewErrTitle => 'We couldn\'t submit your ticket';
+
+  @override
+  String get tkNewErrBody => 'Your details are saved. Please try again.';
+
+  @override
+  String get tkNewOfflineBanner => 'You\'re offline. Your details are saved.';
+
+  @override
+  String get tkNewCategoriesError => 'We couldn\'t load the categories.';
+
+  @override
+  String get tkNewDupTitle =>
+      'You already have an open ticket for this booking';
+
+  @override
+  String get tkNewDupOpen => 'Open that ticket';
+
+  @override
+  String get tkNewSafetyTitle => 'Your safety comes first';
+
+  @override
+  String get tkNewSafetyBody =>
+      'If you are in immediate danger, call local emergency services first.';
+
+  @override
+  String get tkNewCreatedTitle => 'Ticket created';
+
+  @override
+  String get tkNewCreatedBody =>
+      'We\'ve got your request. You\'ll hear from us soon.';
+
+  @override
+  String get tkNewView => 'View ticket';
+
+  @override
+  String get tkNewBack => 'Back to support';
+
+  @override
+  String tkNewRef(String ref) {
+    return 'Ticket #$ref';
+  }
+
+  @override
+  String get tkNewCategoryGone =>
+      'That category is no longer available. Please choose another.';
+
+  @override
+  String get tkNewBookingGone =>
+      'We couldn\'t find that booking. Remove it and try again.';
+
+  @override
+  String tkdMeta(String created, String updated) {
+    return 'Created $created · Updated $updated';
+  }
+
+  @override
+  String tkdBooking(String ref) {
+    return 'Booking #$ref';
+  }
+
+  @override
+  String tkdEventCreated(String time) {
+    return 'Ticket created · $time';
+  }
+
+  @override
+  String tkdEventStatus(String status, String time) {
+    return 'Status changed to $status · $time';
+  }
+
+  @override
+  String tkdEventClosed(String time) {
+    return 'Ticket closed · $time';
+  }
+
+  @override
+  String get tkdSupportName => 'SevaNest Support';
+
+  @override
+  String get tkdWorkerName => 'Worker';
+
+  @override
+  String get tkdReplyHint => 'Write a reply';
+
+  @override
+  String get tkdSend => 'Send';
+
+  @override
+  String get tkdPrivacy => 'Don\'t share OTPs, PINs or card numbers.';
+
+  @override
+  String get tkdFailed => 'Failed';
+
+  @override
+  String get tkdRetry => 'Retry';
+
+  @override
+  String get tkdDismiss => 'Remove';
+
+  @override
+  String get tkdClosedBar => 'This ticket is closed.';
+
+  @override
+  String get tkdClosedNew => 'Create a new ticket';
+
+  @override
+  String get tkdResolutionTitle => 'Ticket closed';
+
+  @override
+  String get tkdLoadErrorTitle => 'We couldn\'t load this ticket';
+
+  @override
+  String get tkdLoadErrorBody => 'Check your connection and try again.';
+
+  @override
+  String get tkdOffline => 'You\'re offline. Reconnect to send messages.';
+
+  @override
+  String get tkdClosedErr =>
+      'This ticket was closed, so your message wasn\'t sent.';
+
+  @override
+  String get tkdSending => 'Sending…';
+
+  @override
+  String get tkdGone => 'This ticket is no longer available.';
+
+  @override
+  String get safetyMenu => 'More options';
+
+  @override
+  String get safetyReport => 'Report this worker';
+
+  @override
+  String get safetyBlock => 'Block this worker';
+
+  @override
+  String get safetyReportTitle => 'Report a problem';
+
+  @override
+  String get safetyReportWhat => 'What went wrong?';
+
+  @override
+  String get safetyReasonNoShow => 'Didn\'t show up';
+
+  @override
+  String get safetyReasonMisconduct => 'Misconduct';
+
+  @override
+  String get safetyReasonHarassment => 'Harassment';
+
+  @override
+  String get safetyReasonTheft => 'Theft';
+
+  @override
+  String get safetyReasonFraud => 'Fraud or cheating';
+
+  @override
+  String get safetyReasonSafety => 'Safety concern';
+
+  @override
+  String get safetyReasonOther => 'Other';
+
+  @override
+  String get safetyNote => 'Tell us what happened';
+
+  @override
+  String get safetyNoteHint => 'Optional. Only our team reads this.';
+
+  @override
+  String get safetyAlsoBlock => 'Also block this worker';
+
+  @override
+  String get safetySubmit => 'Submit report';
+
+  @override
+  String get safetySubmitting => 'Submitting…';
+
+  @override
+  String get safetyThanks => 'Thanks, our team will review this';
+
+  @override
+  String get safetyEmergency =>
+      'If you\'re in immediate danger, call local emergency services first.';
+
+  @override
+  String get safetyBlockTitle => 'Block this worker?';
+
+  @override
+  String get safetyBlockBody =>
+      'You won\'t be matched with this worker again. They won\'t appear in your search or shortlist.';
+
+  @override
+  String get safetyBlockYes => 'Block';
+
+  @override
+  String get safetyBlocked => 'Worker blocked';
+
+  @override
+  String get safetyNotFound => 'We couldn\'t find that worker.';
+
+  @override
+  String get notifTitle => 'Notifications';
+
+  @override
+  String get notifTabAll => 'All';
+
+  @override
+  String get notifTabUnread => 'Unread';
+
+  @override
+  String get notifMarkAll => 'Mark all as read';
+
+  @override
+  String get notifNew => 'New';
+
+  @override
+  String get notifEmptyTitle => 'No notifications yet';
+
+  @override
+  String get notifEmptyBody =>
+      'Updates about your bookings, payments and support will appear here.';
+
+  @override
+  String get notifUnreadEmptyTitle => 'No unread notifications';
+
+  @override
+  String get notifUnreadEmptyBody => 'You\'re all caught up.';
+
+  @override
+  String get notifViewAll => 'View all notifications';
+
+  @override
+  String get notifCaughtUp => 'You\'re all caught up';
+
+  @override
+  String get notifErrTitle => 'We couldn\'t load your notifications';
+
+  @override
+  String get notifErrBody => 'Check your connection and try again.';
+
+  @override
+  String get notifOfflineBanner =>
+      'You\'re offline. Showing saved notifications.';
+
+  @override
+  String get notifOffTitle => 'Notifications are turned off';
+
+  @override
+  String get notifOffBody =>
+      'Turn them on so you don\'t miss interview and payment updates.';
+
+  @override
+  String get notifOpenSettings => 'Open settings';
+
+  @override
+  String get notifFallbackTitle => 'Update';
+
+  @override
+  String get notifPromptTitle => 'Stay in the loop';
+
+  @override
+  String get notifPromptBody =>
+      'Get a heads-up about interviews, payments and replies from support. You can change this any time in your phone\'s settings.';
+
+  @override
+  String get notifPromptAllow => 'Allow notifications';
+
+  @override
+  String get notifPromptLater => 'Not now';
+
+  @override
+  String get notifAccountTitle => 'Notifications';
+
+  @override
+  String get notifAccountOn => 'On';
+
+  @override
+  String get notifAccountOff => 'Off';
+
+  @override
+  String get notifAccountNotAsked => 'Not turned on';
+
+  @override
+  String get accountSupport => 'Help and support';
+
+  @override
+  String get notifBannerOpen => 'Open notification';
+
+  @override
+  String get linkUnavailableTitle => 'This item isn\'t available';
+
+  @override
+  String get linkUnavailableBody =>
+      'It may have been removed, or you may not have access to it.';
+
+  @override
+  String get linkGoHome => 'Go to Home';
+
+  @override
+  String get agoNow => 'Just now';
+
+  @override
+  String agoMinutes(int n) {
+    return '$n min ago';
+  }
+
+  @override
+  String agoHours(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n hours ago',
+      one: '1 hour ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agoDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dayYesterday => 'Yesterday';
+
+  @override
+  String get attendanceLate => 'Late';
+
+  @override
+  String get attendanceLeave => 'On leave';
+
+  @override
+  String attendanceCheckIn(String time) {
+    return 'In $time';
+  }
+
+  @override
+  String attendanceCheckOut(String time) {
+    return 'Out $time';
+  }
+
+  @override
+  String serviceScheduled(String window) {
+    return 'Scheduled $window';
+  }
+
+  @override
+  String get historyFilterAll => 'All';
+
+  @override
+  String get historyFilterYear => 'Year';
+
+  @override
+  String get historyFilterCategory => 'Service';
+
+  @override
+  String get historyFilterStatus => 'Status';
+
+  @override
+  String get historySearchHint => 'Search services';
+
+  @override
+  String historySummaryLine(int services, int workers, String spent) {
+    return '$services services · $workers workers · $spent total spent';
+  }
+
+  @override
+  String get historyNoMatch => 'No services match these filters.';
+
+  @override
+  String get bookingHireAgain => 'Hire again';
+
+  @override
+  String get safetyInProgress =>
+      'Still sending your last request. Please try again in a moment.';
+
+  @override
+  String get rebookFailed => 'Couldn\'t start a new booking. Please try again.';
+
+  @override
+  String get rebookNotAllowed =>
+      'Only a completed booking can be booked again.';
+
+  @override
+  String get rebookWorkerUnavailable =>
+      'This worker isn\'t available right now.';
+
+  @override
+  String get rebookWorkerNotEligible =>
+      'This worker can\'t take a new booking right now.';
+
+  @override
+  String get rebookDuplicate =>
+      'You already have an open booking with this worker.';
+
+  @override
+  String get serviceReportMissing => 'Report a missing day';
+
+  @override
+  String get exceptionTitle => 'Report a missing day';
+
+  @override
+  String get exceptionHint =>
+      'Pick a day your worker didn\'t record and tell us what happened.';
+
+  @override
+  String get exceptionDate => 'Day';
+
+  @override
+  String get exceptionNote => 'What happened';
+
+  @override
+  String get exceptionSubmit => 'Send report';
+
+  @override
+  String get exceptionExists => 'That day already has an entry.';
+
+  @override
+  String get exceptionSent => 'Thanks, we\'ve recorded it.';
+
+  @override
+  String ratingReviewTooLong(int max) {
+    return 'Your review is too long. Please shorten it to $max characters.';
+  }
 }

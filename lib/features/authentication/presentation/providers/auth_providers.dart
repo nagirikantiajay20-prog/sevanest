@@ -8,6 +8,7 @@ import 'package:sevanest_customer/core/storage/device_id_store.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/features/authentication/data/auth_repository_remote.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 
 /// Used only when a 429 gives no Retry-After. Cosmetic: the backend enforces the real limits.
 const resendCooldownSeconds = 30;
@@ -25,10 +26,13 @@ final authRepositoryProvider = Provider<AuthRepository>(
   ),
 );
 
+/// Drops the device push token (best effort, while the session is still valid), then
 /// POST /auth/logout (failure ignored) -> clear tokens + profile state; the router sends the user
-/// to /login. FCM token unregister joins in step 10.3.
+/// to /login. The backend has no unbind route, so the token is deleted on the device
+/// (BACKEND_REQUESTS 51).
 final logoutProvider = Provider<Future<void> Function()>(
   (ref) => () async {
+    await ref.read(pushControllerProvider).unregister();
     try {
       await ref.read(authRepositoryProvider).logout();
     } on Object {

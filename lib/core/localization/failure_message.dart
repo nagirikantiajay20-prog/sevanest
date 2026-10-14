@@ -10,3 +10,13 @@ String failureMessage(AppLocalizations l10n, Object error) {
   if (error is AppFailure && error.message != null) return error.message!;
   return l10n.errorGeneric;
 }
+
+/// Like [failureMessage] but never shows text the server wrote (support, safety and notification
+/// screens map the codes they know themselves and fall back to this).
+String plainFailureMessage(AppLocalizations l10n, Object error) {
+  if (error is NetworkFailure) return l10n.errorNetwork;
+  if (error is UnauthorizedFailure) return l10n.errorSessionExpired;
+  if (error is ForbiddenFailure) return l10n.errorForbidden;
+  if (error is ServerFailure) return l10n.errorServer;
+  return l10n.errorGeneric;
+}

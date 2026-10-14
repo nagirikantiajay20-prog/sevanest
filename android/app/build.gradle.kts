@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -24,8 +25,8 @@ android {
     }
 
     defaultConfig {
-        // TBD: confirm after trademark/domain check (OPEN_QUESTIONS #20).
-        applicationId = "in.sevanest.customer"
+        // Must match the Firebase Android app (google-services.json).
+        applicationId = "com.sevanest.customer"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -37,15 +38,14 @@ android {
     }
 
     flavorDimensions += "env"
+    // No applicationIdSuffix: Firebase only has com.sevanest.customer registered, so every flavor shares it.
     productFlavors {
         create("dev") {
             dimension = "env"
-            applicationIdSuffix = ".dev"
             resValue("string", "app_name", "SevaNest Dev")
         }
         create("stg") {
             dimension = "env"
-            applicationIdSuffix = ".stg"
             resValue("string", "app_name", "SevaNest Stg")
         }
         create("prod") {

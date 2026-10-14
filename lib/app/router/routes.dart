@@ -59,6 +59,10 @@ abstract final class Routes {
   static const supportDetail = '/support/:id';
   static const notifications = '/notifications';
 
+  /// Notification / push deep links open here first: `/open?to=<entity route>` reads the entity
+  /// fresh, then replaces itself with the screen, or says it is not available.
+  static const open = '/open';
+
   // Dev only (never registered in prod)
   static const devGallery = '/dev/gallery';
 

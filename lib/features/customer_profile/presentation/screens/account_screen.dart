@@ -5,6 +5,8 @@ import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Entry points for modules 02 and 03 on the Account tab, plus Log out. Module 14 (account &
@@ -69,6 +71,14 @@ class AccountScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(Routes.serviceHistory),
           ),
+          _NotificationsTile(),
+          ListTile(
+            key: const Key('account_support_tile'),
+            leading: const Icon(Icons.headset_mic_outlined),
+            title: Text(l10n.accountSupport),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.support),
+          ),
           const Divider(),
           ListTile(
             key: const Key('account_logout_btn'),
@@ -81,6 +91,42 @@ class AccountScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Notifications row: the centre, plus "Off" with a button to the system settings when the OS
+/// permission was denied (docs/modules/13: the app works without it).
+class _NotificationsTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final perm = ref.watch(pushPermissionProvider).value;
+    final status = switch (perm) {
+      PushPermission.granted => l10n.notifAccountOn,
+      PushPermission.denied => l10n.notifAccountOff,
+      PushPermission.notDetermined => l10n.notifAccountNotAsked,
+      _ => null,
+    };
+    return ListTile(
+      key: const Key('account_notifications_tile'),
+      leading: Icon(
+        perm == PushPermission.denied
+            ? Icons.notifications_off_outlined
+            : Icons.notifications_none,
+      ),
+      title: Text(l10n.notifAccountTitle),
+      subtitle: status == null
+          ? null
+          : Text(status, key: const Key('account_notifications_status')),
+      trailing: perm == PushPermission.denied
+          ? OutlinedButton(
+              key: const Key('notif_open_settings_btn'),
+              onPressed: () => ref.read(pushServiceProvider).openSettings(),
+              child: Text(l10n.notifOpenSettings),
+            )
+          : const Icon(Icons.chevron_right),
+      onTap: () => context.push(Routes.notifications),
     );
   }
 }

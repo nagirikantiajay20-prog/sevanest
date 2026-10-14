@@ -10,8 +10,11 @@ import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
+import 'package:sevanest_customer/features/notifications/domain/notification.dart';
+import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
+import 'package:sevanest_customer/features/support/domain/support.dart';
 
 import 'fakes.dart';
 
@@ -86,6 +89,10 @@ Future<DiscoverEnv> launchDiscover(
   /// Logical height of the phone surface. Tall surfaces keep long forms fully built, so tests can
   /// read fields without scrolling.
   double height = 844,
+  NotificationRepository? notifications,
+  SupportRepository? support,
+  SafetyRepository? safety,
+  PushService? push,
   List<Override> overrides = const [],
 }) async {
   useTestPhone(t);
@@ -106,6 +113,10 @@ Future<DiscoverEnv> launchDiscover(
       catalog: catalog,
       schedule: schedule,
       guidance: guidance,
+      notifications: notifications,
+      support: support,
+      safety: safety,
+      push: push,
       overrides: [
         ...overrides,
         addressRepositoryProvider.overrideWithValue(addr),

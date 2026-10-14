@@ -41,6 +41,7 @@ void main() {
       Routes.supportNew,
       Routes.supportDetail,
       Routes.notifications,
+      Routes.open,
     ];
     final missing = paths.where((p) => !doc.contains(p)).toList();
     expect(missing, isEmpty);

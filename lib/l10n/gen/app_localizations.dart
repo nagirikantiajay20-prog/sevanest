@@ -4327,7 +4327,7 @@ abstract class AppLocalizations {
   /// No description provided for @repNext3.
   ///
   /// In en, this message translates to:
-  /// **'You choose, and we arrange the switch'**
+  /// **'You choose, and a new booking is created'**
   String get repNext3;
 
   /// No description provided for @repStaysActive.
@@ -4573,7 +4573,7 @@ abstract class AppLocalizations {
   /// No description provided for @repBannerScheduledBody.
   ///
   /// In en, this message translates to:
-  /// **'Your new worker starts on {date}.'**
+  /// **'Your new booking is set to start on {date}. Open it to follow the next steps.'**
   String repBannerScheduledBody(String date);
 
   /// No description provided for @repBannerCompleteTitle.
@@ -4585,7 +4585,7 @@ abstract class AppLocalizations {
   /// No description provided for @repBannerCompleteBody.
   ///
   /// In en, this message translates to:
-  /// **'Your new worker is now with you.'**
+  /// **'Your new booking has been created. Open it to follow the next steps.'**
   String get repBannerCompleteBody;
 
   /// No description provided for @repBannerRejectedTitle.
@@ -4771,7 +4771,7 @@ abstract class AppLocalizations {
   /// No description provided for @repSelectBody.
   ///
   /// In en, this message translates to:
-  /// **'Your current booking will end and a new booking will start with the worker you chose.'**
+  /// **'A new booking will be created with the worker you chose, and your current booking will be marked as replaced. The new booking then follows the usual steps.'**
   String get repSelectBody;
 
   /// No description provided for @repSelectYes.
@@ -4785,6 +4785,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'That worker is no longer available. Please choose another.'**
   String get repSelectGone;
+
+  /// No description provided for @repSelectSame.
+  ///
+  /// In en, this message translates to:
+  /// **'That is your current worker. Please choose someone else.'**
+  String get repSelectSame;
+
+  /// No description provided for @repChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'This request has changed. Here is its latest status.'**
+  String get repChanged;
+
+  /// No description provided for @repRequestAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a new replacement'**
+  String get repRequestAgain;
 
   /// No description provided for @repSelectFail.
   ///
@@ -4893,6 +4911,1050 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View replacement request'**
   String get repViewRequest;
+
+  /// No description provided for @supTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get supTitle;
+
+  /// No description provided for @supHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'How can we help?'**
+  String get supHeadline;
+
+  /// No description provided for @supSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll be notified in the app when we reply.'**
+  String get supSubtitle;
+
+  /// No description provided for @supSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Feeling unsafe or facing an emergency?'**
+  String get supSafetyTitle;
+
+  /// No description provided for @supSafetyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Call local emergency services first, then tell us.'**
+  String get supSafetyBody;
+
+  /// No description provided for @supSafetyBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a safety issue'**
+  String get supSafetyBtn;
+
+  /// No description provided for @supQuickHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick help'**
+  String get supQuickHelp;
+
+  /// No description provided for @supLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load support'**
+  String get supLoadErrorTitle;
+
+  /// No description provided for @supLoadErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again.'**
+  String get supLoadErrorBody;
+
+  /// No description provided for @supOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Tickets need a connection.'**
+  String get supOfflineBanner;
+
+  /// No description provided for @supOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to create a ticket.'**
+  String get supOfflineHint;
+
+  /// No description provided for @supCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a ticket'**
+  String get supCreate;
+
+  /// No description provided for @supContactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get supContactUs;
+
+  /// No description provided for @supCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call support'**
+  String get supCall;
+
+  /// No description provided for @supEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email support'**
+  String get supEmail;
+
+  /// No description provided for @supContactNA.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available right now'**
+  String get supContactNA;
+
+  /// No description provided for @supYourTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Your tickets'**
+  String get supYourTickets;
+
+  /// No description provided for @supNoTickets.
+  ///
+  /// In en, this message translates to:
+  /// **'No tickets yet'**
+  String get supNoTickets;
+
+  /// No description provided for @supNoTicketsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When you raise a ticket it appears here.'**
+  String get supNoTicketsBody;
+
+  /// No description provided for @supTicketsError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your tickets.'**
+  String get supTicketsError;
+
+  /// No description provided for @supLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get supLoadMore;
+
+  /// No description provided for @supUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {when}'**
+  String supUpdated(String when);
+
+  /// No description provided for @tkStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get tkStatusOpen;
+
+  /// No description provided for @tkStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get tkStatusInProgress;
+
+  /// No description provided for @tkStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get tkStatusClosed;
+
+  /// No description provided for @tkStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get tkStatusUnknown;
+
+  /// No description provided for @tkNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New ticket'**
+  String get tkNewTitle;
+
+  /// No description provided for @tkNewAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this about?'**
+  String get tkNewAbout;
+
+  /// No description provided for @tkNewRelated.
+  ///
+  /// In en, this message translates to:
+  /// **'Related booking (optional)'**
+  String get tkNewRelated;
+
+  /// No description provided for @tkNewRelatedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a booking'**
+  String get tkNewRelatedHint;
+
+  /// No description provided for @tkNewRelatedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach one so we can help faster.'**
+  String get tkNewRelatedHelp;
+
+  /// No description provided for @tkNewAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached: Booking #{ref}'**
+  String tkNewAttached(String ref);
+
+  /// No description provided for @tkNewRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get tkNewRemove;
+
+  /// No description provided for @tkNewPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Related booking'**
+  String get tkNewPickerTitle;
+
+  /// No description provided for @tkNewPickerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent bookings'**
+  String get tkNewPickerSub;
+
+  /// No description provided for @tkNewPickerNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get tkNewPickerNone;
+
+  /// No description provided for @tkNewPickerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any bookings yet.'**
+  String get tkNewPickerEmpty;
+
+  /// No description provided for @tkNewDescribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the problem'**
+  String get tkNewDescribe;
+
+  /// No description provided for @tkNewDescribeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened? Include dates and times if you can.'**
+  String get tkNewDescribeHint;
+
+  /// No description provided for @tkNewDescribeShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add a little more detail'**
+  String get tkNewDescribeShort;
+
+  /// No description provided for @tkNewPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t share OTPs, card numbers or passwords.'**
+  String get tkNewPrivacy;
+
+  /// No description provided for @tkNewNotified.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll be notified in the app when we reply.'**
+  String get tkNewNotified;
+
+  /// No description provided for @tkNewSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit ticket'**
+  String get tkNewSubmit;
+
+  /// No description provided for @tkNewSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get tkNewSubmitting;
+
+  /// No description provided for @tkNewTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tkNewTryAgain;
+
+  /// No description provided for @tkNewHintCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category to continue'**
+  String get tkNewHintCategory;
+
+  /// No description provided for @tkNewHintDescribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the problem to continue'**
+  String get tkNewHintDescribe;
+
+  /// No description provided for @tkNewHintMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a little more detail to continue'**
+  String get tkNewHintMore;
+
+  /// No description provided for @tkNewHintOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to submit'**
+  String get tkNewHintOffline;
+
+  /// No description provided for @tkNewErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t submit your ticket'**
+  String get tkNewErrTitle;
+
+  /// No description provided for @tkNewErrBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details are saved. Please try again.'**
+  String get tkNewErrBody;
+
+  /// No description provided for @tkNewOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Your details are saved.'**
+  String get tkNewOfflineBanner;
+
+  /// No description provided for @tkNewCategoriesError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the categories.'**
+  String get tkNewCategoriesError;
+
+  /// No description provided for @tkNewDupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an open ticket for this booking'**
+  String get tkNewDupTitle;
+
+  /// No description provided for @tkNewDupOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open that ticket'**
+  String get tkNewDupOpen;
+
+  /// No description provided for @tkNewSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your safety comes first'**
+  String get tkNewSafetyTitle;
+
+  /// No description provided for @tkNewSafetyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you are in immediate danger, call local emergency services first.'**
+  String get tkNewSafetyBody;
+
+  /// No description provided for @tkNewCreatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket created'**
+  String get tkNewCreatedTitle;
+
+  /// No description provided for @tkNewCreatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ve got your request. You\'ll hear from us soon.'**
+  String get tkNewCreatedBody;
+
+  /// No description provided for @tkNewView.
+  ///
+  /// In en, this message translates to:
+  /// **'View ticket'**
+  String get tkNewView;
+
+  /// No description provided for @tkNewBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to support'**
+  String get tkNewBack;
+
+  /// No description provided for @tkNewRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket #{ref}'**
+  String tkNewRef(String ref);
+
+  /// No description provided for @tkNewCategoryGone.
+  ///
+  /// In en, this message translates to:
+  /// **'That category is no longer available. Please choose another.'**
+  String get tkNewCategoryGone;
+
+  /// No description provided for @tkNewBookingGone.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find that booking. Remove it and try again.'**
+  String get tkNewBookingGone;
+
+  /// No description provided for @tkdMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Created {created} · Updated {updated}'**
+  String tkdMeta(String created, String updated);
+
+  /// No description provided for @tkdBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking #{ref}'**
+  String tkdBooking(String ref);
+
+  /// No description provided for @tkdEventCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket created · {time}'**
+  String tkdEventCreated(String time);
+
+  /// No description provided for @tkdEventStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status changed to {status} · {time}'**
+  String tkdEventStatus(String status, String time);
+
+  /// No description provided for @tkdEventClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket closed · {time}'**
+  String tkdEventClosed(String time);
+
+  /// No description provided for @tkdSupportName.
+  ///
+  /// In en, this message translates to:
+  /// **'SevaNest Support'**
+  String get tkdSupportName;
+
+  /// No description provided for @tkdWorkerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get tkdWorkerName;
+
+  /// No description provided for @tkdReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a reply'**
+  String get tkdReplyHint;
+
+  /// No description provided for @tkdSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get tkdSend;
+
+  /// No description provided for @tkdPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t share OTPs, PINs or card numbers.'**
+  String get tkdPrivacy;
+
+  /// No description provided for @tkdFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get tkdFailed;
+
+  /// No description provided for @tkdRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get tkdRetry;
+
+  /// No description provided for @tkdDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get tkdDismiss;
+
+  /// No description provided for @tkdClosedBar.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket is closed.'**
+  String get tkdClosedBar;
+
+  /// No description provided for @tkdClosedNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new ticket'**
+  String get tkdClosedNew;
+
+  /// No description provided for @tkdResolutionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket closed'**
+  String get tkdResolutionTitle;
+
+  /// No description provided for @tkdLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load this ticket'**
+  String get tkdLoadErrorTitle;
+
+  /// No description provided for @tkdLoadErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get tkdLoadErrorBody;
+
+  /// No description provided for @tkdOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Reconnect to send messages.'**
+  String get tkdOffline;
+
+  /// No description provided for @tkdClosedErr.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket was closed, so your message wasn\'t sent.'**
+  String get tkdClosedErr;
+
+  /// No description provided for @tkdSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get tkdSending;
+
+  /// No description provided for @tkdGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This ticket is no longer available.'**
+  String get tkdGone;
+
+  /// No description provided for @safetyMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get safetyMenu;
+
+  /// No description provided for @safetyReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report this worker'**
+  String get safetyReport;
+
+  /// No description provided for @safetyBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Block this worker'**
+  String get safetyBlock;
+
+  /// No description provided for @safetyReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a problem'**
+  String get safetyReportTitle;
+
+  /// No description provided for @safetyReportWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong?'**
+  String get safetyReportWhat;
+
+  /// No description provided for @safetyReasonNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t show up'**
+  String get safetyReasonNoShow;
+
+  /// No description provided for @safetyReasonMisconduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Misconduct'**
+  String get safetyReasonMisconduct;
+
+  /// No description provided for @safetyReasonHarassment.
+  ///
+  /// In en, this message translates to:
+  /// **'Harassment'**
+  String get safetyReasonHarassment;
+
+  /// No description provided for @safetyReasonTheft.
+  ///
+  /// In en, this message translates to:
+  /// **'Theft'**
+  String get safetyReasonTheft;
+
+  /// No description provided for @safetyReasonFraud.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraud or cheating'**
+  String get safetyReasonFraud;
+
+  /// No description provided for @safetyReasonSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety concern'**
+  String get safetyReasonSafety;
+
+  /// No description provided for @safetyReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get safetyReasonOther;
+
+  /// No description provided for @safetyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened'**
+  String get safetyNote;
+
+  /// No description provided for @safetyNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Only our team reads this.'**
+  String get safetyNoteHint;
+
+  /// No description provided for @safetyAlsoBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Also block this worker'**
+  String get safetyAlsoBlock;
+
+  /// No description provided for @safetySubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit report'**
+  String get safetySubmit;
+
+  /// No description provided for @safetySubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting…'**
+  String get safetySubmitting;
+
+  /// No description provided for @safetyThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks, our team will review this'**
+  String get safetyThanks;
+
+  /// No description provided for @safetyEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'If you\'re in immediate danger, call local emergency services first.'**
+  String get safetyEmergency;
+
+  /// No description provided for @safetyBlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block this worker?'**
+  String get safetyBlockTitle;
+
+  /// No description provided for @safetyBlockBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You won\'t be matched with this worker again. They won\'t appear in your search or shortlist.'**
+  String get safetyBlockBody;
+
+  /// No description provided for @safetyBlockYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Block'**
+  String get safetyBlockYes;
+
+  /// No description provided for @safetyBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker blocked'**
+  String get safetyBlocked;
+
+  /// No description provided for @safetyNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find that worker.'**
+  String get safetyNotFound;
+
+  /// No description provided for @notifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifTitle;
+
+  /// No description provided for @notifTabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notifTabAll;
+
+  /// No description provided for @notifTabUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notifTabUnread;
+
+  /// No description provided for @notifMarkAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notifMarkAll;
+
+  /// No description provided for @notifNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get notifNew;
+
+  /// No description provided for @notifEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications yet'**
+  String get notifEmptyTitle;
+
+  /// No description provided for @notifEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates about your bookings, payments and support will appear here.'**
+  String get notifEmptyBody;
+
+  /// No description provided for @notifUnreadEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No unread notifications'**
+  String get notifUnreadEmptyTitle;
+
+  /// No description provided for @notifUnreadEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up.'**
+  String get notifUnreadEmptyBody;
+
+  /// No description provided for @notifViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all notifications'**
+  String get notifViewAll;
+
+  /// No description provided for @notifCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up'**
+  String get notifCaughtUp;
+
+  /// No description provided for @notifErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your notifications'**
+  String get notifErrTitle;
+
+  /// No description provided for @notifErrBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get notifErrBody;
+
+  /// No description provided for @notifOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Showing saved notifications.'**
+  String get notifOfflineBanner;
+
+  /// No description provided for @notifOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are turned off'**
+  String get notifOffTitle;
+
+  /// No description provided for @notifOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn them on so you don\'t miss interview and payment updates.'**
+  String get notifOffBody;
+
+  /// No description provided for @notifOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get notifOpenSettings;
+
+  /// No description provided for @notifFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get notifFallbackTitle;
+
+  /// No description provided for @notifPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay in the loop'**
+  String get notifPromptTitle;
+
+  /// No description provided for @notifPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a heads-up about interviews, payments and replies from support. You can change this any time in your phone\'s settings.'**
+  String get notifPromptBody;
+
+  /// No description provided for @notifPromptAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications'**
+  String get notifPromptAllow;
+
+  /// No description provided for @notifPromptLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notifPromptLater;
+
+  /// No description provided for @notifAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifAccountTitle;
+
+  /// No description provided for @notifAccountOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get notifAccountOn;
+
+  /// No description provided for @notifAccountOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get notifAccountOff;
+
+  /// No description provided for @notifAccountNotAsked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not turned on'**
+  String get notifAccountNotAsked;
+
+  /// No description provided for @accountSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and support'**
+  String get accountSupport;
+
+  /// No description provided for @notifBannerOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open notification'**
+  String get notifBannerOpen;
+
+  /// No description provided for @linkUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This item isn\'t available'**
+  String get linkUnavailableTitle;
+
+  /// No description provided for @linkUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been removed, or you may not have access to it.'**
+  String get linkUnavailableBody;
+
+  /// No description provided for @linkGoHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Home'**
+  String get linkGoHome;
+
+  /// No description provided for @agoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get agoNow;
+
+  /// No description provided for @agoMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min ago'**
+  String agoMinutes(int n);
+
+  /// No description provided for @agoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 hour ago} other{{n} hours ago}}'**
+  String agoHours(int n);
+
+  /// No description provided for @agoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 day ago} other{{n} days ago}}'**
+  String agoDays(int n);
+
+  /// No description provided for @dayYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get dayYesterday;
+
+  /// No description provided for @attendanceLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get attendanceLate;
+
+  /// No description provided for @attendanceLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave'**
+  String get attendanceLeave;
+
+  /// No description provided for @attendanceCheckIn.
+  ///
+  /// In en, this message translates to:
+  /// **'In {time}'**
+  String attendanceCheckIn(String time);
+
+  /// No description provided for @attendanceCheckOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out {time}'**
+  String attendanceCheckOut(String time);
+
+  /// No description provided for @serviceScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled {window}'**
+  String serviceScheduled(String window);
+
+  /// No description provided for @historyFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get historyFilterAll;
+
+  /// No description provided for @historyFilterYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get historyFilterYear;
+
+  /// No description provided for @historyFilterCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get historyFilterCategory;
+
+  /// No description provided for @historyFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get historyFilterStatus;
+
+  /// No description provided for @historySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search services'**
+  String get historySearchHint;
+
+  /// No description provided for @historySummaryLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{services} services · {workers} workers · {spent} total spent'**
+  String historySummaryLine(int services, int workers, String spent);
+
+  /// No description provided for @historyNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No services match these filters.'**
+  String get historyNoMatch;
+
+  /// No description provided for @bookingHireAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Hire again'**
+  String get bookingHireAgain;
+
+  /// No description provided for @safetyInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Still sending your last request. Please try again in a moment.'**
+  String get safetyInProgress;
+
+  /// No description provided for @rebookFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t start a new booking. Please try again.'**
+  String get rebookFailed;
+
+  /// No description provided for @rebookNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Only a completed booking can be booked again.'**
+  String get rebookNotAllowed;
+
+  /// No description provided for @rebookWorkerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This worker isn\'t available right now.'**
+  String get rebookWorkerUnavailable;
+
+  /// No description provided for @rebookWorkerNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'This worker can\'t take a new booking right now.'**
+  String get rebookWorkerNotEligible;
+
+  /// No description provided for @rebookDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an open booking with this worker.'**
+  String get rebookDuplicate;
+
+  /// No description provided for @serviceReportMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a missing day'**
+  String get serviceReportMissing;
+
+  /// No description provided for @exceptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a missing day'**
+  String get exceptionTitle;
+
+  /// No description provided for @exceptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a day your worker didn\'t record and tell us what happened.'**
+  String get exceptionHint;
+
+  /// No description provided for @exceptionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get exceptionDate;
+
+  /// No description provided for @exceptionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get exceptionNote;
+
+  /// No description provided for @exceptionSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get exceptionSubmit;
+
+  /// No description provided for @exceptionExists.
+  ///
+  /// In en, this message translates to:
+  /// **'That day already has an entry.'**
+  String get exceptionExists;
+
+  /// No description provided for @exceptionSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks, we\'ve recorded it.'**
+  String get exceptionSent;
+
+  /// No description provided for @ratingReviewTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review is too long. Please shorten it to {max} characters.'**
+  String ratingReviewTooLong(int max);
 }
 
 class _AppLocalizationsDelegate

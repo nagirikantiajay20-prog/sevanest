@@ -16,6 +16,10 @@ import 'package:sevanest_customer/features/authentication/presentation/providers
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
+import 'package:sevanest_customer/features/notifications/domain/notification.dart';
+import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
@@ -23,7 +27,12 @@ import 'package:sevanest_customer/features/service_discovery/domain/schedule_rep
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
+import 'package:sevanest_customer/features/support/domain/support.dart';
+import 'package:sevanest_customer/features/support/presentation/providers/support_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
+
+import 'notification_fakes.dart';
+import 'support_fakes.dart';
 
 class InMemorySessionStore implements SessionStore {
   InMemorySessionStore([this._tokens]);
@@ -129,6 +138,10 @@ Widget testRootApp({
   CatalogRepository? catalog,
   ScheduleRepository? schedule,
   GuidanceRepository? guidance,
+  NotificationRepository? notifications,
+  SupportRepository? support,
+  SafetyRepository? safety,
+  PushService? push,
   List<Override> overrides = const [],
 }) => ProviderScope(
   retry: (_, _) => null,
@@ -148,6 +161,16 @@ Widget testRootApp({
       guidance ?? FakeGuidanceRepository(),
     ),
     nowProvider.overrideWithValue(() => testNow),
+    notificationRepositoryProvider.overrideWithValue(
+      notifications ?? FakeNotificationRepository(),
+    ),
+    supportRepositoryProvider.overrideWithValue(
+      support ?? FakeSupportRepository(),
+    ),
+    safetyRepositoryProvider.overrideWithValue(
+      safety ?? FakeSafetyRepository(),
+    ),
+    pushServiceProvider.overrideWithValue(push ?? FakePushService()),
     ...overrides,
   ],
   child: const SevaNestApp(),

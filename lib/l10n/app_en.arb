@@ -1188,7 +1188,7 @@
   "repNextTitle": "What happens next",
   "repNext1": "We review your request",
   "repNext2": "We suggest verified alternatives",
-  "repNext3": "You choose, and we arrange the switch",
+  "repNext3": "You choose, and a new booking is created",
   "repStaysActive": "Your current booking stays active until you choose a replacement.",
   "repChooseReasonHint": "Choose a reason to continue",
   "repNoteHint": "Tell us what happened to continue",
@@ -1236,7 +1236,7 @@
   },
   "repBannerReadyBody": "Choose one to continue.",
   "repBannerScheduledTitle": "Replacement confirmed",
-  "repBannerScheduledBody": "Your new worker starts on {date}.",
+  "repBannerScheduledBody": "Your new booking is set to start on {date}. Open it to follow the next steps.",
   "@repBannerScheduledBody": {
     "placeholders": {
       "date": {
@@ -1245,7 +1245,7 @@
     }
   },
   "repBannerCompleteTitle": "Replacement complete",
-  "repBannerCompleteBody": "Your new worker is now with you.",
+  "repBannerCompleteBody": "Your new booking has been created. Open it to follow the next steps.",
   "repBannerRejectedTitle": "We couldn't take this request forward",
   "repBannerRejectedBody": "Please contact support, or find a worker yourself.",
   "repBannerCancelledTitle": "Request cancelled",
@@ -1290,9 +1290,12 @@
   "repSelectHint": "Select a worker to continue",
   "repConfirm": "Confirm replacement",
   "repSelectTitle": "Confirm this replacement?",
-  "repSelectBody": "Your current booking will end and a new booking will start with the worker you chose.",
+  "repSelectBody": "A new booking will be created with the worker you chose, and your current booking will be marked as replaced. The new booking then follows the usual steps.",
   "repSelectYes": "Yes, confirm",
   "repSelectGone": "That worker is no longer available. Please choose another.",
+  "repSelectSame": "That is your current worker. Please choose someone else.",
+  "repChanged": "This request has changed. Here is its latest status.",
+  "repRequestAgain": "Request a new replacement",
   "repSelectFail": "We couldn't confirm the replacement. Please try again.",
   "repOfflineContinue": "Connect to the internet to continue.",
   "repWithdraw": "Cancel request",
@@ -1320,5 +1323,303 @@
     }
   },
   "repChainThis": "This booking",
-  "repViewRequest": "View replacement request"
+  "repViewRequest": "View replacement request",
+  "supTitle": "Support",
+  "supHeadline": "How can we help?",
+  "supSubtitle": "You'll be notified in the app when we reply.",
+  "supSafetyTitle": "Feeling unsafe or facing an emergency?",
+  "supSafetyBody": "Call local emergency services first, then tell us.",
+  "supSafetyBtn": "Report a safety issue",
+  "supQuickHelp": "Quick help",
+  "supLoadErrorTitle": "We couldn't load support",
+  "supLoadErrorBody": "Please try again.",
+  "supOfflineBanner": "You're offline. Tickets need a connection.",
+  "supOfflineHint": "Connect to the internet to create a ticket.",
+  "supCreate": "Create a ticket",
+  "supContactUs": "Contact us",
+  "supCall": "Call support",
+  "supEmail": "Email support",
+  "supContactNA": "Not available right now",
+  "supYourTickets": "Your tickets",
+  "supNoTickets": "No tickets yet",
+  "supNoTicketsBody": "When you raise a ticket it appears here.",
+  "supTicketsError": "We couldn't load your tickets.",
+  "supLoadMore": "Load more",
+  "supUpdated": "Updated {when}",
+  "@supUpdated": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "tkStatusOpen": "Open",
+  "tkStatusInProgress": "In progress",
+  "tkStatusClosed": "Closed",
+  "tkStatusUnknown": "Updated",
+  "tkNewTitle": "New ticket",
+  "tkNewAbout": "What is this about?",
+  "tkNewRelated": "Related booking (optional)",
+  "tkNewRelatedHint": "Choose a booking",
+  "tkNewRelatedHelp": "Attach one so we can help faster.",
+  "tkNewAttached": "Attached: Booking #{ref}",
+  "@tkNewAttached": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "tkNewRemove": "Remove",
+  "tkNewPickerTitle": "Related booking",
+  "tkNewPickerSub": "Recent bookings",
+  "tkNewPickerNone": "None",
+  "tkNewPickerEmpty": "You don't have any bookings yet.",
+  "tkNewDescribe": "Describe the problem",
+  "tkNewDescribeHint": "What happened? Include dates and times if you can.",
+  "tkNewDescribeShort": "Please add a little more detail",
+  "tkNewPrivacy": "Don't share OTPs, card numbers or passwords.",
+  "tkNewNotified": "You'll be notified in the app when we reply.",
+  "tkNewSubmit": "Submit ticket",
+  "tkNewSubmitting": "Submitting…",
+  "tkNewTryAgain": "Try again",
+  "tkNewHintCategory": "Choose a category to continue",
+  "tkNewHintDescribe": "Describe the problem to continue",
+  "tkNewHintMore": "Add a little more detail to continue",
+  "tkNewHintOffline": "Connect to the internet to submit",
+  "tkNewErrTitle": "We couldn't submit your ticket",
+  "tkNewErrBody": "Your details are saved. Please try again.",
+  "tkNewOfflineBanner": "You're offline. Your details are saved.",
+  "tkNewCategoriesError": "We couldn't load the categories.",
+  "tkNewDupTitle": "You already have an open ticket for this booking",
+  "tkNewDupOpen": "Open that ticket",
+  "tkNewSafetyTitle": "Your safety comes first",
+  "tkNewSafetyBody": "If you are in immediate danger, call local emergency services first.",
+  "tkNewCreatedTitle": "Ticket created",
+  "tkNewCreatedBody": "We've got your request. You'll hear from us soon.",
+  "tkNewView": "View ticket",
+  "tkNewBack": "Back to support",
+  "tkNewRef": "Ticket #{ref}",
+  "@tkNewRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "tkNewCategoryGone": "That category is no longer available. Please choose another.",
+  "tkNewBookingGone": "We couldn't find that booking. Remove it and try again.",
+  "tkdMeta": "Created {created} · Updated {updated}",
+  "@tkdMeta": {
+    "placeholders": {
+      "created": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      }
+    }
+  },
+  "tkdBooking": "Booking #{ref}",
+  "@tkdBooking": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "tkdEventCreated": "Ticket created · {time}",
+  "@tkdEventCreated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tkdEventStatus": "Status changed to {status} · {time}",
+  "@tkdEventStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tkdEventClosed": "Ticket closed · {time}",
+  "@tkdEventClosed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "tkdSupportName": "SevaNest Support",
+  "tkdWorkerName": "Worker",
+  "tkdReplyHint": "Write a reply",
+  "tkdSend": "Send",
+  "tkdPrivacy": "Don't share OTPs, PINs or card numbers.",
+  "tkdFailed": "Failed",
+  "tkdRetry": "Retry",
+  "tkdDismiss": "Remove",
+  "tkdClosedBar": "This ticket is closed.",
+  "tkdClosedNew": "Create a new ticket",
+  "tkdResolutionTitle": "Ticket closed",
+  "tkdLoadErrorTitle": "We couldn't load this ticket",
+  "tkdLoadErrorBody": "Check your connection and try again.",
+  "tkdOffline": "You're offline. Reconnect to send messages.",
+  "tkdClosedErr": "This ticket was closed, so your message wasn't sent.",
+  "tkdSending": "Sending…",
+  "tkdGone": "This ticket is no longer available.",
+  "safetyMenu": "More options",
+  "safetyReport": "Report this worker",
+  "safetyBlock": "Block this worker",
+  "safetyReportTitle": "Report a problem",
+  "safetyReportWhat": "What went wrong?",
+  "safetyReasonNoShow": "Didn't show up",
+  "safetyReasonMisconduct": "Misconduct",
+  "safetyReasonHarassment": "Harassment",
+  "safetyReasonTheft": "Theft",
+  "safetyReasonFraud": "Fraud or cheating",
+  "safetyReasonSafety": "Safety concern",
+  "safetyReasonOther": "Other",
+  "safetyNote": "Tell us what happened",
+  "safetyNoteHint": "Optional. Only our team reads this.",
+  "safetyAlsoBlock": "Also block this worker",
+  "safetySubmit": "Submit report",
+  "safetySubmitting": "Submitting…",
+  "safetyThanks": "Thanks, our team will review this",
+  "safetyEmergency": "If you're in immediate danger, call local emergency services first.",
+  "safetyBlockTitle": "Block this worker?",
+  "safetyBlockBody": "You won't be matched with this worker again. They won't appear in your search or shortlist.",
+  "safetyBlockYes": "Block",
+  "safetyBlocked": "Worker blocked",
+  "safetyNotFound": "We couldn't find that worker.",
+  "notifTitle": "Notifications",
+  "notifTabAll": "All",
+  "notifTabUnread": "Unread",
+  "notifMarkAll": "Mark all as read",
+  "notifNew": "New",
+  "notifEmptyTitle": "No notifications yet",
+  "notifEmptyBody": "Updates about your bookings, payments and support will appear here.",
+  "notifUnreadEmptyTitle": "No unread notifications",
+  "notifUnreadEmptyBody": "You're all caught up.",
+  "notifViewAll": "View all notifications",
+  "notifCaughtUp": "You're all caught up",
+  "notifErrTitle": "We couldn't load your notifications",
+  "notifErrBody": "Check your connection and try again.",
+  "notifOfflineBanner": "You're offline. Showing saved notifications.",
+  "notifOffTitle": "Notifications are turned off",
+  "notifOffBody": "Turn them on so you don't miss interview and payment updates.",
+  "notifOpenSettings": "Open settings",
+  "notifFallbackTitle": "Update",
+  "notifPromptTitle": "Stay in the loop",
+  "notifPromptBody": "Get a heads-up about interviews, payments and replies from support. You can change this any time in your phone's settings.",
+  "notifPromptAllow": "Allow notifications",
+  "notifPromptLater": "Not now",
+  "notifAccountTitle": "Notifications",
+  "notifAccountOn": "On",
+  "notifAccountOff": "Off",
+  "notifAccountNotAsked": "Not turned on",
+  "accountSupport": "Help and support",
+  "notifBannerOpen": "Open notification",
+  "linkUnavailableTitle": "This item isn't available",
+  "linkUnavailableBody": "It may have been removed, or you may not have access to it.",
+  "linkGoHome": "Go to Home",
+  "agoNow": "Just now",
+  "agoMinutes": "{n} min ago",
+  "@agoMinutes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "agoHours": "{n, plural, =1{1 hour ago} other{{n} hours ago}}",
+  "@agoHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "agoDays": "{n, plural, =1{1 day ago} other{{n} days ago}}",
+  "@agoDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dayYesterday": "Yesterday",
+  "attendanceLate": "Late",
+  "attendanceLeave": "On leave",
+  "attendanceCheckIn": "In {time}",
+  "@attendanceCheckIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "attendanceCheckOut": "Out {time}",
+  "@attendanceCheckOut": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceScheduled": "Scheduled {window}",
+  "@serviceScheduled": {
+    "placeholders": {
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "historyFilterAll": "All",
+  "historyFilterYear": "Year",
+  "historyFilterCategory": "Service",
+  "historyFilterStatus": "Status",
+  "historySearchHint": "Search services",
+  "historySummaryLine": "{services} services · {workers} workers · {spent} total spent",
+  "@historySummaryLine": {
+    "placeholders": {
+      "services": {
+        "type": "int"
+      },
+      "workers": {
+        "type": "int"
+      },
+      "spent": {
+        "type": "String"
+      }
+    }
+  },
+  "historyNoMatch": "No services match these filters.",
+  "bookingHireAgain": "Hire again",
+  "safetyInProgress": "Still sending your last request. Please try again in a moment.",
+  "rebookFailed": "Couldn't start a new booking. Please try again.",
+  "rebookNotAllowed": "Only a completed booking can be booked again.",
+  "rebookWorkerUnavailable": "This worker isn't available right now.",
+  "rebookWorkerNotEligible": "This worker can't take a new booking right now.",
+  "rebookDuplicate": "You already have an open booking with this worker.",
+  "serviceReportMissing": "Report a missing day",
+  "exceptionTitle": "Report a missing day",
+  "exceptionHint": "Pick a day your worker didn't record and tell us what happened.",
+  "exceptionDate": "Day",
+  "exceptionNote": "What happened",
+  "exceptionSubmit": "Send report",
+  "exceptionExists": "That day already has an entry.",
+  "exceptionSent": "Thanks, we've recorded it.",
+  "ratingReviewTooLong": "Your review is too long. Please shorten it to {max} characters.",
+  "@ratingReviewTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  }
 }
