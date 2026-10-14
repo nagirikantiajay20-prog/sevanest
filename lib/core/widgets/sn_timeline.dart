@@ -9,11 +9,15 @@ class SnTimelineItem {
     required this.state,
     this.subtitle,
     this.timestamp,
+    this.chip,
   });
 
   final String title;
   final String? subtitle;
   final String? timestamp;
+
+  /// Small label after the timestamp ("Done", "Now", "Upcoming").
+  final String? chip;
   final SnTimelineState state;
 }
 
@@ -64,10 +68,38 @@ class SnTimeline extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         if (items[i].subtitle != null) Text(items[i].subtitle!),
-                        if (items[i].timestamp != null)
-                          Text(
-                            items[i].timestamp!,
-                            style: Theme.of(context).textTheme.bodySmall,
+                        if (items[i].timestamp != null || items[i].chip != null)
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              if (items[i].timestamp != null)
+                                Text(
+                                  items[i].timestamp!,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              if (items[i].chip != null)
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: scheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.lg,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.sm,
+                                      vertical: 2,
+                                    ),
+                                    child: Text(
+                                      items[i].chip!,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                       ],
                     ),

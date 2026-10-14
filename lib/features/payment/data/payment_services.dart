@@ -24,9 +24,8 @@ class FakePaymentService implements PaymentService {
   }
 }
 
-/// Razorpay Checkout. Opens only for a `razorpay` checkout with a `keyId`; the server's `fake`
-/// gateway (no keys configured yet) has nothing to open and fails safely. The SDK's answer is only
-/// a hint; the server verifies it.
+/// Razorpay Checkout. Opens only for a `razorpay` checkout with a `keyId`; any other checkout fails
+/// safely. The SDK's answer is only a hint; the server verifies it.
 class RazorpayPaymentService implements PaymentService {
   @override
   Future<PaymentOutcome> pay(Payment payment) {

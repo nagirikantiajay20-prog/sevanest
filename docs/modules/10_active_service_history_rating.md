@@ -1,6 +1,11 @@
 # Module 10 — Active Service, Service History & Rating
 
-**Backend:** `GET /bookings/{id}` (active), `GET /bookings/{id}/attendance`, `GET /services/history`, `POST /bookings/{id}/rating`, rating config (scale).
+**Backend (REAL, docs/backend_openapi_2026-10-13.json - overrides the assumed routes below):**
+`GET /bookings/{id}` + `GET /bookings` (history; no `/services/history`), `GET /attendance/bookings/{id}` and `/summary?month=YYYY-MM`
+(status `PRESENT | ABSENT | EXCEPTION`, `note`), `POST /ratings {bookingId, score >= 1, review <= 2000}` (Idempotency-Key; 409 `RATING_ALREADY_EXISTS`,
+422 `RATING_NOT_ELIGIBLE`, 400 `RATING_SCORE_OUT_OF_SCALE`), `GET /ratings`, `GET /ratings/bookings/{id}` (404 = not rated), `ratingScaleMax` from `/reference-data`.
+No eligibility endpoint, no tags, no `rebook`. See BACKEND_REQUESTS 28-36.
+~~Assumed (not deployed): `/bookings/{id}/attendance`, `GET /services/history`, `POST /bookings/{id}/rating`, `rating-eligibility`.~~
 **Routes:** `/services/current?bookingId=`, `/services/history`, `/ratings/:bookingId`.
 **Rules:** no face-recognition/GPS attendance (V2). Show **only** statuses backend provides. Rating only when `allowedActions` has `rate`.
 

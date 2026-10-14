@@ -215,7 +215,9 @@ class Booking {
       timeline: _timeline(j['timeline'] ?? j['events'] ?? j['history']),
       actions: explicit.isNotEmpty ? explicit : derivedBookingActions(status),
       paymentId: _s(j['paymentId']),
-      previousBookingId: _s(j['previousBookingId'] ?? j['replacedFromId']),
+      previousBookingId: _s(
+        j['replacesBookingId'] ?? j['previousBookingId'] ?? j['replacedFromId'],
+      ),
       createdAt: _date(j['createdAt']),
     );
   }

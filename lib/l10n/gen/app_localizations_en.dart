@@ -2100,4 +2100,527 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get txnRefundNote =>
       'Refunds go back to your original payment method.';
+
+  @override
+  String get serviceTitle => 'Active service';
+
+  @override
+  String get serviceNoneTitle => 'No active service';
+
+  @override
+  String get serviceNoneBody => 'When a worker starts, you\'ll see them here.';
+
+  @override
+  String get servicePickTitle => 'Which service?';
+
+  @override
+  String serviceSince(String date) {
+    return 'Since $date';
+  }
+
+  @override
+  String get serviceTodayTitle => 'Today';
+
+  @override
+  String get serviceTodayNone => 'Not recorded yet';
+
+  @override
+  String get serviceMonthTitle => 'This month';
+
+  @override
+  String get serviceBookingLink => 'Booking details';
+
+  @override
+  String get serviceSupport => 'Report an issue';
+
+  @override
+  String get attendanceTitle => 'Attendance';
+
+  @override
+  String get attendanceEmpty =>
+      'No updates yet. You\'ll see your worker\'s status here.';
+
+  @override
+  String get attendanceLoadMore => 'Load more';
+
+  @override
+  String get attendancePresent => 'Present';
+
+  @override
+  String get attendanceAbsent => 'Absent';
+
+  @override
+  String get attendanceException => 'Exception';
+
+  @override
+  String get attendanceUnknown => 'Updated';
+
+  @override
+  String get historyTitle => 'Service history';
+
+  @override
+  String get historyEmptyTitle => 'No past services yet';
+
+  @override
+  String get historyEmptyBody => 'Services you\'ve booked will appear here.';
+
+  @override
+  String get historySectionCurrent => 'Current';
+
+  @override
+  String get historySectionCompleted => 'Completed';
+
+  @override
+  String get historySectionCancelled => 'Cancelled';
+
+  @override
+  String get historySectionReplaced => 'Replaced';
+
+  @override
+  String get historyRate => 'Rate now';
+
+  @override
+  String historyRatedLabel(int score, int max) {
+    return 'You rated $score out of $max';
+  }
+
+  @override
+  String get accountHistory => 'Service history';
+
+  @override
+  String get ratingTitle => 'Rate your experience';
+
+  @override
+  String get ratingQuestion => 'How was your experience?';
+
+  @override
+  String get ratingTapHint => 'Tap a star to rate';
+
+  @override
+  String ratingStarLabel(int n, int max) {
+    return '$n out of $max';
+  }
+
+  @override
+  String get ratingReviewLabel => 'Write a review (optional)';
+
+  @override
+  String get ratingReviewHint => 'Tell others about your experience.';
+
+  @override
+  String get ratingReviewNote =>
+      'Your review helps other families choose. Don\'t share phone numbers or personal details.';
+
+  @override
+  String get ratingChoose => 'Choose a star rating to continue';
+
+  @override
+  String get ratingSubmit => 'Submit review';
+
+  @override
+  String get ratingSkip => 'Skip for now';
+
+  @override
+  String get ratingThanksTitle => 'Thanks for your feedback';
+
+  @override
+  String get ratingThanksBody => 'Your rating helps other families choose.';
+
+  @override
+  String get ratingDone => 'Back to booking';
+
+  @override
+  String get ratingAlreadyTitle => 'You\'ve already rated this service';
+
+  @override
+  String get ratingNotEligibleTitle => 'You can\'t rate this service yet';
+
+  @override
+  String get ratingNotEligibleBody =>
+      'You can rate a worker once the service is completed.';
+
+  @override
+  String get ratingScaleError =>
+      'That rating isn\'t on the scale. Please choose again.';
+
+  @override
+  String get repRequestTitle => 'Request replacement';
+
+  @override
+  String get repStatusTitle => 'Replacement';
+
+  @override
+  String get repHeadline => 'Let\'s find you a better match';
+
+  @override
+  String get repIntro =>
+      'Tell us what went wrong. We\'ll review your request and suggest alternatives.';
+
+  @override
+  String get repWhy => 'Why do you want a replacement?';
+
+  @override
+  String get repRequired => 'Required';
+
+  @override
+  String get repOptional => 'Optional';
+
+  @override
+  String get repReasonNotOnTime => 'Not arriving on time';
+
+  @override
+  String get repReasonFrequentAbsences => 'Frequent absences';
+
+  @override
+  String get repReasonWorkQuality => 'Work quality is not good';
+
+  @override
+  String get repReasonBehaviour => 'Behaviour concern';
+
+  @override
+  String get repReasonScheduleChanged => 'Schedule no longer suits';
+
+  @override
+  String get repReasonWorkerLeft => 'Worker left or can\'t continue';
+
+  @override
+  String get repReasonSafety => 'Safety or trust concern';
+
+  @override
+  String get repReasonOther => 'Other';
+
+  @override
+  String get repMore => 'Tell us more';
+
+  @override
+  String get repNotesHint => 'What happened? Include dates if you can.';
+
+  @override
+  String get repNotesNote => 'Don\'t share phone numbers or personal details.';
+
+  @override
+  String get repNotesRequired => 'Please tell us what happened';
+
+  @override
+  String get repNextTitle => 'What happens next';
+
+  @override
+  String get repNext1 => 'We review your request';
+
+  @override
+  String get repNext2 => 'We suggest verified alternatives';
+
+  @override
+  String get repNext3 => 'You choose, and we arrange the switch';
+
+  @override
+  String get repStaysActive =>
+      'Your current booking stays active until you choose a replacement.';
+
+  @override
+  String get repChooseReasonHint => 'Choose a reason to continue';
+
+  @override
+  String get repNoteHint => 'Tell us what happened to continue';
+
+  @override
+  String get repSubmit => 'Submit request';
+
+  @override
+  String get repSubmitting => 'Submitting...';
+
+  @override
+  String get repOfflineBanner => 'You\'re offline. Your answers are kept.';
+
+  @override
+  String get repOfflineHint => 'Connect to the internet to submit';
+
+  @override
+  String get repConfirmTitle => 'Submit replacement request?';
+
+  @override
+  String get repConfirmBody =>
+      'We\'ll start looking for an alternative. Your current booking stays active until you choose.';
+
+  @override
+  String get repConfirmYes => 'Yes, submit';
+
+  @override
+  String get repGoBack => 'Go back';
+
+  @override
+  String get repErrTitle => 'We couldn\'t submit your request';
+
+  @override
+  String get repErrBody => 'Your details are saved. Please try again.';
+
+  @override
+  String get repTryAgain => 'Try again';
+
+  @override
+  String get repNotEligibleTitle =>
+      'Replacement isn\'t available for this booking';
+
+  @override
+  String get repNotEligibleBody =>
+      'If you think this is a mistake, our support team can help.';
+
+  @override
+  String get repSafetyTitle => 'If you feel unsafe, contact us right away.';
+
+  @override
+  String get repSafetyBody => 'Our support team can help you with priority.';
+
+  @override
+  String get repSafetyBtn => 'Talk to support now';
+
+  @override
+  String get repSent => 'Request sent';
+
+  @override
+  String get repReceivedTitle => 'Request received';
+
+  @override
+  String get repReceivedBody =>
+      'We\'ll review it and suggest alternatives. You can check the status here any time.';
+
+  @override
+  String get repRowRequest => 'Request';
+
+  @override
+  String get repRowReason => 'Reason';
+
+  @override
+  String get repRowStatus => 'Status';
+
+  @override
+  String get repTrack => 'Track request';
+
+  @override
+  String get repBackBooking => 'Back to booking';
+
+  @override
+  String get repStatusRequested => 'Under review';
+
+  @override
+  String get repStatusApproved => 'Approved';
+
+  @override
+  String get repStatusRejected => 'Not approved';
+
+  @override
+  String get repStatusCancelled => 'Cancelled';
+
+  @override
+  String get repStatusCompleted => 'Completed';
+
+  @override
+  String get repStatusUnknown => 'Updated';
+
+  @override
+  String get repBannerReviewTitle => 'We\'re reviewing your request';
+
+  @override
+  String get repBannerReviewBody => 'We\'ll suggest alternatives soon.';
+
+  @override
+  String get repBannerFindingTitle => 'Finding alternatives for you';
+
+  @override
+  String get repBannerFindingBody =>
+      'Your request is approved. Pull down to refresh.';
+
+  @override
+  String repBannerReadyTitle(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n alternatives are ready',
+      one: '1 alternative is ready',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get repBannerReadyBody => 'Choose one to continue.';
+
+  @override
+  String get repBannerScheduledTitle => 'Replacement confirmed';
+
+  @override
+  String repBannerScheduledBody(String date) {
+    return 'Your new worker starts on $date.';
+  }
+
+  @override
+  String get repBannerCompleteTitle => 'Replacement complete';
+
+  @override
+  String get repBannerCompleteBody => 'Your new worker is now with you.';
+
+  @override
+  String get repBannerRejectedTitle => 'We couldn\'t take this request forward';
+
+  @override
+  String get repBannerRejectedBody =>
+      'Please contact support, or find a worker yourself.';
+
+  @override
+  String get repBannerCancelledTitle => 'Request cancelled';
+
+  @override
+  String get repBannerUnknownTitle => 'Updated';
+
+  @override
+  String repRequestNo(String ref) {
+    return 'Request #$ref';
+  }
+
+  @override
+  String get repTagCurrent => 'Current engagement';
+
+  @override
+  String get repTagPrevious => 'Previous engagement';
+
+  @override
+  String repSubmitted(String when) {
+    return 'Submitted $when';
+  }
+
+  @override
+  String get repCopyId => 'Copy request ID';
+
+  @override
+  String get repCopied => 'Request ID copied';
+
+  @override
+  String get repTeamNote => 'Note from our team';
+
+  @override
+  String get repProgress => 'Progress';
+
+  @override
+  String get repStepReceived => 'Request received';
+
+  @override
+  String get repStepReview => 'Under review';
+
+  @override
+  String get repStepReady => 'Alternatives ready';
+
+  @override
+  String get repStepChoose => 'You choose a worker';
+
+  @override
+  String get repStepStarts => 'Replacement starts';
+
+  @override
+  String get repStepRejected => 'Request not approved';
+
+  @override
+  String get repStepCancelled => 'Request cancelled';
+
+  @override
+  String get repStepCancelledSub => 'Your current worker continues.';
+
+  @override
+  String get repChipDone => 'Done';
+
+  @override
+  String get repChipNow => 'Now';
+
+  @override
+  String get repChipUpcoming => 'Upcoming';
+
+  @override
+  String get repChipCancelled => 'Cancelled';
+
+  @override
+  String get repChooseTitle => 'Choose a replacement';
+
+  @override
+  String get repChooseSub =>
+      'Choose the worker you\'d like from these options.';
+
+  @override
+  String get repViewProfile => 'View profile';
+
+  @override
+  String get repSelectHint => 'Select a worker to continue';
+
+  @override
+  String get repConfirm => 'Confirm replacement';
+
+  @override
+  String get repSelectTitle => 'Confirm this replacement?';
+
+  @override
+  String get repSelectBody =>
+      'Your current booking will end and a new booking will start with the worker you chose.';
+
+  @override
+  String get repSelectYes => 'Yes, confirm';
+
+  @override
+  String get repSelectGone =>
+      'That worker is no longer available. Please choose another.';
+
+  @override
+  String get repSelectFail =>
+      'We couldn\'t confirm the replacement. Please try again.';
+
+  @override
+  String get repOfflineContinue => 'Connect to the internet to continue.';
+
+  @override
+  String get repWithdraw => 'Cancel request';
+
+  @override
+  String get repWithdrawTitle => 'Cancel this request?';
+
+  @override
+  String get repWithdrawBody =>
+      'Your current worker continues and your booking stays as it is.';
+
+  @override
+  String get repWithdrawYes => 'Yes, cancel request';
+
+  @override
+  String get repKeep => 'Keep request';
+
+  @override
+  String get repWithdrawFail =>
+      'We couldn\'t cancel the request. Please try again.';
+
+  @override
+  String get repViewBooking => 'View booking';
+
+  @override
+  String get repViewOld => 'View previous booking';
+
+  @override
+  String get repFindWorker => 'Find a worker';
+
+  @override
+  String get repNeedHelp => 'Need help?';
+
+  @override
+  String get repLoadErrTitle => 'We couldn\'t load this request';
+
+  @override
+  String get repLoadErrBody => 'Please check your connection and try again.';
+
+  @override
+  String get repChainTitle => 'Replacement history';
+
+  @override
+  String repChainEntry(int n, String status) {
+    return '$n. $status';
+  }
+
+  @override
+  String get repChainThis => 'This booking';
+
+  @override
+  String get repViewRequest => 'View replacement request';
 }

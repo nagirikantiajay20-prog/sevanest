@@ -312,8 +312,12 @@ class _BookingTile extends StatelessWidget {
   const _BookingTile({required this.booking});
   final ActiveBookingSummary booking;
 
-  void _open(BuildContext context) =>
-      context.push(Routes.path(Routes.bookingDetail, {'id': booking.id}));
+  /// An in-progress service opens the active-service screen; earlier stages open the booking.
+  void _open(BuildContext context) => context.push(
+    booking.stage == BookingStage.active
+        ? '${Routes.serviceCurrent}?bookingId=${Uri.encodeComponent(booking.id)}'
+        : Routes.path(Routes.bookingDetail, {'id': booking.id}),
+  );
 
   @override
   Widget build(BuildContext context) {

@@ -30,8 +30,8 @@
 | Active Service `/services/current` | Booking detail | Worker/Booking links → push · Support/Replace/Rate → push respective · Report → sheet |
 | History `/services/history` | Account | Card → push `/bookings/:id` · Rate → push `/ratings/:id` · Rebook → push `/discover/review` |
 | Rating `/ratings/:id` | Booking, Service, History | Submit → replace thank-you state → Done → go `/bookings/:id` |
-| Replacement Request `/replacements/new` | Booking, Active service | Submit → replace `/replacements/:id` |
-| Replacement Status `/replacements/:id` | Submit, notification | Alternative card → push `/workers/:id?replacementId=` · Support → push `/support/new` · View booking → go `/bookings/:newId` |
+| Replacement Request `/replacements/new` | Booking, Active service | Submit → Request received → Track → replace `/replacements/:id` · Back to booking → go `/bookings/:id` · Safety/Not eligible → push `/support/new?bookingId=` |
+| Replacement Status `/replacements/:id` | Submit, notification | Alternative card → select, then Confirm replacement · View profile → push `/workers/:id` · Support → push `/support/new?replacementId=` · View booking → go `/bookings/:newId` · Previous booking → push `/bookings/:oldId` |
 | Favourites `/favourites` (tab) | nav tab, Account | Card → push `/workers/:id` · Empty CTA → push `/discover/category` |
 | Support `/support` | Home, Account | New → push `/support/new` · Card → push `/support/:id` |
 | New Ticket `/support/new` | Support, Booking, Payment, Interview, Replacement | Submit → replace `/support/:id` |

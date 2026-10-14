@@ -60,7 +60,13 @@ class RatingLabel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(Icons.star, size: 16, color: AppColors.amber),
-          Text(' $avg (${worker.ratingCount})', style: style),
+          Flexible(
+            child: Text(
+              ' $avg (${worker.ratingCount})',
+              style: style,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

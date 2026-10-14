@@ -101,7 +101,10 @@ class BookingRepositoryRemote implements BookingRepository {
 
   @override
   Future<Booking> interviewComplete(String id, {String? note}) =>
-      _act(id, 'interview-complete', {'outcomeNote': ?note});
+      // The backend requires `outcomeNote` (400 without it, seen live 2026-10-14).
+      _act(id, 'interview-complete', {
+        'outcomeNote': note ?? 'The interview took place',
+      });
 
   @override
   Future<Booking> confirmWorker(String id, DateTime startDate) =>

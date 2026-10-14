@@ -8,6 +8,7 @@ import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/widgets/placeholder_screen.dart';
+import 'package:sevanest_customer/features/active_service/presentation/screens/active_service_screen.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_form_screen.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_list_screen.dart';
@@ -27,6 +28,9 @@ import 'package:sevanest_customer/features/interview_trial/presentation/screens/
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interviews_list_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/payment_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/transactions_screen.dart';
+import 'package:sevanest_customer/features/ratings/presentation/screens/rating_screen.dart';
+import 'package:sevanest_customer/features/replacement/presentation/screens/replacement_request_screen.dart';
+import 'package:sevanest_customer/features/replacement/presentation/screens/replacement_status_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/budget_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/engagement_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/location_screen.dart';
@@ -34,6 +38,7 @@ import 'package:sevanest_customer/features/service_discovery/presentation/screen
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/service_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/start_date_screen.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/screens/timing_screen.dart';
+import 'package:sevanest_customer/features/service_history/presentation/screens/service_history_screen.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/screens/worker_detail_screen.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/screens/worker_reviews_screen.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/screens/results_screen.dart';
@@ -221,9 +226,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             TransactionDetailScreen(paymentId: state.pathParameters['id']!),
       ),
-      _placeholder(Routes.serviceCurrent, 'Active service'),
-      _placeholder(Routes.rating, 'Rate your worker'),
-      _placeholder(Routes.replacementNew, 'Request replacement'),
+      GoRoute(
+        path: Routes.serviceCurrent,
+        builder: (context, state) => ActiveServiceScreen(
+          bookingId: state.uri.queryParameters['bookingId'],
+        ),
+      ),
+      GoRoute(
+        path: Routes.serviceHistory,
+        builder: (context, state) => const ServiceHistoryScreen(),
+      ),
+      GoRoute(
+        path: Routes.rating,
+        builder: (context, state) =>
+            RatingScreen(bookingId: state.pathParameters['id']!),
+      ),
+      // `new` must come before `:id`.
+      GoRoute(
+        path: Routes.replacementNew,
+        builder: (context, state) => ReplacementRequestScreen(
+          bookingId: state.uri.queryParameters['bookingId'],
+        ),
+      ),
+      GoRoute(
+        path: Routes.replacementDetail,
+        builder: (context, state) =>
+            ReplacementStatusScreen(replacementId: state.pathParameters['id']!),
+      ),
       _placeholder(Routes.supportNew, 'New ticket'),
       GoRoute(
         path: Routes.workers,

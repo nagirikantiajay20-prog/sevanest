@@ -62,6 +62,13 @@ class AccountScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(Routes.transactions),
           ),
+          ListTile(
+            key: const Key('account_history_tile'),
+            leading: const Icon(Icons.history),
+            title: Text(l10n.accountHistory),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.serviceHistory),
+          ),
           const Divider(),
           ListTile(
             key: const Key('account_logout_btn'),

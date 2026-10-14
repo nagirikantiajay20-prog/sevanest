@@ -1,0 +1,314 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/localization/failure_message.dart';
+import 'package:sevanest_customer/core/widgets/async_value_view.dart';
+import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/features/booking/domain/booking.dart';
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/ratings/domain/rating.dart';
+import 'package:sevanest_customer/features/ratings/presentation/providers/rating_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
+import 'package:uuid/uuid.dart';
+
+/// `/ratings/:id` (module doc 10.3). There is no eligibility endpoint, so eligibility is the
+/// booking's allowed actions (`rate`) plus "no rating exists yet" (`GET /ratings/bookings/{id}`).
+class RatingScreen extends ConsumerStatefulWidget {
+  const RatingScreen({required this.bookingId, super.key});
+  final String bookingId;
+
+  @override
+  ConsumerState<RatingScreen> createState() => _State();
+}
+
+class _State extends ConsumerState<RatingScreen> {
+  final _comment = TextEditingController();
+  int? _score;
+  var _sending = false;
+  var _thanks = false;
+  var _alreadyRated = false;
+  var _notEligible = false;
+  String? _error;
+
+  /// One key per form: a retry after a lost answer returns the first rating, never a second.
+  final _key = const Uuid().v4();
+
+  @override
+  void dispose() {
+    _comment.dispose();
+    super.dispose();
+  }
+
+  void _toBooking() =>
+      context.go(Routes.path(Routes.bookingDetail, {'id': widget.bookingId}));
+
+  Future<void> _submit() async {
+    final score = _score;
+    if (score == null || _sending) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    try {
+      await ref
+          .read(ratingRepositoryProvider)
+          .submit(
+            widget.bookingId,
+            score: score,
+            review: _comment.text,
+            idempotencyKey: _key,
+          );
+      ref
+        ..invalidate(bookingRatingProvider(widget.bookingId))
+        ..invalidate(myRatingsProvider)
+        ..invalidate(bookingProvider(widget.bookingId))
+        ..invalidate(bookingListProvider);
+      if (mounted) setState(() => _thanks = true);
+    } on ConflictFailure catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (e.code == 'RATING_ALREADY_EXISTS') {
+          _alreadyRated = true;
+        } else {
+          _error = l10n.errorGeneric;
+        }
+      });
+    } on ValidationFailure catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (e.code == 'RATING_NOT_ELIGIBLE') {
+          _notEligible = true;
+        } else if (e.code == 'RATING_SCORE_OUT_OF_SCALE') {
+          _score = null;
+          _error = l10n.ratingScaleError;
+        } else {
+          _error = l10n.errorGeneric;
+        }
+      });
+    } on Object catch (e) {
+      // The stars and the comment stay.
+      if (mounted) {
+        setState(
+          () => _error =
+              e is NetworkFailure ||
+                  e is ServerFailure ||
+                  e is UnauthorizedFailure ||
+                  e is ForbiddenFailure
+              ? failureMessage(l10n, e)
+              : l10n.errorGeneric,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final booking = ref.watch(bookingProvider(widget.bookingId));
+    final rated = ref.watch(bookingRatingProvider(widget.bookingId));
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          key: const Key('app_back_btn'),
+          tooltip: l10n.back,
+          icon: const Icon(Icons.close),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go(Routes.bookings),
+        ),
+        title: Text(l10n.ratingTitle),
+      ),
+      body: _thanks
+          ? _Message(
+              key: const Key('rating_thanks'),
+              icon: Icons.favorite,
+              title: l10n.ratingThanksTitle,
+              body: l10n.ratingThanksBody,
+              onDone: _toBooking,
+            )
+          : AsyncValueView<Booking>(
+              value: booking,
+              onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
+              data: (b) => AsyncValueView<Rating?>(
+                value: rated,
+                onRetry: () =>
+                    ref.invalidate(bookingRatingProvider(widget.bookingId)),
+                data: (existing) {
+                  if (existing != null || _alreadyRated) {
+                    return _Message(
+                      key: const Key('rating_already_rated'),
+                      icon: Icons.star,
+                      title: l10n.ratingAlreadyTitle,
+                      score: existing?.score,
+                      scale: ref.watch(ratingScaleMaxProvider).value ?? 5,
+                      body: existing?.review,
+                      onDone: _toBooking,
+                    );
+                  }
+                  if (_notEligible || !b.actions.contains(BookingAction.rate)) {
+                    return _Message(
+                      key: const Key('rating_not_eligible'),
+                      icon: Icons.info_outline,
+                      title: l10n.ratingNotEligibleTitle,
+                      body: l10n.ratingNotEligibleBody,
+                      onDone: _toBooking,
+                    );
+                  }
+                  return _form(l10n);
+                },
+              ),
+            ),
+    );
+  }
+
+  Widget _form(AppLocalizations l10n) {
+    final text = Theme.of(context).textTheme;
+    final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
+    final max = ref.watch(ratingReviewMaxProvider);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Text(
+              l10n.ratingQuestion,
+              style: text.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            alignment: WrapAlignment.center,
+            children: [
+              for (var n = 1; n <= scale; n++)
+                IconButton(
+                  key: Key('rating_star_$n'),
+                  tooltip: l10n.ratingStarLabel(n, scale),
+                  iconSize: 36,
+                  onPressed: _sending ? null : () => setState(() => _score = n),
+                  icon: Icon(
+                    n <= (_score ?? 0) ? Icons.star : Icons.star_border,
+                    color: n <= (_score ?? 0)
+                        ? AppColors.amber
+                        : AppColors.slate,
+                  ),
+                ),
+            ],
+          ),
+          Center(
+            child: Text(
+              _score == null
+                  ? l10n.ratingTapHint
+                  : l10n.ratingStarLabel(_score!, scale),
+              key: const Key('rating_score_label'),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(l10n.ratingReviewLabel, style: text.titleSmall),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            key: const Key('rating_comment_field'),
+            controller: _comment,
+            enabled: !_sending,
+            maxLength: max,
+            maxLines: 5,
+            decoration: InputDecoration(hintText: l10n.ratingReviewHint),
+          ),
+          Text(l10n.ratingReviewNote, style: text.bodySmall),
+          if (_error != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              _error!,
+              key: const Key('rating_error'),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          if (_score == null)
+            Center(
+              child: Text(
+                l10n.ratingChoose,
+                key: const Key('rating_choose_hint'),
+              ),
+            ),
+          const SizedBox(height: AppSpacing.sm),
+          SnButton(
+            key: const Key('rating_submit_btn'),
+            label: l10n.ratingSubmit,
+            isLoading: _sending,
+            onPressed: _score == null ? null : _submit,
+          ),
+          SnButton(
+            key: const Key('rating_skip_btn'),
+            label: l10n.ratingSkip,
+            variant: SnButtonVariant.text,
+            onPressed: _sending ? null : _toBooking,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Thank-you, already-rated and not-eligible states: no form, one way back to the booking.
+class _Message extends StatelessWidget {
+  const _Message({
+    required this.icon,
+    required this.title,
+    required this.onDone,
+    this.body,
+    this.score,
+    this.scale = 5,
+    super.key,
+  });
+  final IconData icon;
+  final String title;
+  final String? body;
+  final int? score;
+  final int scale;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 56, color: AppColors.teal),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            if (score != null)
+              Text(
+                l10n.ratingStarLabel(score!, scale),
+                key: const Key('rating_existing_score'),
+              ),
+            if (body != null && body!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(body!, textAlign: TextAlign.center),
+            ],
+            const SizedBox(height: AppSpacing.lg),
+            SnButton(
+              key: const Key('rating_done_btn'),
+              label: l10n.ratingDone,
+              onPressed: onDone,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

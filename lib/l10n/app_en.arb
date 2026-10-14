@@ -1094,5 +1094,231 @@
         "type": "String"
       }
     }
-  }
+  },
+  "serviceTitle": "Active service",
+  "serviceNoneTitle": "No active service",
+  "serviceNoneBody": "When a worker starts, you'll see them here.",
+  "servicePickTitle": "Which service?",
+  "serviceSince": "Since {date}",
+  "@serviceSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "serviceTodayTitle": "Today",
+  "serviceTodayNone": "Not recorded yet",
+  "serviceMonthTitle": "This month",
+  "serviceBookingLink": "Booking details",
+  "serviceSupport": "Report an issue",
+  "attendanceTitle": "Attendance",
+  "attendanceEmpty": "No updates yet. You'll see your worker's status here.",
+  "attendanceLoadMore": "Load more",
+  "attendancePresent": "Present",
+  "attendanceAbsent": "Absent",
+  "attendanceException": "Exception",
+  "attendanceUnknown": "Updated",
+  "historyTitle": "Service history",
+  "historyEmptyTitle": "No past services yet",
+  "historyEmptyBody": "Services you've booked will appear here.",
+  "historySectionCurrent": "Current",
+  "historySectionCompleted": "Completed",
+  "historySectionCancelled": "Cancelled",
+  "historySectionReplaced": "Replaced",
+  "historyRate": "Rate now",
+  "historyRatedLabel": "You rated {score} out of {max}",
+  "@historyRatedLabel": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "accountHistory": "Service history",
+  "ratingTitle": "Rate your experience",
+  "ratingQuestion": "How was your experience?",
+  "ratingTapHint": "Tap a star to rate",
+  "ratingStarLabel": "{n} out of {max}",
+  "@ratingStarLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "ratingReviewLabel": "Write a review (optional)",
+  "ratingReviewHint": "Tell others about your experience.",
+  "ratingReviewNote": "Your review helps other families choose. Don't share phone numbers or personal details.",
+  "ratingChoose": "Choose a star rating to continue",
+  "ratingSubmit": "Submit review",
+  "ratingSkip": "Skip for now",
+  "ratingThanksTitle": "Thanks for your feedback",
+  "ratingThanksBody": "Your rating helps other families choose.",
+  "ratingDone": "Back to booking",
+  "ratingAlreadyTitle": "You've already rated this service",
+  "ratingNotEligibleTitle": "You can't rate this service yet",
+  "ratingNotEligibleBody": "You can rate a worker once the service is completed.",
+  "ratingScaleError": "That rating isn't on the scale. Please choose again.",
+  "repRequestTitle": "Request replacement",
+  "repStatusTitle": "Replacement",
+  "repHeadline": "Let's find you a better match",
+  "repIntro": "Tell us what went wrong. We'll review your request and suggest alternatives.",
+  "repWhy": "Why do you want a replacement?",
+  "repRequired": "Required",
+  "repOptional": "Optional",
+  "repReasonNotOnTime": "Not arriving on time",
+  "repReasonFrequentAbsences": "Frequent absences",
+  "repReasonWorkQuality": "Work quality is not good",
+  "repReasonBehaviour": "Behaviour concern",
+  "repReasonScheduleChanged": "Schedule no longer suits",
+  "repReasonWorkerLeft": "Worker left or can't continue",
+  "repReasonSafety": "Safety or trust concern",
+  "repReasonOther": "Other",
+  "repMore": "Tell us more",
+  "repNotesHint": "What happened? Include dates if you can.",
+  "repNotesNote": "Don't share phone numbers or personal details.",
+  "repNotesRequired": "Please tell us what happened",
+  "repNextTitle": "What happens next",
+  "repNext1": "We review your request",
+  "repNext2": "We suggest verified alternatives",
+  "repNext3": "You choose, and we arrange the switch",
+  "repStaysActive": "Your current booking stays active until you choose a replacement.",
+  "repChooseReasonHint": "Choose a reason to continue",
+  "repNoteHint": "Tell us what happened to continue",
+  "repSubmit": "Submit request",
+  "repSubmitting": "Submitting...",
+  "repOfflineBanner": "You're offline. Your answers are kept.",
+  "repOfflineHint": "Connect to the internet to submit",
+  "repConfirmTitle": "Submit replacement request?",
+  "repConfirmBody": "We'll start looking for an alternative. Your current booking stays active until you choose.",
+  "repConfirmYes": "Yes, submit",
+  "repGoBack": "Go back",
+  "repErrTitle": "We couldn't submit your request",
+  "repErrBody": "Your details are saved. Please try again.",
+  "repTryAgain": "Try again",
+  "repNotEligibleTitle": "Replacement isn't available for this booking",
+  "repNotEligibleBody": "If you think this is a mistake, our support team can help.",
+  "repSafetyTitle": "If you feel unsafe, contact us right away.",
+  "repSafetyBody": "Our support team can help you with priority.",
+  "repSafetyBtn": "Talk to support now",
+  "repSent": "Request sent",
+  "repReceivedTitle": "Request received",
+  "repReceivedBody": "We'll review it and suggest alternatives. You can check the status here any time.",
+  "repRowRequest": "Request",
+  "repRowReason": "Reason",
+  "repRowStatus": "Status",
+  "repTrack": "Track request",
+  "repBackBooking": "Back to booking",
+  "repStatusRequested": "Under review",
+  "repStatusApproved": "Approved",
+  "repStatusRejected": "Not approved",
+  "repStatusCancelled": "Cancelled",
+  "repStatusCompleted": "Completed",
+  "repStatusUnknown": "Updated",
+  "repBannerReviewTitle": "We're reviewing your request",
+  "repBannerReviewBody": "We'll suggest alternatives soon.",
+  "repBannerFindingTitle": "Finding alternatives for you",
+  "repBannerFindingBody": "Your request is approved. Pull down to refresh.",
+  "repBannerReadyTitle": "{n, plural, =1{1 alternative is ready} other{{n} alternatives are ready}}",
+  "@repBannerReadyTitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "repBannerReadyBody": "Choose one to continue.",
+  "repBannerScheduledTitle": "Replacement confirmed",
+  "repBannerScheduledBody": "Your new worker starts on {date}.",
+  "@repBannerScheduledBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "repBannerCompleteTitle": "Replacement complete",
+  "repBannerCompleteBody": "Your new worker is now with you.",
+  "repBannerRejectedTitle": "We couldn't take this request forward",
+  "repBannerRejectedBody": "Please contact support, or find a worker yourself.",
+  "repBannerCancelledTitle": "Request cancelled",
+  "repBannerUnknownTitle": "Updated",
+  "repRequestNo": "Request #{ref}",
+  "@repRequestNo": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "repTagCurrent": "Current engagement",
+  "repTagPrevious": "Previous engagement",
+  "repSubmitted": "Submitted {when}",
+  "@repSubmitted": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "repCopyId": "Copy request ID",
+  "repCopied": "Request ID copied",
+  "repTeamNote": "Note from our team",
+  "repProgress": "Progress",
+  "repStepReceived": "Request received",
+  "repStepReview": "Under review",
+  "repStepReady": "Alternatives ready",
+  "repStepChoose": "You choose a worker",
+  "repStepStarts": "Replacement starts",
+  "repStepRejected": "Request not approved",
+  "repStepCancelled": "Request cancelled",
+  "repStepCancelledSub": "Your current worker continues.",
+  "repChipDone": "Done",
+  "repChipNow": "Now",
+  "repChipUpcoming": "Upcoming",
+  "repChipCancelled": "Cancelled",
+  "repChooseTitle": "Choose a replacement",
+  "repChooseSub": "Choose the worker you'd like from these options.",
+  "repViewProfile": "View profile",
+  "repSelectHint": "Select a worker to continue",
+  "repConfirm": "Confirm replacement",
+  "repSelectTitle": "Confirm this replacement?",
+  "repSelectBody": "Your current booking will end and a new booking will start with the worker you chose.",
+  "repSelectYes": "Yes, confirm",
+  "repSelectGone": "That worker is no longer available. Please choose another.",
+  "repSelectFail": "We couldn't confirm the replacement. Please try again.",
+  "repOfflineContinue": "Connect to the internet to continue.",
+  "repWithdraw": "Cancel request",
+  "repWithdrawTitle": "Cancel this request?",
+  "repWithdrawBody": "Your current worker continues and your booking stays as it is.",
+  "repWithdrawYes": "Yes, cancel request",
+  "repKeep": "Keep request",
+  "repWithdrawFail": "We couldn't cancel the request. Please try again.",
+  "repViewBooking": "View booking",
+  "repViewOld": "View previous booking",
+  "repFindWorker": "Find a worker",
+  "repNeedHelp": "Need help?",
+  "repLoadErrTitle": "We couldn't load this request",
+  "repLoadErrBody": "Please check your connection and try again.",
+  "repChainTitle": "Replacement history",
+  "repChainEntry": "{n}. {status}",
+  "@repChainEntry": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "repChainThis": "This booking",
+  "repViewRequest": "View replacement request"
 }

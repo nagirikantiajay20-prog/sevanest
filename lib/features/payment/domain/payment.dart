@@ -36,8 +36,9 @@ String paymentStatusCode(PaymentStatus s) => switch (s) {
   PaymentStatus.unknown => '',
 };
 
-/// `checkout` of `POST /payments`: `{ gateway, keyId, orderId, amount, currency }`. `gateway` is
-/// `razorpay` once configured on the server, `fake` before that (then `keyId` is null).
+/// `checkout` of `POST /payments`: `{ gateway, keyId, orderId, amount, currency }`. Staging runs
+/// Razorpay test mode (`gateway: razorpay`, a test `keyId`); the old `fake` gateway is gone, and
+/// anything else is refused by [isRazorpay].
 class PaymentCheckout {
   const PaymentCheckout({
     required this.gateway,

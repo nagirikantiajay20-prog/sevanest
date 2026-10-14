@@ -3927,6 +3927,972 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refunds go back to your original payment method.'**
   String get txnRefundNote;
+
+  /// No description provided for @serviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active service'**
+  String get serviceTitle;
+
+  /// No description provided for @serviceNoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No active service'**
+  String get serviceNoneTitle;
+
+  /// No description provided for @serviceNoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When a worker starts, you\'ll see them here.'**
+  String get serviceNoneBody;
+
+  /// No description provided for @servicePickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which service?'**
+  String get servicePickTitle;
+
+  /// No description provided for @serviceSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Since {date}'**
+  String serviceSince(String date);
+
+  /// No description provided for @serviceTodayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get serviceTodayTitle;
+
+  /// No description provided for @serviceTodayNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded yet'**
+  String get serviceTodayNone;
+
+  /// No description provided for @serviceMonthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get serviceMonthTitle;
+
+  /// No description provided for @serviceBookingLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking details'**
+  String get serviceBookingLink;
+
+  /// No description provided for @serviceSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report an issue'**
+  String get serviceSupport;
+
+  /// No description provided for @attendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get attendanceTitle;
+
+  /// No description provided for @attendanceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No updates yet. You\'ll see your worker\'s status here.'**
+  String get attendanceEmpty;
+
+  /// No description provided for @attendanceLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get attendanceLoadMore;
+
+  /// No description provided for @attendancePresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get attendancePresent;
+
+  /// No description provided for @attendanceAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get attendanceAbsent;
+
+  /// No description provided for @attendanceException.
+  ///
+  /// In en, this message translates to:
+  /// **'Exception'**
+  String get attendanceException;
+
+  /// No description provided for @attendanceUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get attendanceUnknown;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Service history'**
+  String get historyTitle;
+
+  /// No description provided for @historyEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No past services yet'**
+  String get historyEmptyTitle;
+
+  /// No description provided for @historyEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Services you\'ve booked will appear here.'**
+  String get historyEmptyBody;
+
+  /// No description provided for @historySectionCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get historySectionCurrent;
+
+  /// No description provided for @historySectionCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get historySectionCompleted;
+
+  /// No description provided for @historySectionCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get historySectionCancelled;
+
+  /// No description provided for @historySectionReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced'**
+  String get historySectionReplaced;
+
+  /// No description provided for @historyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate now'**
+  String get historyRate;
+
+  /// No description provided for @historyRatedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'You rated {score} out of {max}'**
+  String historyRatedLabel(int score, int max);
+
+  /// No description provided for @accountHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Service history'**
+  String get accountHistory;
+
+  /// No description provided for @ratingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your experience'**
+  String get ratingTitle;
+
+  /// No description provided for @ratingQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your experience?'**
+  String get ratingQuestion;
+
+  /// No description provided for @ratingTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a star to rate'**
+  String get ratingTapHint;
+
+  /// No description provided for @ratingStarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} out of {max}'**
+  String ratingStarLabel(int n, int max);
+
+  /// No description provided for @ratingReviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a review (optional)'**
+  String get ratingReviewLabel;
+
+  /// No description provided for @ratingReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell others about your experience.'**
+  String get ratingReviewHint;
+
+  /// No description provided for @ratingReviewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your review helps other families choose. Don\'t share phone numbers or personal details.'**
+  String get ratingReviewNote;
+
+  /// No description provided for @ratingChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a star rating to continue'**
+  String get ratingChoose;
+
+  /// No description provided for @ratingSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit review'**
+  String get ratingSubmit;
+
+  /// No description provided for @ratingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get ratingSkip;
+
+  /// No description provided for @ratingThanksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your feedback'**
+  String get ratingThanksTitle;
+
+  /// No description provided for @ratingThanksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating helps other families choose.'**
+  String get ratingThanksBody;
+
+  /// No description provided for @ratingDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to booking'**
+  String get ratingDone;
+
+  /// No description provided for @ratingAlreadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve already rated this service'**
+  String get ratingAlreadyTitle;
+
+  /// No description provided for @ratingNotEligibleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t rate this service yet'**
+  String get ratingNotEligibleTitle;
+
+  /// No description provided for @ratingNotEligibleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can rate a worker once the service is completed.'**
+  String get ratingNotEligibleBody;
+
+  /// No description provided for @ratingScaleError.
+  ///
+  /// In en, this message translates to:
+  /// **'That rating isn\'t on the scale. Please choose again.'**
+  String get ratingScaleError;
+
+  /// No description provided for @repRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request replacement'**
+  String get repRequestTitle;
+
+  /// No description provided for @repStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement'**
+  String get repStatusTitle;
+
+  /// No description provided for @repHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s find you a better match'**
+  String get repHeadline;
+
+  /// No description provided for @repIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what went wrong. We\'ll review your request and suggest alternatives.'**
+  String get repIntro;
+
+  /// No description provided for @repWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why do you want a replacement?'**
+  String get repWhy;
+
+  /// No description provided for @repRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get repRequired;
+
+  /// No description provided for @repOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get repOptional;
+
+  /// No description provided for @repReasonNotOnTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Not arriving on time'**
+  String get repReasonNotOnTime;
+
+  /// No description provided for @repReasonFrequentAbsences.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequent absences'**
+  String get repReasonFrequentAbsences;
+
+  /// No description provided for @repReasonWorkQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Work quality is not good'**
+  String get repReasonWorkQuality;
+
+  /// No description provided for @repReasonBehaviour.
+  ///
+  /// In en, this message translates to:
+  /// **'Behaviour concern'**
+  String get repReasonBehaviour;
+
+  /// No description provided for @repReasonScheduleChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule no longer suits'**
+  String get repReasonScheduleChanged;
+
+  /// No description provided for @repReasonWorkerLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker left or can\'t continue'**
+  String get repReasonWorkerLeft;
+
+  /// No description provided for @repReasonSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety or trust concern'**
+  String get repReasonSafety;
+
+  /// No description provided for @repReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get repReasonOther;
+
+  /// No description provided for @repMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us more'**
+  String get repMore;
+
+  /// No description provided for @repNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened? Include dates if you can.'**
+  String get repNotesHint;
+
+  /// No description provided for @repNotesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t share phone numbers or personal details.'**
+  String get repNotesNote;
+
+  /// No description provided for @repNotesRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please tell us what happened'**
+  String get repNotesRequired;
+
+  /// No description provided for @repNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next'**
+  String get repNextTitle;
+
+  /// No description provided for @repNext1.
+  ///
+  /// In en, this message translates to:
+  /// **'We review your request'**
+  String get repNext1;
+
+  /// No description provided for @repNext2.
+  ///
+  /// In en, this message translates to:
+  /// **'We suggest verified alternatives'**
+  String get repNext2;
+
+  /// No description provided for @repNext3.
+  ///
+  /// In en, this message translates to:
+  /// **'You choose, and we arrange the switch'**
+  String get repNext3;
+
+  /// No description provided for @repStaysActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current booking stays active until you choose a replacement.'**
+  String get repStaysActive;
+
+  /// No description provided for @repChooseReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a reason to continue'**
+  String get repChooseReasonHint;
+
+  /// No description provided for @repNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened to continue'**
+  String get repNoteHint;
+
+  /// No description provided for @repSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit request'**
+  String get repSubmit;
+
+  /// No description provided for @repSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting...'**
+  String get repSubmitting;
+
+  /// No description provided for @repOfflineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Your answers are kept.'**
+  String get repOfflineBanner;
+
+  /// No description provided for @repOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to submit'**
+  String get repOfflineHint;
+
+  /// No description provided for @repConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit replacement request?'**
+  String get repConfirmTitle;
+
+  /// No description provided for @repConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll start looking for an alternative. Your current booking stays active until you choose.'**
+  String get repConfirmBody;
+
+  /// No description provided for @repConfirmYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, submit'**
+  String get repConfirmYes;
+
+  /// No description provided for @repGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get repGoBack;
+
+  /// No description provided for @repErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t submit your request'**
+  String get repErrTitle;
+
+  /// No description provided for @repErrBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your details are saved. Please try again.'**
+  String get repErrBody;
+
+  /// No description provided for @repTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get repTryAgain;
+
+  /// No description provided for @repNotEligibleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement isn\'t available for this booking'**
+  String get repNotEligibleTitle;
+
+  /// No description provided for @repNotEligibleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you think this is a mistake, our support team can help.'**
+  String get repNotEligibleBody;
+
+  /// No description provided for @repSafetyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If you feel unsafe, contact us right away.'**
+  String get repSafetyTitle;
+
+  /// No description provided for @repSafetyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Our support team can help you with priority.'**
+  String get repSafetyBody;
+
+  /// No description provided for @repSafetyBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk to support now'**
+  String get repSafetyBtn;
+
+  /// No description provided for @repSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get repSent;
+
+  /// No description provided for @repReceivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request received'**
+  String get repReceivedTitle;
+
+  /// No description provided for @repReceivedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll review it and suggest alternatives. You can check the status here any time.'**
+  String get repReceivedBody;
+
+  /// No description provided for @repRowRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get repRowRequest;
+
+  /// No description provided for @repRowReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get repRowReason;
+
+  /// No description provided for @repRowStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get repRowStatus;
+
+  /// No description provided for @repTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Track request'**
+  String get repTrack;
+
+  /// No description provided for @repBackBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to booking'**
+  String get repBackBooking;
+
+  /// No description provided for @repStatusRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get repStatusRequested;
+
+  /// No description provided for @repStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get repStatusApproved;
+
+  /// No description provided for @repStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not approved'**
+  String get repStatusRejected;
+
+  /// No description provided for @repStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get repStatusCancelled;
+
+  /// No description provided for @repStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get repStatusCompleted;
+
+  /// No description provided for @repStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get repStatusUnknown;
+
+  /// No description provided for @repBannerReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re reviewing your request'**
+  String get repBannerReviewTitle;
+
+  /// No description provided for @repBannerReviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll suggest alternatives soon.'**
+  String get repBannerReviewBody;
+
+  /// No description provided for @repBannerFindingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding alternatives for you'**
+  String get repBannerFindingTitle;
+
+  /// No description provided for @repBannerFindingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request is approved. Pull down to refresh.'**
+  String get repBannerFindingBody;
+
+  /// No description provided for @repBannerReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1 alternative is ready} other{{n} alternatives are ready}}'**
+  String repBannerReadyTitle(int n);
+
+  /// No description provided for @repBannerReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one to continue.'**
+  String get repBannerReadyBody;
+
+  /// No description provided for @repBannerScheduledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement confirmed'**
+  String get repBannerScheduledTitle;
+
+  /// No description provided for @repBannerScheduledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new worker starts on {date}.'**
+  String repBannerScheduledBody(String date);
+
+  /// No description provided for @repBannerCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement complete'**
+  String get repBannerCompleteTitle;
+
+  /// No description provided for @repBannerCompleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your new worker is now with you.'**
+  String get repBannerCompleteBody;
+
+  /// No description provided for @repBannerRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t take this request forward'**
+  String get repBannerRejectedTitle;
+
+  /// No description provided for @repBannerRejectedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please contact support, or find a worker yourself.'**
+  String get repBannerRejectedBody;
+
+  /// No description provided for @repBannerCancelledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled'**
+  String get repBannerCancelledTitle;
+
+  /// No description provided for @repBannerUnknownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get repBannerUnknownTitle;
+
+  /// No description provided for @repRequestNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Request #{ref}'**
+  String repRequestNo(String ref);
+
+  /// No description provided for @repTagCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current engagement'**
+  String get repTagCurrent;
+
+  /// No description provided for @repTagPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous engagement'**
+  String get repTagPrevious;
+
+  /// No description provided for @repSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {when}'**
+  String repSubmitted(String when);
+
+  /// No description provided for @repCopyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy request ID'**
+  String get repCopyId;
+
+  /// No description provided for @repCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Request ID copied'**
+  String get repCopied;
+
+  /// No description provided for @repTeamNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note from our team'**
+  String get repTeamNote;
+
+  /// No description provided for @repProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get repProgress;
+
+  /// No description provided for @repStepReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Request received'**
+  String get repStepReceived;
+
+  /// No description provided for @repStepReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get repStepReview;
+
+  /// No description provided for @repStepReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternatives ready'**
+  String get repStepReady;
+
+  /// No description provided for @repStepChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'You choose a worker'**
+  String get repStepChoose;
+
+  /// No description provided for @repStepStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement starts'**
+  String get repStepStarts;
+
+  /// No description provided for @repStepRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Request not approved'**
+  String get repStepRejected;
+
+  /// No description provided for @repStepCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cancelled'**
+  String get repStepCancelled;
+
+  /// No description provided for @repStepCancelledSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current worker continues.'**
+  String get repStepCancelledSub;
+
+  /// No description provided for @repChipDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get repChipDone;
+
+  /// No description provided for @repChipNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get repChipNow;
+
+  /// No description provided for @repChipUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get repChipUpcoming;
+
+  /// No description provided for @repChipCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get repChipCancelled;
+
+  /// No description provided for @repChooseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a replacement'**
+  String get repChooseTitle;
+
+  /// No description provided for @repChooseSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the worker you\'d like from these options.'**
+  String get repChooseSub;
+
+  /// No description provided for @repViewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get repViewProfile;
+
+  /// No description provided for @repSelectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a worker to continue'**
+  String get repSelectHint;
+
+  /// No description provided for @repConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm replacement'**
+  String get repConfirm;
+
+  /// No description provided for @repSelectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this replacement?'**
+  String get repSelectTitle;
+
+  /// No description provided for @repSelectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current booking will end and a new booking will start with the worker you chose.'**
+  String get repSelectBody;
+
+  /// No description provided for @repSelectYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, confirm'**
+  String get repSelectYes;
+
+  /// No description provided for @repSelectGone.
+  ///
+  /// In en, this message translates to:
+  /// **'That worker is no longer available. Please choose another.'**
+  String get repSelectGone;
+
+  /// No description provided for @repSelectFail.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t confirm the replacement. Please try again.'**
+  String get repSelectFail;
+
+  /// No description provided for @repOfflineContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to continue.'**
+  String get repOfflineContinue;
+
+  /// No description provided for @repWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get repWithdraw;
+
+  /// No description provided for @repWithdrawTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this request?'**
+  String get repWithdrawTitle;
+
+  /// No description provided for @repWithdrawBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current worker continues and your booking stays as it is.'**
+  String get repWithdrawBody;
+
+  /// No description provided for @repWithdrawYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel request'**
+  String get repWithdrawYes;
+
+  /// No description provided for @repKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep request'**
+  String get repKeep;
+
+  /// No description provided for @repWithdrawFail.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t cancel the request. Please try again.'**
+  String get repWithdrawFail;
+
+  /// No description provided for @repViewBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'View booking'**
+  String get repViewBooking;
+
+  /// No description provided for @repViewOld.
+  ///
+  /// In en, this message translates to:
+  /// **'View previous booking'**
+  String get repViewOld;
+
+  /// No description provided for @repFindWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a worker'**
+  String get repFindWorker;
+
+  /// No description provided for @repNeedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help?'**
+  String get repNeedHelp;
+
+  /// No description provided for @repLoadErrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load this request'**
+  String get repLoadErrTitle;
+
+  /// No description provided for @repLoadErrBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your connection and try again.'**
+  String get repLoadErrBody;
+
+  /// No description provided for @repChainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement history'**
+  String get repChainTitle;
+
+  /// No description provided for @repChainEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}. {status}'**
+  String repChainEntry(int n, String status);
+
+  /// No description provided for @repChainThis.
+  ///
+  /// In en, this message translates to:
+  /// **'This booking'**
+  String get repChainThis;
+
+  /// No description provided for @repViewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'View replacement request'**
+  String get repViewRequest;
 }
 
 class _AppLocalizationsDelegate

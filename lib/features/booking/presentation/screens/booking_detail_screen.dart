@@ -17,6 +17,7 @@ import 'package:sevanest_customer/features/interview_trial/presentation/intervie
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
 import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
+import 'package:sevanest_customer/features/replacement/presentation/replacement_links.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
@@ -351,6 +352,7 @@ class _Body extends StatelessWidget {
                 '${Routes.replacementNew}?bookingId=${Uri.encodeComponent(b.id)}',
               ),
             ),
+          ReplacementLinks(booking: b),
           if (a.contains(BookingAction.receipt))
             action('booking_receipt_btn', l10n.bookingReceipt, onReceipt),
           if (a.contains(BookingAction.cancel))

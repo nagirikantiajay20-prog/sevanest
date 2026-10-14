@@ -1,6 +1,12 @@
 # Module 11 — Replacement
 
-**Backend:** `POST /bookings/{id}/replacement`, `GET /replacements/{id}`, `GET /replacements/{id}/alternatives`, `POST /replacements/{id}/select`, `GET /catalog/replacement-reasons`.
+**Backend (REAL, docs/backend_openapi_2026-10-13.json - overrides the assumed routes below):**
+`POST /replacement-requests {bookingId, reason <=1000, notes <=2000}` (Idempotency-Key; 404 not mine, 422 `REPLACEMENT_NOT_ELIGIBLE`, 409 while one is open),
+`GET /replacement-requests` (mine, newest first, paged), `GET /replacement-requests/{id}`, `POST .../{id}/cancel` (withdraw an open request; booking ACTIVE again),
+`POST .../{id}/select {workerId}` (once APPROVED; creates the MATCHED replacement booking, closes the old one as REPLACED), `GET /bookings/{id}/replacement-chain` (oldest first).
+Status `REQUESTED | APPROVED | REJECTED | CANCELLED | COMPLETED`. No reason list, no needed-from date, no customer alternatives route, no events. See BACKEND_REQUESTS 37-44.
+~~Assumed (not deployed): `POST /bookings/{id}/replacement`, `GET /replacements/{id}`, `/alternatives`, `/replacements/{id}/select`, `GET /catalog/replacement-reasons`.~~
+**UI (design 25 / 26 wins):** Request received screen after submit (Track request replaces the form with the status); choose a card on the status screen, then "Confirm replacement" (dialog); worker detail "Choose" mode is NOT built.
 **Routes:** `/replacements/new?bookingId=`, `/replacements/:id`.
 **Rules:** customer only *requests*; Support/Admin decides (AGENTS §45, §80.4). Eligibility = backend (`allowedActions.replace`). Previous engagement stays visible. Status enum is backend-owned (`ReplacementStatusMapper` + unknown fallback).
 

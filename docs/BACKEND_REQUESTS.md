@@ -128,11 +128,15 @@ Razorpay yet (no keys), only against mocks and the documented shapes.
 20. **`checkout` shape - answered.** `{ gateway: "razorpay" | "fake", keyId, orderId, amount, currency }`.
     Razorpay SDK gets `key = keyId`, `order_id = orderId`, `amount`, `currency`. `verify` takes
     `providerPaymentId = razorpay_payment_id` and `signature = razorpay_signature`; `razorpay_order_id`
-    is not sent. Until Razorpay is configured the gateway is `fake` with `keyId: null`: the app has
-    nothing to open and shows "didn't go through" (`CHECKOUT_UNSUPPORTED`). STILL OPEN: what the
-    `fake` gateway accepts in `verify`, so staging can be paid without Razorpay keys.
+    is not sent. CLOSED (2026-10-14): the `fake` gateway is removed (it only worked in backend tests);
+    staging runs Razorpay test mode (`PAYMENT_PROVIDER=razorpay`, test key). The backend paid a booking
+    end to end with it: order -> Razorpay checkout -> verify 200 SUCCEEDED -> booking CONFIRMED. A
+    checkout that is not `razorpay` with a `keyId` still ends in "didn't go through" (`CHECKOUT_UNSUPPORTED`).
+    Live test customers: +919999900001 / +919999900002, OTP 123456 (set `SEVANEST_LIVE`).
 21. **Receipt - answered.** `GET /payments/{id}/receipt` (409 `RECEIPT_NOT_AVAILABLE` before payment,
-    404 for another customer). The app renders it; no PDF until an invoice / GST format is approved.
+    404 for another customer). The app renders it. UPDATE 2026-10-14: `GET /payments/{id}/receipt/pdf`
+    is added (same 404/409 errors; a payment receipt, NOT a GST tax invoice, which waits on the client).
+    It needs a backend deploy before it is live on staging, so the app does not use it yet.
 22. **Method and reference - answered.** `paymentMethod` (`upi`/`card`/`netbanking`/`wallet`/`emi`),
     `paymentMethodDetail` (masked), `gatewayReference`; null until the gateway answers. Shown on the receipt.
 23. **Payment of a booking - answered.** `GET /payments?bookingId=`; `BookingView` gets no `paymentId`.
@@ -148,6 +152,88 @@ Razorpay yet (no keys), only against mocks and the documented shapes.
     debited, it will be refunded automatically."
 
 ---
+
+### Module 8 - active service, history, rating (2026-10-14, from the typed OpenAPI)
+
+The app runs on `GET /attendance/bookings/{id}` (+ `/summary`), `GET /bookings`, `POST /ratings`,
+`GET /ratings`, `GET /ratings/bookings/{id}`. The module-doc routes (`/services/history`,
+`/bookings/{id}/attendance`, `POST /bookings/{id}/rating`, `rating-eligibility`) do not exist and are not used.
+
+28. **Customer attendance access.** The Swagger lists `/attendance/bookings/{id}` for a customer, but the
+    spec does not say whether the customer token is accepted today. CONFIRM with a live customer who has an
+    ACTIVE booking. The app shows "No updates yet" for an empty list and a retry for 403.
+29. **Attendance statuses.** The Swagger enum is `PRESENT | ABSENT | EXCEPTION`. The design shows Late and
+    Leave, and "Checked in 8:02 AM / Scheduled 8 AM - 12 PM". None are in `AttendanceView` (`date`, `status`,
+    `note`, `recordedBy`, `updatedAt`), so the app shows only the three statuses plus the note. Any other
+    value reads "Updated". Add check-in / out times and a scheduled window if they should appear.
+30. **Customer "raise exception".** `POST /attendance/bookings/{id}/exceptions` exists (a day the worker did not
+    record, note required). The designs have no screen for it, so it is NOT built. Decide whether the active
+    service screen should offer "Report a missing day".
+31. **Service history route.** There is none. History is `GET /bookings` grouped by `status` in the app
+    (Current / Completed / Cancelled / Replaced), paged 20 at a time. The designs also show "9 services,
+    7 workers, total spent" and a year / category filter and search: none of those are served. Ask whether a
+    `GET /bookings/summary` (counts, total spent) or a `search` / `year` filter is planned.
+32. **Rating eligibility.** There is no eligibility endpoint and no `allowedActions` on bookings. The app treats
+    a booking as rateable when it is `COMPLETED` (derived) and `GET /ratings/bookings/{id}` answers 404; the
+    server stays the judge (`422 RATING_NOT_ELIGIBLE` and `409 RATING_ALREADY_EXISTS` switch the screen to the
+    reason / "already rated" states). Confirm that `COMPLETED` is the only rateable state, and whether a
+    booking that ended early (`REPLACED`, designs say "Ended early") can be rated.
+33. **Rating tags and comment limit.** No tags endpoint (the module doc's `rating_tag_<id>` is not built).
+    `review` is max 2000 in the Swagger; the design says 300 and `/reference-data` has no review limit. The
+    app reads the limit from `ratingReviewMaxProvider` (default 2000). Add `ratingReviewMax` to
+    `/reference-data`, or confirm 2000.
+34. **Rebook.** No `rebook` action is sent, so there is no "Hire again" button (the design has one). Add it to
+    the booking `allowedActions` if wanted.
+35. **Response bodies.** Success bodies of `/attendance` and `/ratings` are typed in the Swagger and parsed
+    defensively (a row without a date is skipped; unknown status = "Updated"). Not yet seen from a live
+    customer with data: the test customer has no ACTIVE / COMPLETED booking.
+36. **Worker name and photo.** Neither the booking nor the attendance carries the worker's name; the card is the
+    anonymous search card (category, experience, languages), as on the other screens.
+
+### Module 9 - replacement (2026-10-14, from the typed OpenAPI)
+
+The app runs on `POST /replacement-requests`, `GET /replacement-requests`, `GET /replacement-requests/{id}`,
+`POST .../cancel`, `POST .../select` and `GET /bookings/{id}/replacement-chain`. The module-doc routes
+(`/bookings/{id}/replacement`, `/replacements/{id}/alternatives`, `/catalog/replacement-reasons`) do not exist
+and are not used. Nothing below has run against a live customer with an ACTIVE booking.
+
+37. **Reasons and note length.** `reason` is free text (max 1000) and the Swagger says "the specs define no reason
+    list (Q-54)". The design has eight fixed reasons, so the app sends the English text of the chosen reason
+    ("Work quality is not good") as `reason` and the customer's words as `notes`. For "Other" the note is required
+    in the app only. Please publish fixed reason codes (or a list in `/reference-data`) so staff can filter on them.
+    Notes: the Swagger allows 2000, the design shows 500; the app follows the Swagger (`replacementNotesMaxProvider`).
+38. **"Needed from" date.** The design asks "When do you need someone? As soon as possible / From a date / I'll
+    decide later" and shows it on the received and status screens. `CreateReplacementDto` has no such field, so
+    the question is NOT shown and nothing is sent. Add `neededFrom` (nullable date) to the create body and to
+    `ReplacementView` if it is wanted.
+39. **How the customer sees the alternatives.** `GET .../candidates` is admin-only and the customer has no
+    alternatives route; `select` takes a `workerId` "from search or matching". The app therefore shows choices only
+    when `ReplacementView` carries an `alternatives` (or `candidates`) array of worker cards (the search card shape,
+    with `workerId`); until then an APPROVED request reads "Finding alternatives for you" and the customer cannot
+    choose. Please say how choices reach the customer: an `alternatives` array on `ReplacementView` once APPROVED,
+    or a `GET /replacement-requests/{id}/alternatives`. If the customer is meant to pick any worker from search,
+    say so and the app will offer search from the approved state.
+40. **Statuses.** `REQUESTED | APPROVED | REJECTED | CANCELLED | COMPLETED`. The design's "Under review",
+    "Alternatives ready", "Replacement scheduled" and "Completed" are derived: REQUESTED = under review; APPROVED
+    with alternatives = ready; COMPLETED with the new booking's `startDate` in the future = scheduled, else
+    complete. Confirm that APPROVED means "alternatives may be chosen" and that REJECTED is final.
+    `decisionRemarks` is staff text shown to the customer verbatim on a rejection ("Note from our team"); confirm it
+    is written for customers.
+41. **After select.** `select` creates a replacement booking in MATCHED "to continue through the normal lifecycle".
+    Does the customer still schedule an interview / trial, confirm the worker and pay again? Is the price the same
+    (the design says "No change in price")? The app claims neither.
+42. **Request of a booking.** `BookingView` has no replacement request id and there is no filter by booking, so the
+    app reads `GET /replacement-requests` (newest first) to find the open request of a REPLACEMENT_REQUESTED booking.
+    Add `replacementRequestId` to `BookingView` (or `bookingId` to the list filter). Related: bookings have no
+    `allowedActions`, so "replace" is derived from ACTIVE.
+43. **Error codes.** Only `REPLACEMENT_NOT_ELIGIBLE` (422) is named. Please name: the 409 code when a request is
+    already open (the app treats any 409 on create other than `IDEMPOTENCY_IN_PROGRESS` as "already requested" and
+    opens the open request), the codes for `select` of an unavailable or ineligible worker (the app treats any 409 or
+    422 on select as "choose another"), and `cancel` of a request that is no longer open.
+44. **Timeline and review time.** No events, no expected review time and no push on a decision are sent, so the
+    Progress timeline is the happy path built from the status and `createdAt` / `decidedAt` / `completedAt`, and the
+    design's "Reason: work quality" and "3 verified workers matched" sub-lines are not shown. The worker name, rating
+    count and distance on the design cards are not served either (see 36).
 
 ## Items that are NOT backend problems (for the team's information)
 
