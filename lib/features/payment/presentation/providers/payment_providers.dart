@@ -66,9 +66,27 @@ final pendingPaymentStoreProvider = Provider<PendingPaymentStore>(
   (ref) => PendingPaymentStore(),
 );
 
+/// The payment the app stored when its checkout opened and has not seen the result of: for the
+/// "confirming" banner on Home and the booking. Null when none is stored, it is settled (the
+/// recovery check clears those), it was never started, or it cannot be read now.
+final unconfirmedPaymentProvider = FutureProvider.autoDispose<Payment?>((
+  ref,
+) async {
+  ref.watch(mockApiProvider);
+  final id = await ref.read(pendingPaymentStoreProvider).read();
+  if (id == null) return null;
+  try {
+    final p = await ref.read(paymentRepositoryProvider).get(id);
+    return p.isSettled || p.status == PaymentStatus.created ? null : p;
+  } on Object {
+    return null;
+  }
+});
+
 /// Everything a settled payment changes on screen: the booking, the lists, Home, transactions.
 void refreshAfterPayment(WidgetRef ref, String bookingId) {
   ref
+    ..invalidate(unconfirmedPaymentProvider)
     ..invalidate(bookingProvider(bookingId))
     ..invalidate(bookingListProvider)
     ..invalidate(homeProvider)
@@ -86,8 +104,33 @@ final paymentProvider = FutureProvider.autoDispose.family<Payment, String>((
   return ref.read(paymentRepositoryProvider).get(id, cancel: cancel);
 });
 
-/// Transactions filter: all, paid (SUCCEEDED) or refunded (REFUNDED). The backend filters by one
-/// status only, so a refund that is still pending shows under All.
+/// The receipt of a paid payment (`GET /payments/{id}/receipt`). A 409 `RECEIPT_NOT_AVAILABLE`
+/// (not paid yet) is an error here; the receipt screen falls back to the payment itself.
+final receiptProvider = FutureProvider.autoDispose.family<Receipt, String>((
+  ref,
+  id,
+) {
+  ref.watch(mockApiProvider);
+  final cancel = CancelToken();
+  ref.onDispose(cancel.cancel);
+  return ref.read(paymentRepositoryProvider).receipt(id, cancel: cancel);
+});
+
+/// The paid payment of a booking, for its Receipt button (`GET /payments?bookingId=`, which only
+/// returns the customer's own payments). Null when none was paid or the lookup failed.
+Future<String?> paidPaymentIdOf(WidgetRef ref, String bookingId) async {
+  try {
+    final page = await ref
+        .read(paymentRepositoryProvider)
+        .list(bookingId: bookingId);
+    return page.items.where((p) => p.wasPaid).firstOrNull?.id;
+  } on Object {
+    return null;
+  }
+}
+
+/// Transactions filter: all, paid (SUCCEEDED) or refunded (`refunded=true`: REFUND_PENDING,
+/// REFUNDED and REFUND_FAILED).
 enum TransactionFilter { all, paid, refunded }
 
 class TransactionFilterNotifier extends Notifier<TransactionFilter> {
@@ -104,11 +147,13 @@ final transactionFilterProvider =
     );
 
 class TransactionListNotifier extends AsyncNotifier<PagedState<Payment>> {
-  PaymentStatus? get _status => switch (ref.read(transactionFilterProvider)) {
-    TransactionFilter.all => null,
-    TransactionFilter.paid => PaymentStatus.succeeded,
-    TransactionFilter.refunded => PaymentStatus.refunded,
-  };
+  PaymentStatus? get _status =>
+      ref.read(transactionFilterProvider) == TransactionFilter.paid
+      ? PaymentStatus.succeeded
+      : null;
+
+  bool get _refunded =>
+      ref.read(transactionFilterProvider) == TransactionFilter.refunded;
 
   @override
   Future<PagedState<Payment>> build() async {
@@ -117,7 +162,7 @@ class TransactionListNotifier extends AsyncNotifier<PagedState<Payment>> {
       ..watch(transactionFilterProvider);
     final page = await ref
         .read(paymentRepositoryProvider)
-        .list(status: _status);
+        .list(status: _status, refunded: _refunded);
     return const PagedState<Payment>().appended(page.items, page.nextCursor);
   }
 
@@ -137,7 +182,7 @@ class TransactionListNotifier extends AsyncNotifier<PagedState<Payment>> {
     try {
       final page = await ref
           .read(paymentRepositoryProvider)
-          .list(cursor: cur.nextCursor, status: _status);
+          .list(cursor: cur.nextCursor, status: _status, refunded: _refunded);
       state = AsyncData(cur.appended(page.items, page.nextCursor));
     } on Object catch (e) {
       state = AsyncData(cur.failedMore(e));

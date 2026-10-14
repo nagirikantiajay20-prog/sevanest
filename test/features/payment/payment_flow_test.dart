@@ -48,6 +48,9 @@ class _Repo implements PaymentRepository {
   /// What `get` answers instead of the stored payment, e.g. a payment still PENDING.
   Payment? forcedGet;
   Payment? forcedVerify;
+
+  /// What the first `start` answers instead of the mock (e.g. a CREATED payment).
+  Payment? firstStart;
   Completer<void>? verifyGate;
   Object? listFails;
   bool emptyList = false;
@@ -61,6 +64,11 @@ class _Repo implements PaymentRepository {
     startKeys.add(idempotencyKey);
     final f = startFails;
     if (f != null) throw f;
+    final first = firstStart;
+    if (first != null) {
+      firstStart = null;
+      return first;
+    }
     return inner.start(bookingId, idempotencyKey: idempotencyKey);
   }
 
@@ -93,12 +101,33 @@ class _Repo implements PaymentRepository {
     return forcedGet ?? await inner.get(id, cancel: cancel);
   }
 
+  Object? receiptFails;
+  var receiptCalls = 0;
+
   @override
-  Future<PaymentPage> list({String? cursor, PaymentStatus? status}) async {
+  Future<Receipt> receipt(String id, {CancelToken? cancel}) async {
+    receiptCalls++;
+    final f = receiptFails;
+    if (f != null) throw f;
+    return inner.receipt(id, cancel: cancel);
+  }
+
+  @override
+  Future<PaymentPage> list({
+    String? cursor,
+    PaymentStatus? status,
+    String? bookingId,
+    bool refunded = false,
+  }) async {
     final f = listFails;
     if (f != null) throw f;
     if (emptyList) return const PaymentPage([], null);
-    return inner.list(cursor: cursor, status: status);
+    return inner.list(
+      cursor: cursor,
+      status: status,
+      bookingId: bookingId,
+      refunded: refunded,
+    );
   }
 }
 
@@ -342,6 +371,77 @@ void main() {
       },
     );
 
+    testWidgets(
+      'PENDING with a checkout is payable; once the SDK reported it stays confirming',
+      (t) async {
+        final base = (await t.runAsync(
+          () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+        ))!;
+        expect(base.status, PaymentStatus.pending);
+        expect(base.checkout, isNotNull);
+        await open(t);
+        expect(k('payment_pay_btn'), findsOneWidget); // can pay
+        // The server still shows the checkout, but the customer already paid in the SDK.
+        repo
+          ..forcedVerify = base
+          ..forcedGet = base;
+        await tapKey(t, 'payment_pay_btn');
+        expect(find.text("We're confirming your payment"), findsOneWidget);
+        expect(k('payment_pay_btn'), findsNothing);
+        await tapKey(t, 'payment_refresh_btn');
+        expect(find.text("We're confirming your payment"), findsOneWidget);
+        expect(k('payment_pay_btn'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'CREATED (no gateway order yet): POST /payments is made again',
+      (t) async {
+        repo.firstStart = const Payment(
+          id: 'pay_c',
+          bookingId: _bookingId,
+          status: PaymentStatus.created,
+          amountMinor: 49900,
+        );
+        await open(t);
+        expect(repo.startCalls, 2);
+        expect(repo.startKeys[0], isNot(repo.startKeys[1]));
+        expect(k('payment_pay_btn'), findsOneWidget);
+      },
+    );
+
+    testWidgets('failed: the gateway reason and the refund note are shown', (
+      t,
+    ) async {
+      final base = (await t.runAsync(
+        () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+      ))!;
+      repo.verifyFails = const ValidationFailure(
+        'x',
+        {},
+        'PAYMENT_VERIFICATION_FAILED',
+      );
+      await open(t);
+      repo.forcedGet = Payment(
+        id: base.id,
+        bookingId: base.bookingId,
+        status: PaymentStatus.failed,
+        amountMinor: base.amountMinor,
+        failureCode: 'BAD_REQUEST_ERROR',
+        failureReason: 'Your bank declined the payment',
+      );
+      await tapKey(t, 'payment_pay_btn');
+      expect(find.text('Your bank declined the payment'), findsOneWidget);
+      expect(
+        find.text(
+          'If any amount was debited, it will be refunded automatically.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('BAD_REQUEST_ERROR'), findsNothing); // for support only
+      expect(find.textContaining('No money'), findsNothing);
+    });
+
     testWidgets('the key of each verify is fresh', (t) async {
       repo.verifyFails = const NetworkFailure();
       repo.getFails = false;
@@ -455,11 +555,57 @@ void main() {
         );
         SharedPreferences.setMockInitialValues({'pending_payment_id': p.id});
         await open(t, route: '/home');
+        // The snackbar and the Home banner both say it.
         expect(
           find.text("We're still confirming your last payment."),
-          findsOneWidget,
+          findsNWidgets(2),
         );
+        expect(k('pending_payment_banner'), findsOneWidget);
         expect(await pendingId(t), p.id);
+      },
+    );
+
+    testWidgets(
+      'opened from a stored id while the checkout may have been paid: confirming, with Pay again',
+      (t) async {
+        final p = (await t.runAsync(
+          () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+        ))!;
+        SharedPreferences.setMockInitialValues({'pending_payment_id': p.id});
+        await open(t, route: '/payments/${p.id}');
+        expect(find.text("We're confirming your payment"), findsOneWidget);
+        expect(k('payment_pay_btn'), findsNothing);
+        expect(k('payment_refresh_btn'), findsOneWidget);
+        await tapKey(t, 'payment_pay_again_btn');
+        expect(k('payment_pay_btn'), findsOneWidget);
+        expect(k('payment_pay_again_btn'), findsNothing);
+      },
+    );
+
+    testWidgets('an open payment that was never in a checkout is payable', (
+      t,
+    ) async {
+      final p = (await t.runAsync(
+        () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+      ))!;
+      await open(t, route: '/payments/${p.id}');
+      expect(k('payment_pay_btn'), findsOneWidget);
+      expect(k('payment_pay_again_btn'), findsNothing);
+    });
+
+    testWidgets(
+      'Pay again is not offered while confirming after the SDK paid',
+      (t) async {
+        final base = (await t.runAsync(
+          () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+        ))!;
+        repo
+          ..forcedVerify = base
+          ..forcedGet = base;
+        await open(t);
+        await tapKey(t, 'payment_pay_btn');
+        expect(find.text("We're confirming your payment"), findsOneWidget);
+        expect(k('payment_pay_again_btn'), findsNothing);
       },
     );
 
@@ -484,6 +630,65 @@ void main() {
       SharedPreferences.setMockInitialValues({'pending_payment_id': 'pay_x'});
       await open(t, route: '/home');
       expect(await pendingId(t), 'pay_x');
+    });
+  });
+
+  group('confirming banner', () {
+    Future<Payment> storedPending(WidgetTester t) async {
+      final p = (await t.runAsync(
+        () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+      ))!;
+      SharedPreferences.setMockInitialValues({'pending_payment_id': p.id});
+      return p;
+    }
+
+    testWidgets('Home shows it, and View opens the payment', (t) async {
+      final p = await storedPending(t);
+      final env = await open(t, route: '/home');
+      expect(k('pending_payment_banner'), findsOneWidget);
+      await tapKey(t, 'pending_payment_view_btn');
+      expect(env.where, '/payments/${p.id}');
+    });
+
+    testWidgets('nothing stored: no banner', (t) async {
+      await open(t, route: '/home');
+      expect(k('pending_payment_banner'), findsNothing);
+    });
+
+    testWidgets('a settled stored payment shows no banner', (t) async {
+      final p = (await t.runAsync(
+        () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+      ))!;
+      await t.runAsync(
+        () => repo.inner.verify(
+          p.id,
+          providerPaymentId: '${PaymentRepositoryMock.fakeProviderPrefix}x',
+          signature: 's',
+          idempotencyKey: 'seed-key-0002',
+        ),
+      );
+      SharedPreferences.setMockInitialValues({'pending_payment_id': p.id});
+      await open(t, route: '/home');
+      expect(k('pending_payment_banner'), findsNothing);
+    });
+
+    testWidgets('the booking of that payment shows it', (t) async {
+      await storedPending(t);
+      await open(t, route: '/bookings/$_bookingId');
+      expect(k('pending_payment_banner'), findsOneWidget);
+    });
+
+    testWidgets('another booking does not', (t) async {
+      await storedPending(t);
+      await open(t, route: '/bookings/bk_1900');
+      expect(k('pending_payment_banner'), findsNothing);
+    });
+
+    testWidgets('an unreadable payment shows no banner', (t) async {
+      await storedPending(t);
+      repo.getFails = true;
+      await open(t, route: '/home');
+      expect(k('pending_payment_banner'), findsNothing);
     });
   });
 
@@ -513,6 +718,59 @@ void main() {
     testWidgets('a refunded receipt says where the money goes', (t) async {
       await open(t, route: '/transactions/pay_1800');
       expect(k('txn_refund_note'), findsOneWidget);
+    });
+
+    testWidgets('receipt shows the masked method and the gateway reference', (
+      t,
+    ) async {
+      await open(t, route: '/transactions/pay_1900');
+      expect(repo.receiptCalls, 1);
+      expect(find.text('Card · Visa **** 4242'), findsOneWidget);
+      expect(find.text('pay_mock1900'), findsOneWidget);
+    });
+
+    testWidgets('a refunded receipt shows its method too', (t) async {
+      await open(t, route: '/transactions/pay_1800');
+      expect(find.text('UPI · ab***@okhdfc'), findsOneWidget);
+      expect(
+        find.text('Refunded on'),
+        findsOneWidget,
+      ); // from the payment's refundedAt
+    });
+
+    testWidgets('receipt not readable: the payment itself is shown', (t) async {
+      repo.receiptFails = const ConflictFailure('x', 'RECEIPT_NOT_AVAILABLE');
+      await open(t, route: '/transactions/pay_1900');
+      expect(find.text('SN-R-1900'), findsOneWidget);
+      expect(find.text('Card · Visa **** 4242'), findsOneWidget);
+    });
+
+    testWidgets('a payment that is not paid does not ask for a receipt', (
+      t,
+    ) async {
+      final p = (await t.runAsync(
+        () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0001'),
+      ))!;
+      await open(t, route: '/transactions/${p.id}');
+      expect(repo.receiptCalls, 0);
+      expect(find.text('Issued once the payment succeeds'), findsOneWidget);
+    });
+
+    testWidgets('booking Receipt button finds its payment by booking id', (
+      t,
+    ) async {
+      final env = await open(t, route: '/bookings/bk_1900');
+      await tapKey(t, 'booking_receipt_btn');
+      expect(env.where, '/transactions/pay_1900');
+    });
+
+    testWidgets('booking Receipt button falls back to the list on an error', (
+      t,
+    ) async {
+      repo.listFails = const NetworkFailure();
+      final env = await open(t, route: '/bookings/bk_1900');
+      await tapKey(t, 'booking_receipt_btn');
+      expect(env.where, '/transactions');
     });
 
     testWidgets('empty list: "No transactions yet"', (t) async {

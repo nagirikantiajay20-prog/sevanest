@@ -13,6 +13,7 @@ import 'package:sevanest_customer/features/customer_profile/presentation/provide
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_widgets.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
+import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/discover_navigation.dart';
@@ -181,6 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     OfflineBanner(onRetry: _refresh),
                     const SizedBox(height: AppSpacing.md),
                   ],
+                  const PendingPaymentBanner(),
                   if (resumeGap != null || resumeDraft.serviceId != null) ...[
                     ResumeCard(
                       what: [

@@ -5,6 +5,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/payment/data/payment_repository_mock.dart';
 import 'package:sevanest_customer/features/payment/data/payment_repository_remote.dart';
+import 'package:sevanest_customer/features/payment/data/payment_services.dart';
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
 
 import '../../helpers/fakes.dart';
@@ -31,9 +32,10 @@ void main() {
       final repo = PaymentRepositoryRemote(
         dio(
           (o) async => jsonBody(
-            '{"id":"p1","bookingId":"b1","status":"CREATED","amountMinor":49900,"currency":"INR",'
+            '{"id":"p1","bookingId":"b1","status":"PENDING","amountMinor":49900,"currency":"INR",'
             '"receiptNumber":null,"paidAt":null,"refundStatus":null,"refundedAt":null,'
-            '"createdAt":"2026-10-13T09:00:00Z","checkout":{"key":"rzp_test_x","orderId":"order_1"}}',
+            '"createdAt":"2026-10-13T09:00:00Z","checkout":{"gateway":"razorpay","keyId":"rzp_test_x",'
+            '"orderId":"order_1","amount":49900,"currency":"INR"}}',
             201,
           ),
         ),
@@ -44,11 +46,159 @@ void main() {
       expect(seen.single.data, {'bookingId': 'b1'});
       expect(seen.single.headers['Idempotency-Key'], 'key-12345678');
       expect(p.id, 'p1');
-      expect(p.status, PaymentStatus.created);
+      expect(p.status, PaymentStatus.pending);
       expect(p.amountMinor, 49900);
-      expect(p.checkout, {'key': 'rzp_test_x', 'orderId': 'order_1'});
+      final c = p.checkout!;
+      expect(c.gateway, 'razorpay');
+      expect(c.keyId, 'rzp_test_x');
+      expect(c.orderId, 'order_1');
+      expect(c.amount, 49900);
+      expect(c.currency, 'INR');
+      expect(c.isRazorpay, isTrue);
+      expect(p.canPay, isTrue);
       expect(p.isSettled, isFalse);
     });
+
+    test(
+      'fake gateway has no key; CREATED has no checkout and is not payable',
+      () {
+        final fake = Payment.fromJson({
+          'id': 'p1',
+          'bookingId': 'b1',
+          'status': 'PENDING',
+          'amountMinor': 100,
+          'checkout': {
+            'gateway': 'fake',
+            'keyId': null,
+            'orderId': 'order_f',
+            'amount': 100,
+            'currency': 'INR',
+          },
+        })!;
+        expect(
+          fake.checkout!.isRazorpay,
+          isFalse,
+        ); // nothing for the SDK to open
+        expect(fake.canPay, isTrue);
+        final created = Payment.fromJson({
+          'id': 'p1',
+          'bookingId': 'b1',
+          'status': 'CREATED',
+          'amountMinor': 100,
+          'checkout': null,
+        })!;
+        expect(created.checkout, isNull);
+        expect(created.canPay, isFalse);
+      },
+    );
+
+    test('method, masked detail, reference and failure reason are read', () {
+      final paid = Payment.fromJson({
+        'id': 'p1',
+        'bookingId': 'b1',
+        'status': 'SUCCEEDED',
+        'amountMinor': 100,
+        'paymentMethod': 'upi',
+        'paymentMethodDetail': 'ab***@okhdfc',
+        'gatewayReference': 'pay_abc',
+        'failureCode': null,
+        'failureReason': null,
+      })!;
+      expect(paid.paymentMethod, PaymentMethod.upi);
+      expect(paid.paymentMethodDetail, 'ab***@okhdfc');
+      expect(paid.gatewayReference, 'pay_abc');
+      expect(paid.failureReason, isNull);
+      final failed = Payment.fromJson({
+        'id': 'p2',
+        'bookingId': 'b1',
+        'status': 'FAILED',
+        'amountMinor': 100,
+        'paymentMethod': 'somethingnew',
+        'failureCode': 'BAD_REQUEST_ERROR',
+        'failureReason': 'Your bank declined the payment',
+      })!;
+      expect(
+        failed.paymentMethod,
+        isNull,
+      ); // unknown method codes stay out of the UI
+      expect(failed.failureCode, 'BAD_REQUEST_ERROR');
+      expect(failed.failureReason, 'Your bank declined the payment');
+    });
+
+    test('refund status and date are read from the payment', () {
+      final p = Payment.fromJson({
+        'id': 'p1',
+        'bookingId': 'b1',
+        'status': 'REFUNDED',
+        'amountMinor': 100,
+        'refundStatus': 'REFUNDED',
+        'refundedAt': '2026-10-14T10:00:00Z',
+      })!;
+      expect(p.refundStatus, 'REFUNDED');
+      expect(p.refundedAt, DateTime.utc(2026, 10, 14, 10));
+      final none = Payment.fromJson({
+        'id': 'p1',
+        'bookingId': 'b1',
+        'status': 'SUCCEEDED',
+        'amountMinor': 100,
+        'refundStatus': null,
+        'refundedAt': null,
+      })!;
+      expect(none.refundStatus, isNull);
+      expect(none.refundedAt, isNull);
+    });
+
+    test('receipt reads GET /payments/{id}/receipt', () async {
+      final repo = PaymentRepositoryRemote(
+        dio(
+          (o) async => jsonBody(
+            '{"receiptNumber":"SN-1","paymentId":"p 1","bookingId":"b1","feeCode":"BOOKING_FEE",'
+            '"amountMinor":49900,"currency":"INR","paidAt":"2026-10-13T10:00:00Z",'
+            '"paymentMethod":"card","paymentMethodDetail":"Visa **** 4242",'
+            '"gatewayReference":"pay_9","status":"REFUNDED","refundStatus":"REFUNDED",'
+            '"refundedAt":"2026-10-14T10:00:00Z"}',
+            200,
+          ),
+        ),
+      );
+      final r = await repo.receipt('p 1');
+      expect(seen.single.method, 'GET');
+      expect(seen.single.path, '/payments/p%201/receipt');
+      expect(r.receiptNumber, 'SN-1');
+      expect(r.amountMinor, 49900);
+      expect(r.paymentMethod, PaymentMethod.card);
+      expect(r.paymentMethodDetail, 'Visa **** 4242');
+      expect(r.gatewayReference, 'pay_9');
+      expect(r.status, PaymentStatus.refunded);
+      expect(r.refundedAt, DateTime.utc(2026, 10, 14, 10));
+    });
+
+    test(
+      'receipt before payment is 409 RECEIPT_NOT_AVAILABLE; others 404',
+      () async {
+        Future<Object> thrown(int status, String body) async {
+          final repo = PaymentRepositoryRemote(
+            dio((o) async => jsonBody(body, status)),
+          );
+          try {
+            await repo.receipt('p1');
+          } on Object catch (e) {
+            return e;
+          }
+          fail('should have thrown');
+        }
+
+        final early = await thrown(
+          409,
+          '{"code":"RECEIPT_NOT_AVAILABLE","message":"x"}',
+        );
+        expect((early as ConflictFailure).code, 'RECEIPT_NOT_AVAILABLE');
+        expect(
+          await thrown(404, '{"code":"NOT_FOUND"}'),
+          isA<NotFoundFailure>(),
+        );
+      },
+    );
 
     test(
       'verify posts providerPaymentId and signature to the payment',
@@ -92,6 +242,24 @@ void main() {
         expect(p.wasRefunded && p.wasPaid && p.isSettled, isTrue);
       },
     );
+
+    test('list filters by booking and by refunded', () async {
+      final repo = PaymentRepositoryRemote(
+        dio((o) async => jsonBody('{"data":[],"meta":{"total":0}}', 200)),
+      );
+      await repo.list(bookingId: 'b1');
+      expect(seen.single.queryParameters, {
+        'page': 1,
+        'limit': 20,
+        'bookingId': 'b1',
+      });
+      await repo.list(refunded: true);
+      expect(seen.last.queryParameters, {
+        'page': 1,
+        'limit': 20,
+        'refunded': true,
+      });
+    });
 
     test('list pages by number, filters by status, skips bad rows', () async {
       final repo = PaymentRepositoryRemote(
@@ -203,6 +371,29 @@ void main() {
     );
   });
 
+  test(
+    'Razorpay opens only a razorpay checkout; fake or missing is refused',
+    () async {
+      for (final co in [
+        null,
+        const PaymentCheckout(gateway: 'fake', orderId: 'o'),
+        const PaymentCheckout(gateway: 'razorpay', orderId: 'o'), // no key
+      ]) {
+        final out = await RazorpayPaymentService().pay(
+          Payment(
+            id: 'p',
+            bookingId: 'b',
+            status: PaymentStatus.pending,
+            amountMinor: 100,
+            checkout: co,
+          ),
+        );
+        expect(out, isA<PaymentSdkFailed>());
+        expect((out as PaymentSdkFailed).code, 'CHECKOUT_UNSUPPORTED');
+      }
+    },
+  );
+
   group('mock', () {
     var paid = <String>[];
     PaymentRepositoryMock make({bool payable = true}) {
@@ -222,6 +413,24 @@ void main() {
       final other = await repo.start('b1', idempotencyKey: 'key-2-bbbbbb');
       expect(again.id, a.id);
       expect(other.id, a.id);
+    });
+
+    test('booking and refunded filters; no receipt before payment', () async {
+      final repo = make();
+      final p = await repo.start('b1', idempotencyKey: 'key-1-aaaaaa');
+      expect((await repo.list(bookingId: 'b1')).items.single.id, p.id);
+      expect((await repo.list(bookingId: 'zz')).items, isEmpty);
+      expect((await repo.list(refunded: true)).items, isEmpty);
+      await expectLater(
+        repo.receipt(p.id),
+        throwsA(
+          isA<ConflictFailure>().having(
+            (e) => e.code,
+            'code',
+            'RECEIPT_NOT_AVAILABLE',
+          ),
+        ),
+      );
     });
 
     test(
@@ -254,7 +463,7 @@ void main() {
           ),
           throwsA(isA<ValidationFailure>()),
         );
-        expect((await repo.get(p.id)).status, PaymentStatus.created);
+        expect((await repo.get(p.id)).status, PaymentStatus.pending);
         expect(paid, isEmpty);
         final ok = await repo.verify(
           p.id,

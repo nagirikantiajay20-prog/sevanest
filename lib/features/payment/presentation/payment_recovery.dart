@@ -69,6 +69,7 @@ class _State extends ConsumerState<PaymentRecoveryHost>
       if (p.isSettled || p.status == PaymentStatus.created) {
         await store.clear();
         ref
+          ..invalidate(unconfirmedPaymentProvider)
           ..invalidate(bookingListProvider)
           ..invalidate(homeProvider)
           ..invalidate(transactionListProvider)

@@ -122,29 +122,30 @@ The app runs on `POST /payments`, `POST /payments/{id}/verify`, `GET /payments/{
 `GET /payments` (history). The docs/05 assumptions (`/payments/initiate`, `/transactions`) do not
 exist in the backend and are not used.
 
-20. **`checkout` shape.** `CreatePaymentResponse.checkout` is an untyped object ("what the gateway
-    SDK needs"). Please publish its fields and the gateway. The app (Razorpay adapter) reads
-    `key` / `keyId` and `orderId` / `order_id` and otherwise refuses to open the checkout
-    (`CHECKOUT_UNSUPPORTED`, shown as "didn't go through"). Also confirm the gateway is Razorpay,
-    and which SDK fields go into `verify` (`providerPaymentId` = Razorpay `razorpay_payment_id`,
-    `signature` = `razorpay_signature`; is `razorpay_order_id` needed?).
-21. **Receipt file.** There is no `receiptUrl` / PDF route; `PaymentView` has only `receiptNumber`.
-    The receipt screen shows the number, amount, date and refund status; there is no download.
-    Please add a short-lived receipt URL or a `GET /payments/{id}/receipt`.
-22. **Payment method and gateway reference.** `PaymentView` has no masked payment method or gateway
-    reference, which the design's receipt shows. Not shown until published.
-23. **Payment id on the booking.** `BookingView` has no `paymentId`, and `GET /payments` cannot filter
-    by `bookingId` for a customer. The booking's "Receipt" button therefore opens the transactions
-    list. Please add `paymentId` (or `latestPaymentId`) to `BookingView`, or a `bookingId` filter.
-24. **Pending vs created.** Which status does a payment have after the customer opened the checkout
-    but before the gateway answered (`CREATED` or `PENDING`)? The app treats `CREATED` as "can pay",
-    `PENDING` as "confirming" (Pay hidden), and anything unknown as "confirming".
-25. **Failed payment retry.** After `FAILED`, does `POST /payments` for the same booking create a new
-    payment (we assume so and send a fresh Idempotency-Key), or return the failed one?
-26. **Refund filter.** `GET /payments?status=` takes one status, so the "Refunded" chip shows
-    `REFUNDED` only; `REFUND_PENDING` appears under All. A `refunded=true` filter would fix that.
-27. **Failure reason.** `PaymentView` has no failure reason, so the failed screen is generic. Also
-    the statement "no money deducted" is not shown, because the backend does not say so.
+**Answered by the backend (2026-10-14) and built in the app.** Nothing below has run against real
+Razorpay yet (no keys), only against mocks and the documented shapes.
+
+20. **`checkout` shape - answered.** `{ gateway: "razorpay" | "fake", keyId, orderId, amount, currency }`.
+    Razorpay SDK gets `key = keyId`, `order_id = orderId`, `amount`, `currency`. `verify` takes
+    `providerPaymentId = razorpay_payment_id` and `signature = razorpay_signature`; `razorpay_order_id`
+    is not sent. Until Razorpay is configured the gateway is `fake` with `keyId: null`: the app has
+    nothing to open and shows "didn't go through" (`CHECKOUT_UNSUPPORTED`). STILL OPEN: what the
+    `fake` gateway accepts in `verify`, so staging can be paid without Razorpay keys.
+21. **Receipt - answered.** `GET /payments/{id}/receipt` (409 `RECEIPT_NOT_AVAILABLE` before payment,
+    404 for another customer). The app renders it; no PDF until an invoice / GST format is approved.
+22. **Method and reference - answered.** `paymentMethod` (`upi`/`card`/`netbanking`/`wallet`/`emi`),
+    `paymentMethodDetail` (masked), `gatewayReference`; null until the gateway answers. Shown on the receipt.
+23. **Payment of a booking - answered.** `GET /payments?bookingId=`; `BookingView` gets no `paymentId`.
+    The booking's Receipt button uses the filter and opens the paid payment.
+24. **CREATED vs PENDING - answered.** `CREATED` = no gateway order yet (call `POST /payments` again; the app
+    does so once). `PENDING` with a `checkout` = can pay; "confirming" only after the SDK returned.
+25. **Retry after FAILED - answered.** A new payment and order, with a fresh Idempotency-Key, while the
+    booking is `PENDING_PAYMENT`. Matches the app.
+26. **Refund filter - answered.** `GET /payments?refunded=true` (REFUND_PENDING, REFUNDED, REFUND_FAILED).
+    The Refunded chip uses it.
+27. **Failure reason - answered.** FAILED payments carry `failureCode` (support only, never shown) and
+    `failureReason` (shown). "No money deducted" is not claimed; the app says "If any amount was
+    debited, it will be refunded automatically."
 
 ---
 

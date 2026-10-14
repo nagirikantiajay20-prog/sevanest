@@ -166,8 +166,9 @@ class _Row extends StatelessWidget {
   }
 }
 
-/// `/transactions/:id` (module 09, screen 9.4): the receipt. The backend sends a receipt number
-/// but no receipt file or URL (docs/BACKEND_REQUESTS.md), so there is nothing to download.
+/// `/transactions/:id` (module 09, screen 9.4): the receipt, rendered from
+/// `GET /payments/{id}/receipt` once the payment has succeeded (there is no PDF yet) and from the
+/// payment itself otherwise or when the receipt cannot be read.
 class TransactionDetailScreen extends ConsumerWidget {
   const TransactionDetailScreen({required this.paymentId, super.key});
   final String paymentId;
@@ -193,6 +194,17 @@ class TransactionDetailScreen extends ConsumerWidget {
         value: ref.watch(paymentProvider(paymentId)),
         onRetry: () => ref.invalidate(paymentProvider(paymentId)),
         data: (p) {
+          final r = p.wasPaid
+              ? ref.watch(receiptProvider(paymentId)).value
+              : null;
+          final paidAt = r?.paidAt ?? p.paidAt;
+          final method = paymentMethodText(
+            l10n,
+            r?.paymentMethod ?? p.paymentMethod,
+            r?.paymentMethodDetail ?? p.paymentMethodDetail,
+          );
+          final reference = r?.gatewayReference ?? p.gatewayReference;
+          final refundedAt = r?.refundedAt ?? p.refundedAt;
           Widget row(String label, Widget v) => Padding(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
             child: Row(
@@ -224,14 +236,31 @@ class TransactionDetailScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
                 row(
                   l10n.txnReceiptRow,
-                  Text(p.receiptNumber ?? l10n.txnNoReceipt),
+                  Text(
+                    r?.receiptNumber ?? p.receiptNumber ?? l10n.txnNoReceipt,
+                  ),
                 ),
-                if (p.paidAt != null)
+                if (paidAt != null)
                   row(
                     l10n.txnPaidOnRow,
                     Text(
-                      '${formatDate(p.paidAt!, locale)}, ${formatTime(p.paidAt!.toLocal().hour * 60 + p.paidAt!.toLocal().minute)}',
+                      '${formatDate(paidAt, locale)}, ${formatTime(paidAt.toLocal().hour * 60 + paidAt.toLocal().minute)}',
                     ),
+                  ),
+                if (method != null)
+                  row(
+                    l10n.txnMethodRow,
+                    Text(method, key: const Key('txn_method')),
+                  ),
+                if (reference != null)
+                  row(
+                    l10n.txnReferenceRow,
+                    SelectableText(reference, key: const Key('txn_reference')),
+                  ),
+                if (refundedAt != null)
+                  row(
+                    l10n.txnRefundedOnRow,
+                    Text(formatDate(refundedAt, locale)),
                   ),
                 if (p.wasRefunded) ...[
                   const SizedBox(height: AppSpacing.sm),

@@ -37,6 +37,9 @@ class PaymentRepositoryMock implements PaymentRepository {
         receiptNumber: 'SN-R-1900',
         paidAt: base,
         createdAt: base,
+        paymentMethod: PaymentMethod.card,
+        paymentMethodDetail: 'Visa **** 4242',
+        gatewayReference: 'pay_mock1900',
       ),
       Payment(
         id: 'pay_1800',
@@ -46,6 +49,11 @@ class PaymentRepositoryMock implements PaymentRepository {
         receiptNumber: 'SN-R-1800',
         paidAt: base.subtract(const Duration(days: 20)),
         createdAt: base.subtract(const Duration(days: 20)),
+        paymentMethod: PaymentMethod.upi,
+        paymentMethodDetail: 'ab***@okhdfc',
+        gatewayReference: 'pay_mock1800',
+        refundStatus: 'REFUNDED',
+        refundedAt: base.subtract(const Duration(days: 15)),
       ),
     ]);
   }
@@ -65,7 +73,12 @@ class PaymentRepositoryMock implements PaymentRepository {
       receiptNumber: receipt ? 'SN-R-${p.id}' : p.receiptNumber,
       paidAt: receipt ? _now() : p.paidAt,
       createdAt: p.createdAt,
-      checkout: s == PaymentStatus.created ? p.checkout : null,
+      checkout: s == PaymentStatus.pending ? p.checkout : null,
+      paymentMethod: receipt ? PaymentMethod.upi : p.paymentMethod,
+      paymentMethodDetail: receipt ? 'ab***@okhdfc' : p.paymentMethodDetail,
+      gatewayReference: receipt ? 'pay_mock${p.id}' : p.gatewayReference,
+      refundStatus: p.refundStatus,
+      refundedAt: p.refundedAt,
     );
     return _items[_index(p.id)] = next;
   }
@@ -92,10 +105,13 @@ class PaymentRepositoryMock implements PaymentRepository {
         final p = Payment(
           id: 'pay_${_seq++}',
           bookingId: bookingId,
-          status: PaymentStatus.created,
+          status: PaymentStatus.pending,
           amountMinor: 49900,
           createdAt: _now(),
-          checkout: const {'provider': 'fake'},
+          checkout: const PaymentCheckout(
+            gateway: 'fake',
+            orderId: 'order_mock',
+          ),
         );
         _items.insert(0, p);
         return _byKey[idempotencyKey] = p;
@@ -130,11 +146,42 @@ class PaymentRepositoryMock implements PaymentRepository {
       mockCall(_state(), () => _items[_index(id)]);
 
   @override
-  Future<PaymentPage> list({String? cursor, PaymentStatus? status}) => mockCall(
+  Future<Receipt> receipt(String id, {CancelToken? cancel}) =>
+      mockCall(_state(), () {
+        final p = _items[_index(id)];
+        if (!p.wasPaid) {
+          throw const ConflictFailure(
+            'The receipt is not available yet',
+            'RECEIPT_NOT_AVAILABLE',
+          );
+        }
+        return Receipt(
+          receiptNumber: p.receiptNumber ?? 'SN-R-${p.id}',
+          paymentId: p.id,
+          bookingId: p.bookingId,
+          amountMinor: p.amountMinor,
+          paidAt: p.paidAt,
+          paymentMethod: p.paymentMethod,
+          paymentMethodDetail: p.paymentMethodDetail,
+          gatewayReference: p.gatewayReference,
+          status: p.status,
+        );
+      });
+
+  @override
+  Future<PaymentPage> list({
+    String? cursor,
+    PaymentStatus? status,
+    String? bookingId,
+    bool refunded = false,
+  }) => mockCall(
     _state(),
     () => PaymentPage([
       for (final p in _items)
-        if (status == null || p.status == status) p,
+        if ((status == null || p.status == status) &&
+            (bookingId == null || p.bookingId == bookingId) &&
+            (!refunded || p.wasRefunded))
+          p,
     ], null),
   );
 }

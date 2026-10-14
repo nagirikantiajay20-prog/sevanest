@@ -1952,6 +1952,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your booking is still waiting for payment. You can try again.';
 
   @override
+  String get payFailedDebitNote =>
+      'If any amount was debited, it will be refunded automatically.';
+
+  @override
   String get payRetry => 'Try again';
 
   @override
@@ -1969,6 +1973,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payRefresh => 'Check again';
+
+  @override
+  String get payAgain => 'I haven\'t paid, pay again';
 
   @override
   String get payNotPayableTitle => 'Nothing to pay';
@@ -2059,6 +2066,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get txnBookingRow => 'Booking';
+
+  @override
+  String get txnMethodRow => 'Paid with';
+
+  @override
+  String get txnReferenceRow => 'Reference';
+
+  @override
+  String get txnRefundedOnRow => 'Refunded on';
+
+  @override
+  String get txnMethodUpi => 'UPI';
+
+  @override
+  String get txnMethodCard => 'Card';
+
+  @override
+  String get txnMethodNetbanking => 'Net banking';
+
+  @override
+  String get txnMethodWallet => 'Wallet';
+
+  @override
+  String get txnMethodEmi => 'EMI';
 
   @override
   String get txnNoReceipt => 'Issued once the payment succeeds';

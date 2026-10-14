@@ -15,6 +15,8 @@ import 'package:sevanest_customer/features/booking/presentation/widgets/cancel_s
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/interview_labels.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
+import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
@@ -74,6 +76,17 @@ class _State extends ConsumerState<BookingDetailScreen>
       ..showSnackBar(SnackBar(content: Text(l10n.cancelRequested)));
   }
 
+  /// The paid payment of this booking (`GET /payments?bookingId=`); the list when none is found.
+  Future<void> _receipt(Booking b) async {
+    final id = b.paymentId ?? await paidPaymentIdOf(ref, b.id);
+    if (!mounted) return;
+    await context.push(
+      id == null
+          ? Routes.transactions
+          : Routes.path(Routes.transactionDetail, {'id': id}),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -101,7 +114,11 @@ class _State extends ConsumerState<BookingDetailScreen>
               // shown by the view
             }
           },
-          child: _Body(booking: b, onCancel: _cancel),
+          child: _Body(
+            booking: b,
+            onCancel: _cancel,
+            onReceipt: () => _receipt(b),
+          ),
         ),
       ),
     );
@@ -109,9 +126,14 @@ class _State extends ConsumerState<BookingDetailScreen>
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.booking, required this.onCancel});
+  const _Body({
+    required this.booking,
+    required this.onCancel,
+    required this.onReceipt,
+  });
   final Booking booking;
   final VoidCallback onCancel;
+  final VoidCallback onReceipt;
 
   static const _path = [
     BookingStatus.newRequest,
@@ -208,6 +230,7 @@ class _Body extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          PendingPaymentBanner(bookingId: b.id),
           Row(
             children: [
               SnBadge(
@@ -329,18 +352,7 @@ class _Body extends StatelessWidget {
               ),
             ),
           if (a.contains(BookingAction.receipt))
-            action(
-              'booking_receipt_btn',
-              l10n.bookingReceipt,
-              // BookingView has no payment id (docs/BACKEND_REQUESTS.md): fall back to the list.
-              () => context.push(
-                b.paymentId == null
-                    ? Routes.transactions
-                    : Routes.path(Routes.transactionDetail, {
-                        'id': b.paymentId!,
-                      }),
-              ),
-            ),
+            action('booking_receipt_btn', l10n.bookingReceipt, onReceipt),
           if (a.contains(BookingAction.cancel))
             action(
               'booking_cancel_btn',

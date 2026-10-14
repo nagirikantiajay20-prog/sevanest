@@ -59,7 +59,23 @@ class PaymentRepositoryRemote implements PaymentRepository {
   }
 
   @override
-  Future<PaymentPage> list({String? cursor, PaymentStatus? status}) async {
+  Future<Receipt> receipt(String id, {CancelToken? cancel}) async {
+    final res = await guarded(
+      () => _dio.get<dynamic>(
+        '/payments/${Uri.encodeComponent(id)}/receipt',
+        cancelToken: cancel,
+      ),
+    );
+    return Receipt.fromJson(res.data) ?? (throw const UnknownFailure());
+  }
+
+  @override
+  Future<PaymentPage> list({
+    String? cursor,
+    PaymentStatus? status,
+    String? bookingId,
+    bool refunded = false,
+  }) async {
     final page = int.tryParse(cursor ?? '') ?? 1;
     final res = await guarded(
       () => _dio.get<dynamic>(
@@ -67,7 +83,9 @@ class PaymentRepositoryRemote implements PaymentRepository {
         queryParameters: {
           'page': page,
           'limit': pageSize,
-          if (status != null) 'status': paymentStatusCode(status),
+          if (status != null && !refunded) 'status': paymentStatusCode(status),
+          'bookingId': ?bookingId,
+          if (refunded) 'refunded': true,
         },
       ),
     );

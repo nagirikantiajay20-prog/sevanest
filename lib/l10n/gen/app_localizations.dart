@@ -3640,6 +3640,12 @@ abstract class AppLocalizations {
   /// **'Your booking is still waiting for payment. You can try again.'**
   String get payFailedBody;
 
+  /// No description provided for @payFailedDebitNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If any amount was debited, it will be refunded automatically.'**
+  String get payFailedDebitNote;
+
   /// No description provided for @payRetry.
   ///
   /// In en, this message translates to:
@@ -3675,6 +3681,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check again'**
   String get payRefresh;
+
+  /// No description provided for @payAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'I haven\'t paid, pay again'**
+  String get payAgain;
 
   /// No description provided for @payNotPayableTitle.
   ///
@@ -3849,6 +3861,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Booking'**
   String get txnBookingRow;
+
+  /// No description provided for @txnMethodRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid with'**
+  String get txnMethodRow;
+
+  /// No description provided for @txnReferenceRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get txnReferenceRow;
+
+  /// No description provided for @txnRefundedOnRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded on'**
+  String get txnRefundedOnRow;
+
+  /// No description provided for @txnMethodUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI'**
+  String get txnMethodUpi;
+
+  /// No description provided for @txnMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get txnMethodCard;
+
+  /// No description provided for @txnMethodNetbanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Net banking'**
+  String get txnMethodNetbanking;
+
+  /// No description provided for @txnMethodWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get txnMethodWallet;
+
+  /// No description provided for @txnMethodEmi.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI'**
+  String get txnMethodEmi;
 
   /// No description provided for @txnNoReceipt.
   ///

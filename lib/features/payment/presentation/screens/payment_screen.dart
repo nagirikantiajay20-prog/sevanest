@@ -47,6 +47,17 @@ class _State extends ConsumerState<PaymentScreen> {
   String? _error;
   bool _busy = false; // synchronous guard: a double tap pays once
 
+  /// The SDK reported a payment, so this payment is "confirming" from now on, even if the server
+  /// still shows its checkout (a `PENDING` payment with a checkout otherwise means "can pay").
+  bool _confirming = false;
+
+  /// Opened again from a stored id (app killed or left while the checkout was open): the customer
+  /// may or may not have paid, so it reads "confirming" and offers Check again / Pay again.
+  bool _resumed = false;
+
+  /// A `CREATED` payment (gateway order not made yet) is started again once, not in a loop.
+  bool _restarted = false;
+
   String get _bookingId => _p?.bookingId ?? widget.bookingId ?? '';
 
   @override
@@ -66,17 +77,38 @@ class _State extends ConsumerState<PaymentScreen> {
       _phase = p;
       _error = error;
     });
+    // The stored id changes with the phases; Home and the booking show a banner from it.
+    ref.invalidate(unconfirmedPaymentProvider);
+  }
+
+  /// Resumed payment, and the customer says it was not paid: back to the checkout.
+  void _payAgain() {
+    _confirming = false;
+    _resumed = false;
+    final p = _p;
+    if (p != null) unawaited(_show(p));
   }
 
   /// Starts (or resumes) the payment of the booking, or reads an existing one.
-  Future<void> _load({required bool fresh}) async {
+  Future<void> _load({required bool fresh, bool restart = false}) async {
     final l10n = AppLocalizations.of(context);
+    if (!restart) {
+      _confirming = false;
+      _resumed = false;
+      _restarted = false;
+    }
     _set(_Phase.loading);
     final repo = ref.read(paymentRepositoryProvider);
     try {
       final p = fresh
           ? await repo.start(_bookingId, idempotencyKey: _key())
           : await repo.get(widget.paymentId!);
+      if (!fresh &&
+          p.canPay &&
+          await ref.read(pendingPaymentStoreProvider).read() == p.id) {
+        _confirming = true;
+        _resumed = true;
+      }
       await _show(p);
     } on ConflictFailure catch (e) {
       if (e.code == 'BOOKING_NOT_PAYABLE') {
@@ -107,8 +139,14 @@ class _State extends ConsumerState<PaymentScreen> {
     } else if (p.status == PaymentStatus.failed) {
       await ref.read(pendingPaymentStoreProvider).clear();
       _set(_Phase.failed);
-    } else if (p.status == PaymentStatus.created) {
+    } else if (_confirming) {
+      _set(_Phase.pending);
+    } else if (p.canPay) {
       _set(_Phase.ready);
+    } else if (p.status == PaymentStatus.created && !_restarted) {
+      // The gateway order does not exist yet: `POST /payments` again makes it.
+      _restarted = true;
+      await _load(fresh: true, restart: true);
     } else {
       _set(_Phase.pending);
     }
@@ -144,6 +182,7 @@ class _State extends ConsumerState<PaymentScreen> {
       }
       switch (out) {
         case PaymentPaid():
+          _confirming = true;
           await _verify(p, out);
         case PaymentCancelled():
           await _noPayment(p, cancelled: true);
@@ -202,7 +241,7 @@ class _State extends ConsumerState<PaymentScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final q = await _tryGet(p.id);
     if (!mounted) return;
-    if (q != null && q.status != PaymentStatus.created) {
+    if (q != null && !q.canPay && q.status != PaymentStatus.created) {
       await _show(q); // paid anyway, failed, or still confirming
       return;
     }
@@ -371,7 +410,16 @@ class _State extends ConsumerState<PaymentScreen> {
         icon: Icons.cancel_outlined,
         color: scheme.error,
         title: l10n.payFailedTitle,
-        body: l10n.payFailedBody,
+        body: p?.failureReason ?? l10n.payFailedBody,
+        extra: Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.sm),
+          child: Text(
+            l10n.payFailedDebitNote,
+            key: const Key('payment_debit_note'),
+            textAlign: TextAlign.center,
+            style: text.bodySmall,
+          ),
+        ),
         buttons: [
           SnButton(
             key: const Key('payment_retry_btn'),
@@ -406,6 +454,13 @@ class _State extends ConsumerState<PaymentScreen> {
             label: l10n.payRefresh,
             onPressed: _refresh,
           ),
+          if (_resumed && (p?.canPay ?? false))
+            SnButton(
+              key: const Key('payment_pay_again_btn'),
+              label: l10n.payAgain,
+              variant: SnButtonVariant.secondary,
+              onPressed: _payAgain,
+            ),
           SnButton(
             key: const Key('payment_view_booking_btn'),
             label: l10n.payViewBooking,

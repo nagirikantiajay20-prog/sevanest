@@ -29,3 +29,21 @@ SnBadgeTone paymentStatusTone(PaymentStatus s) => switch (s) {
   PaymentStatus.failed || PaymentStatus.refundFailed => SnBadgeTone.error,
   PaymentStatus.unknown => SnBadgeTone.neutral,
 };
+
+String paymentMethodLabel(AppLocalizations l, PaymentMethod m) => switch (m) {
+  PaymentMethod.upi => l.txnMethodUpi,
+  PaymentMethod.card => l.txnMethodCard,
+  PaymentMethod.netbanking => l.txnMethodNetbanking,
+  PaymentMethod.wallet => l.txnMethodWallet,
+  PaymentMethod.emi => l.txnMethodEmi,
+};
+
+/// "UPI · ab***@okhdfc"; the detail is already masked by the server. Null when neither is known.
+String? paymentMethodText(
+  AppLocalizations l,
+  PaymentMethod? method,
+  String? detail,
+) {
+  final parts = [if (method != null) paymentMethodLabel(l, method), ?detail];
+  return parts.isEmpty ? null : parts.join(' · ');
+}

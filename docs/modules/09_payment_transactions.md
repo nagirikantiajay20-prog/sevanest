@@ -5,6 +5,13 @@
 **Core rule:** the SDK callback is **not** truth. UI shows SUCCESS only when backend payment status is SUCCESS (AGENTS §38, §80.5).
 **Abstraction:** `PaymentService.pay(PaymentInit) → PaymentOutcome{success(payload)|cancelled|failed(code,msg)}`. Razorpay adapter default; `FakePaymentService` for tests.
 
+> **Updated 2026-10-14 to the deployed API.** Routes are `POST /payments`, `POST /payments/{id}/verify`,
+> `GET /payments` (`status`, `bookingId`, `refunded`), `GET /payments/{id}`, `GET /payments/{id}/receipt`.
+> `checkout = { gateway, keyId, orderId, amount, currency }`. `PENDING` with a checkout = can pay;
+> `CREATED` = call `POST /payments` again. There is no receipt PDF/URL: the receipt is rendered in the app.
+> Failed payments show the gateway's `failureReason` and "If any amount was debited, it will be refunded
+> automatically." The sections below keep the original design intent.
+
 ## Payment state machine (screen-level)
 `initiating → awaitingUser (SDK open) → verifying (backend) → success | failed | pending(timeout)`; plus `cancelledByUser`.
 

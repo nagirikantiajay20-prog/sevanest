@@ -7,7 +7,7 @@
 //
 //   Reads only, except: if the customer has a PENDING_PAYMENT booking it starts its payment
 //   (`POST /payments`, which the backend documents as "start or resume"). It never calls `verify`
-//   with real data (no gateway SDK runs in a test) and prints only the NAMES of `checkout` fields.
+//   with real data (no gateway SDK runs in a test) and prints only whether the `checkout` has a key, never its values.
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,11 +74,19 @@ void main() {
         expect(p.bookingId, isNotEmpty);
         expect(p.status, isNot(PaymentStatus.unknown));
       }
-      final refunded = await payments.list(status: PaymentStatus.refunded);
-      expect(
-        refunded.items.every((p) => p.status == PaymentStatus.refunded),
-        isTrue,
-      );
+      final refunded = await payments.list(refunded: true);
+      expect(refunded.items.every((p) => p.wasRefunded), isTrue);
+      if (page.items.isNotEmpty) {
+        final first = page.items.first;
+        final ofBooking = await payments.list(bookingId: first.bookingId);
+        expect(ofBooking.items.map((p) => p.id), contains(first.id));
+      }
+      final paid = page.items.where((p) => p.wasPaid).firstOrNull;
+      if (paid != null) {
+        final r = await payments.receipt(paid.id);
+        expect(r.paymentId, paid.id);
+        expect(r.receiptNumber, isNotEmpty);
+      }
 
       // Somebody else's / unknown payment: 404.
       await expectLater(
@@ -134,9 +142,19 @@ void main() {
         // ignore: avoid_print
         print(
           'LIVE started payment: status=${a.status.name} amountMinor=${a.amountMinor} '
-          'checkout fields=${a.checkout?.keys.toList()}',
+          'gateway=${a.checkout?.gateway} hasKeyId=${a.checkout?.keyId != null}',
         );
         expect((await payments.get(a.id)).bookingId, payable.id);
+        await expectLater(
+          payments.receipt(a.id),
+          throwsA(
+            isA<ConflictFailure>().having(
+              (e) => e.code,
+              'code',
+              'RECEIPT_NOT_AVAILABLE',
+            ),
+          ),
+        );
       } else {
         // ignore: avoid_print
         print(

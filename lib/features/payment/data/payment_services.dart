@@ -24,16 +24,14 @@ class FakePaymentService implements PaymentService {
   }
 }
 
-/// Razorpay Checkout. The backend's `checkout` object is not documented (docs/BACKEND_REQUESTS.md):
-/// this reads the usual Razorpay names (`key` / `keyId`, `orderId` / `order_id`) and fails safely
-/// when they are missing. The SDK's answer is only a hint; the server verifies it.
+/// Razorpay Checkout. Opens only for a `razorpay` checkout with a `keyId`; the server's `fake`
+/// gateway (no keys configured yet) has nothing to open and fails safely. The SDK's answer is only
+/// a hint; the server verifies it.
 class RazorpayPaymentService implements PaymentService {
   @override
   Future<PaymentOutcome> pay(Payment payment) {
-    final c = payment.checkout ?? const <String, dynamic>{};
-    final key = c['key'] ?? c['keyId'];
-    final order = c['orderId'] ?? c['order_id'];
-    if (key is! String || order is! String) {
+    final c = payment.checkout;
+    if (c == null || !c.isRazorpay) {
       return Future.value(const PaymentSdkFailed('CHECKOUT_UNSUPPORTED'));
     }
     final done = Completer<PaymentOutcome>();
@@ -65,10 +63,10 @@ class RazorpayPaymentService implements PaymentService {
       ..on(Razorpay.EVENT_EXTERNAL_WALLET, (_) {});
     try {
       rz.open({
-        'key': key,
-        'order_id': order,
-        'amount': payment.amountMinor,
-        'currency': payment.currency,
+        'key': c.keyId,
+        'order_id': c.orderId,
+        'amount': c.amount ?? payment.amountMinor,
+        'currency': c.currency ?? payment.currency,
         'name': 'SevaNest',
       });
     } on Object {
