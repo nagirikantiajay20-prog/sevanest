@@ -1,7 +1,12 @@
 # Module 12 — Support Tickets & Safety (Report/Block)
 
-**Backend:** `GET /catalog/ticket-categories`, `POST /tickets`, `GET /tickets`, `GET /tickets/{id}`, `POST /tickets/{id}/reply` *(assumed, confirm)*, `POST /workers/{id}/report`, `POST /workers/{id}/block`.
-**Routes:** `/support`, `/support/new?bookingId=|paymentId=|replacementId=|interviewId=`, `/support/:id`.
+> **Built on the real contract (docs/backend_openapi_2026-10-13.json), which overrides the routes assumed below.**
+> Backend: `GET /support/categories`, `POST /support/tickets` (Idempotency-Key; body `categoryId`, `description` max 4000, optional `bookingId`), `GET /support/tickets` (paged), `GET /support/tickets/{id}` (status `OPEN | IN_PROGRESS | ESCALATED | CLOSED`, `resolution`, `history`), `GET` / `POST /support/tickets/{id}/messages` (body max 2000; 409 `TICKET_CLOSED`), `POST /safety/reports` (`reasonCode` enum, `note` max 1000, `alsoBlock`), `POST /safety/blocks`, `GET /safety/blocks`, `DELETE /safety/blocks/{id}`.
+> Not in the backend, so not built: subject, photos, urgent priority, FAQ and help search, "Waiting for you" / resolved feedback, ticket overflow menu, listing or lifting blocks (no design entry). A payment, replacement or interview is linked through its booking. `ESCALATED` is shown as "In progress". See BACKEND_REQUESTS 45-50.
+> Design: screens 27, 28, 29 and 22 "Report sheet open". Routes: `/support`, `/support/new?bookingId=|paymentId=|replacementId=|interviewId=|categoryId=|safety=true`, `/support/:id`.
+
+**Original draft backend (assumed, superseded):** `GET /catalog/ticket-categories`, `POST /tickets`, `GET /tickets`, `GET /tickets/{id}`, `POST /tickets/{id}/reply`, `POST /workers/{id}/report`, `POST /workers/{id}/block`.
+**Routes:** `/support`, `/support/new`, `/support/:id`.
 **Rules:** customer cannot see/edit internal owner/priority/escalation fields; categories server-driven.
 
 ## Screen 12.1 — Support Home (`/support`)

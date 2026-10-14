@@ -1,5 +1,11 @@
 # Module 10 — Active Service, Service History & Rating
 
+**Update 2026-10-14 (see BACKEND_REQUESTS "Module 10"):** statuses add `LATE | LEAVE` with `checkInAt/checkOutAt` and
+`scheduledWindow`; history is `GET /customers/me/booking-history` (+ `/summary`) with year / service / status / search;
+bookings carry `allowedActions`, `rating` and `worker {displayName, initials, photo}`; `rebook` shows "Hire again"
+(`POST /bookings/rebook`); review max from `ratingReviewMax` (300); customers can "Report a missing day"
+(`POST /attendance/bookings/{id}/exceptions`). Still no tags (Q-103); REPLACED is not rateable (Q-102).
+
 **Backend (REAL, docs/backend_openapi_2026-10-13.json - overrides the assumed routes below):**
 `GET /bookings/{id}` + `GET /bookings` (history; no `/services/history`), `GET /attendance/bookings/{id}` and `/summary?month=YYYY-MM`
 (status `PRESENT | ABSENT | EXCEPTION`, `note`), `POST /ratings {bookingId, score >= 1, review <= 2000}` (Idempotency-Key; 409 `RATING_ALREADY_EXISTS`,

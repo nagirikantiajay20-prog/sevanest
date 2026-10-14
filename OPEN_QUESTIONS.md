@@ -23,7 +23,7 @@ Status: `OPEN` | `ANSWERED` | `ASSUMED(temporary)`. Update here; never bury in c
 | 17 | Consent/terms UX | Legal | OPEN | `GET /legal/current` returns null terms/privacy; the links say "not available yet" (`termsUrl` / `privacyUrl` in app_config.dart) |
 | 18 | Data retention/deletion UX (account delete?) | Legal | OPEN | not in V1 until defined |
 | 19 | Brand/design assets, colours, fonts | Design | OPEN | placeholder tokens `TBD-BRAND` |
-| 20 | App name/ID availability (trademark, domain, bundle id) | Business | OPEN | `in.sevanest.customer` provisional |
+| 20 | App name/ID availability (trademark, domain, bundle id) | Business | OPEN | `com.sevanest.customer` provisional |
 | 21 | Bottom-nav tab set | Design | OPEN | Home/Bookings/Favourites/Account |
 | 22 | OTP length, resend seconds, max attempts | Backend | PARTIAL | resend/expiry seconds come from the response; 5 attempts per code observed; OTP length is NOT in any response, so the app uses 6 (design) |
 | 23 | Email required at profile setup? | Product | ANSWERED (by backend) | `POST /customers/me` requires `email`; the app enforces it (design shows Optional) |

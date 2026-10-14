@@ -28,7 +28,7 @@ Before any work, read in this order:
 
 Also maintain `docs/PROGRESS.md` (tick each step in doc 03 when its exit criteria pass) and `docs/DECISIONS.md` (any deviation from these docs).
 
-**Decisions resolved by the companion docs** (these supersede "if no solution selected" wording in §8 and §58): state = Riverpod; routing = go_router; HTTP = dio; models = freezed/json_serializable; flavors = dev/stg/prod; app id `in.sevanest.customer` (provisional). **iOS builds require macOS/CI Mac** — plan from Week 1.
+**Decisions resolved by the companion docs** (these supersede "if no solution selected" wording in §8 and §58): state = Riverpod; routing = go_router; HTTP = dio; models = freezed/json_serializable; flavors = dev/stg/prod; app id `com.sevanest.customer` (provisional). **iOS builds require macOS/CI Mac** — plan from Week 1.
 
 **Market-informed UX rules** (from doc 01): few-step requirement builder, pre-selected default address for returning users, trust cues (badge + "what verified means") at decision points, fee transparency before payment, plain-language status timeline, replacement/support always reachable from Active Service. Do not copy competitor branding, assets or copy.
 

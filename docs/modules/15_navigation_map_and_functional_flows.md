@@ -38,7 +38,8 @@
 | Ticket Detail `/support/:id` | Submit, list, notification | Related link → push entity screen |
 | Transactions `/transactions` | Account | Row → push `/transactions/:id` |
 | Receipt `/transactions/:id` | list, payment success, Booking | Booking link → push `/bookings/:id` · Receipt → external viewer · Help → push `/support/new?paymentId=` |
-| Notifications `/notifications` | Home bell, Account | Row → push target by type (module 13) |
+| Notifications `/notifications` | Home bell, Account | Row → push `/open?to=<entity route>` (module 13) |
+| Deep link `/open?to=` | Notification row, push tap (foreground banner, background, cold start) | Reads the entity fresh, then replaces itself with the screen; 404 / 403 → "This item isn't available" + Go to Home |
 | Account `/account` (tab) | nav tab | rows → module 14 · Logout → go `/login` |
 
 ## 2. How each feature works (end-to-end functional flows)

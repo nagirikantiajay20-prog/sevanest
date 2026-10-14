@@ -41,7 +41,7 @@ fvm flutter pub add --dev riverpod_generator build_runner freezed json_serializa
 ```
 Add `flutter_localizations` (sdk: flutter) manually and set `flutter: generate: true`.
 
-Application IDs: Android `in.sevanest.customer`, iOS bundle `in.sevanest.customer` (confirm with team — **TBD** until trademark/domain verified, PRD §1.1).
+Application IDs: Android `com.sevanest.customer`, iOS bundle `com.sevanest.customer` (confirm with team — **TBD** until trademark/domain verified, PRD §1.1).
 
 ## 4. Flavors & environment config
 

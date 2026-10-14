@@ -190,50 +190,94 @@ The app runs on `GET /attendance/bookings/{id}` (+ `/summary`), `GET /bookings`,
 36. **Worker name and photo.** Neither the booking nor the attendance carries the worker's name; the card is the
     anonymous search card (category, experience, languages), as on the other screens.
 
-### Module 9 - replacement (2026-10-14, from the typed OpenAPI)
+### Module 10 - active service, history, rating (answered by the backend on 2026-10-14)
 
-The app runs on `POST /replacement-requests`, `GET /replacement-requests`, `GET /replacement-requests/{id}`,
-`POST .../cancel`, `POST .../select` and `GET /bookings/{id}/replacement-chain`. The module-doc routes
-(`/bookings/{id}/replacement`, `/replacements/{id}/alternatives`, `/catalog/replacement-reasons`) do not exist
-and are not used. Nothing below has run against a live customer with an ACTIVE booking.
+Items 28-36 above are answered. Built in the app:
 
-37. **Reasons and note length.** `reason` is free text (max 1000) and the Swagger says "the specs define no reason
-    list (Q-54)". The design has eight fixed reasons, so the app sends the English text of the chosen reason
-    ("Work quality is not good") as `reason` and the customer's words as `notes`. For "Other" the note is required
-    in the app only. Please publish fixed reason codes (or a list in `/reference-data`) so staff can filter on them.
-    Notes: the Swagger allows 2000, the design shows 500; the app follows the Swagger (`replacementNotesMaxProvider`).
-38. **"Needed from" date.** The design asks "When do you need someone? As soon as possible / From a date / I'll
-    decide later" and shows it on the received and status screens. `CreateReplacementDto` has no such field, so
-    the question is NOT shown and nothing is sent. Add `neededFrom` (nullable date) to the create body and to
-    `ReplacementView` if it is wanted.
-39. **How the customer sees the alternatives.** `GET .../candidates` is admin-only and the customer has no
-    alternatives route; `select` takes a `workerId` "from search or matching". The app therefore shows choices only
-    when `ReplacementView` carries an `alternatives` (or `candidates`) array of worker cards (the search card shape,
-    with `workerId`); until then an APPROVED request reads "Finding alternatives for you" and the customer cannot
-    choose. Please say how choices reach the customer: an `alternatives` array on `ReplacementView` once APPROVED,
-    or a `GET /replacement-requests/{id}/alternatives`. If the customer is meant to pick any worker from search,
-    say so and the app will offer search from the approved state.
-40. **Statuses.** `REQUESTED | APPROVED | REJECTED | CANCELLED | COMPLETED`. The design's "Under review",
-    "Alternatives ready", "Replacement scheduled" and "Completed" are derived: REQUESTED = under review; APPROVED
-    with alternatives = ready; COMPLETED with the new booking's `startDate` in the future = scheduled, else
-    complete. Confirm that APPROVED means "alternatives may be chosen" and that REJECTED is final.
-    `decisionRemarks` is staff text shown to the customer verbatim on a rejection ("Note from our team"); confirm it
-    is written for customers.
-41. **After select.** `select` creates a replacement booking in MATCHED "to continue through the normal lifecycle".
-    Does the customer still schedule an interview / trial, confirm the worker and pay again? Is the price the same
-    (the design says "No change in price")? The app claims neither.
-42. **Request of a booking.** `BookingView` has no replacement request id and there is no filter by booking, so the
-    app reads `GET /replacement-requests` (newest first) to find the open request of a REPLACEMENT_REQUESTED booking.
-    Add `replacementRequestId` to `BookingView` (or `bookingId` to the list filter). Related: bookings have no
-    `allowedActions`, so "replace" is derived from ACTIVE.
-43. **Error codes.** Only `REPLACEMENT_NOT_ELIGIBLE` (422) is named. Please name: the 409 code when a request is
-    already open (the app treats any 409 on create other than `IDEMPOTENCY_IN_PROGRESS` as "already requested" and
-    opens the open request), the codes for `select` of an unavailable or ineligible worker (the app treats any 409 or
-    422 on select as "choose another"), and `cancel` of a request that is no longer open.
-44. **Timeline and review time.** No events, no expected review time and no push on a decision are sent, so the
-    Progress timeline is the happy path built from the status and `createdAt` / `decidedAt` / `completedAt`, and the
-    design's "Reason: work quality" and "3 verified workers matched" sub-lines are not shown. The worker name, rating
-    count and distance on the design cards are not served either (see 36).
+- **28 customer attendance:** works for the customer's own bookings (others 404).
+- **29 statuses:** `LATE` and `LEAVE` exist; every row has `checkInAt` / `checkOutAt` (null until the worker taps).
+  The summary adds `late`, `leave`, `scheduledWindow {from,to}` and `worker`. Shown as badges, "In 8:25 AM · Out
+  12:05 PM", "Scheduled 8 AM - 12 PM". Unknown statuses still read "Updated". **Q-101:** LATE / LEAVE / the times
+  await client sign-off.
+- **30 customer exception:** built as "Report a missing day" on the active service screen (ACTIVE booking only, day
+  from the start date to today, note 1-500; 409 = day already has an entry).
+- **31 history:** `GET /customers/me/booking-history` (`year`, `category`, `search`, `status`) and `/summary`
+  (`totalServices`, `distinctWorkers`, `totalSpentMinor`, `currency`). **Q-104:** "total spent" includes money still
+  held; the app shows the server's number as "total spent".
+- **32 rating eligibility:** every customer booking carries `allowedActions` and `rating`; the app trusts the list
+  even when empty (so a rated or REPLACED booking never shows Rate). `/ratings/bookings/{id}/eligibility` is NOT
+  called (no response schema was given; `allowedActions` carries the same answer). **Q-102:** REPLACED ("Ended
+  early") is not rateable until the client decides. Repeat rating = 409 (shown as "already rated").
+- **33 review limit / tags:** `ratingReviewMax` from `/reference-data` (default 300, the app falls back to 300). No
+  tags: **Q-103**, no chips.
+- **34 rebook:** "Hire again" only when `allowedActions` has `rebook`; `POST /bookings/rebook {bookingId}` (no
+  `startDate` is sent, the server picks it), then opens the new booking.
+- **36 worker identity:** `worker {displayName, initials, photo {url, largeUrl, expiresAt, cacheKey}}` shown on
+  booking detail, active service and history; photo cached by `cacheKey`.
+
+Not verified against a live customer yet (no shared test account with ACTIVE / COMPLETED bookings).
+
+Backend follow-up answers (2026-10-14, from their code, no live run):
+- **Rebook default start:** omitted `startDate` leaves the new booking's `startDate` and `requestedStartDate` null; it
+  is set later at the schedule/start step (today or later). Send `startDate` ("YYYY-MM-DD") for "start today". Returns
+  201 (200 on a replayed `Idempotency-Key`); 409 `REBOOK_NOT_ALLOWED` if not COMPLETED, plus the normal creation
+  errors (`WORKER_NOT_ELIGIBLE`, `WORKER_UNAVAILABLE`, `DUPLICATE_BOOKING`). `allowedActions` is only a hint.
+- **`rating` object:** `{rated, eligible, code}`, code = `ELIGIBLE | ALREADY_RATED | NOT_COMPLETED |
+  ENDED_EARLY_NOT_RATEABLE | NO_WORKER`. Same logic as `/ratings/.../eligibility`
+  (`{bookingId, eligible, code, reason, reviewMaxLength, scaleMax}`), so `allowedActions` agrees.
+- **`scheduledWindow`:** `{from:"08:00", to:"12:00"}`, plain 24h strings, no date or timezone.
+- **Q-101..Q-104** still have no client sign-off; backend defaults are what the app already follows. Review length
+  300 is Q-105: read `reviewMaxLength`, don't hard-code.
+
+### Module 9 - replacement (answered by the backend on 2026-10-14, commit `ad37f66`)
+
+The app runs on `POST/GET /replacement-requests`, `GET /replacement-requests?bookingId=`, `GET .../{id}`,
+`GET .../{id}/alternatives`, `POST .../cancel`, `POST .../select` and `GET /bookings/{id}/replacement-chain`.
+Backend verified 23/23 on a throwaway local database; nothing has run on staging, so the app is not yet
+verified against a live customer with an ACTIVE booking (no shared test account, nothing seeded).
+
+Done and used by the app:
+- Alternatives: `GET /replacement-requests/{id}/alternatives?page&limit`, customer-safe cards (no name), owner of
+  an APPROVED request only, never the replaced worker; other status = 409 `INVALID_TRANSITION` (the app reads that
+  as "no alternatives"), someone else's request = 404.
+- Booking link: `GET /replacement-requests?bookingId=` (mine only) replaces the old scan of the whole list.
+- Timeline: `timeline[]` (`status`, `at`, `actor` CUSTOMER / STAFF / SYSTEM, `remarks` on APPROVED / REJECTED only)
+  gives the Progress timestamps; the date fields are the fallback.
+- Statuses: APPROVED = alternatives may be listed and one selected. REJECTED is final (alternatives, select, cancel,
+  approve = 409); the booking goes back to ACTIVE, so the rejected screen offers "Request a new replacement".
+  `decisionRemarks` is shown verbatim.
+- Error codes: create 409 `REPLACEMENT_ALREADY_OPEN` (opens the open request), 404 `BOOKING_NOT_FOUND` and
+  422 `REPLACEMENT_NOT_ELIGIBLE` (lock the form); select 409 `WORKER_UNAVAILABLE`, 422 `WORKER_NOT_ELIGIBLE`
+  ("choose another"), 422 `SAME_WORKER`, 409 `INVALID_TRANSITION` ("this request has changed", status re-read);
+  cancel 409 `INVALID_TRANSITION` the same.
+- After select: a new MATCHED booking (`replacementBookingId`), old one REPLACED. The copy no longer says the new
+  worker "is now with you" or that the old booking "ends": it says a new booking was created and the usual steps
+  follow.
+
+Still needs a client decision (the app does NOT assume any of these):
+37. **Reasons.** No fixed reason list is approved. `reason` stays free text (1-1000): the app sends the English text of
+    the chosen reason and the customer's words as `notes`. Notes limit is 2000 (the design shows 500; the app uses 2000
+    via `replacementNotesMaxProvider`, change it there if the client picks 500).
+38. **"Needed from" date.** Not accepted or stored; the question is not shown. The replacement starts from today.
+41. **Replacement booking rules.** Does a replacement skip the interview or the booking fee, or keep the old price?
+    Today it follows the normal flow with no price or payment copied. The app claims none of it (the design's
+    "No change in price" is not shown).
+44. **Review ETA.** No ETA field and no review-time rule, so none is shown.
+
+### Module 10 - support, safety, notifications (2026-10-14, from the typed OpenAPI)
+
+The app runs on `/support/*`, `/safety/*`, `/notifications*` and `PUT /auth/device-token`. The module-doc routes (`/tickets`, `/devices`, `/workers/{id}/report`) do not exist. Nothing below has run against a live customer with tickets or notifications.
+
+45. **FAQ, help search, contact content.** The design shows "Popular questions", a help search and "Call / Email support". No FAQ endpoint exists, so FAQ and search are NOT built. Contact comes from `GET /app-config` `support.phone` / `support.email`, both `null` today, so the buttons are disabled. Is FAQ content planned (an endpoint, or `/reference-data`)? Please set the support contact.
+46. **Ticket fields the design has and the schema lacks.** `CreateTicketDto` is `categoryId`, `description` (max 4000), `bookingId` only. Not built: subject (80), photo attachments (3 images, 5 MB; no upload route), "Urgent" priority (`priority` is staff-only), a payment / replacement / interview link (only `bookingId`; the app resolves those to their booking), resolved feedback and rating. Questions: is there a minimum description length (the app uses 10 from the module doc)? Will `subject` and attachments be added? Should a safety-category ticket tell the customer it is prioritised?
+47. **Ticket statuses.** `OPEN | IN_PROGRESS | ESCALATED | CLOSED`. The design's "Waiting for you" and "Resolved" do not exist. The app shows ESCALATED as "In progress" (internal) and CLOSED with the `resolution` text. Confirm that is right, and whether `history[].type` has a stable list (the app reads only `fromStatus` / `toStatus`).
+48. **Conversation.** `GET .../messages` is paged but the order is not stated (the app sorts by `createdAt`). Is the ticket `description` also returned as the first message? (The app adds it when no customer message equals it.) Can a customer reopen a closed ticket (the design offers "No, I still need help")? Today the app offers "Create a new ticket".
+49. **Report reasons and block.** `reasonCode` is `HARASSMENT | THEFT | SAFETY_CONCERN | MISCONDUCT | FRAUD | NO_SHOW | OTHER`; the design's "Arrived late / Left early / Attendance is wrong / Work quality" are not in it and are not offered. `reason` (500) and `note` (1000) are both free text: the app sends only `note`. `POST /safety/reports` has no Idempotency-Key and returns no ticket id. Is there a customer-visible "Blocked workers" list planned (the app shows none: the design has no entry)?
+50. **Naming the worker.** The app sends `workerId` from a worker profile and `bookingId` from a booking or the active service. Confirm `bookingId` is accepted from a customer for both report and block ("Customers may use it instead of workerId").
+51. **Device token.** `PUT /auth/device-token` binds the token to the session. There is no unbind route. On logout the app deletes the FCM token on the device (best effort) and calls `POST /auth/logout`. Does logout (session revocation) also drop the bound token? Is a token stored per session or per user? What does the server do with a token FCM reports invalid?
+52. **Push payload.** Not published. The app reads `route` as `{type, id}` (or `"type:id"`) or flat `type` + `entityId` / `id`. Please publish the data keys and every `InboxItemView.route.type` the backend can send (the app handles `booking`, `interview`, `payment`, `replacement`, `ticket`; the module doc has `*_update`), and whether a rating prompt has a type.
+53. **Notification centre extras.** No preferences (the design's settings sheet), no mark-unread, no delete. The unread count body is empty in the Swagger: the app reads a bare number or `count` / `unread` / `unreadCount`. Please document it.
+54. **Push permission re-ask.** The app asks once after the first interview request and again after 3 days if the customer chose "Not now". Is that interval a product decision (config)?
 
 ## Items that are NOT backend problems (for the team's information)
 

@@ -1,8 +1,12 @@
 # Module 13 — Notifications (Push, Centre, Deep Links)
 
-**Backend:** `POST /devices {fcmToken, platform}`, `DELETE /devices/{token}`, `GET /notifications`, `POST /notifications/{id}/read`, `POST /notifications/read-all`, `GET /notifications/unread-count`.
-**Routes:** `/notifications`.
-**Payload contract (assumed):** `{ type, entityId, notificationId, title, body }`. Payload is a *hint* — always fetch fresh entity (AGENTS §50).
+> **Built on the real contract (docs/backend_openapi_2026-10-13.json), which overrides the routes assumed below.**
+> Backend: `GET /notifications` (`unreadOnly`, paged; item `{id, event, title, body, route:{type,id}, readAt, createdAt}`), `POST /notifications/{id}/read`, `POST /notifications/read-all`, `GET /notifications/unread-count`, `PUT /auth/device-token {token, platform: ANDROID|IOS}` (binds the token to the session; `DELETE /auth/device-token` unbinds the current session only; logout calls it, then deletes the token on the device).
+> Deep links: ONE mapper (`routeForNotification` / `routeForPushData`); entities open through `/open?to=<route>`, which reads the entity fresh. Push is behind `PushService` (Firebase when configured, no-op otherwise). Not built, no backend support: settings sheet, per-row mark-unread / delete. See BACKEND_REQUESTS 51-54.
+
+**Original draft backend (assumed, superseded):** `POST /devices {fcmToken, platform}`, `DELETE /devices/{token}`, `GET /notifications`, `POST /notifications/{id}/read`, `POST /notifications/read-all`, `GET /notifications/unread-count`.
+**Routes:** `/notifications`, `/open?to=`.
+**Payload contract (assumed, unconfirmed):** `{ type, entityId, notificationId, title, body }` or `route:{type,id}`. Payload is a *hint* — always fetch fresh entity (AGENTS §50).
 
 ## Push lifecycle (no buttons, but must be implemented)
 | Event | Behaviour |
