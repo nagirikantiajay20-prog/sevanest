@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,3 +55,11 @@ final openInAppBrowserProvider = Provider<Future<bool> Function(String url)>(
     }
   },
 );
+
+/// "1.2.3 (45)" from the platform package info (pubspec `version`). Overridden in tests.
+final appVersionProvider = FutureProvider.autoDispose<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return info.buildNumber.isEmpty
+      ? info.version
+      : '${info.version} (${info.buildNumber})';
+});

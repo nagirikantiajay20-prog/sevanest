@@ -1636,5 +1636,6 @@
       }
     }
   },
-  "accountLegalUnavailable": "Not available yet. We'll publish this soon."
+  "accountLegalUnavailable": "Not available yet. We'll publish this soon.",
+  "accountLanguageFailed": "Couldn't change the language. Please try again."
 }

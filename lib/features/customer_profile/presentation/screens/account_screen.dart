@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
@@ -67,28 +66,16 @@ class AccountScreen extends ConsumerWidget {
   }
 
   void _about(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
-      builder: (_) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.accountAbout,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                l10n.accountVersion(appVersionLabel),
-                key: const Key('account_about_version'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      builder: (_) => const _AboutSheet(),
+    );
+  }
+
+  void _language(BuildContext context, AccountConfig config) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (_) => _LanguageSheet(codes: config.languages),
     );
   }
 
@@ -202,7 +189,7 @@ class AccountScreen extends ConsumerWidget {
               'account_language_btn',
               Icons.language,
               l10n.accountLanguage,
-              () => context.push(Routes.profile),
+              () => _language(context, config),
             ),
           const Divider(),
           row(
@@ -284,6 +271,97 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AboutSheet extends ConsumerWidget {
+  const _AboutSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final version = ref.watch(appVersionProvider).value;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.accountAbout,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            if (version != null)
+              Text(
+                l10n.accountVersion(version),
+                key: const Key('account_about_version'),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The languages `GET /app-config` enables. Picking one saves `preferredLanguage` on the profile
+/// (the same PATCH the profile screen uses) and updates the shared profile state.
+class _LanguageSheet extends ConsumerWidget {
+  const _LanguageSheet({required this.codes});
+
+  final List<String> codes;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileProvider).value;
+    final messenger = ScaffoldMessenger.of(context);
+    final failed = AppLocalizations.of(context).accountLanguageFailed;
+    Future<void> pick(String code) async {
+      Navigator.of(context).pop();
+      if (profile == null || code == profile.preferredLanguage) return;
+      final saved = await ref
+          .read(profileFormProvider.notifier)
+          .submit(
+            create: false,
+            name: profile.name,
+            email: profile.email,
+            preferredLanguage: code,
+          );
+      if (saved == null) {
+        messenger.showSnackBar(SnackBar(content: Text(failed)));
+        return;
+      }
+      // PATCH may not echo mobile / verification: keep what we know.
+      ref
+          .read(profileProvider.notifier)
+          .replace(
+            CustomerProfile(
+              name: saved.name,
+              email: saved.email,
+              preferredLanguage: saved.preferredLanguage,
+              mobile: saved.mobile ?? profile.mobile,
+              verificationStatus:
+                  saved.verificationStatus ?? profile.verificationStatus,
+            ),
+          );
+    }
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final l in profileLanguages.where((l) => codes.contains(l.code)))
+            ListTile(
+              key: Key('account_language_${l.code}'),
+              title: Text(l.label),
+              trailing: l.code == profile?.preferredLanguage
+                  ? const Icon(Icons.check)
+                  : null,
+              onTap: profile == null ? null : () => pick(l.code),
+            ),
         ],
       ),
     );

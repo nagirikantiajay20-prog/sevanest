@@ -285,11 +285,16 @@ void main() {
       expect(k('account_legal_unavailable'), findsNothing);
     });
 
-    testWidgets('About shows the app version in a bottom sheet', (t) async {
-      await open(t);
+    testWidgets('About shows the package version in a bottom sheet', (t) async {
+      await open(
+        t,
+        overrides: [
+          appVersionProvider.overrideWith((ref) async => '2.3.4 (7)'),
+        ],
+      );
       await t.tap(k('account_about_btn'));
       await t.pumpAndSettle();
-      expect(k('account_about_version'), findsOneWidget);
+      expect(find.text('Version 2.3.4 (7)'), findsOneWidget);
     });
 
     testWidgets('Delete account is not offered (OPEN_QUESTIONS #18)', (

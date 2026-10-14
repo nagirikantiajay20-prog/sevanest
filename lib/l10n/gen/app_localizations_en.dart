@@ -3249,4 +3249,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountLegalUnavailable =>
       'Not available yet. We\'ll publish this soon.';
+
+  @override
+  String get accountLanguageFailed =>
+      'Couldn\'t change the language. Please try again.';
 }

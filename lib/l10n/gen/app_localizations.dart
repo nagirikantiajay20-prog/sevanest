@@ -6003,6 +6003,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not available yet. We\'ll publish this soon.'**
   String get accountLegalUnavailable;
+
+  /// No description provided for @accountLanguageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the language. Please try again.'**
+  String get accountLanguageFailed;
 }
 
 class _AppLocalizationsDelegate
