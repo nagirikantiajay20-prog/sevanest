@@ -13,6 +13,8 @@ class MockApiState {
     this.mode = MockMode.normal,
     this.returningUser = true,
     this.live = false,
+    this.forceUpdate = false,
+    this.maintenance = false,
   });
 
   final MockMode mode;
@@ -25,12 +27,23 @@ class MockApiState {
   /// Seeds Home (and later modules) as a returning customer with activity, or a brand-new one.
   final bool returningUser;
 
-  MockApiState copyWith({MockMode? mode, bool? returningUser, bool? live}) =>
-      MockApiState(
-        mode: mode ?? this.mode,
-        returningUser: returningUser ?? this.returningUser,
-        live: live ?? this.live,
-      );
+  /// Dev only: what the launch gate shows while on mocks (module 11.1).
+  final bool forceUpdate;
+  final bool maintenance;
+
+  MockApiState copyWith({
+    MockMode? mode,
+    bool? returningUser,
+    bool? live,
+    bool? forceUpdate,
+    bool? maintenance,
+  }) => MockApiState(
+    mode: mode ?? this.mode,
+    returningUser: returningUser ?? this.returningUser,
+    live: live ?? this.live,
+    forceUpdate: forceUpdate ?? this.forceUpdate,
+    maintenance: maintenance ?? this.maintenance,
+  );
 
   Duration get latency => switch (mode) {
     MockMode.slow => const Duration(seconds: 4),

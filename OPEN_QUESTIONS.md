@@ -30,10 +30,10 @@ Status: `OPEN` | `ANSWERED` | `ASSUMED(temporary)`. Update here; never bury in c
 | 24 | Draft requirement persistence | Product | OPEN | in-memory only |
 | 25 | Idempotency-Key support | Backend | OPEN | header sent; harmless if ignored |
 | 26 | iOS build infrastructure (Mac/CI) | DevOps | OPEN | needed by Week 1 |
-| 27 | DLT / SMS provider registration | Ops/Backend | OPEN | Ordinary numbers get 503 `SMS_NOT_CONFIGURED`; only backend-provisioned static test numbers can log in. Needed before any real user can sign in |
+| 27 | DLT / SMS provider registration | Ops/Backend | OPEN | Staging now runs `DEMO_OTP_ACCEPT_ANY` (no SMS; verify accepts any code, any number). App needs no change: it already sends the user-entered code to `/auth/otp/verify`. Real SMS still needed before real users; if `/auth/otp/request` still returns 503, the Render redeploy is pending |
 | 28 | Error code when OTP attempts are exhausted | Backend | OPEN | Not observed live; the app maps any `OTP_*` code containing LOCK/ATTEMPT/MAX, and HTTP 429, to the "Too many attempts" state |
 | 29 | 429 shape (`Retry-After` header vs `details[0].retryAfterSeconds`) | Backend | OPEN | Both are honoured; verified by mocked tests only |
-| 30 | Force-update / maintenance (`GET /app-config` minVersion, maintenance) | Product | OPEN | Not implemented in the auth module |
+| 30 | Force-update / maintenance (`GET /app-config` minVersion, maintenance) | Product | ASSUMED(temporary) | Built in module 11.1: blocking screens on launch and resume. Update button needs a store URL the backend does not send (BACKEND_REQUESTS 57); copy is placeholder; not run against staging |
 | 31 | Support phone/email | Ops | OPEN | `GET /app-config` -> `support` is null today; the button explains support isn't available |
 | 32 | Brand assets (logo, arch artwork, Inter font) for the auth screens | Design | OPEN | Placeholder house icon + painted arches; colours sampled from the mockups |
 | 33 | Customer password / dev-login path | Backend | ANSWERED | Backend added static test numbers + OTP instead; there is no password login for customers |

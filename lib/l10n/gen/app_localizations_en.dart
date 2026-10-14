@@ -3253,4 +3253,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountLanguageFailed =>
       'Couldn\'t change the language. Please try again.';
+
+  @override
+  String get gateUpdateTitle => 'Update required';
+
+  @override
+  String get gateUpdateBody =>
+      'This version of SevaNest is no longer supported. Please update the app to continue.';
+
+  @override
+  String get gateUpdateBtn => 'Update';
+
+  @override
+  String get gateMaintTitle => 'We will be right back';
+
+  @override
+  String get gateMaintBody =>
+      'SevaNest is down for maintenance. Please try again in a little while.';
+
+  @override
+  String get gateRetryFailed => 'Could not check right now. Please try again.';
+
+  @override
+  String get gateDevOff => 'Dev: switch off';
+
+  @override
+  String get devMenuGate => 'Launch gate';
+
+  @override
+  String get devMenuGateUpdate => 'Force update';
+
+  @override
+  String get devMenuGateMaint => 'Maintenance';
 }

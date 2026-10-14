@@ -6009,6 +6009,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t change the language. Please try again.'**
   String get accountLanguageFailed;
+
+  /// No description provided for @gateUpdateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get gateUpdateTitle;
+
+  /// No description provided for @gateUpdateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of SevaNest is no longer supported. Please update the app to continue.'**
+  String get gateUpdateBody;
+
+  /// No description provided for @gateUpdateBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get gateUpdateBtn;
+
+  /// No description provided for @gateMaintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We will be right back'**
+  String get gateMaintTitle;
+
+  /// No description provided for @gateMaintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'SevaNest is down for maintenance. Please try again in a little while.'**
+  String get gateMaintBody;
+
+  /// No description provided for @gateRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check right now. Please try again.'**
+  String get gateRetryFailed;
+
+  /// No description provided for @gateDevOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Dev: switch off'**
+  String get gateDevOff;
+
+  /// No description provided for @devMenuGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch gate'**
+  String get devMenuGate;
+
+  /// No description provided for @devMenuGateUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Force update'**
+  String get devMenuGateUpdate;
+
+  /// No description provided for @devMenuGateMaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get devMenuGateMaint;
 }
 
 class _AppLocalizationsDelegate

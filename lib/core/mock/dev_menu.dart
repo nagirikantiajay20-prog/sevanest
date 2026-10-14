@@ -76,6 +76,25 @@ class _DevMenu extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
+              Text(l10n.devMenuGate),
+              Wrap(
+                spacing: AppSpacing.sm,
+                children: [
+                  FilterChip(
+                    key: const Key('dev_gate_update'),
+                    label: Text(l10n.devMenuGateUpdate),
+                    selected: s.forceUpdate,
+                    onSelected: (v) => notifier.set(s.copyWith(forceUpdate: v)),
+                  ),
+                  FilterChip(
+                    key: const Key('dev_gate_maintenance'),
+                    label: Text(l10n.devMenuGateMaint),
+                    selected: s.maintenance,
+                    onSelected: (v) => notifier.set(s.copyWith(maintenance: v)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
               Text(l10n.devMenuUser),
               Wrap(
                 spacing: AppSpacing.sm,

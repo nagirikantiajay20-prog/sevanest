@@ -351,10 +351,11 @@ the meantime.
 - The "What does verified mean?" sheet uses placeholder copy.
 - Only English is selectable (`GET /app-config` returns `languages: ["en"]`).
 - The Budget step is always shown and every engagement type is offered for every category, because the backend states neither.
-- Force-update and maintenance screens are not built (OPEN_QUESTIONS #30).
+- Force-update and maintenance screens are built (module 11.1) but not run against staging (OPEN_QUESTIONS #30).
 
 
 ## Module 14: Account & Settings (2026-10-14)
 
 55. **Legal URLs** - `GET /app-config` -> `legal.terms.url` / `legal.privacy.url` are null today. The Account screen opens them in the in-app browser when set; please publish both (OPEN_QUESTIONS #17).
 56. **Delete account** - no endpoint or retention policy is defined (OPEN_QUESTIONS #18). The row is hidden; tell us the route and what happens to bookings / payments before we build it.
+57. **Store URL for force update** - `AppConfigView.customer` carries only `minVersion`. The Update button needs the Play Store / App Store page, so please add one (the app reads `customer.storeUrl`, http(s) only, and hides the button without it), or confirm the package id / iOS app id so the app may build the link. Also confirm `minVersion` format: the app reads `major.minor.patch` with an optional `+build` and treats anything else as not blocking.

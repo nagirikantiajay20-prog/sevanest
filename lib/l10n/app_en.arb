@@ -1637,5 +1637,15 @@
     }
   },
   "accountLegalUnavailable": "Not available yet. We'll publish this soon.",
-  "accountLanguageFailed": "Couldn't change the language. Please try again."
+  "accountLanguageFailed": "Couldn't change the language. Please try again.",
+  "gateUpdateTitle": "Update required",
+  "gateUpdateBody": "This version of SevaNest is no longer supported. Please update the app to continue.",
+  "gateUpdateBtn": "Update",
+  "gateMaintTitle": "We will be right back",
+  "gateMaintBody": "SevaNest is down for maintenance. Please try again in a little while.",
+  "gateRetryFailed": "Could not check right now. Please try again.",
+  "gateDevOff": "Dev: switch off",
+  "devMenuGate": "Launch gate",
+  "devMenuGateUpdate": "Force update",
+  "devMenuGateMaint": "Maintenance"
 }
