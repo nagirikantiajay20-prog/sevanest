@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/features/app_gate/app_gate.dart';
+import 'package:sevanest_customer/features/app_gate/app_gate_host.dart';
 
 import '../../helpers/fakes.dart';
 
@@ -170,6 +173,69 @@ void main() {
       t.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await t.pumpAndSettle();
       expect(calls, greaterThan(before));
+      expect(find.byKey(const Key('gate_retry_btn')), findsOneWidget);
+    });
+  });
+
+  group('first-check hold', () {
+    Future<void> pump(WidgetTester t, Future<AppGate> Function() fetch) async {
+      useTestPhone(t);
+      await t.pumpWidget(
+        testRootApp(
+          store: InMemorySessionStore(),
+          repo: FakeAuthRepository(),
+          overrides: [appGateFetcherProvider.overrideWithValue(fetch)],
+        ),
+      );
+    }
+
+    final login = find.byKey(
+      const Key('login_mobile_field'),
+      skipOffstage: false,
+    );
+
+    testWidgets(
+      'blocked on launch: login never shows, not even offstage-visible',
+      (t) async {
+        final c = Completer<AppGate>();
+        await pump(t, () => c.future);
+        await t.pump(const Duration(seconds: 1));
+        expect(find.byKey(const Key('gate_hold')), findsOneWidget);
+        expect(find.byKey(const Key('login_mobile_field')), findsNothing);
+        c.complete(const AppGate(AppGateKind.forceUpdate));
+        await t.pumpAndSettle();
+        expect(find.text('Update required'), findsOneWidget);
+        expect(find.byKey(const Key('gate_hold')), findsNothing);
+        expect(find.byKey(const Key('login_mobile_field')), findsNothing);
+        expect(login, findsOneWidget); // still mounted underneath, hidden
+      },
+    );
+
+    testWidgets('a slow check releases after the cap', (t) async {
+      await pump(t, () => Completer<AppGate>().future);
+      await t.pump(const Duration(seconds: 2));
+      expect(find.byKey(const Key('gate_hold')), findsOneWidget);
+      await t.pump(appGateHoldCap);
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('gate_hold')), findsNothing);
+      expect(find.byKey(const Key('login_mobile_field')), findsOneWidget);
+    });
+
+    testWidgets('a failing check releases at once', (t) async {
+      await pump(t, () async => throw Exception('offline'));
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('gate_hold')), findsNothing);
+      expect(find.byKey(const Key('login_mobile_field')), findsOneWidget);
+    });
+
+    testWidgets('a late answer after the cap still blocks', (t) async {
+      final c = Completer<AppGate>();
+      await pump(t, () => c.future);
+      await t.pump(appGateHoldCap);
+      await t.pumpAndSettle();
+      expect(find.byKey(const Key('login_mobile_field')), findsOneWidget);
+      c.complete(const AppGate(AppGateKind.maintenance));
+      await t.pumpAndSettle();
       expect(find.byKey(const Key('gate_retry_btn')), findsOneWidget);
     });
   });

@@ -3,10 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 
 import '../helpers/discover_harness.dart';
 import '../helpers/fakes.dart';
 import '../helpers/notification_fakes.dart';
+import '../helpers/support_fakes.dart';
 
 Finder k(String key) => find.byKey(Key(key));
 
@@ -16,6 +18,7 @@ void _scale(WidgetTester t) {
 }
 
 void main() {
+  screensA11y();
   testWidgets(
     'Account at text scale 1.3: no overflow, rows >= 44 dp, labelled',
     (t) async {
@@ -82,4 +85,80 @@ void main() {
       handle.dispose();
     },
   );
+}
+
+// 11.2 pass 2: the main screens on the seeded mocks / fakes, at text scale 1.3.
+const _screens = <String, String>{
+  'results': '/workers',
+  'worker detail': '/workers/cook-2',
+  'bookings list': '/bookings',
+  'booking detail': '/bookings/bk_2100',
+  'payment': '/payments/pay_1900',
+  'active service': '/services/current',
+  'support home': '/support',
+  'ticket': '/support/tk_1',
+  'transactions': '/transactions',
+};
+
+void screensA11y() {
+  for (final MapEntry(key: name, value: route) in _screens.entries) {
+    testWidgets('$name at 1.3: no overflow, taps >= 44 dp, buttons labelled', (
+      t,
+    ) async {
+      _scale(t);
+      final handle = t.ensureSemantics();
+      final env = await launchDiscover(
+        t,
+        height: 1400,
+        support: FakeSupportRepository(
+          tickets: [ticket('tk_1', bookingId: 'bk_2100')],
+        ),
+      );
+      if (route == '/workers') env.stepsOneToThree(EngagementType.fullTime);
+      env.unawaitedPush(route);
+      await t.pump();
+      await t.pump(const Duration(seconds: 1));
+      await t.pump(const Duration(seconds: 1));
+      expect(t.takeException(), isNull);
+      expect(
+        find.textContaining(RegExp('Retry|Try again')),
+        findsNothing,
+        reason: 'real content, not an error',
+      );
+      await expectLater(t, meetsGuideline(iOSTapTargetGuideline));
+      await expectLater(t, meetsGuideline(labeledTapTargetGuideline));
+      handle.dispose();
+      await t.pumpWidget(const SizedBox());
+      await t.pump(const Duration(seconds: 5));
+    });
+  }
+
+  testWidgets('Home at 1.3: no overflow, taps >= 44 dp, buttons labelled', (
+    t,
+  ) async {
+    _scale(t);
+    final handle = t.ensureSemantics();
+    await launchDiscover(t, height: 1400);
+    expect(t.takeException(), isNull);
+    await expectLater(t, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(t, meetsGuideline(labeledTapTargetGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('Login at 1.3: no overflow, taps >= 44 dp, buttons labelled', (
+    t,
+  ) async {
+    _scale(t);
+    final handle = t.ensureSemantics();
+    useTestPhone(t);
+    await t.pumpWidget(
+      testRootApp(store: InMemorySessionStore(), repo: FakeAuthRepository()),
+    );
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('login_mobile_field')), findsOneWidget);
+    expect(t.takeException(), isNull);
+    await expectLater(t, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(t, meetsGuideline(labeledTapTargetGuideline));
+    handle.dispose();
+  });
 }

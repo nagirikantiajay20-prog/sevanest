@@ -6,6 +6,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/app_gate/app_gate.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Runs the force-update / maintenance check on launch and on every resume, for signed-in and
@@ -18,16 +19,25 @@ class AppGateHost extends ConsumerStatefulWidget {
   ConsumerState<AppGateHost> createState() => _State();
 }
 
+/// How long the first check may hold the app on the splash.
+const appGateHoldCap = Duration(seconds: 3);
+
 class _State extends ConsumerState<AppGateHost> with WidgetsBindingObserver {
+  Timer? _cap;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _check());
+    _cap = Timer(appGateHoldCap, () {
+      if (mounted) ref.read(appGateProvider.notifier).release();
+    });
   }
 
   @override
   void dispose() {
+    _cap?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -52,11 +62,13 @@ class _State extends ConsumerState<AppGateHost> with WidgetsBindingObserver {
       (_, _) => _check(),
     );
     final gate = ref.watch(appGateProvider);
+    if (gate.checked) _cap?.cancel();
     final blocked = gate.kind != AppGateKind.none;
     return Stack(
       children: [
         // Kept mounted so a cleared gate returns to where the customer was.
-        Offstage(offstage: blocked, child: widget.child),
+        Offstage(offstage: blocked || !gate.checked, child: widget.child),
+        if (!gate.checked) const _Hold(),
         if (blocked)
           if (gate.kind == AppGateKind.forceUpdate)
             _UpdateScreen(storeUrl: gate.storeUrl)
@@ -215,4 +227,15 @@ class _MaintState extends ConsumerState<_MaintenanceScreen> {
       ],
     );
   }
+}
+
+/// Plain branded cover while the first check runs (the real splash keeps booting underneath).
+class _Hold extends StatelessWidget {
+  const _Hold();
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    key: Key('gate_hold'),
+    body: AuthBackdrop(child: Center(child: LogoTile(size: 104))),
+  );
 }

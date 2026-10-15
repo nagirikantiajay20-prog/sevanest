@@ -162,15 +162,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         children: [
                           const LogoTile(),
                           const SizedBox(width: AppSpacing.md),
-                          Text(
-                            l10n.appName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w600,
+                          Expanded(
+                            child: Text(
+                              l10n.appName,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                          const Spacer(),
                           _LanguageChip(onTap: _chooseLanguage),
                         ],
                       ),
@@ -489,11 +491,15 @@ class _TrustStrip extends StatelessWidget {
         Row(
           children: [
             const Expanded(child: Divider(color: AppColors.hairline)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Text(
-                l10n.secureAndPrivate,
-                style: const TextStyle(color: AppColors.slate, fontSize: 16),
+            Flexible(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Text(
+                  l10n.secureAndPrivate,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: AppColors.slate, fontSize: 16),
+                ),
               ),
             ),
             const Expanded(child: Divider(color: AppColors.hairline)),

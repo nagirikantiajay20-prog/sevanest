@@ -108,10 +108,7 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
               height: 48,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 itemCount: chips.length,
                 separatorBuilder: (_, _) =>
                     const SizedBox(width: AppSpacing.sm),

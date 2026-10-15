@@ -11,10 +11,16 @@ import 'package:url_launcher/url_launcher.dart';
 enum AppGateKind { none, forceUpdate, maintenance }
 
 class AppGate {
-  const AppGate(this.kind, {this.storeUrl});
+  const AppGate(this.kind, {this.storeUrl, this.checked = false});
   static const open = AppGate(AppGateKind.none);
 
   final AppGateKind kind;
+
+  /// False until the first check has answered, failed, or hit the hold cap; the host keeps the
+  /// app behind a splash until then so login / home never flash before a block screen.
+  final bool checked;
+
+  AppGate get asChecked => AppGate(kind, storeUrl: storeUrl, checked: true);
 
   /// Store page to open. The backend does not publish one today (BACKEND_REQUESTS 55); null hides
   /// the Update button.
@@ -89,12 +95,17 @@ class AppGateNotifier extends Notifier<AppGate> {
   /// when the read failed, so Retry can say so.
   Future<bool> check() async {
     try {
-      state = await ref.read(appGateFetcherProvider)();
+      state = (await ref.read(appGateFetcherProvider)()).asChecked;
       return true;
     } on Object {
-      return false; // fail open; nothing logged (no data worth keeping)
+      state =
+          state.asChecked; // fail open; nothing logged (no data worth keeping)
+      return false;
     }
   }
+
+  /// The first check took too long: let the app on. A late answer still blocks.
+  void release() => state = state.asChecked;
 }
 
 final appGateProvider = NotifierProvider<AppGateNotifier, AppGate>(
