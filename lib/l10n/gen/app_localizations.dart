@@ -2494,6 +2494,12 @@ abstract class AppLocalizations {
   /// **'Review your request'**
   String get reviewTitle;
 
+  /// No description provided for @reviewAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All steps done'**
+  String get reviewAllDone;
+
   /// No description provided for @reviewHeading.
   ///
   /// In en, this message translates to:

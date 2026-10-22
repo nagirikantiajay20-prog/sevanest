@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
@@ -14,6 +14,7 @@ import 'package:sevanest_customer/features/service_discovery/presentation/provid
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_scaffold.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// `/discover/review` (module 04, step 7): the requirement in one card, each row editable, then
@@ -58,7 +59,6 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final d = ref.watch(requirementDraftProvider);
     final category = ref.watch(selectedCategoryProvider);
@@ -119,57 +119,69 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
         ),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-        title: Text(l10n.reviewTitle),
-      ),
+    return DiscoverScaffold(
+      step: kDiscoverSteps,
+      title: l10n.reviewTitle,
+      stepLabel: l10n.reviewAllDone,
+      nextKey: const Key('discover_search_btn'),
+      continueLabel: l10n.reviewSearch,
+      onContinue: _search,
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.only(
+          top: AppSpacing.lg,
+          bottom: AppSpacing.lg,
+        ),
         children: [
-          Text(l10n.reviewHeading, style: text.headlineSmall),
-          const SizedBox(height: AppSpacing.xs),
-          Text(l10n.reviewSub, style: text.bodyMedium),
+          StepHeading(heading: l10n.reviewHeading, sub: l10n.reviewSub),
           const SizedBox(height: AppSpacing.md),
-          Card(
-            margin: EdgeInsets.zero,
-            child: Column(
-              children: [
-                for (final r in rows)
-                  ListTile(
-                    key: Key('discover_review_row_${r.field}'),
-                    title: Text(r.label, style: text.bodySmall),
-                    subtitle: Text(r.value, style: text.bodyLarge),
-                    trailing: TextButton(
-                      key: Key('discover_review_edit_${r.field}'),
-                      onPressed: () => _edit(r.step),
-                      child: Semantics(
-                        label: l10n.reviewEditSemantics(r.label),
-                        excludeSemantics: true,
-                        child: Text(l10n.reviewEdit),
-                      ),
+          for (final r in rows) ...[
+            const Divider(height: 1, color: AppColors.hairline),
+            Padding(
+              key: Key('discover_review_row_${r.field}'),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          r.label.toUpperCase(),
+                          style: AppText.body.copyWith(
+                            fontSize: 11,
+                            letterSpacing: 0.8,
+                            color: AppColors.slate400,
+                          ),
+                        ),
+                        Text(
+                          r.value,
+                          style: AppText.heading.copyWith(fontSize: 17),
+                        ),
+                      ],
                     ),
                   ),
-              ],
+                  const SizedBox(width: AppSpacing.sm),
+                  OutlinedButton(
+                    key: Key('discover_review_edit_${r.field}'),
+                    onPressed: () => _edit(r.step),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(64, kMinTapTarget),
+                      shape: const StadiumBorder(),
+                      side: const BorderSide(color: AppColors.hairline),
+                      foregroundColor: AppColors.teal,
+                    ),
+                    child: Semantics(
+                      label: l10n.reviewEditSemantics(r.label),
+                      excludeSemantics: true,
+                      child: Text(l10n.reviewEdit),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
+          const Divider(height: 1, color: AppColors.hairline),
         ],
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: SnButton(
-            key: const Key('discover_search_btn'),
-            label: l10n.reviewSearch,
-            onPressed: _search,
-          ),
-        ),
       ),
     );
   }

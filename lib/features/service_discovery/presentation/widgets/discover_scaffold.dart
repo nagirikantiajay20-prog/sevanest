@@ -25,6 +25,8 @@ class DiscoverScaffold extends ConsumerWidget {
     this.padBody = true,
     this.summary,
     this.onSummaryTap,
+    this.stepLabel,
+    this.nextKey,
     super.key,
   });
 
@@ -43,6 +45,12 @@ class DiscoverScaffold extends ConsumerWidget {
   /// One line above Continue ("Mornings · 8 AM – 12 PM · Mon to Sat"); tap to edit it.
   final String? summary;
   final VoidCallback? onSummaryTap;
+
+  /// Replaces "Step n of 6" (Review: "All steps done").
+  final String? stepLabel;
+
+  /// Key of the sticky button when a screen needs its own (Review: search).
+  final Key? nextKey;
 
   Future<bool> _confirmDiscard(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -136,7 +144,8 @@ class DiscoverScaffold extends ConsumerWidget {
                               style: AppText.card,
                             ),
                             Text(
-                              l10n.discoverStep(step, kDiscoverSteps),
+                              stepLabel ??
+                                  l10n.discoverStep(step, kDiscoverSteps),
                               key: const Key('discover_progress_label'),
                               style: AppText.body.copyWith(
                                 fontSize: 12,
@@ -208,7 +217,7 @@ class DiscoverScaffold extends ConsumerWidget {
                     ),
                   ),
                 SnButton(
-                  key: const Key('discover_next_btn'),
+                  key: nextKey ?? const Key('discover_next_btn'),
                   label: continueLabel ?? l10n.discoverContinue,
                   onPressed: onContinue,
                 ),

@@ -1352,6 +1352,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewTitle => 'Review your request';
 
   @override
+  String get reviewAllDone => 'All steps done';
+
+  @override
   String get reviewHeading => 'Check your requirement';
 
   @override
