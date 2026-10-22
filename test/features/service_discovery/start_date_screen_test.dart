@@ -40,9 +40,12 @@ void main() {
     final env = await open(t);
     expect(find.text('Step 5 of 6'), findsOneWidget);
     expect(find.text('When should they start?'), findsOneWidget);
-    expect(find.text('Tomorrow, Sat 10 Oct'), findsOneWidget);
-    expect(find.text('In 3 days, Mon 12 Oct'), findsOneWidget);
-    expect(find.text('Next Monday, 19 Oct'), findsOneWidget);
+    expect(find.text('Tomorrow'), findsOneWidget);
+    expect(find.text('Sat 10 Oct'), findsOneWidget);
+    expect(find.text('In 3 days'), findsOneWidget);
+    expect(find.text('Mon 12 Oct'), findsOneWidget);
+    expect(find.text('Next Monday'), findsOneWidget);
+    expect(find.text('19 Oct'), findsOneWidget);
     expect(find.text('Pick another date'), findsOneWidget);
     expect(find.text('October 2026'), findsOneWidget);
     expect(env.nextEnabled, isFalse);

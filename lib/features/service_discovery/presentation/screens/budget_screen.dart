@@ -244,7 +244,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           bottom: AppSpacing.lg,
         ),
         children: [
-          const FlowChips(),
+          const FlowChips(showTiming: true),
           const SizedBox(height: AppSpacing.sm),
           StepHeading(heading: l10n.budgetHeading),
           const SizedBox(height: AppSpacing.sm),

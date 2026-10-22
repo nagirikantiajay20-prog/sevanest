@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_calendar.dart';
@@ -10,7 +11,6 @@ import 'package:sevanest_customer/features/service_discovery/domain/timing.dart'
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/widgets/choice_pill.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_scaffold.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/flow_chips.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -34,7 +34,6 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
-    final text = Theme.of(context).textTheme;
     final draft = ref.watch(requirementDraftProvider);
     final configAsync = ref.watch(scheduleConfigProvider);
     final config = configAsync.value;
@@ -73,13 +72,12 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
       body = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: AppSpacing.sm,
-            runSpacing: AppSpacing.sm,
-            children: [
+          _ShortcutGrid(
+            cards: [
               for (final s in shortcuts)
-                ChoicePill(
+                _ShortcutCard(
                   key: Key('discover_shortcut_${s.kind.name}'),
+                  // ponytail: split "Tomorrow, Sat 10 Oct" at the comma; per-part strings when translating.
                   label: switch (s.kind) {
                     ShortcutKind.tomorrow => l10n.startTomorrow(
                       formatShortcutDate(s.date, locale),
@@ -97,9 +95,10 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
                       .read(requirementDraftProvider.notifier)
                       .setStartDate(s.date),
                 ),
-              ChoicePill(
+              _ShortcutCard(
                 key: const Key('discover_shortcut_other'),
                 label: l10n.startPickAnother,
+                trailing: Icons.chevron_right,
                 selected: selected != null && !isShortcut,
                 onTap: () {
                   final ctx = _calendarKey.currentContext;
@@ -132,7 +131,7 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
           Text(
             l10n.startLimitNote(config.maxLeadDays, formatDate(last, locale)),
             key: const Key('discover_limit_note'),
-            style: text.bodySmall?.copyWith(color: AppColors.slate),
+            style: AppText.body,
           ),
           if (outside) ...[
             const SizedBox(height: AppSpacing.md),
@@ -166,7 +165,7 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
           bottom: AppSpacing.lg,
         ),
         children: [
-          const FlowChips(),
+          const FlowChips(showTiming: true),
           const SizedBox(height: AppSpacing.sm),
           StepHeading(heading: l10n.startHeading, sub: l10n.startSub),
           const SizedBox(height: AppSpacing.md),
@@ -191,7 +190,6 @@ class _OutsideDaysWarning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Container(
       key: const Key('discover_outside_days_warning'),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -209,11 +207,8 @@ class _OutsideDaysWarning extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.startOutsideTitle(date),
-                  style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                ),
-                Text(l10n.startOutsideBody(days), style: text.bodyMedium),
+                Text(l10n.startOutsideTitle(date), style: AppText.heading),
+                Text(l10n.startOutsideBody(days), style: AppText.bodyLarge),
                 const SizedBox(height: AppSpacing.sm),
                 SizedBox(
                   width: 180,
@@ -288,4 +283,105 @@ class _StartSkeleton extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// Two cards per row, equal height (design: Tomorrow / In 3 days / Next Monday / Pick another).
+class _ShortcutGrid extends StatelessWidget {
+  const _ShortcutGrid({required this.cards});
+  final List<Widget> cards;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < cards.length; i += 2)
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: cards[i]),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(
+                  child: i + 1 < cards.length ? cards[i + 1] : const SizedBox(),
+                ),
+              ],
+            ),
+          ),
+        ),
+    ],
+  );
+}
+
+class _ShortcutCard extends StatelessWidget {
+  const _ShortcutCard({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.trailing,
+    super.key,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final IconData? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final i = label.indexOf(', ');
+    final head = i < 0 ? null : label.substring(0, i);
+    final value = i < 0 ? label : label.substring(i + 2);
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        color: selected ? AppColors.tealMist : AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.button),
+          side: BorderSide(
+            color: selected ? AppColors.teal : AppColors.hairline,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.button),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: kMinTapTarget + 16),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (head != null)
+                          Text(
+                            head,
+                            style: AppText.body.copyWith(fontSize: 13),
+                          ),
+                        Text(
+                          value,
+                          style: AppText.card.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (selected || trailing != null)
+                    Icon(
+                      selected ? Icons.check : trailing,
+                      color: selected ? AppColors.teal : AppColors.brandInk,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -254,7 +254,14 @@ class SelectionChip extends StatelessWidget {
             Icon(icon, size: 18, color: AppColors.teal),
             const SizedBox(width: AppSpacing.sm),
           ],
-          Flexible(child: Text(label, style: AppText.card)),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.card,
+            ),
+          ),
           const Text(' · ', style: AppText.body),
           TextButton(
             key: changeKey,
