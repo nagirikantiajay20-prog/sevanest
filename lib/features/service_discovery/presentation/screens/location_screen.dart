@@ -108,7 +108,14 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     if (list != null) _seed(list);
 
     final selected = list?.where((a) => a.id == draft.address?.id).firstOrNull;
-    final canContinue = selected != null && draft.engagement != null;
+    // Module 04: an area outside `GET /service-areas` blocks Continue. No list (call failed or empty) = no block.
+    final areas = ref.watch(serviceAreasProvider).value;
+    final served =
+        selected == null ||
+        areas == null ||
+        areas.isEmpty ||
+        areas.any((a) => a.name.toLowerCase() == selected.area.toLowerCase());
+    final canContinue = selected != null && served && draft.engagement != null;
 
     Widget body;
     if (addresses.hasError && list == null) {
@@ -197,6 +204,27 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
               onOpenSettings: () =>
                   ref.read(locationServiceProvider).openSettings(),
               onChooseSaved: () => setState(() => _permissionOff = false),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          if (!served) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 20,
+                  color: AppColors.danger,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    l10n.locationNotServed,
+                    key: const Key('discover_not_served'),
+                    style: AppText.bodyLarge.copyWith(color: AppColors.danger),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.md),
           ],

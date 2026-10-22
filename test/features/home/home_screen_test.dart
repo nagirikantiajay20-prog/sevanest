@@ -138,6 +138,12 @@ void main() {
       expect(location(t), '/addresses/new');
     });
 
+    testWidgets('View all (activity) switches to the Bookings tab', (t) async {
+      await launch(t);
+      await tapKey(t, 'home_view_bookings_btn');
+      expect(location(t), '/bookings');
+    });
+
     testWidgets('See all opens the service step with a fresh draft', (t) async {
       await launch(t);
       await tapKey(t, 'home_see_all_btn');

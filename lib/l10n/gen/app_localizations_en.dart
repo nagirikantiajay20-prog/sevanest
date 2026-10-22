@@ -579,6 +579,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeViewShortlist => 'View shortlist';
 
   @override
+  String get homeViewAll => 'View all';
+
+  @override
   String get homeSupportShortcut => 'Need help with something?';
 
   @override
@@ -733,6 +736,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationSub => 'We\'ll show workers who serve this area.';
+
+  @override
+  String get locationNotServed =>
+      'We do not serve this area yet. Please choose another address.';
 
   @override
   String get locationUseCurrent => 'Use my current location';

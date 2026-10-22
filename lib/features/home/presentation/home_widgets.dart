@@ -8,7 +8,7 @@ import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_format.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-const _cardRadius = 28.0;
+const _cardRadius = AppRadius.xl;
 
 /// Light card shell used by onboarding, error and shortlist sections.
 class HomeCard extends StatelessWidget {
@@ -290,14 +290,26 @@ class ActivityCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.homeActivity,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.homeActivity,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              TextButton(
+                key: const Key('home_view_bookings_btn'),
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                onPressed: () => context.go(Routes.bookings),
+                child: Text(l10n.homeViewAll),
+              ),
+            ],
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
           if (booking != null) _BookingTile(booking: booking!),
           if (booking != null && interview != null)
             const SizedBox(height: AppSpacing.md),

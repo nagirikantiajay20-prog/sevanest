@@ -1132,6 +1132,12 @@ abstract class AppLocalizations {
   /// **'View shortlist'**
   String get homeViewShortlist;
 
+  /// No description provided for @homeViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homeViewAll;
+
   /// No description provided for @homeSupportShortcut.
   ///
   /// In en, this message translates to:
@@ -1425,6 +1431,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We\'ll show workers who serve this area.'**
   String get locationSub;
+
+  /// No description provided for @locationNotServed.
+  ///
+  /// In en, this message translates to:
+  /// **'We do not serve this area yet. Please choose another address.'**
+  String get locationNotServed;
 
   /// No description provided for @locationUseCurrent.
   ///

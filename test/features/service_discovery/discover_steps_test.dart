@@ -355,6 +355,18 @@ void main() {
   });
 
   group('step 3 - location', () {
+    testWidgets(
+      'DISC-09 area outside the service areas: message, Continue off',
+      (t) async {
+        await launch(t);
+        addresses.areas = const [ServiceArea(id: 'a1', name: 'Elsewhere')];
+        container.invalidate(serviceAreasProvider);
+        await toLocation(t);
+        expect(find.byKey(const Key('discover_not_served')), findsOneWidget);
+        expect(nextEnabled(t), isFalse);
+      },
+    );
+
     testWidgets('DISC-08 default address preselected, label names the area', (
       t,
     ) async {
