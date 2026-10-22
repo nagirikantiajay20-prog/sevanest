@@ -288,6 +288,7 @@ void main() {
         final terms = spans.firstWhere((s) => s.text == 'Terms of service');
         (terms.recognizer! as dynamic).onTap();
         await t.pump();
+        await t.pump(const Duration(milliseconds: 100));
         expect(find.text("This link isn't available yet."), findsOneWidget);
       },
     );

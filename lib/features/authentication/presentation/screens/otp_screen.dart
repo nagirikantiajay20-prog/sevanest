@@ -111,10 +111,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           ),
                           const Padding(
                             padding: EdgeInsets.only(top: AppSpacing.xs),
-                            child: LogoTile(
-                              size: 72,
-                              icon: Icons.mark_chat_read_outlined,
-                            ),
+                            child: LogoTile(size: 72),
                           ),
                         ],
                       ),

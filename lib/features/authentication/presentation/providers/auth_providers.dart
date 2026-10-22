@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/session_reset_host.dart';
+import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
@@ -29,8 +30,8 @@ final authRepositoryProvider = Provider<AuthRepository>(
 
 /// Drops the device push token (best effort, while the session is still valid), then
 /// POST /auth/logout (failure ignored) -> clear tokens + profile state -> reset every provider
-/// (the app restarts at the splash, which lands on /login). The backend has no unbind route, so the token is deleted on the device
-/// (BACKEND_REQUESTS 51).
+/// (the app restarts at the splash, which lands on /login). The token is unbound with
+/// `DELETE /auth/device-token`, then deleted on the device.
 final logoutProvider = Provider<Future<void> Function()>(
   (ref) => () async {
     await ref.read(pushControllerProvider).unregister();
@@ -162,6 +163,7 @@ class OtpController extends Notifier<OtpState> {
       state = state.copyWith(phase: OtpPhase.verified);
       await Future<void>.delayed(verifiedHold);
       ref.read(profileCompleteProvider.notifier).set(complete);
+      telemetry.event(TelemetryEvent.signIn);
       await ref
           .read(authProvider.notifier)
           .signIn(access: tokens.access, refresh: tokens.refresh);

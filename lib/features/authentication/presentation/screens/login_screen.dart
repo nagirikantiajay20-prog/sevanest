@@ -5,13 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -53,8 +53,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _terms = TapGestureRecognizer()..onTap = () => _openLegal(termsUrl);
-    _privacy = TapGestureRecognizer()..onTap = () => _openLegal(privacyUrl);
+    _terms = TapGestureRecognizer()
+      ..onTap = () => _openLegal((c) => c.termsUrl);
+    _privacy = TapGestureRecognizer()
+      ..onTap = () => _openLegal((c) => c.privacyUrl);
     _focus.addListener(() {
       // Validate once the user leaves a non-empty field.
       if (!_focus.hasFocus && _controller.text.isNotEmpty) {
@@ -74,10 +76,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String get _digits => digitsOf(_controller.text);
 
-  Future<void> _openLegal(String? url) async {
+  Future<void> _openLegal(String? Function(AccountConfig) pick) async {
     final messenger = ScaffoldMessenger.of(context);
     final unavailable = AppLocalizations.of(context).linkUnavailable;
     var opened = false;
+    String? url;
+    try {
+      url = pick(await ref.read(accountConfigProvider.future));
+    } on Object {
+      url = null;
+    }
     if (url != null) {
       try {
         opened = await launchUrl(

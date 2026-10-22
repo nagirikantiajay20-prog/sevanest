@@ -8,6 +8,7 @@ import 'package:sevanest_customer/features/authentication/presentation/providers
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/screens/account_deletion_screen.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -43,6 +44,32 @@ class AccountScreen extends ConsumerWidget {
     );
     // Clears the session and every provider; the app restarts on /login.
     if (yes) await ref.read(logoutProvider)();
+  }
+
+  Future<void> _delete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final yes = await confirmDialog(
+      context,
+      title: l10n.deleteTitle,
+      body: l10n.deleteConfirmBody,
+      confirmLabel: l10n.deleteConfirmButton,
+      cancelLabel: l10n.cancel,
+      confirmKey: const Key('account_delete_confirm_btn'),
+      cancelKey: const Key('account_delete_cancel_btn'),
+      destructive: true,
+    );
+    if (!yes || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await requestAccountDeletion(ref);
+    } on Object {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.deleteFailed)));
+      return;
+    }
+    if (!context.mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(builder: (_) => const AccountDeletionScreen()),
+    );
   }
 
   Future<void> _openLegal(
@@ -211,6 +238,13 @@ class AccountScreen extends ConsumerWidget {
             () => _about(context),
           ),
           const Divider(),
+          if (ref.watch(accountDeletionEnabledProvider))
+            row(
+              'account_delete_btn',
+              Icons.delete_outline,
+              l10n.accountDelete,
+              () => _delete(context, ref),
+            ),
           ListTile(
             key: const Key('account_logout_btn'),
             leading: const Icon(Icons.logout, color: AppColors.danger),

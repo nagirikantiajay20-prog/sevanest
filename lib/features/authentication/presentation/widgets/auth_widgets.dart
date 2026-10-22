@@ -90,24 +90,30 @@ class _ArchPatternPainter extends CustomPainter {
       old.bigArch != bigArch || old.archSize != archSize;
 }
 
-/// White rounded tile holding the app mark (design asset not delivered yet, OPEN_QUESTIONS #19).
+/// Official SevaNest brand mark on a white rounded tile; [full] shows the logo with wordmark and tagline.
 class LogoTile extends StatelessWidget {
-  const LogoTile({this.size = 48, this.icon = Icons.home_rounded, super.key});
+  const LogoTile({this.size = 48, this.full = false, super.key});
 
   final double size;
-  final IconData icon;
+  final bool full;
 
   @override
   Widget build(BuildContext context) {
+    final pad = size * (full ? 0.06 : 0.1);
     return ExcludeSemantics(
       child: Container(
         width: size,
-        height: size,
+        padding: EdgeInsets.all(pad),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(size * 0.3),
+          borderRadius: BorderRadius.circular(size * (full ? 0.08 : 0.3)),
         ),
-        child: Icon(icon, size: size * 0.6, color: AppColors.navy),
+        child: Image.asset(
+          full
+              ? 'assets/branding/logo_full.png'
+              : 'assets/branding/logo_mark.png',
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

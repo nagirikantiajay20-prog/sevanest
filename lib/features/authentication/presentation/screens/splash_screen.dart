@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Shown as "slow" after this long (design: "Still loading. Your connection seems slow.").
@@ -100,33 +100,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   child: Column(
                     children: [
                       const Spacer(flex: 5),
-                      const LogoTile(size: 104),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        l10n.appName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        l10n.splashTagline,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        l10n.splashTaglineHi,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.65),
-                          fontSize: 16,
-                        ),
-                      ),
+                      const LogoTile(size: 280, full: true),
                       if (failed) ...[
                         const Spacer(flex: 3),
                         _FailedCard(
@@ -148,7 +122,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       ],
                       const SizedBox(height: AppSpacing.md),
                       Text(
-                        l10n.versionLabel(appVersionLabel),
+                        ref.watch(appVersionProvider).value == null
+                            ? ''
+                            : l10n.versionLabel(
+                                ref.watch(appVersionProvider).value!,
+                              ),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.55),
                           fontSize: 16,
