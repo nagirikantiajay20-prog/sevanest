@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 
 /// Language pills from the design. Languages the backend doesn't accept yet are shown but disabled.
@@ -16,8 +17,8 @@ class LanguageChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: AppSpacing.sm + 2,
-      runSpacing: AppSpacing.sm + 2,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: [
         for (final l in profileLanguages)
           ChoiceChip(
@@ -26,17 +27,20 @@ class LanguageChips extends StatelessWidget {
             selected: selected == l.code,
             showCheckmark: true,
             checkmarkColor: AppColors.teal,
-            selectedColor: AppColors.tealMist,
-            backgroundColor: Colors.white,
-            labelStyle: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
-              color: l.enabled ? AppColors.ink : AppColors.slate,
+            selectedColor: AppColors.tealWash,
+            backgroundColor: AppColors.surface,
+            labelStyle: AppText.label.copyWith(
+              fontSize: 15,
+              color: selected == l.code
+                  ? AppColors.teal
+                  : l.enabled
+                  ? AppColors.brandInk
+                  : AppColors.slate400,
             ),
             shape: StadiumBorder(
               side: BorderSide(
-                color: selected == l.code ? AppColors.teal : AppColors.slate,
-                width: 1.5,
+                color: selected == l.code ? AppColors.teal : AppColors.hairline,
+                width: selected == l.code ? 1.5 : 1,
               ),
             ),
             materialTapTargetSize: MaterialTapTargetSize.padded,

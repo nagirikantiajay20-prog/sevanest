@@ -283,9 +283,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keepEditing => 'Keep editing';
 
   @override
-  String get profileStep => 'Step 3 of 3';
-
-  @override
   String get profileSetupTitle => 'Tell us about you';
 
   @override

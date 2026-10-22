@@ -604,12 +604,6 @@ abstract class AppLocalizations {
   /// **'Keep editing'**
   String get keepEditing;
 
-  /// No description provided for @profileStep.
-  ///
-  /// In en, this message translates to:
-  /// **'Step 3 of 3'**
-  String get profileStep;
-
   /// No description provided for @profileSetupTitle.
   ///
   /// In en, this message translates to:
