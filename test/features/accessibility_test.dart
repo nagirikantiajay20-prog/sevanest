@@ -98,6 +98,15 @@ const _screens = <String, String>{
   'support home': '/support',
   'ticket': '/support/tk_1',
   'transactions': '/transactions',
+  'discover service': '/discover/category',
+  'discover engagement': '/discover/engagement',
+  'discover location': '/discover/location',
+  'discover timing': '/discover/timing',
+  'discover review': '/discover/review',
+  'new address': '/addresses/new',
+  'new ticket': '/support/new',
+  'replacement request': '/replacements/new?bookingId=bk_2100',
+  'interview request': '/interviews/new?workerId=cook-2',
 };
 
 void screensA11y() {
@@ -114,7 +123,9 @@ void screensA11y() {
           tickets: [ticket('tk_1', bookingId: 'bk_2100')],
         ),
       );
-      if (route == '/workers') env.stepsOneToThree(EngagementType.fullTime);
+      if (route == '/workers' || route.startsWith('/discover/')) {
+        env.stepsOneToThree(EngagementType.fullTime);
+      }
       env.unawaitedPush(route);
       await t.pump();
       await t.pump(const Duration(seconds: 1));

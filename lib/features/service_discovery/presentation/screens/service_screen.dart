@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
@@ -76,11 +77,14 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
               ),
             )
           : SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: AppSpacing.md,
                 crossAxisSpacing: AppSpacing.md,
-                childAspectRatio: .86,
+                // Taller tiles when the text is scaled up, so the name and description fit.
+                childAspectRatio:
+                    .86 /
+                    math.max(1, MediaQuery.textScalerOf(context).scale(1)),
               ),
               itemCount: shown.length,
               itemBuilder: (_, i) => _ServiceTile(
