@@ -14,16 +14,19 @@ import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/policy_sheet.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/payment/presentation/payment_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// `/bookings/confirm?interviewId=` (module 08, screen 8.1). Confirming the worker moves the
-/// booking to PENDING_PAYMENT; the booking fee is set by the backend and shown at the payment
-/// step (there is no quote endpoint), so no amount appears here.
+/// booking to PENDING_PAYMENT; the booking fee comes from `GET /fees/booking`; without it the note says it shows
+/// at the payment step.
 class ConfirmWorkerScreen extends ConsumerStatefulWidget {
   const ConfirmWorkerScreen({required this.bookingId, super.key});
   final String bookingId;
@@ -233,11 +236,21 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
                   label: Text(formatDate(start, locale)),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                Text(
-                  l10n.confirmFeeNote,
-                  key: const Key('confirm_fee_note'),
-                  style: text.bodySmall,
-                ),
+                if (ref.watch(bookingFeeProvider(b.id)).value case final fee?)
+                  row(l10n.confirmFeeRow, minorAmount(fee))
+                else
+                  Text(
+                    l10n.confirmFeeNote,
+                    key: const Key('confirm_fee_note'),
+                    style: text.bodySmall,
+                  ),
+                if (ref.watch(accountConfigProvider).value?.policy
+                    case final policy? when !policy.isEmpty)
+                  TextButton(
+                    key: const Key('confirm_policy_btn'),
+                    onPressed: () => showPolicySheet(context, ref, policy),
+                    child: Text(l10n.policyLink),
+                  ),
                 TextButton(
                   key: const Key('confirm_edit_req_btn'),
                   onPressed: () => context.push(Routes.discoverReview),

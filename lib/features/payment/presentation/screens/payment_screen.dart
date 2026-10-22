@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
@@ -135,6 +136,7 @@ class _State extends ConsumerState<PaymentScreen> {
     if (!mounted) return;
     _p = p;
     if (p.wasPaid) {
+      telemetry.event(TelemetryEvent.paymentSuccess);
       await _paid(p);
     } else if (p.status == PaymentStatus.failed) {
       await ref.read(pendingPaymentStoreProvider).clear();

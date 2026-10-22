@@ -401,7 +401,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteConfirmBody =>
-      'It will be removed from your saved addresses.';
+      'We will schedule your account and data for deletion. You can cancel the request until it is processed.';
 
   @override
   String get addressSaved => 'Address saved';
@@ -1838,6 +1838,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmEditRequirement => 'Edit requirement';
 
   @override
+  String get confirmFeeRow => 'Booking fee';
+
+  @override
   String get confirmFeeNote => 'The booking fee is shown at the payment step.';
 
   @override
@@ -2199,6 +2202,88 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String ratingStarLabel(int n, int max) {
     return '$n out of $max';
+  }
+
+  @override
+  String get notifSettingsTitle => 'Notification settings';
+
+  @override
+  String get notifSettingsBody =>
+      'Choose which alerts pop up while you use the app. System notifications are managed in your phone\'s settings.';
+
+  @override
+  String get notifCatBookings => 'Bookings and interviews';
+
+  @override
+  String get notifCatPayments => 'Payments and refunds';
+
+  @override
+  String get notifCatReplacements => 'Replacements';
+
+  @override
+  String get notifCatSupport => 'Support tickets';
+
+  @override
+  String get policyLink => 'Cancellation and refund policy';
+
+  @override
+  String get policyCancellationTitle => 'Cancellation';
+
+  @override
+  String get policyRefundTitle => 'Refunds';
+
+  @override
+  String get policyReadMore => 'Read more';
+
+  @override
+  String get repNeededFrom => 'Needed from (optional)';
+
+  @override
+  String get repNeededFromPick => 'Pick a date';
+
+  @override
+  String get repNeededFromClear => 'Clear date';
+
+  @override
+  String get repNeededFromNote =>
+      'For our team\'s information. It does not change the replacement\'s start date.';
+
+  @override
+  String get ratingTagsGood => 'What went well?';
+
+  @override
+  String get ratingTagsBad => 'What went wrong?';
+
+  @override
+  String get ratingTagPunctual => 'Punctual';
+
+  @override
+  String get ratingTagPolite => 'Polite';
+
+  @override
+  String get ratingTagSkilled => 'Skilled';
+
+  @override
+  String get ratingTagClean => 'Clean work';
+
+  @override
+  String get ratingTagTrustworthy => 'Trustworthy';
+
+  @override
+  String get ratingTagLate => 'Late';
+
+  @override
+  String get ratingTagRude => 'Rude';
+
+  @override
+  String get ratingTagPoorWork => 'Poor quality work';
+
+  @override
+  String get ratingTagUnreliable => 'Unreliable';
+
+  @override
+  String ratingTagsLine(String tags) {
+    return 'Tags: $tags';
   }
 
   @override
@@ -3285,4 +3370,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get devMenuGateMaint => 'Maintenance';
+
+  @override
+  String get legalConsentTitle => 'Accept our terms';
+
+  @override
+  String get legalConsentBody =>
+      'To continue, please accept the latest Terms of Service and Privacy Policy.';
+
+  @override
+  String get legalConsentAccept => 'Accept and continue';
+
+  @override
+  String get legalConsentUnavailable =>
+      'Terms and privacy documents aren\'t available yet. Please try again later.';
+
+  @override
+  String get legalConsentFailed =>
+      'Couldn\'t save your acceptance. Please try again.';
+
+  @override
+  String get accountDelete => 'Delete account';
+
+  @override
+  String get deleteTitle => 'Delete your account?';
+
+  @override
+  String get deleteConfirmButton => 'Request deletion';
+
+  @override
+  String get deleteStatusTitle => 'Account deletion';
+
+  @override
+  String deleteStatusRequested(String date) {
+    return 'Deletion requested on $date. We\'ll let you know when it\'s done.';
+  }
+
+  @override
+  String get deleteStatusNone => 'No deletion request.';
+
+  @override
+  String get deleteStatusCompleted => 'Your account has been deleted.';
+
+  @override
+  String get deleteCancelRequest => 'Cancel request';
+
+  @override
+  String get deleteFailed =>
+      'Couldn\'t update your deletion request. Please try again.';
 }

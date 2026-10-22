@@ -102,6 +102,7 @@ class _Rate implements RatingRepository {
   final keys = <String>[];
   int? lastScore;
   String? lastReview;
+  List<String> lastTags = const [];
 
   @override
   Future<Rating?> forBooking(String bookingId) async => given[bookingId];
@@ -115,6 +116,7 @@ class _Rate implements RatingRepository {
     String bookingId, {
     required int score,
     String? review,
+    List<String> tags = const [],
     required String idempotencyKey,
   }) async {
     submitCalls++;
@@ -124,6 +126,7 @@ class _Rate implements RatingRepository {
     if (f != null) throw f;
     lastScore = score;
     lastReview = review;
+    lastTags = tags;
     return given[bookingId] = Rating(
       id: 'r$submitCalls',
       bookingId: bookingId,
@@ -733,6 +736,49 @@ void main() {
       expect(k('rating_submit_btn'), findsNothing);
       await tapKey(t, 'rating_done_btn');
       expect(where(t), '/bookings/c2');
+    });
+
+    testWidgets('tags: praise at 4-5 stars, complaints at 1-2, none at 3', (
+      t,
+    ) async {
+      await open(t, '/ratings/c2');
+      expect(k('rating_tag_PUNCTUAL'), findsNothing);
+      await t.tap(k('rating_star_4'));
+      await t.pump();
+      expect(k('rating_tag_PUNCTUAL'), findsOneWidget);
+      expect(k('rating_tag_LATE'), findsNothing);
+      await t.tap(k('rating_star_3'));
+      await t.pump();
+      expect(k('rating_tag_PUNCTUAL'), findsNothing);
+      expect(k('rating_tag_LATE'), findsNothing);
+      await t.tap(k('rating_star_2'));
+      await t.pump();
+      expect(k('rating_tag_LATE'), findsOneWidget);
+    });
+
+    testWidgets('tags are sent as codes, the review stays plain', (t) async {
+      await open(t, '/ratings/c2');
+      await t.tap(k('rating_star_5'));
+      await t.pump();
+      await t.tap(k('rating_tag_PUNCTUAL'));
+      await t.tap(k('rating_tag_POLITE'));
+      await t.enterText(k('rating_comment_field'), 'Great');
+      await t.pump();
+      await tapKey(t, 'rating_submit_btn');
+      expect(rate.lastReview, 'Great');
+      expect(rate.lastTags, ['PUNCTUAL', 'POLITE']);
+    });
+
+    testWidgets('changing the stars drops tags of the other kind', (t) async {
+      await open(t, '/ratings/c2');
+      await t.tap(k('rating_star_5'));
+      await t.pump();
+      await t.tap(k('rating_tag_PUNCTUAL'));
+      await t.tap(k('rating_star_1'));
+      await t.pump();
+      await tapKey(t, 'rating_submit_btn');
+      expect(rate.lastReview, '');
+      expect(rate.lastTags, isEmpty);
     });
 
     testWidgets('SVC-08 a double tap submits once', (t) async {

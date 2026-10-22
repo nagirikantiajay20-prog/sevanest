@@ -23,6 +23,7 @@ class ReplacementRepositoryRemote implements ReplacementRepository {
     required String bookingId,
     required String reason,
     String? notes,
+    String? neededFrom,
     required String idempotencyKey,
   }) async => _one(
     await guarded(
@@ -33,6 +34,7 @@ class ReplacementRepositoryRemote implements ReplacementRepository {
           'bookingId': bookingId,
           'reason': reason.trim(),
           if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+          'neededFrom': ?neededFrom,
         },
       ),
     ),

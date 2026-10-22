@@ -61,8 +61,57 @@ class AddressFormScreen extends ConsumerWidget {
   }
 }
 
+/// The add-address bottom sheet of design screen 08 (same form as `/addresses/new`). Resolves to
+/// the saved [Address], or null when closed.
+Future<Address?> showAddAddressSheet(
+  BuildContext context, {
+  AddressInput? prefill,
+}) {
+  final l10n = AppLocalizations.of(context);
+  return showModalBottomSheet<Address>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+      child: SizedBox(
+        height: MediaQuery.sizeOf(ctx).height * 0.9,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(
+                l10n.addAddress,
+                style: Theme.of(ctx).textTheme.titleLarge,
+              ),
+              trailing: IconButton(
+                key: const Key('address_sheet_close_btn'),
+                tooltip: MaterialLocalizations.of(ctx).closeButtonLabel,
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(ctx).maybePop(),
+              ),
+            ),
+            Expanded(
+              child: _AddressForm(
+                firstTime: false,
+                prefill: prefill,
+                inSheet: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _AddressForm extends ConsumerStatefulWidget {
-  const _AddressForm({required this.firstTime, this.initial, this.prefill});
+  const _AddressForm({
+    required this.firstTime,
+    this.initial,
+    this.prefill,
+    this.inSheet = false,
+  });
+  final bool inSheet;
   final AddressInput? prefill;
   final Address? initial;
   final bool firstTime;
@@ -157,7 +206,11 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
       _city.text.trim().isNotEmpty &&
       isValidPincode(_pincode.text);
 
-  void _leave() => context.canPop() ? context.pop() : context.go(Routes.home);
+  void _leave() => widget.inSheet
+      ? Navigator.of(context).pop()
+      : context.canPop()
+      ? context.pop()
+      : context.go(Routes.home);
 
   Future<void> _confirmLeave() async {
     final l10n = AppLocalizations.of(context);
@@ -233,7 +286,9 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(savedText)));
-    if (widget.firstTime) {
+    if (widget.inSheet) {
+      Navigator.of(context).pop(saved);
+    } else if (widget.firstTime) {
       context.go(Routes.home);
     } else if (context.canPop()) {
       context.pop(saved);

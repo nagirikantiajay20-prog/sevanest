@@ -96,6 +96,7 @@ class Replacement {
     required this.status,
     required this.reason,
     this.notes,
+    this.neededFrom,
     this.decisionRemarks,
     this.replacementBookingId,
     this.createdAt,
@@ -109,6 +110,9 @@ class Replacement {
   final ReplacementStatus status;
   final String reason;
   final String? notes;
+
+  /// `neededFrom` (`YYYY-MM-DD`): informational only, never changes the replacement booking.
+  final String? neededFrom;
   final String? decisionRemarks;
   final String? replacementBookingId;
   final DateTime? createdAt;
@@ -153,6 +157,7 @@ class Replacement {
       status: replacementStatusFrom(j['status']),
       reason: s(j['reason']) ?? '',
       notes: s(j['notes']),
+      neededFrom: s(j['neededFrom']),
       decisionRemarks: s(j['decisionRemarks']),
       replacementBookingId: s(j['replacementBookingId']),
       createdAt: d(j['createdAt']),
@@ -218,6 +223,7 @@ abstract interface class ReplacementRepository {
     required String bookingId,
     required String reason,
     String? notes,
+    String? neededFrom,
     required String idempotencyKey,
   });
 

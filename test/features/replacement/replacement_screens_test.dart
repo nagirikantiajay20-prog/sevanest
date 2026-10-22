@@ -48,6 +48,7 @@ class _Rep implements ReplacementRepository {
   final selectKeys = <String>[];
   String? lastReason;
   String? lastNotes;
+  String? lastNeededFrom;
   String? lastWorker;
 
   /// Runs inside select before it answers (a worker taken meanwhile, a lost answer).
@@ -58,9 +59,11 @@ class _Rep implements ReplacementRepository {
     required String bookingId,
     required String reason,
     String? notes,
+    String? neededFrom,
     required String idempotencyKey,
   }) async {
     createCalls++;
+    lastNeededFrom = neededFrom;
     createKeys.add(idempotencyKey);
     lastReason = reason;
     lastNotes = notes;

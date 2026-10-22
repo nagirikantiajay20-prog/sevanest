@@ -58,6 +58,7 @@ class ReplacementRepositoryMock implements ReplacementRepository {
       status: s,
       reason: o.reason,
       notes: o.notes,
+      neededFrom: o.neededFrom,
       decisionRemarks: remarks ?? o.decisionRemarks,
       replacementBookingId: newBooking ?? o.replacementBookingId,
       createdAt: o.createdAt,
@@ -99,6 +100,7 @@ class ReplacementRepositoryMock implements ReplacementRepository {
     required String bookingId,
     required String reason,
     String? notes,
+    String? neededFrom,
     required String idempotencyKey,
   }) => mockCall(_state(), () {
     final prior = _keys[idempotencyKey];
@@ -117,6 +119,7 @@ class ReplacementRepositoryMock implements ReplacementRepository {
       status: ReplacementStatus.requested,
       reason: reason.trim(),
       notes: notes == null || notes.trim().isEmpty ? null : notes.trim(),
+      neededFrom: neededFrom,
       createdAt: _now(),
       timeline: [
         ReplacementEvent(

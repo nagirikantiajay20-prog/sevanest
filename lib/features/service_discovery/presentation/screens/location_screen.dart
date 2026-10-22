@@ -7,6 +7,7 @@ import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/addresses/presentation/screens/address_form_screen.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
@@ -51,11 +52,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
   }
 
   Future<void> _add([AddressInput? prefill]) async {
-    final saved = await context.push<Object?>(
-      Routes.addressNew,
-      extra: prefill,
-    );
-    if (saved is Address && mounted) {
+    final saved = await showAddAddressSheet(context, prefill: prefill);
+    if (saved != null && mounted) {
       ref.read(requirementDraftProvider.notifier).setAddress(saved);
     }
   }
@@ -129,6 +127,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
             ref.read(requirementDraftProvider.notifier).setAddress(a),
         onMakeDefault: (a) =>
             ref.read(addressesProvider.notifier).setDefault(a.id),
+        onAdd: _add,
       );
     }
 
@@ -403,8 +402,10 @@ class _SavedList extends StatelessWidget {
     required this.selectedId,
     required this.onSelect,
     required this.onMakeDefault,
+    required this.onAdd,
   });
 
+  final VoidCallback onAdd;
   final List<Address> addresses;
   final String? selectedId;
   final ValueChanged<Address> onSelect;
@@ -447,7 +448,7 @@ class _SavedList extends StatelessWidget {
           ),
         TextButton.icon(
           key: const Key('discover_add_address_btn'),
-          onPressed: () => context.push<Object?>(Routes.addressNew),
+          onPressed: onAdd,
           icon: const Icon(Icons.add),
           label: Text(l10n.addAddress),
         ),

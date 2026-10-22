@@ -12,6 +12,7 @@ import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -28,7 +29,7 @@ IconData _iconFor(String? type) =>
     };
 
 /// `/notifications` (module doc 13.1, design screen 32): All / Unread, newest first, grouped by
-/// day. NOT built, no backend support: the settings sheet and the per-row "Mark as unread" /
+/// day. NOT built, no backend support: the per-row "Mark as unread" /
 /// "Delete" actions (BACKEND_REQUESTS 53).
 class NotificationCentreScreen extends ConsumerStatefulWidget {
   const NotificationCentreScreen({super.key});
@@ -117,6 +118,15 @@ class _State extends ConsumerState<NotificationCentreScreen>
           ),
         ),
         actions: [
+          IconButton(
+            key: const Key('notif_settings_btn'),
+            tooltip: l10n.notifSettingsTitle,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              builder: (_) => const _SettingsSheet(),
+            ),
+          ),
           TextButton(
             key: const Key('notif_mark_all_btn'),
             onPressed: unread == 0 || _markingAll ? null : _markAll,
@@ -634,6 +644,51 @@ class _OffBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Per-category switches for the in-app alerts (see [notificationCategories]).
+class _SettingsSheet extends ConsumerWidget {
+  const _SettingsSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final muted = ref.watch(mutedCategoriesProvider).value ?? const {};
+    final labels = {
+      'bookings': l10n.notifCatBookings,
+      'payments': l10n.notifCatPayments,
+      'replacements': l10n.notifCatReplacements,
+      'support': l10n.notifCatSupport,
+    };
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Text(
+              l10n.notifSettingsTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Text(l10n.notifSettingsBody),
+          ),
+          for (final c in notificationCategories)
+            SwitchListTile(
+              key: Key('notif_pref_$c'),
+              title: Text(labels[c]!),
+              value: !muted.contains(c),
+              onChanged: (v) => ref
+                  .read(mutedCategoriesProvider.notifier)
+                  .setEnabled(c, enabled: v),
+            ),
+        ],
       ),
     );
   }

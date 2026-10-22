@@ -373,7 +373,9 @@ void main() {
       expect(find.text('Add your first address'), findsOneWidget);
       expect(nextEnabled(t), isFalse);
       await tapKey(t, 'discover_empty_add_address_btn');
-      expect(where(t), '/addresses/new');
+      // the add-address sheet (design 08) opens over the step, not a new route
+      expect(find.byKey(const Key('address_sheet_close_btn')), findsOneWidget);
+      expect(where(t), '/discover/location');
     });
 
     testWidgets('DISC-08 a newly saved address is auto-selected', (t) async {
@@ -383,7 +385,8 @@ void main() {
           .read(requirementDraftProvider.notifier)
           .setAddress(_home); // baseline
       await tapKey(t, 'discover_add_address_btn');
-      expect(where(t), '/addresses/new');
+      expect(find.byKey(const Key('address_sheet_close_btn')), findsOneWidget);
+      expect(where(t), '/discover/location');
     });
 
     testWidgets('error -> Try again', (t) async {
@@ -438,7 +441,10 @@ void main() {
         expect(find.text('Finding your location...'), findsOneWidget);
         gate.complete();
         await t.pumpAndSettle();
-        expect(where(t), '/addresses/new');
+        expect(
+          find.byKey(const Key('address_sheet_close_btn')),
+          findsOneWidget,
+        );
         expect(find.widgetWithText(TextField, 'Kondapur'), findsOneWidget);
         expect(find.widgetWithText(TextField, '500084'), findsOneWidget);
       },

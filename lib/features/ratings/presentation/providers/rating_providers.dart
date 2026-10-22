@@ -44,3 +44,9 @@ final myRatingsProvider = FutureProvider.autoDispose<Map<String, Rating>>((
   } while (cursor != null);
   return out;
 });
+
+/// The tag catalogue: `ratingTags` of `GET /reference-data`, else the built-in one.
+final ratingTagsProvider = Provider<List<RatingTag>>(
+  (ref) =>
+      RatingTag.listFrom(ref.watch(referenceDataProvider).value?['ratingTags']),
+);

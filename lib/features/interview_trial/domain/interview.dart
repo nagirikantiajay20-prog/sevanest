@@ -189,10 +189,13 @@ String slotId(int minutes) =>
 
 /// One bookable start time. One hour long (assumed: the backend has no slot endpoint yet).
 class InterviewSlot {
-  const InterviewSlot(this.id);
+  const InterviewSlot(this.id, {this.minutes = 60});
   final String id;
+
+  /// Slot length from `GET /search/workers/{id}/slots` -> `slotMinutes` (60 when absent).
+  final int minutes;
   int get startMinutes => parseSlot(id) ?? 0;
-  int get endMinutes => startMinutes + 60;
+  int get endMinutes => startMinutes + minutes;
 }
 
 class InterviewRequest {

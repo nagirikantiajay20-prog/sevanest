@@ -5,6 +5,7 @@ import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
+import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
@@ -15,6 +16,7 @@ import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
 import 'package:sevanest_customer/features/replacement/presentation/providers/replacement_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_labels.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_widgets.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -47,6 +49,7 @@ class ReplacementRequestScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<ReplacementRequestScreen> {
   final _notes = TextEditingController();
   ReplacementReason? _reason;
+  DateTime? _neededFrom;
   var _sending = false;
   var _offline = false;
   var _locked = false;
@@ -68,7 +71,8 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
   }
 
   bool get _dirty =>
-      _created == null && (_reason != null || _notes.text.trim().isNotEmpty);
+      _created == null &&
+      (_reason != null || _notes.text.trim().isNotEmpty || _neededFrom != null);
 
   bool get _needsNote =>
       _reason == ReplacementReason.other && _notes.text.trim().isEmpty;
@@ -82,6 +86,27 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
     _failed = false;
     _error = null;
   });
+
+  Future<void> _pickNeededFrom() async {
+    final n = ref.read(nowProvider)();
+    final today = DateTime(n.year, n.month, n.day);
+    final d = await showDatePicker(
+      context: context,
+      initialDate: _neededFrom ?? today,
+      firstDate: today,
+      lastDate: today.add(const Duration(days: 365)),
+    );
+    if (d != null && mounted) {
+      _edited(() => _neededFrom = DateTime(d.year, d.month, d.day));
+    }
+  }
+
+  String? get _neededFromIso {
+    final d = _neededFrom;
+    if (d == null) return null;
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${d.year}-${two(d.month)}-${two(d.day)}';
+  }
 
   Future<void> _confirmLeave() async {
     final l10n = AppLocalizations.of(context);
@@ -153,6 +178,7 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
             bookingId: _id,
             reason: reason.text,
             notes: _notes.text,
+            neededFrom: _neededFromIso,
             idempotencyKey: _key,
           );
       _markCreated(r);
@@ -422,6 +448,36 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
                   helperMaxLines: 2,
                 ),
               ),
+              const SizedBox(height: AppSpacing.md),
+              Text(l10n.repNeededFrom, style: text.titleSmall),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    key: const Key('replacement_needed_from_btn'),
+                    onPressed: _sending ? null : _pickNeededFrom,
+                    icon: const Icon(Icons.calendar_today_outlined),
+                    label: Text(
+                      _neededFrom == null
+                          ? l10n.repNeededFromPick
+                          : formatDate(
+                              _neededFrom!,
+                              Localizations.localeOf(context).toString(),
+                            ),
+                    ),
+                  ),
+                  if (_neededFrom != null)
+                    IconButton(
+                      key: const Key('replacement_needed_from_clear'),
+                      tooltip: l10n.repNeededFromClear,
+                      icon: const Icon(Icons.close),
+                      onPressed: _sending
+                          ? null
+                          : () => _edited(() => _neededFrom = null),
+                    ),
+                ],
+              ),
+              Text(l10n.repNeededFromNote, style: text.bodySmall),
               const SizedBox(height: AppSpacing.md),
               _NextSteps(),
               const SizedBox(height: AppSpacing.md),

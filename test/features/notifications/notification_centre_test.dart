@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/discover_harness.dart';
 import '../../helpers/notification_fakes.dart';
@@ -70,6 +72,7 @@ void main() {
   late FakeNotificationRepository repo;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     repo = FakeNotificationRepository(_items())..unreadFails = false;
   });
 
@@ -100,6 +103,30 @@ void main() {
   bool markAllEnabled(WidgetTester t) =>
       t.widget<TextButton>(k('notif_mark_all_btn')).onPressed != null;
 
+  group('Settings sheet', () {
+    test('routes map to categories; unknown routes are never muted', () {
+      expect(notificationCategoryOfRoute('/interviews/i1'), 'bookings');
+      expect(notificationCategoryOfRoute('/bookings/b1'), 'bookings');
+      expect(notificationCategoryOfRoute('/payments/p1'), 'payments');
+      expect(notificationCategoryOfRoute('/replacements/r1'), 'replacements');
+      expect(notificationCategoryOfRoute('/support/t1'), 'support');
+      expect(notificationCategoryOfRoute('/notifications'), isNull);
+      expect(bannerAllowed({'support'}, '/notifications'), isTrue);
+      expect(bannerAllowed({'support'}, '/support/t1'), isFalse);
+    });
+
+    testWidgets('opens from the gear; a switch mutes its category', (t) async {
+      final env = await open(t);
+      await tap(t, 'notif_settings_btn');
+      for (final c in notificationCategories) {
+        expect(t.widget<SwitchListTile>(k('notif_pref_$c')).value, isTrue);
+      }
+      await tap(t, 'notif_pref_payments');
+      expect(t.widget<SwitchListTile>(k('notif_pref_payments')).value, isFalse);
+      expect(env.container.read(mutedCategoriesProvider).value, {'payments'});
+    });
+  });
+
   group('Default / Unread tab', () {
     testWidgets('Default: grouped by day, newest first, unread styled', (
       t,
@@ -129,8 +156,8 @@ void main() {
         t.getTopLeft(k('notification_row_n1')).dy,
         lessThan(t.getTopLeft(k('notification_row_n5')).dy),
       );
-      // No settings sheet and no row actions: the backend has neither.
-      expect(find.byIcon(Icons.settings_outlined), findsNothing);
+      // The settings sheet exists (device-only switches); row actions stay out: no backend.
+      expect(k('notif_settings_btn'), findsOneWidget);
     });
 
     testWidgets('Unread tab: only unread, then "You\'re all caught up"', (

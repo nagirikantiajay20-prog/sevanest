@@ -160,7 +160,7 @@ class BookingRepositoryMock implements BookingRepository {
     DateTime? scheduledAt,
     InterviewType? type,
     DateTime? startDate,
-    bool dropWorker = false,
+    bool clearSchedule = false,
   }) {
     final i = _index(id);
     final o = _items[i];
@@ -173,13 +173,13 @@ class BookingRepositoryMock implements BookingRepository {
       categoryCode: o.categoryCode,
       categoryName: o.categoryName,
       engagement: o.engagement,
-      workerId: dropWorker ? null : o.workerId,
-      worker: dropWorker ? null : o.worker,
+      workerId: o.workerId,
+      worker: o.worker,
       areaName: o.areaName,
       addressId: o.addressId,
       startDate: startDate ?? o.startDate,
-      scheduledAt: dropWorker ? null : scheduledAt ?? o.scheduledAt,
-      scheduleType: dropWorker ? null : type ?? o.scheduleType,
+      scheduledAt: clearSchedule ? null : scheduledAt ?? o.scheduledAt,
+      scheduleType: clearSchedule ? null : type ?? o.scheduleType,
       budgetMin: o.budgetMin,
       budgetMax: o.budgetMax,
       budgetPeriod: o.budgetPeriod,
@@ -367,8 +367,9 @@ class BookingRepositoryMock implements BookingRepository {
         BookingStatus.interviewTrialScheduled,
         BookingStatus.interviewTrialCompleted,
       },
-      BookingStatus.newRequest,
-      dropWorker: true,
+      // Server returns to MATCHED with the same worker; only the schedule is cleared.
+      BookingStatus.matched,
+      clearSchedule: true,
     ),
   );
 

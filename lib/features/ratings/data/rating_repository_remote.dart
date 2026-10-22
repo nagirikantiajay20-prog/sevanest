@@ -47,6 +47,7 @@ class RatingRepositoryRemote implements RatingRepository {
     String bookingId, {
     required int score,
     String? review,
+    List<String> tags = const [],
     required String idempotencyKey,
   }) async {
     final res = await guarded(
@@ -58,6 +59,7 @@ class RatingRepositoryRemote implements RatingRepository {
           'score': score,
           if (review != null && review.trim().isNotEmpty)
             'review': review.trim(),
+          if (tags.isNotEmpty) 'tags': tags,
         },
       ),
     );

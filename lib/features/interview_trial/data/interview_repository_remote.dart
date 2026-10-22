@@ -162,10 +162,13 @@ class InterviewRepositoryRemote extends InterviewRepositoryOverBookings {
     );
     final body = res.data;
     final raw = body is Map ? body['slots'] : null;
+    final len = body is Map ? body['slotMinutes'] : null;
+    final minutes = len is num && len > 0 ? len.toInt() : 60;
     return [
       if (raw is List)
         for (final s in raw)
-          if (s is String && parseSlot(s) != null) InterviewSlot(s),
+          if (s is String && parseSlot(s) != null)
+            InterviewSlot(s, minutes: minutes),
     ];
   }
 }

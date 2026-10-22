@@ -8,6 +8,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -51,6 +52,9 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
 
   Future<void> _start() async {
     final service = ref.read(pushServiceProvider);
+    unawaited(
+      ref.read(mutedCategoriesProvider.future),
+    ); // warm, so the banner check is sync
     await service.start();
     if (!mounted) return;
     _subs
@@ -87,6 +91,8 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
       ..invalidate(notificationListProvider(true));
     // Screens showing a ticket, booking or replacement read it again.
     ref.read(notificationTickProvider.notifier).bump();
+    final muted = ref.read(mutedCategoriesProvider).value ?? const <String>{};
+    if (!bannerAllowed(muted, routeForPushData(m.data))) return;
     _bannerTimer?.cancel();
     setState(() {
       _banner = m;

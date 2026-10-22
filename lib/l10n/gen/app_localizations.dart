@@ -841,7 +841,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'It will be removed from your saved addresses.'**
+  /// **'We will schedule your account and data for deletion. You can cancel the request until it is processed.'**
   String get deleteConfirmBody;
 
   /// No description provided for @addressSaved.
@@ -3436,6 +3436,12 @@ abstract class AppLocalizations {
   /// **'Edit requirement'**
   String get confirmEditRequirement;
 
+  /// No description provided for @confirmFeeRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking fee'**
+  String get confirmFeeRow;
+
   /// No description provided for @confirmFeeNote.
   ///
   /// In en, this message translates to:
@@ -4113,6 +4119,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{n} out of {max}'**
   String ratingStarLabel(int n, int max);
+
+  /// No description provided for @notifSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification settings'**
+  String get notifSettingsTitle;
+
+  /// No description provided for @notifSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which alerts pop up while you use the app. System notifications are managed in your phone\'s settings.'**
+  String get notifSettingsBody;
+
+  /// No description provided for @notifCatBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings and interviews'**
+  String get notifCatBookings;
+
+  /// No description provided for @notifCatPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments and refunds'**
+  String get notifCatPayments;
+
+  /// No description provided for @notifCatReplacements.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacements'**
+  String get notifCatReplacements;
+
+  /// No description provided for @notifCatSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support tickets'**
+  String get notifCatSupport;
+
+  /// No description provided for @policyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation and refund policy'**
+  String get policyLink;
+
+  /// No description provided for @policyCancellationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation'**
+  String get policyCancellationTitle;
+
+  /// No description provided for @policyRefundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds'**
+  String get policyRefundTitle;
+
+  /// No description provided for @policyReadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Read more'**
+  String get policyReadMore;
+
+  /// No description provided for @repNeededFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed from (optional)'**
+  String get repNeededFrom;
+
+  /// No description provided for @repNeededFromPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get repNeededFromPick;
+
+  /// No description provided for @repNeededFromClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear date'**
+  String get repNeededFromClear;
+
+  /// No description provided for @repNeededFromNote.
+  ///
+  /// In en, this message translates to:
+  /// **'For our team\'s information. It does not change the replacement\'s start date.'**
+  String get repNeededFromNote;
+
+  /// No description provided for @ratingTagsGood.
+  ///
+  /// In en, this message translates to:
+  /// **'What went well?'**
+  String get ratingTagsGood;
+
+  /// No description provided for @ratingTagsBad.
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong?'**
+  String get ratingTagsBad;
+
+  /// No description provided for @ratingTagPunctual.
+  ///
+  /// In en, this message translates to:
+  /// **'Punctual'**
+  String get ratingTagPunctual;
+
+  /// No description provided for @ratingTagPolite.
+  ///
+  /// In en, this message translates to:
+  /// **'Polite'**
+  String get ratingTagPolite;
+
+  /// No description provided for @ratingTagSkilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Skilled'**
+  String get ratingTagSkilled;
+
+  /// No description provided for @ratingTagClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean work'**
+  String get ratingTagClean;
+
+  /// No description provided for @ratingTagTrustworthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Trustworthy'**
+  String get ratingTagTrustworthy;
+
+  /// No description provided for @ratingTagLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get ratingTagLate;
+
+  /// No description provided for @ratingTagRude.
+  ///
+  /// In en, this message translates to:
+  /// **'Rude'**
+  String get ratingTagRude;
+
+  /// No description provided for @ratingTagPoorWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor quality work'**
+  String get ratingTagPoorWork;
+
+  /// No description provided for @ratingTagUnreliable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreliable'**
+  String get ratingTagUnreliable;
+
+  /// No description provided for @ratingTagsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags: {tags}'**
+  String ratingTagsLine(String tags);
 
   /// No description provided for @ratingReviewLabel.
   ///
@@ -6069,6 +6231,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maintenance'**
   String get devMenuGateMaint;
+
+  /// No description provided for @legalConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept our terms'**
+  String get legalConsentTitle;
+
+  /// No description provided for @legalConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To continue, please accept the latest Terms of Service and Privacy Policy.'**
+  String get legalConsentBody;
+
+  /// No description provided for @legalConsentAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept and continue'**
+  String get legalConsentAccept;
+
+  /// No description provided for @legalConsentUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms and privacy documents aren\'t available yet. Please try again later.'**
+  String get legalConsentUnavailable;
+
+  /// No description provided for @legalConsentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your acceptance. Please try again.'**
+  String get legalConsentFailed;
+
+  /// No description provided for @accountDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get accountDelete;
+
+  /// No description provided for @deleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteTitle;
+
+  /// No description provided for @deleteConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Request deletion'**
+  String get deleteConfirmButton;
+
+  /// No description provided for @deleteStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deletion'**
+  String get deleteStatusTitle;
+
+  /// No description provided for @deleteStatusRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion requested on {date}. We\'ll let you know when it\'s done.'**
+  String deleteStatusRequested(String date);
+
+  /// No description provided for @deleteStatusNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No deletion request.'**
+  String get deleteStatusNone;
+
+  /// No description provided for @deleteStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted.'**
+  String get deleteStatusCompleted;
+
+  /// No description provided for @deleteCancelRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get deleteCancelRequest;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update your deletion request. Please try again.'**
+  String get deleteFailed;
 }
 
 class _AppLocalizationsDelegate

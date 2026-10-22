@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
@@ -14,6 +15,7 @@ import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/legal/legal_consent.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/push_prompt.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
@@ -95,6 +97,10 @@ class _State extends ConsumerState<InterviewRequestScreen> {
     final slot = _slot!;
     final startedAt = DateTime.now();
     var gone = false;
+    if (!_isReschedule && !await ref.read(legalConsentProvider)(context)) {
+      return;
+    }
+    if (!mounted) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -121,6 +127,7 @@ class _State extends ConsumerState<InterviewRequestScreen> {
           idempotencyKey: _key,
         );
       }
+      if (!_isReschedule) telemetry.event(TelemetryEvent.interviewRequest);
       _done(result.id, messenger, router, sent: !_isReschedule, l10n: l10n);
     } on ConflictFailure catch (e) {
       if (e.code == 'DUPLICATE_BOOKING') {

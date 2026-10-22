@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
@@ -89,6 +90,7 @@ class WorkerSearchNotifier extends AsyncNotifier<PagedState<WorkerSummary>> {
     }
     final q = ref.watch(workerQueryProvider);
     if (q == null) return const PagedState();
+    telemetry.event(TelemetryEvent.search);
     final page = await ref
         .read(workerSearchRepositoryProvider)
         .search(q, cancel: _newToken());

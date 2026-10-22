@@ -25,6 +25,7 @@ class RatingRepositoryMock implements RatingRepository {
     String bookingId, {
     required int score,
     String? review,
+    List<String> tags = const [],
     required String idempotencyKey,
   }) => mockCall(_state(), () {
     final prior = _keys[idempotencyKey];
@@ -44,6 +45,7 @@ class RatingRepositoryMock implements RatingRepository {
       bookingId: bookingId,
       score: score,
       review: review?.trim().isEmpty ?? true ? null : review!.trim(),
+      tags: tags,
       createdAt: DateTime.now(),
     );
     _items.add(r);

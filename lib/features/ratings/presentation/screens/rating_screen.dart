@@ -28,6 +28,7 @@ class RatingScreen extends ConsumerStatefulWidget {
 class _State extends ConsumerState<RatingScreen> {
   final _comment = TextEditingController();
   int? _score;
+  final _tags = <String>{};
   var _sending = false;
   var _thanks = false;
   var _alreadyRated = false;
@@ -46,10 +47,26 @@ class _State extends ConsumerState<RatingScreen> {
   void _toBooking() =>
       context.go(Routes.path(Routes.bookingDetail, {'id': widget.bookingId}));
 
+  /// Tags offered for the score: praise from 4 up, complaints at 2 and below, none between.
+  /// (The backend accepts any pairing; this pairing is the design's, pending client approval.)
+  List<RatingTag> _offered(int scale) {
+    final s = _score;
+    if (s == null) return const [];
+    final all = ref.read(ratingTagsProvider);
+    final praise = s * 5 >= scale * 4;
+    if (!praise && s * 5 > scale * 2) return const [];
+    return all.where((t) => t.positive == praise).toList();
+  }
+
   Future<void> _submit() async {
     final score = _score;
     if (score == null || _sending) return;
     final l10n = AppLocalizations.of(context);
+    final offered = _offered(ref.read(ratingScaleMaxProvider).value ?? 5);
+    final tags = [
+      for (final t in offered)
+        if (_tags.contains(t.code)) t.code,
+    ];
     setState(() {
       _sending = true;
       _error = null;
@@ -61,6 +78,7 @@ class _State extends ConsumerState<RatingScreen> {
             widget.bookingId,
             score: score,
             review: _comment.text,
+            tags: tags,
             idempotencyKey: _key,
           );
       ref
@@ -196,7 +214,12 @@ class _State extends ConsumerState<RatingScreen> {
                   key: Key('rating_star_$n'),
                   tooltip: l10n.ratingStarLabel(n, scale),
                   iconSize: 36,
-                  onPressed: _sending ? null : () => setState(() => _score = n),
+                  onPressed: _sending
+                      ? null
+                      : () => setState(() {
+                          _score = n;
+                          _tags.clear();
+                        }),
                   icon: Icon(
                     n <= (_score ?? 0) ? Icons.star : Icons.star_border,
                     color: n <= (_score ?? 0)
@@ -214,6 +237,32 @@ class _State extends ConsumerState<RatingScreen> {
               key: const Key('rating_score_label'),
             ),
           ),
+          if (_offered(scale).isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              _offered(scale).first.positive
+                  ? l10n.ratingTagsGood
+                  : l10n.ratingTagsBad,
+              style: text.titleSmall,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.sm,
+              children: [
+                for (final t in _offered(scale))
+                  FilterChip(
+                    key: Key('rating_tag_${t.code}'),
+                    label: Text(t.label),
+                    selected: _tags.contains(t.code),
+                    onSelected: _sending
+                        ? null
+                        : (v) => setState(() {
+                            v ? _tags.add(t.code) : _tags.remove(t.code);
+                          }),
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: AppSpacing.lg),
           Text(l10n.ratingReviewLabel, style: text.titleSmall),
           const SizedBox(height: AppSpacing.sm),

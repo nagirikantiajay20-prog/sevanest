@@ -9,6 +9,7 @@ import 'package:sevanest_customer/core/mock/dev_menu.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_widgets.dart';
@@ -309,6 +310,8 @@ class _Header extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    const LogoTile(size: 40),
+                    const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: Material(
                         color: Colors.white10,

@@ -107,3 +107,25 @@ final historySummaryProvider = FutureProvider.autoDispose
       ref.watch(mockApiProvider);
       return ref.read(bookingRepositoryProvider).historySummary(filter);
     });
+
+/// `GET /fees/booking?bookingId=` -> `amountMinor`: the fee `POST /payments` will charge. Null on the
+/// mock or when the backend has none (422 FEE_NOT_CONFIGURED) or fails: the screen then keeps the note.
+final bookingFeeProvider = FutureProvider.autoDispose.family<int?, String>((
+  ref,
+  bookingId,
+) async {
+  if (!ref.watch(mockApiProvider.select((s) => s.live))) return null;
+  try {
+    final res = await ref
+        .read(dioProvider)
+        .get<dynamic>(
+          '/fees/booking',
+          queryParameters: {'bookingId': bookingId},
+        );
+    final d = res.data;
+    final a = d is Map ? d['amountMinor'] : null;
+    return a is num && a >= 0 ? a.toInt() : null;
+  } on DioException {
+    return null;
+  }
+});

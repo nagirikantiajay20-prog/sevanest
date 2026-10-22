@@ -5,6 +5,7 @@ class Rating {
     required this.bookingId,
     required this.score,
     this.review,
+    this.tags = const [],
     this.createdAt,
   });
 
@@ -12,6 +13,9 @@ class Rating {
   final String bookingId;
   final int score;
   final String? review;
+
+  /// Tag codes (`PUNCTUAL`...), always a list; show the label from [RatingTag].
+  final List<String> tags;
   final DateTime? createdAt;
 
   static Rating? fromJson(Object? json) {
@@ -26,8 +30,48 @@ class Rating {
       bookingId: '${j['bookingId']}',
       score: score.toInt(),
       review: review is String && review.isNotEmpty ? review : null,
+      tags: [
+        if (j['tags'] is List)
+          for (final t in j['tags'] as List)
+            if (t is String) t,
+      ],
       createdAt: DateTime.tryParse('${j['createdAt']}'),
     );
+  }
+}
+
+/// One `ratingTags` entry of `GET /reference-data`. Send [code], show [label].
+class RatingTag {
+  const RatingTag(this.code, this.label, {required this.positive});
+  final String code;
+  final String label;
+  final bool positive;
+
+  /// Used until `/reference-data` answers (and offline); same codes as the backend catalogue.
+  static const fallback = [
+    RatingTag('PUNCTUAL', 'Punctual', positive: true),
+    RatingTag('POLITE', 'Polite', positive: true),
+    RatingTag('SKILLED', 'Skilled', positive: true),
+    RatingTag('CLEAN_WORK', 'Clean work', positive: true),
+    RatingTag('TRUSTWORTHY', 'Trustworthy', positive: true),
+    RatingTag('LATE', 'Late', positive: false),
+    RatingTag('RUDE', 'Rude', positive: false),
+    RatingTag('POOR_QUALITY_WORK', 'Poor quality work', positive: false),
+    RatingTag('UNRELIABLE', 'Unreliable', positive: false),
+  ];
+
+  static List<RatingTag> listFrom(Object? json) {
+    final out = <RatingTag>[
+      if (json is List)
+        for (final m in json)
+          if (m is Map && m['code'] is String && m['label'] is String)
+            RatingTag(
+              m['code'] as String,
+              m['label'] as String,
+              positive: '${m['sentiment']}'.toUpperCase() != 'NEGATIVE',
+            ),
+    ];
+    return out.isEmpty ? fallback : out;
   }
 }
 
@@ -51,6 +95,7 @@ abstract interface class RatingRepository {
     String bookingId, {
     required int score,
     String? review,
+    List<String> tags = const [],
     required String idempotencyKey,
   });
 }

@@ -7,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
 import 'package:sevanest_customer/features/support/domain/support.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/discover_harness.dart';
 import '../../helpers/fakes.dart';
@@ -39,6 +41,7 @@ void main() {
   late FakeNotificationRepository inbox;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     push = FakePushService(state: PushPermission.granted);
     support = FakeSupportRepository()..tickets = [ticket('tk_1')];
     inbox = FakeNotificationRepository()..unreadFails = false;
@@ -71,6 +74,28 @@ void main() {
       await settle(t);
       expect(inbox.unreadCalls, greaterThan(before));
     });
+
+    testWidgets(
+      'a muted category shows no banner but still refreshes the count',
+      (t) async {
+        final env = await open(t);
+        await env.container
+            .read(mutedCategoriesProvider.notifier)
+            .setEnabled('support', enabled: false);
+        final before = inbox.unreadCalls;
+        push.foreground.add(msgFor('ticket', 'tk_1', mid: 'm1'));
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 400));
+        expect(find.byKey(const Key('notif_banner_1')), findsNothing);
+        await settle(t);
+        expect(inbox.unreadCalls, greaterThan(before));
+        // another category still shows
+        push.foreground.add(msgFor('booking', 'bk_1', mid: 'm2'));
+        await t.pump();
+        await t.pump(const Duration(milliseconds: 400));
+        expect(find.byKey(const Key('notif_banner_1')), findsOneWidget);
+      },
+    );
 
     testWidgets('tapping the banner opens the target', (t) async {
       final env = await open(t);

@@ -4,9 +4,11 @@ import 'package:sevanest_customer/features/service_discovery/domain/budget.dart'
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// "₹499" or "₹499.50" from paise.
-String paymentAmount(Payment p) {
-  final paise = p.amountMinor % 100;
-  final rupees = formatRupees(p.amountMinor ~/ 100);
+String paymentAmount(Payment p) => minorAmount(p.amountMinor);
+
+String minorAmount(int minor) {
+  final paise = minor % 100;
+  final rupees = formatRupees(minor ~/ 100);
   return paise == 0 ? rupees : '$rupees.${paise.toString().padLeft(2, '0')}';
 }
 
