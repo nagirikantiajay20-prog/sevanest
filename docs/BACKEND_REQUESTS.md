@@ -274,7 +274,7 @@ The app runs on `/support/*`, `/safety/*`, `/notifications*` and `PUT /auth/devi
 48. **Conversation.** `GET .../messages` is paged but the order is not stated (the app sorts by `createdAt`). Is the ticket `description` also returned as the first message? (The app adds it when no customer message equals it.) Can a customer reopen a closed ticket (the design offers "No, I still need help")? Today the app offers "Create a new ticket".
 49. **Report reasons and block.** `reasonCode` is `HARASSMENT | THEFT | SAFETY_CONCERN | MISCONDUCT | FRAUD | NO_SHOW | OTHER`; the design's "Arrived late / Left early / Attendance is wrong / Work quality" are not in it and are not offered. `reason` (500) and `note` (1000) are both free text: the app sends only `note`. `POST /safety/reports` has no Idempotency-Key and returns no ticket id. Is there a customer-visible "Blocked workers" list planned (the app shows none: the design has no entry)?
 50. **Naming the worker.** The app sends `workerId` from a worker profile and `bookingId` from a booking or the active service. Confirm `bookingId` is accepted from a customer for both report and block ("Customers may use it instead of workerId").
-51. **Device token.** `PUT /auth/device-token` binds the token to the session. There is no unbind route. On logout the app deletes the FCM token on the device (best effort) and calls `POST /auth/logout`. Does logout (session revocation) also drop the bound token? Is a token stored per session or per user? What does the server do with a token FCM reports invalid?
+51. **Device token.** `PUT /auth/device-token` binds the token to the session. ANSWERED 2026-10-15: `DELETE /auth/device-token` unbinds it, and the app already calls it on logout (best effort) before deleting the FCM token and calling `POST /auth/logout`. Does logout (session revocation) also drop the bound token? Is a token stored per session or per user? What does the server do with a token FCM reports invalid?
 52. **Push payload.** Not published. The app reads `route` as `{type, id}` (or `"type:id"`) or flat `type` + `entityId` / `id`. Please publish the data keys and every `InboxItemView.route.type` the backend can send (the app handles `booking`, `interview`, `payment`, `replacement`, `ticket`; the module doc has `*_update`), and whether a rating prompt has a type.
 53. **Notification centre extras.** No preferences (the design's settings sheet), no mark-unread, no delete. The unread count body is empty in the Swagger: the app reads a bare number or `count` / `unread` / `unreadCount`. Please document it.
 54. **Push permission re-ask.** The app asks once after the first interview request and again after 3 days if the customer chose "Not now". Is that interval a product decision (config)?
@@ -359,3 +359,37 @@ the meantime.
 55. **Legal URLs** - `GET /app-config` -> `legal.terms.url` / `legal.privacy.url` are null today. The Account screen opens them in the in-app browser when set; please publish both (OPEN_QUESTIONS #17).
 56. **Delete account** - no endpoint or retention policy is defined (OPEN_QUESTIONS #18). The row is hidden; tell us the route and what happens to bookings / payments before we build it.
 57. **Store URL for force update** - `AppConfigView.customer` carries only `minVersion`. The Update button needs the Play Store / App Store page, so please add one (the app reads `customer.storeUrl`, http(s) only, and hides the button without it), or confirm the package id / iOS app id so the app may build the link. Also confirm `minVersion` format: the app reads `major.minor.patch` with an optional `+build` and treats anything else as not blocking.
+
+
+## Backend reply (2026-10-15): status of our open items
+
+Numbers match our message.
+
+**Already built on the backend (app already uses them, no code change needed)**
+- 2 App config: `GET /app-config` has store URL, support phone/email, terms/privacy links. They are `null` only because env values are unset (ops is setting them). The app already treats `null` as "hide/disable" (support Contact, legal rows, force-update button).
+- 4 Push unbind: `DELETE /auth/device-token`. Already called on logout (`PushController.unregister`). Answers item 51's "no unbind route".
+- 5 Bookings: `allowedActions`, worker name/photo, `POST /bookings/rebook` with `bookingId` in the body. Already used (`booking_repository_remote.dart`, `HireAgainButton`).
+- 6 Home aggregate, 7 attendance (late, leave, check-in/out), 11 customer photo upload, 12 address `label` + `line2`: exist. Verify against live responses when staging is up.
+- 13 Ratings: eligibility signal and 300-char review limit. App reads `ratingReviewMax` from reference-data (default 300).
+
+**Waiting on a backend decision, no app code until answered**
+- 3 Account deletion: routes exist, retention rules for bookings/payments open (row stays hidden).
+- 4 Push payload keys, event catalog, 3-day re-ask rule.
+- 9 Support: FAQ/help search content, ticket photos, "waiting for you" status.
+- 10 Notification preferences and delete.
+- 13 Rating tags.
+- 16 Replacement rules: skipping interview or booking fee, whether price is kept.
+
+**Not ready on the backend**
+- 1 SMS/OTP: provider and DLT not live. Staging keeps `DEMO_OTP_ACCEPT_ANY`. OTP length, error codes and 429 shape to follow.
+- 8 Search: start date and time window filters exist. Budget filter needs pricing rules. `minRating` accepts 1-10 today; backend is confirming 1-5. The app sends values on the `ratingScaleMax` scale (default 5), so it is safe either way.
+
+**Confirmations still to come (14, 15, 17, 18)**: success response schemas, status enums, error codes, refresh-token rotation and `meta.total` rules, in one doc. ETAs per item after the decisions above.
+
+## Completion pass 2026-10-15 (open)
+
+- **Fresh OpenAPI**: the staging spec URL is not in the repo and `/openapi.json` returns 404 on the deployed host. Please publish it (owner: Backend). The app has NOT been checked against booking-history, rebook, `DELETE /auth/device-token`, receipt/PDF or customer photo endpoints; none exist in the checked-in 2026-10-13 spec, so none are called.
+- **Schedule config** for Timing/Start date (owner: Backend) - currently client-side.
+- **Account deletion**: retention rules, and a remote flag in `/app-config` to show the row (owner: Backend/Legal). Until then the row is hidden by build flag.
+- **Interview horizon**: `horizonDays` only arrives with a slots response; ask whether `/app-config` can carry it.
+- **Production host** distinct from the free-tier host; stg and prod still point at the same URL (owner: DevOps).

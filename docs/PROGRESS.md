@@ -108,3 +108,17 @@ Wired and tested (484 tests, analyzer clean): live `/interviews` (booking first,
 Not built by design: budget filter in search, weekday matching, customer profile photo (backend says out of V1).
 Not verified: nothing has run against a live customer (backend not deployed, no test customer). Interview request is built on assumptions the backend marked unconfirmed (1-hour slots, 14-day horizon).
 Modules 7-11 (payment, active service, replacement, support, push, hardening) are not started. Release APK is debug-signed until `android/key.properties` exists.
+
+## 2026-10-15 completion pass
+
+- Done (analyzer clean, 961 tests green): legal consent gate, account deletion UI behind a flag, server slot length, version from package info, login legal links from `/app-config`, release signing guard + R8 rules + `POST_NOTIFICATIONS`, namespace aligned, Crashlytics/Analytics wrapper (stg/prod), CI workflow, store listing notes.
+- Correction to older lines: modules 7-11 are built (see steps above); 8.2/10.3 notes about "no history route" / "no Firebase files" are superseded - Firebase client files exist locally (untracked) and push is wired.
+- Not done / unverified: nothing run against the live backend this pass; runtime check of the minified dev release APK; iOS (needs Mac); real-device NOT-11; brand assets; Hindi/Telugu (product undecided, English-only kept); customer photo, rebook, history, receipts PDF (not in the checked-in spec).
+
+## 2026-10-15 UI gaps pass (no backend needed)
+
+- Add-address bottom sheet on Location (08): `showAddAddressSheet` reuses the shared form (`/addresses/new` stays for profile setup and Account). Tests updated to expect the sheet.
+- Rating tags (24): praise tags at 4-5 stars, complaint tags at 1-2, none between; chosen tags are sent as a last line `Tags: ...` of the review because the backend has no tag field. Revisit if it adds one.
+- History filters/search (23): already built on `GET /customers/me/booking-history` (year, service, status, search); the old "not built" note in AGE/PROGRESS 8.2 was stale.
+- Notification settings sheet (32): gear in the centre; per-category switches (bookings, payments, replacements, support) saved on the device and applied to the in-app foreground banner only. Server pushes and system notifications are unchanged (no preference API, BACKEND_REQUESTS 53). Row actions still not built.
+

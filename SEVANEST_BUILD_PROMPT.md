@@ -121,7 +121,7 @@ States: loading, new user, default, offline, error, edit profile (changed/unsave
 1. Walk the full journey end to end: sign-up -> build requirement -> results -> interview -> pay -> booking -> active service -> rate -> history -> receipt -> support.
 2. Confirm every state in the file names above is reachable via the mock-API toggle (a hidden dev menu).
 3. Test deep links, push taps, app-kill-and-resume mid-requirement and mid-payment, and offline cache behaviour.
-4. Produce `docs/SCREEN_COVERAGE.md`: one row per PNG file with the route, component and status (done/partial). **The target is 100%.**
+4. Produce `docs/AGE.md`: one row per PNG file with the route, component and status (done/partial). **The target is 100%.**
 5. Run the code-review-graph `detect_changes_tool` and `get_affected_flows_tool`, and fix the high-risk findings.
 
 ## How to work

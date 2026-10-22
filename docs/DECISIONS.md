@@ -75,3 +75,15 @@
 | 2026-10-12 | Added "Sign in again" on the failed splash card (module 01 requires `splash_login_btn`; the design shows only Try again + Contact support) | Never strand a user with an unusable stored session | Pending design review |
 | 2026-10-12 | Primary colour token changed to `#0F766E` (sampled from the approved auth screens) | Buttons must match the design | Pending brand sign-off (#19) |
 | 2026-10-08 | Stack: Riverpod, go_router, dio, freezed, secure storage, FCM, Razorpay behind PaymentService | PRD recommends Flutter; community-standard stack; provider-swappable payments | Pending team confirmation |
+
+## 2026-10-15 completion pass (app side only)
+
+| Date | Decision | Why | Type |
+| --- | --- | --- | --- |
+| 2026-10-15 | `scheduleRepositoryProvider` stays mock-only on purpose: the 2026-10-13 OpenAPI has no schedule/timing config (`/reference-data` and `/app-config` carry none), so Timing and Start date rules are client-side | No source exists; request logged in BACKEND_REQUESTS | Intentional fallback |
+| 2026-10-15 | Interview slot length now comes from `slotMinutes` in `GET /search/workers/{id}/slots` (supersedes the one-hour assumption in L20). The 14-day horizon stays a constant (`interviewWindowDays`) because the date picker opens before any slots response exists; `horizonDays` is returned per response | Picker needs a limit before the first fetch | Partial |
+| 2026-10-15 | Legal consent: before a new booking request the app reads `app-config.legal` + `GET /legal/status` and, if acceptance is required and missing, shows a dialog that sends `POST /legal/accept` with the versions from `app-config.legal.*.version`. A failed status read lets the request through (server enforces) | OpenAPI types `/legal/current` as the status view, so versions come from app-config | Contract |
+| 2026-10-15 | Account deletion UI (confirm, status, cancel) ships hidden behind `--dart-define=ACCOUNT_DELETION=true` because the backend publishes no remote flag and retention rules are unconfirmed | Cannot enable before policy | Deferred |
+| 2026-10-15 | Release builds of stg and prod fail without `android/key.properties`; dev release stays debug-signed for manual testing. Namespace now equals the application id `com.sevanest.customer`; flavors still share the id (one Firebase app) | Never ship debug-signed | Release |
+| 2026-10-15 | Version shown on the splash and Account comes from `package_info_plus`; the hardcoded label and `termsUrl`/`privacyUrl` constants were removed (login reads `app-config` via `accountConfigProvider`) | Single source | Cleanup |
+| 2026-10-15 | Crashlytics + Analytics via `core/analytics/telemetry.dart`: stg and prod only, no PII, events sign_in / worker_search / interview_request / payment_success, non-fatals for 5xx/unknown from the error mapper | Observability | Added |
