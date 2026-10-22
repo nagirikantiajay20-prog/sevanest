@@ -125,8 +125,11 @@ Not verified (at the time of this note; later live runs are in steps 3.1, 3.2, 7
 
 ## 2026-10-22 hardening pass
 
-- Fixed the notification settings test (it never mocked `SharedPreferences`); full suite 972 passed, 12 live skipped, analyzer clean.
+- Fixed the notification settings test (it never mocked `SharedPreferences`); full suite 981 passed, 12 live skipped, analyzer clean.
 - Pending work committed in four scoped commits; Firebase client files (`google-services.json`, `GoogleService-Info.plist`) stay untracked pending a decision, so CI needs them supplied.
 - Colours: every inline `Color(0x..)` moved to `AppColors` (values unchanged). `Colors.white` / `transparent` are still used directly.
 - Flow A (AUTH-17) now has one end-to-end widget test. Flows B-J and F's payment retry were already covered by widget tests; there is still no `integration_test/` run on a device.
 - Module docs 03-08 now carry a "Deployed API" note where the endpoints differ from the original assumption.
+- Accessibility: 1.3x text checks added for the discovery steps (service, engagement, location, timing, review), new address, new ticket, replacement request and interview request. Found and fixed a category-tile overflow (grid ratio now follows the text scale). Not yet covered at 1.3: OTP, budget, start date, confirm worker. TalkBack / VoiceOver and contrast need a device.
+- Quality gate (2026-10-22): `dart format` clean, `flutter analyze` clean, 981 tests passed, 12 live skipped.
+- Known limitations: no device run (FCM delivery, Razorpay SDK, iOS build, release keystore); live backend checks need a staging test number and OTP and were not run; `integration_test/` is empty; `Colors.white` / `transparent` still used directly; Firebase files untracked; features without backend support stay unbuilt (see BACKEND_REQUESTS).
