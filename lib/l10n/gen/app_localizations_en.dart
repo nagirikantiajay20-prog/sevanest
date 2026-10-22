@@ -924,6 +924,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timingErrDays => 'Choose at least one day.';
 
   @override
+  String timingDaysSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Selected: $count days',
+      one: 'Selected: 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get timingErrDate => 'Choose a date.';
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
@@ -253,10 +254,7 @@ class _Editors extends StatelessWidget {
 
     Widget label(String t) => Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Text(
-        t,
-        style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-      ),
+      child: Text(t, style: AppText.heading),
     );
 
     return Column(
@@ -264,23 +262,29 @@ class _Editors extends StatelessWidget {
       children: [
         if (_hasWindow) ...[
           label(l10n.timingWindowLabel),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            mainAxisSpacing: AppSpacing.md,
-            crossAxisSpacing: AppSpacing.md,
-            childAspectRatio: 1.6,
-            children: [
-              for (final w in TimeWindow.values)
-                _WindowCard(
-                  window: w,
-                  caption: windowCaption(l10n, w, config),
-                  selected: timing.window == w,
-                  onTap: () => onWindow(w),
+          for (var i = 0; i < TimeWindow.values.length; i += 2)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final w in TimeWindow.values.skip(i).take(2)) ...[
+                      if (w != TimeWindow.values[i])
+                        const SizedBox(width: AppSpacing.s12),
+                      Expanded(
+                        child: _WindowCard(
+                          window: w,
+                          caption: windowCaption(l10n, w, config),
+                          selected: timing.window == w,
+                          onTap: () => onWindow(w),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-            ],
-          ),
+              ),
+            ),
           const SizedBox(height: AppSpacing.lg),
         ],
         if (variant == TimingVariant.hourly) ...[
@@ -410,75 +414,49 @@ class _WindowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Semantics(
       selected: selected,
       button: true,
       child: Material(
-        color: selected ? AppColors.tealWash : AppColors.surface,
+        color: selected ? AppColors.tealMist : AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
+          borderRadius: BorderRadius.circular(AppRadius.button),
           side: BorderSide(
-            color: selected ? AppColors.teal : AppColors.slate,
-            width: selected ? 2 : 1.2,
+            color: selected ? AppColors.teal : AppColors.hairline,
+            width: selected ? 2 : 1,
           ),
         ),
         child: InkWell(
           key: Key('discover_window_${window.name}'),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
+          borderRadius: BorderRadius.circular(AppRadius.button),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm + 4),
-            child: Stack(
+            padding: const EdgeInsets.all(AppSpacing.s12),
+            child: Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: selected ? Colors.white : AppColors.tealWash,
-                        borderRadius: BorderRadius.circular(AppRadius.sm + 2),
+                Icon(
+                  _windowIcons[window],
+                  size: 26,
+                  color: selected ? AppColors.teal : AppColors.slate400,
+                ),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        windowName(l10n, window),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.card,
                       ),
-                      child: Icon(
-                        _windowIcons[window],
-                        size: 20,
-                        color: AppColors.teal,
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          windowName(l10n, window),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: text.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        Text(
-                          caption,
-                          style: text.bodySmall?.copyWith(
-                            color: AppColors.slate,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                      Text(caption, style: AppText.body.copyWith(fontSize: 12)),
+                    ],
+                  ),
                 ),
                 if (selected)
-                  const Positioned(
-                    top: 0,
-                    right: 0,
-                    child: CircleAvatar(
-                      radius: 11,
-                      backgroundColor: AppColors.teal,
-                      child: Icon(Icons.check, size: 15, color: Colors.white),
-                    ),
-                  ),
+                  const Icon(Icons.check, size: 20, color: AppColors.teal),
               ],
             ),
           ),
@@ -506,27 +484,26 @@ class _TimeField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: text.bodySmall?.copyWith(color: AppColors.slate)),
-        const SizedBox(height: 4),
+        Text(label, style: AppText.body.copyWith(fontSize: 12)),
+        const SizedBox(height: AppSpacing.xs),
         Material(
           color: AppColors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.field),
             side: BorderSide(
-              color: error ? AppColors.danger : AppColors.slate,
-              width: error ? 2 : 1.2,
+              color: error ? AppColors.danger : AppColors.hairline,
+              width: error ? 2 : 1,
             ),
           ),
           child: InkWell(
             key: fieldKey,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.field),
             onTap: onTap,
-            child: SizedBox(
-              height: 56,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Row(
@@ -541,11 +518,10 @@ class _TimeField extends StatelessWidget {
                         minutes == null
                             ? l10n.timingPickTime
                             : formatTime(minutes!),
-                        style: text.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: AppText.card.copyWith(
                           color: minutes == null
-                              ? AppColors.slate
-                              : AppColors.ink,
+                              ? AppColors.slate400
+                              : AppColors.brandInk,
                         ),
                       ),
                     ),
@@ -573,19 +549,18 @@ class _DateRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        side: const BorderSide(color: AppColors.slate, width: 1.2),
+        borderRadius: BorderRadius.circular(AppRadius.field),
+        side: const BorderSide(color: AppColors.hairline),
       ),
       child: InkWell(
         key: const Key('discover_date_btn'),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.field),
         onTap: onTap,
-        child: SizedBox(
-          height: 56,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Row(
@@ -600,13 +575,14 @@ class _DateRow extends StatelessWidget {
                     date == null
                         ? l10n.timingChooseDate
                         : formatDate(date!, locale),
-                    style: text.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: date == null ? AppColors.slate : AppColors.ink,
+                    style: AppText.card.copyWith(
+                      color: date == null
+                          ? AppColors.slate400
+                          : AppColors.brandInk,
                     ),
                   ),
                 ),
-                const Icon(Icons.chevron_right),
+                const Icon(Icons.chevron_right, color: AppColors.slate400),
               ],
             ),
           ),
@@ -679,23 +655,25 @@ class _DaysPicker extends StatelessWidget {
                   ),
                   child: Container(
                     width: 44,
-                    height: 44,
+                    height: 48,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: days.contains(d) ? AppColors.teal : Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      color: days.contains(d)
+                          ? AppColors.teal
+                          : AppColors.surface,
                       border: Border.all(
                         color: days.contains(d)
                             ? AppColors.teal
-                            : AppColors.slate,
-                        width: 1.4,
+                            : AppColors.hairline,
                       ),
                     ),
                     child: Text(
                       dayShort(d, locale).substring(0, 1),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: days.contains(d) ? Colors.white : AppColors.ink,
+                      style: AppText.card.copyWith(
+                        color: days.contains(d)
+                            ? Colors.white
+                            : AppColors.brandInk,
                       ),
                     ),
                   ),
@@ -703,6 +681,15 @@ class _DaysPicker extends StatelessWidget {
               ),
           ],
         ),
+        if (days.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: Text(
+              l10n.timingDaysSelected(days.length),
+              key: const Key('discover_days_count'),
+              style: AppText.body,
+            ),
+          ),
       ],
     );
   }
@@ -716,7 +703,7 @@ class _TimingSkeleton extends StatelessWidget {
     height: h,
     decoration: BoxDecoration(
       color: AppColors.hairline,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(AppRadius.sm),
     ),
   );
 
@@ -734,28 +721,35 @@ class _TimingSkeleton extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: AppSpacing.md,
           crossAxisSpacing: AppSpacing.md,
-          childAspectRatio: 1.6,
+          childAspectRatio: 2.2,
           children: [
             for (var i = 0; i < 6; i++)
               Material(
                 color: AppColors.surface,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  borderRadius: BorderRadius.circular(AppRadius.button),
                   side: const BorderSide(color: AppColors.hairline),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
                       const CircleAvatar(
                         radius: 14,
                         backgroundColor: AppColors.hairline,
                       ),
-                      const Spacer(),
-                      _box(w: 80),
-                      const SizedBox(height: 6),
-                      _box(w: 50, h: 10),
+                      const SizedBox(width: AppSpacing.s12),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _box(w: 70),
+                            const SizedBox(height: AppSpacing.xs),
+                            _box(w: 50, h: 10),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

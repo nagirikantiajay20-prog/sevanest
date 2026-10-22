@@ -471,6 +471,14 @@
     }
   },
   "timingErrDays": "Choose at least one day.",
+  "timingDaysSelected": "{count, plural, =1{Selected: 1 day} other{Selected: {count} days}}",
+  "@timingDaysSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "timingErrDate": "Choose a date.",
   "timingEditSummary": "Edit times and days",
   "timeSheetSub": "In 15-minute steps",

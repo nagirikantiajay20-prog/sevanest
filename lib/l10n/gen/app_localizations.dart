@@ -1750,6 +1750,12 @@ abstract class AppLocalizations {
   /// **'Choose at least one day.'**
   String get timingErrDays;
 
+  /// No description provided for @timingDaysSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Selected: 1 day} other{Selected: {count} days}}'**
+  String timingDaysSelected(int count);
+
   /// No description provided for @timingErrDate.
   ///
   /// In en, this message translates to:

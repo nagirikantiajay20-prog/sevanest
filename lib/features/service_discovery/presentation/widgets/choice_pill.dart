@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 
 /// Rounded selectable pill (hours chips, day shortcuts, date shortcuts) with a check when selected.
 class ChoicePill extends StatelessWidget {
@@ -22,8 +23,8 @@ class ChoicePill extends StatelessWidget {
       color: selected ? AppColors.tealWash : AppColors.surface,
       shape: StadiumBorder(
         side: BorderSide(
-          color: selected ? AppColors.teal : AppColors.slate,
-          width: selected ? 2 : 1.2,
+          color: selected ? AppColors.teal : AppColors.hairline,
+          width: selected ? 1.5 : 1,
         ),
       ),
       child: InkWell(
@@ -41,11 +42,14 @@ class ChoicePill extends StatelessWidget {
               children: [
                 if (selected) ...[
                   const Icon(Icons.check, size: 18, color: AppColors.teal),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                 ],
                 Text(
                   label,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  style: AppText.label.copyWith(
+                    fontSize: 14,
+                    color: selected ? AppColors.teal : AppColors.brandInk,
+                  ),
                 ),
               ],
             ),
