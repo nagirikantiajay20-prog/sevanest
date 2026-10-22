@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -94,7 +96,7 @@ class DiscoverScaffold extends ConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.fieldBg,
+      backgroundColor: AppColors.surface,
       body: Column(
         children: [
           Container(
@@ -103,71 +105,68 @@ class DiscoverScaffold extends ConsumerWidget {
             child: Column(
               children: [
                 SizedBox(
-                  height: 56,
+                  height: 64,
                   child: Row(
                     children: [
-                      IconButton(
-                        key: const Key('app_back_btn'),
-                        tooltip: l10n.back,
-                        onPressed: back,
-                        icon: const Icon(Icons.chevron_left, size: 32),
+                      const SizedBox(width: AppSpacing.sm),
+                      Material(
+                        color: AppColors.surface,
+                        elevation: 1,
+                        shadowColor: AppColors.navy.withValues(alpha: 0.2),
+                        shape: const CircleBorder(
+                          side: BorderSide(color: AppColors.hairline),
+                        ),
+                        child: IconButton(
+                          key: const Key('app_back_btn'),
+                          tooltip: l10n.back,
+                          onPressed: back,
+                          icon: const Icon(
+                            Icons.chevron_left,
+                            color: AppColors.brandInk,
+                          ),
+                        ),
                       ),
                       Expanded(
-                        child: Text(
-                          title,
-                          textAlign: TextAlign.center,
-                          style: text.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              title,
+                              textAlign: TextAlign.center,
+                              style: AppText.card,
+                            ),
+                            Text(
+                              l10n.discoverStep(step, kDiscoverSteps),
+                              key: const Key('discover_progress_label'),
+                              style: AppText.body.copyWith(
+                                fontSize: 12,
+                                color: AppColors.slate400,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       IconButton(
                         key: const Key('discover_close_btn'),
                         tooltip: l10n.discoverClose,
                         onPressed: close,
-                        icon: const Icon(Icons.close, size: 28),
+                        icon: const Icon(
+                          Icons.close,
+                          size: 26,
+                          color: AppColors.brandInk,
+                        ),
                       ),
+                      const SizedBox(width: AppSpacing.xs),
                     ],
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.sm,
-                    AppSpacing.md,
-                    AppSpacing.md,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.discoverStep(step, kDiscoverSteps),
-                        key: const Key('discover_progress_label'),
-                        style: text.bodyMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: [
-                          for (var i = 1; i <= kDiscoverSteps; i++)
-                            Expanded(
-                              child: Container(
-                                height: 4,
-                                margin: EdgeInsets.only(
-                                  right: i == kDiscoverSteps ? 0 : 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: i <= step
-                                      ? AppColors.tealDeep
-                                      : AppColors.hairline,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  child: SnStepBar(step: step, total: kDiscoverSteps),
                 ),
+                const SizedBox(height: AppSpacing.sm),
                 const Divider(height: 1, color: AppColors.hairline),
               ],
             ),
@@ -248,7 +247,7 @@ class SelectionChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.slate, width: 1.2),
+            border: Border.all(color: AppColors.hairline),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -286,20 +285,16 @@ class StepHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          heading,
-          style: text.headlineMedium?.copyWith(
-            color: AppColors.navy,
-            fontWeight: FontWeight.w800,
-          ),
+        Semantics(
+          header: true,
+          child: Text(heading, style: AppText.title.copyWith(fontSize: 26)),
         ),
         if (sub != null) ...[
           const SizedBox(height: AppSpacing.sm),
-          Text(sub!, style: text.bodyMedium?.copyWith(color: AppColors.ink)),
+          Text(sub!, style: AppText.bodyLarge),
         ],
       ],
     );
