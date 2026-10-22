@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
@@ -152,7 +153,6 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final draft = ref.watch(requirementDraftProvider);
     final category = ref.watch(selectedCategoryProvider);
     final config =
@@ -256,7 +256,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   period == BudgetPeriod.hourly
                       ? l10n.budgetSubHourly
                       : l10n.budgetSubMonthly,
-                  style: text.bodyMedium?.copyWith(color: AppColors.ink),
+                  style: AppText.bodyLarge,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -266,15 +266,18 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.hairline.withValues(alpha: .6),
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppColors.tealWash,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
                 child: Text(
                   period == BudgetPeriod.hourly
                       ? l10n.budgetPerHour
                       : l10n.budgetPerMonth,
                   key: const Key('discover_period_chip'),
-                  style: text.bodySmall?.copyWith(fontWeight: FontWeight.w700),
+                  style: AppText.label.copyWith(
+                    fontSize: 12,
+                    color: AppColors.teal,
+                  ),
                 ),
               ),
             ],
@@ -343,7 +346,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                       BudgetIssue.missing => l10n.budgetErrMissing,
                     },
                     key: const Key('discover_budget_error'),
-                    style: text.bodyMedium?.copyWith(color: AppColors.danger),
+                    style: AppText.bodyLarge.copyWith(color: AppColors.danger),
                   ),
                 ),
               ],
@@ -426,7 +429,6 @@ class _GuidanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final g = async.value;
 
     if (g == null && async.hasError) {
@@ -452,16 +454,8 @@ class _GuidanceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.guidanceErrTitle,
-                      style: text.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      l10n.guidanceErrBody,
-                      style: text.bodyMedium?.copyWith(color: AppColors.slate),
-                    ),
+                    Text(l10n.guidanceErrTitle, style: AppText.heading),
+                    Text(l10n.guidanceErrBody, style: AppText.bodyLarge),
                     const SizedBox(height: AppSpacing.sm),
                     SizedBox(
                       width: 160,
@@ -530,63 +524,66 @@ class _GuidanceCard extends StatelessWidget {
       key: const Key('discover_guidance_card'),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: tint,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: border,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.navy, AppColors.actionDeepTeal],
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const CircleAvatar(
-            radius: 18,
-            backgroundColor: Colors.white,
-            child: Icon(Icons.trending_up, color: AppColors.teal),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.guidanceTypical(engagementName, serviceName, g.city),
-                  style: text.bodyMedium,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                Text(
-                  g.period == BudgetPeriod.hourly
-                      ? l10n.budgetRangePerHour(range)
-                      : l10n.budgetRangePerMonth(range),
-                  key: const Key('discover_guidance_range'),
-                  style: text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                Wrap(
-                  alignment: WrapAlignment.spaceBetween,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                child: const Icon(Icons.trending_up, color: Colors.white),
+              ),
+              const SizedBox(width: AppSpacing.s12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      g.basis,
-                      style: text.bodySmall?.copyWith(color: AppColors.slate),
+                      l10n.guidanceTypical(engagementName, serviceName, g.city),
+                      style: AppText.body.copyWith(color: Colors.white70),
                     ),
-                    TextButton(
-                      key: const Key('discover_use_range_btn'),
-                      onPressed: () => onUse(g),
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(kMinTapTarget, kMinTapTarget),
-                        foregroundColor: AppColors.teal,
-                      ),
-                      child: Text(
-                        l10n.guidanceUse,
-                        style: const TextStyle(
-                          decoration: TextDecoration.underline,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    Text(
+                      g.period == BudgetPeriod.hourly
+                          ? l10n.budgetRangePerHour(range)
+                          : l10n.budgetRangePerMonth(range),
+                      key: const Key('discover_guidance_range'),
+                      style: AppText.heading.copyWith(color: Colors.white),
+                    ),
+                    Text(
+                      g.basis,
+                      style: AppText.body.copyWith(
+                        fontSize: 12,
+                        color: Colors.white60,
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.s12),
+          FilledButton(
+            key: const Key('discover_use_range_btn'),
+            onPressed: () => onUse(g),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.teal,
+              minimumSize: const Size.fromHeight(kMinTapTarget),
             ),
+            child: Text(l10n.guidanceUse),
           ),
         ],
       ),
@@ -602,7 +599,6 @@ class _Readout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     if (flexible) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -610,12 +606,9 @@ class _Readout extends StatelessWidget {
           Text(
             l10n.budgetAny,
             key: const Key('discover_any_budget'),
-            style: text.headlineMedium?.copyWith(
-              color: AppColors.navy,
-              fontWeight: FontWeight.w800,
-            ),
+            style: AppText.title.copyWith(fontSize: 26),
           ),
-          Text(l10n.budgetAnyBody, style: text.bodySmall),
+          Text(l10n.budgetAnyBody, style: AppText.body),
         ],
       );
     }
@@ -623,10 +616,7 @@ class _Readout extends StatelessWidget {
     Widget col(String label, String value, Key k) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: text.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-        ),
+        Text(label, style: AppText.card.copyWith(fontSize: 14)),
         // Scales down instead of overflowing at large text sizes or amounts like ₹4,00,000.
         FittedBox(
           fit: BoxFit.scaleDown,
@@ -634,10 +624,7 @@ class _Readout extends StatelessWidget {
           child: Text(
             value,
             key: k,
-            style: text.headlineMedium?.copyWith(
-              color: AppColors.navy,
-              fontWeight: FontWeight.w800,
-            ),
+            style: AppText.title.copyWith(fontSize: 26),
           ),
         ),
       ],
@@ -742,7 +729,7 @@ class _RangeBar extends StatelessWidget {
                 t,
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.slate),
+                ).textTheme.bodySmall?.copyWith(color: AppColors.slate400),
               ),
           ],
         ),
@@ -768,15 +755,10 @@ class _AmountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final color = error ? AppColors.danger : AppColors.slate;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-        ),
+        Text(label, style: AppText.card.copyWith(fontSize: 14)),
         const SizedBox(height: 4),
         TextField(
           key: fieldKey,
@@ -785,14 +767,17 @@ class _AmountField extends StatelessWidget {
           textInputAction: TextInputAction.done,
           inputFormatters: [RupeeInputFormatter()],
           onChanged: onChanged,
-          style: text.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: AppText.card,
           decoration: InputDecoration(
             prefixText: '₹ ',
             filled: true,
             fillColor: AppColors.surface,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(color: color, width: error ? 2 : 1.2),
+              borderSide: BorderSide(
+                color: error ? AppColors.danger : AppColors.hairline,
+                width: error ? 2 : 1,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.md),
