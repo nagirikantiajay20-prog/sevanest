@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 
 /// Backend error shape (observed live): { code, message, details?: [{field, messages[]}], requestId }.
@@ -19,8 +20,19 @@ AppFailure mapDioError(DioException e) {
   final status = e.response?.statusCode;
   final data = e.response?.data;
   final body = data is Map<String, dynamic> ? data : const <String, dynamic>{};
-  final message = body['message'] as String?;
+  final failure = _byStatus(status, body, e);
+  // Only unexpected outcomes are reported, and only their status: no bodies, no PII.
+  if (failure is ServerFailure || failure is UnknownFailure) {
+    telemetry.nonFatal(
+      Exception('${failure.runtimeType} status=$status'),
+      null,
+    );
+  }
+  return failure;
+}
 
+AppFailure _byStatus(int? status, Map<String, dynamic> body, DioException e) {
+  final message = body['message'] as String?;
   return switch (status) {
     400 || 422 => ValidationFailure(
       message,

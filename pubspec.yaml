@@ -9,7 +9,9 @@ environment:
 dependencies:
   cached_network_image: ^4.0.3
   dio: ^5.11.1
+  firebase_analytics: ^12.6.0
   firebase_core: ^4.15.0
+  firebase_crashlytics: ^5.4.0
   firebase_messaging: ^16.7.0
   flutter:
     sdk: flutter
@@ -42,8 +44,20 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   geocoding_platform_interface: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/branding/logo_full.png
+    - assets/branding/logo_mark.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/app_icon.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/branding/app_icon_foreground.png
+  remove_alpha_ios: true
 

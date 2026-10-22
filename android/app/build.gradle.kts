@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -15,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "in.sevanest.sevanest_customer"
+    namespace = "com.sevanest.customer"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -42,6 +43,8 @@ android {
     productFlavors {
         create("dev") {
             dimension = "env"
+            // Dev release APKs (manual testing) are debug-signed; stg and prod need the release keystore.
+            signingConfig = signingConfigs.getByName("debug")
             resValue("string", "app_name", "SevaNest Dev")
         }
         create("stg") {
@@ -67,8 +70,20 @@ android {
 
     buildTypes {
         release {
-            // Falls back to debug signing ONLY when no key.properties exists (local builds). Never ship that.
-            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+            // No debug-signing fallback: a release build without android/key.properties fails (see below).
+            signingConfig = signingConfigs.findByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+}
+
+// Fail any stg/prod release assemble/bundle early when the keystore config is missing.
+if (!keystorePropertiesFile.exists()) {
+    gradle.taskGraph.whenReady {
+        if (allTasks.any { Regex("(assemble|bundle)(Stg|Prod)Release").matches(it.name) }) {
+            throw GradleException("android/key.properties is missing: release builds must be signed with the release keystore.")
         }
     }
 }

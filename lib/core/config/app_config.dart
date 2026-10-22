@@ -36,13 +36,6 @@ class AppConfig {
   bool get isProd => env == AppEnv.prod;
 }
 
-/// Mirrors pubspec `version` (shown on the splash screen).
-const appVersionLabel = '0.1.0';
-
-/// Terms / privacy URLs are not defined yet (OPEN_QUESTIONS #17; `GET /legal/current` returns null).
-const String? termsUrl = null;
-const String? privacyUrl = null;
-
 final appConfigProvider = Provider<AppConfig>(
   (ref) => throw UnimplementedError(
     'appConfigProvider must be overridden in bootstrap',

@@ -1,4 +1,4 @@
-package `in`.sevanest.sevanest_customer
+package com.sevanest.customer
 
 import io.flutter.embedding.android.FlutterActivity
 
