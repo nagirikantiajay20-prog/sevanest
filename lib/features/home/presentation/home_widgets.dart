@@ -101,7 +101,7 @@ class HomeErrorCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           const CircleAvatar(
             radius: 24,
-            backgroundColor: Color(0xFFFEE2E2),
+            backgroundColor: AppColors.dangerBg,
             child: Icon(Icons.error_outline, color: AppColors.danger),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -238,7 +238,7 @@ class OnboardingCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 14,
-                    backgroundColor: const Color(0xFFE6F6F3),
+                    backgroundColor: AppColors.tealSoftAlt,
                     child: Text(
                       '${i + 1}',
                       style: const TextStyle(
@@ -348,7 +348,7 @@ class _BookingTile extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFDCFCE7),
+                      color: AppColors.successBg,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -387,7 +387,7 @@ class _BookingTile extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: const Color(0xFFFEF3C7),
+                    backgroundColor: AppColors.warnBg,
                     child: Text(
                       booking.initials,
                       style: const TextStyle(
@@ -682,7 +682,7 @@ class ShortlistPreviewCard extends StatelessWidget {
               key: Key('home_fav_worker_${w.workerId}'),
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
-                backgroundColor: const Color(0xFFE6F6F3),
+                backgroundColor: AppColors.tealSoftAlt,
                 child: Text(
                   w.name.isEmpty ? '?' : w.name[0],
                   style: const TextStyle(color: AppColors.teal),
@@ -744,7 +744,7 @@ class ResumeCard extends StatelessWidget {
       key: const Key('home_resume_card'),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF8F5),
+        color: AppColors.tealWash,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: AppColors.teal.withValues(alpha: .3)),
       ),

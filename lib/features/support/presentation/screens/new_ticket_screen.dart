@@ -374,7 +374,7 @@ class _State extends ConsumerState<NewTicketScreen> {
                   child: _Notice(
                     key: const Key('ticket_safety_card'),
                     icon: Icons.gpp_maybe_outlined,
-                    color: const Color(0xFFFEE2E2),
+                    color: AppColors.dangerBg,
                     iconColor: AppColors.danger,
                     title: l10n.tkNewSafetyTitle,
                     body: l10n.tkNewSafetyBody,
@@ -572,9 +572,9 @@ class _AttachedChip extends ConsumerWidget {
     return DecoratedBox(
       key: const Key('ticket_related_chip'),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDFA),
+        color: AppColors.tealMist,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: const Color(0xFFCCEFE9)),
+        border: Border.all(color: AppColors.tealLine),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -621,7 +621,7 @@ class _CategoryTile extends StatelessWidget {
         selected: selected,
         inMutuallyExclusiveGroup: true,
         child: Material(
-          color: selected ? const Color(0xFFF0FDFA) : AppColors.surface,
+          color: selected ? AppColors.tealMist : AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
             side: BorderSide(
@@ -645,8 +645,8 @@ class _CategoryTile extends StatelessWidget {
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: category.isSafety
-                          ? const Color(0xFFFEE2E2)
-                          : const Color(0xFFE6F7F4),
+                          ? AppColors.dangerBg
+                          : AppColors.tealSoft,
                       child: Icon(
                         supportCategoryIcon(category),
                         size: 22,
@@ -767,7 +767,7 @@ class _PickRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Material(
-        color: selected ? const Color(0xFFF0FDFA) : AppColors.surface,
+        color: selected ? AppColors.tealMist : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
           side: BorderSide(
@@ -811,7 +811,7 @@ class _Created extends StatelessWidget {
                     const SizedBox(height: AppSpacing.lg),
                     const CircleAvatar(
                       radius: 48,
-                      backgroundColor: Color(0xFFDCFCE7),
+                      backgroundColor: AppColors.successBg,
                       child: Icon(
                         Icons.check_circle_outline,
                         size: 48,

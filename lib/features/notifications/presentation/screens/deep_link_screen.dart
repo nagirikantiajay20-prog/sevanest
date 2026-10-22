@@ -78,7 +78,7 @@ class DeepLinkScreen extends ConsumerWidget {
                   children: [
                     const CircleAvatar(
                       radius: 36,
-                      backgroundColor: Color(0xFFF1F5F9),
+                      backgroundColor: AppColors.slateBg,
                       child: Icon(Icons.search_off, size: 36),
                     ),
                     const SizedBox(height: AppSpacing.md),

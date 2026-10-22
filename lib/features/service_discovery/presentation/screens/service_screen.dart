@@ -174,7 +174,7 @@ class _ServiceTile extends StatelessWidget {
       button: true,
       label: category.name,
       child: Material(
-        color: selected ? const Color(0xFFEAF8F5) : AppColors.surface,
+        color: selected ? AppColors.tealWash : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           side: BorderSide(

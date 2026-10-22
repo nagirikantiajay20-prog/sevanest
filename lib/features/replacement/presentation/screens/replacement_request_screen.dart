@@ -374,7 +374,7 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
                   child: DecoratedBox(
                     key: const Key('replacement_safety_card'),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFEE2E2),
+                      color: AppColors.dangerBg,
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Padding(
@@ -581,7 +581,7 @@ class _ReasonTile extends StatelessWidget {
         selected: selected,
         inMutuallyExclusiveGroup: true,
         child: Material(
-          color: selected ? const Color(0xFFF0FDFA) : AppColors.surface,
+          color: selected ? AppColors.tealMist : AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.md),
             side: BorderSide(
@@ -604,7 +604,7 @@ class _ReasonTile extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: const Color(0xFFE6F7F4),
+                      backgroundColor: AppColors.tealSoft,
                       child: Icon(
                         _reasonIcon(reason),
                         size: 22,
@@ -644,9 +644,9 @@ class _NextSteps extends StatelessWidget {
     final steps = [l10n.repNext1, l10n.repNext2, l10n.repNext3];
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDFA),
+        color: AppColors.tealMist,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: const Color(0xFFCCEFE9)),
+        border: Border.all(color: AppColors.tealLine),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -755,7 +755,7 @@ class _Received extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.lg),
                     const CircleAvatar(
                       radius: 48,
-                      backgroundColor: Color(0xFFDCFCE7),
+                      backgroundColor: AppColors.successBg,
                       child: Icon(
                         Icons.check_circle_outline,
                         size: 48,

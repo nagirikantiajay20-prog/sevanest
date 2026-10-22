@@ -444,7 +444,7 @@ class _GuidanceCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const CircleAvatar(
-                backgroundColor: Color(0xFFFEE2E2),
+                backgroundColor: AppColors.dangerBg,
                 child: Icon(Icons.error_outline, color: AppColors.danger),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -482,7 +482,7 @@ class _GuidanceCard extends StatelessWidget {
       );
     }
 
-    const tint = Color(0xFFEAF8F5);
+    const tint = AppColors.tealWash;
     final border = Border.all(color: AppColors.teal.withValues(alpha: .25));
     if (g == null) {
       return Semantics(

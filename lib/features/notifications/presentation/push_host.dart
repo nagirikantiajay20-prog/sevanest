@@ -216,7 +216,7 @@ class _Banner extends StatelessWidget {
             child: Row(
               children: [
                 const CircleAvatar(
-                  backgroundColor: Color(0xFFE6F7F4),
+                  backgroundColor: AppColors.tealSoft,
                   child: Icon(
                     Icons.notifications_outlined,
                     color: AppColors.teal,

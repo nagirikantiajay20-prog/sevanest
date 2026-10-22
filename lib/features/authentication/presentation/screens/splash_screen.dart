@@ -170,7 +170,7 @@ class _Progress extends StatelessWidget {
                   value: v,
                   minHeight: 4,
                   color: AppColors.amber,
-                  backgroundColor: const Color(0xFF576C88),
+                  backgroundColor: AppColors.navyMuted,
                 ),
               ),
             ),

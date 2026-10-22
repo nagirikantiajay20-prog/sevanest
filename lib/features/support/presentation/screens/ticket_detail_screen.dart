@@ -637,7 +637,7 @@ class _Resolution extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const CircleAvatar(
-                backgroundColor: Color(0xFFDCFCE7),
+                backgroundColor: AppColors.successBg,
                 child: Icon(
                   Icons.check_circle_outline,
                   color: AppColors.success,
@@ -866,7 +866,7 @@ class _LoadError extends StatelessWidget {
           children: [
             const CircleAvatar(
               radius: 36,
-              backgroundColor: Color(0xFFFEE2E2),
+              backgroundColor: AppColors.dangerBg,
               child: Icon(
                 Icons.error_outline,
                 size: 36,

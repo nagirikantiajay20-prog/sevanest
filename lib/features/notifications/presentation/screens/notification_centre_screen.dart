@@ -198,7 +198,7 @@ class _State extends ConsumerState<NotificationCentreScreen>
                 children: [
                   const CircleAvatar(
                     radius: 32,
-                    backgroundColor: Color(0xFFFEE2E2),
+                    backgroundColor: AppColors.dangerBg,
                     child: Icon(
                       Icons.error_outline,
                       size: 32,
@@ -429,11 +429,11 @@ class _Row extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Material(
-        color: unread ? const Color(0xFFF0FDFA) : AppColors.surface,
+        color: unread ? AppColors.tealMist : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           side: BorderSide(
-            color: unread ? const Color(0xFFB7E4DC) : AppColors.hairline,
+            color: unread ? AppColors.tealLineStrong : AppColors.hairline,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -454,9 +454,7 @@ class _Row extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: unread
-                      ? Colors.white
-                      : const Color(0xFFE6F7F4),
+                  backgroundColor: unread ? Colors.white : AppColors.tealSoft,
                   child: Icon(_iconFor(n.target?.type), color: AppColors.teal),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -554,7 +552,7 @@ class _Empty extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 32,
-              backgroundColor: const Color(0xFFDCFCE7),
+              backgroundColor: AppColors.successBg,
               child: Icon(icon, size: 32, color: AppColors.success),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -618,7 +616,7 @@ class _OffBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warnBg,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: const Color(0xFFFDE68A)),
+        border: Border.all(color: AppColors.warnLine),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),

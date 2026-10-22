@@ -235,7 +235,7 @@ class _CurrentLocationButton extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEAF8F5),
+                    color: AppColors.tealWash,
                     borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                   ),
                   child: finding
@@ -301,7 +301,7 @@ class _PermissionOffCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const CircleAvatar(
-              backgroundColor: Color(0xFFFEE2E2),
+              backgroundColor: AppColors.dangerBg,
               child: Icon(Icons.location_off_outlined, color: AppColors.danger),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -485,7 +485,7 @@ class _AddressRow extends StatelessWidget {
       selected: selected,
       inMutuallyExclusiveGroup: true,
       child: Material(
-        color: selected ? const Color(0xFFEAF8F5) : AppColors.surface,
+        color: selected ? AppColors.tealWash : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           side: BorderSide(

@@ -201,7 +201,7 @@ class _State extends ConsumerState<SupportHomeScreen>
               children: [
                 const CircleAvatar(
                   radius: 32,
-                  backgroundColor: Color(0xFFFEE2E2),
+                  backgroundColor: AppColors.dangerBg,
                   child: Icon(
                     Icons.error_outline,
                     size: 32,
@@ -450,9 +450,9 @@ class _SafetyCard extends StatelessWidget {
     return DecoratedBox(
       key: const Key('support_safety_card'),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEE2E2),
+        color: AppColors.dangerBg,
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: const Color(0xFFFCA5A5)),
+        border: Border.all(color: AppColors.dangerLine),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -514,7 +514,7 @@ class _TopicTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                backgroundColor: const Color(0xFFE6F7F4),
+                backgroundColor: AppColors.tealSoft,
                 child: Icon(
                   supportCategoryIcon(category),
                   color: category.isSafety ? AppColors.danger : AppColors.teal,
@@ -559,7 +559,7 @@ class _Contact extends StatelessWidget {
       key: key,
       enabled: tap != null,
       leading: CircleAvatar(
-        backgroundColor: const Color(0xFFE6F7F4),
+        backgroundColor: AppColors.tealSoft,
         child: Icon(
           icon,
           color: tap == null ? AppColors.slate : AppColors.teal,

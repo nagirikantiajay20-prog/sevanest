@@ -20,13 +20,13 @@ class SnBadge extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final (Color bg, Color fg, IconData icon) = switch (tone) {
       SnBadgeTone.success => (
-        const Color(0xFFDFF3E7),
-        const Color(0xFF14532D),
+        AppColors.successBgAlt,
+        AppColors.successInk,
         Icons.verified,
       ),
       SnBadgeTone.warning => (
-        const Color(0xFFFFF1D6),
-        const Color(0xFF7A4B00),
+        AppColors.amberBg,
+        AppColors.amberInk,
         Icons.hourglass_top,
       ),
       SnBadgeTone.error => (

@@ -309,7 +309,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
         Icons.groups_outlined,
         l10n.repBannerReadyTitle(choices.length),
         l10n.repBannerReadyBody,
-        const Color(0xFFF0FDFA),
+        AppColors.tealMist,
         AppColors.teal,
       ),
       ReplacementView.scheduled => (
@@ -318,21 +318,21 @@ class _State extends ConsumerState<ReplacementStatusScreen>
         start == null
             ? null
             : l10n.repBannerScheduledBody(formatDate(start, locale)),
-        const Color(0xFFDCFCE7),
+        AppColors.successBg,
         AppColors.success,
       ),
       ReplacementView.complete => (
         Icons.check_circle_outline,
         l10n.repBannerCompleteTitle,
         l10n.repBannerCompleteBody,
-        const Color(0xFFDCFCE7),
+        AppColors.successBg,
         AppColors.success,
       ),
       ReplacementView.rejected => (
         Icons.cancel_outlined,
         l10n.repBannerRejectedTitle,
         l10n.repBannerRejectedBody,
-        const Color(0xFFFEE2E2),
+        AppColors.dangerBg,
         AppColors.danger,
       ),
       ReplacementView.cancelled => (
@@ -874,7 +874,7 @@ class _LoadError extends StatelessWidget {
             children: [
               const CircleAvatar(
                 radius: 32,
-                backgroundColor: Color(0xFFFEE2E2),
+                backgroundColor: AppColors.dangerBg,
                 child: Icon(Icons.error_outline, color: AppColors.danger),
               ),
               const SizedBox(height: AppSpacing.md),

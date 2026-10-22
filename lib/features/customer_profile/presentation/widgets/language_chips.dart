@@ -26,7 +26,7 @@ class LanguageChips extends StatelessWidget {
             selected: selected == l.code,
             showCheckmark: true,
             checkmarkColor: AppColors.teal,
-            selectedColor: const Color(0xFFF0FDFA),
+            selectedColor: AppColors.tealMist,
             backgroundColor: Colors.white,
             labelStyle: TextStyle(
               fontSize: 17,

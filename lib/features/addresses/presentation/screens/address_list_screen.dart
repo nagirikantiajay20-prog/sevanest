@@ -162,7 +162,7 @@ class _AddressCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFF0FDFA),
+                  color: AppColors.tealMist,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

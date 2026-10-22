@@ -238,9 +238,7 @@ class _ReportState extends ConsumerState<_ReportSheet> {
             Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: Material(
-                color: _reason == r
-                    ? const Color(0xFFF0FDFA)
-                    : AppColors.surface,
+                color: _reason == r ? AppColors.tealMist : AppColors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   side: BorderSide(

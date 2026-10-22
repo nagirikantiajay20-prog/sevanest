@@ -504,7 +504,7 @@ class _Box extends StatelessWidget {
       _ => AppColors.slate,
     };
     final fill = style == _BoxStyle.locked
-        ? const Color(0xFFEFF3F8)
+        ? AppColors.navyMist
         : AppColors.fieldBg;
     return AspectRatio(
       aspectRatio: 48 / 56,

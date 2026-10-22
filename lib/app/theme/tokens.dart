@@ -22,6 +22,27 @@ abstract final class AppColors {
   ); // TBD-BRAND (matches approved auth designs)
   static const surface = Color(0xFFFFFFFF);
   static const error = Color(0xFFB3261E);
+
+  // Tints and borders used by the feature screens (values moved here unchanged from inline literals).
+  static const dangerBg = Color(0xFFFEE2E2);
+  static const tealWash = Color(0xFFEAF8F5);
+  static const tealMist = Color(0xFFF0FDFA);
+  static const successBg = Color(0xFFDCFCE7);
+  static const tealSoft = Color(0xFFE6F7F4);
+  static const tealSoftAlt = Color(0xFFE6F6F3);
+  static const tealLine = Color(0xFFCCEFE9);
+  static const amberBg = Color(0xFFFFF1D6);
+  static const dangerBgSoft = Color(0xFFFEF2F2);
+  static const warnLine = Color(0xFFFDE68A);
+  static const dangerLine = Color(0xFFFCA5A5);
+  static const slateBg = Color(0xFFF1F5F9);
+  static const navyMist = Color(0xFFEFF3F8);
+  static const navyMistAlt = Color(0xFFEDF1F7);
+  static const successBgAlt = Color(0xFFDFF3E7);
+  static const tealLineStrong = Color(0xFFB7E4DC);
+  static const amberInk = Color(0xFF7A4B00);
+  static const navyMuted = Color(0xFF576C88);
+  static const successInk = Color(0xFF14532D);
 }
 
 abstract final class AppSpacing {

@@ -151,7 +151,7 @@ class _EngagementCard extends StatelessWidget {
         enabled: enabled,
         inMutuallyExclusiveGroup: true,
         child: Material(
-          color: selected ? const Color(0xFFEAF8F5) : AppColors.surface,
+          color: selected ? AppColors.tealWash : AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.lg),
             side: BorderSide(
@@ -172,7 +172,7 @@ class _EngagementCard extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: selected ? Colors.white : const Color(0xFFEAF8F5),
+                      color: selected ? Colors.white : AppColors.tealWash,
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: Icon(labels.icon, color: AppColors.teal),

@@ -116,7 +116,7 @@ class _TimeSheetState extends State<_TimeSheet> {
                   Container(
                     height: _itemExtent,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEAF8F5),
+                      color: AppColors.tealWash,
                       border: Border.all(color: AppColors.teal, width: 1.5),
                       borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),

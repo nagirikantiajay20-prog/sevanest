@@ -19,7 +19,7 @@ class ChoicePill extends StatelessWidget {
     selected: selected,
     button: true,
     child: Material(
-      color: selected ? const Color(0xFFEAF8F5) : AppColors.surface,
+      color: selected ? AppColors.tealWash : AppColors.surface,
       shape: StadiumBorder(
         side: BorderSide(
           color: selected ? AppColors.teal : AppColors.slate,

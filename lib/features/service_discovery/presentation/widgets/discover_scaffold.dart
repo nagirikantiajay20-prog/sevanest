@@ -336,7 +336,7 @@ class StepErrorCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             const CircleAvatar(
               radius: 24,
-              backgroundColor: Color(0xFFFEE2E2),
+              backgroundColor: AppColors.dangerBg,
               child: Icon(Icons.wifi_off, color: AppColors.danger),
             ),
             const SizedBox(height: AppSpacing.md),

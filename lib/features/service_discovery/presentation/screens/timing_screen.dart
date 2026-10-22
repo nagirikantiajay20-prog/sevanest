@@ -415,7 +415,7 @@ class _WindowCard extends StatelessWidget {
       selected: selected,
       button: true,
       child: Material(
-        color: selected ? const Color(0xFFEAF8F5) : AppColors.surface,
+        color: selected ? AppColors.tealWash : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           side: BorderSide(
@@ -439,9 +439,7 @@ class _WindowCard extends StatelessWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: selected
-                            ? Colors.white
-                            : const Color(0xFFEAF8F5),
+                        color: selected ? Colors.white : AppColors.tealWash,
                         borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                       ),
                       child: Icon(

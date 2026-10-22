@@ -163,7 +163,7 @@ class _SnCalendarState extends State<SnCalendar> {
         ? AppColors.teal
         : enabled
         ? null
-        : const Color(0xFFEDF1F7);
+        : AppColors.navyMistAlt;
     final Color fg = isSelected
         ? Colors.white
         : enabled
