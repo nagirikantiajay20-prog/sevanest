@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
@@ -84,10 +86,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final failed = _state == _Splash.failed;
+    final version = ref.watch(appVersionProvider).value;
     return Scaffold(
-      body: AuthBackdrop(
-        archAlignment: const Alignment(0, -0.05),
-        archSize: const Size(315, 570),
+      backgroundColor: AppColors.surface,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.surface, AppColors.surface, AppColors.ivory],
+            stops: [0, 0.55, 1],
+          ),
+        ),
         child: SafeArea(
           child: CustomScrollView(
             slivers: [
@@ -99,10 +109,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   ),
                   child: Column(
                     children: [
-                      const Spacer(flex: 5),
-                      const LogoTile(size: 280, full: true),
+                      const SizedBox(height: AppSpacing.xl),
+                      const _Brand(),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        l10n.splashTagline,
+                        textAlign: TextAlign.center,
+                        style: AppText.display,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      const _TrustRow(),
+                      const Spacer(),
                       if (failed) ...[
-                        const Spacer(flex: 3),
                         _FailedCard(
                           onRetry: _boot,
                           onSignInAgain: _signInAgain,
@@ -111,27 +129,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                           key: const Key('splash_support_link'),
                           label: l10n.contactSupport,
                           icon: Icons.headset_mic_outlined,
-                          onDark: true,
                           onTap: () => openSupport(context, ref),
                         ),
-                      ] else ...[
-                        const Spacer(flex: 5),
-                        const _TrustRow(),
-                        const Spacer(flex: 2),
+                      ] else
                         _Progress(slow: _state == _Splash.slow),
-                      ],
                       const SizedBox(height: AppSpacing.md),
-                      Text(
-                        ref.watch(appVersionProvider).value == null
-                            ? ''
-                            : l10n.versionLabel(
-                                ref.watch(appVersionProvider).value!,
-                              ),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.55),
-                          fontSize: 16,
+                      if (version != null)
+                        Text(
+                          l10n.versionLabel(version),
+                          style: AppText.body.copyWith(
+                            color: AppColors.slate400,
+                          ),
                         ),
-                      ),
                       const SizedBox(height: AppSpacing.md),
                     ],
                   ),
@@ -139,6 +148,46 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Brand extends StatelessWidget {
+  const _Brand();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Semantics(
+      label: l10n.appName,
+      child: ExcludeSemantics(
+        child: Column(
+          children: [
+            Image.asset('assets/branding/logo_mark.png', height: 120),
+            const SizedBox(height: AppSpacing.sm),
+            const Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Seva',
+                    style: TextStyle(color: AppColors.brandInk),
+                  ),
+                  TextSpan(
+                    text: 'Nest',
+                    style: TextStyle(color: AppColors.teal),
+                  ),
+                ],
+                style: TextStyle(
+                  fontFamily: AppFonts.heading,
+                  fontSize: 36,
+                  height: 1.1,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -155,35 +204,35 @@ class _Progress extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       label: slow ? l10n.splashSlow : l10n.splashLoading,
-      child: Column(
-        children: [
-          SizedBox(
-            width: 160,
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(end: slow ? 0.8 : 0.35),
-              duration: const Duration(milliseconds: 900),
-              curve: Curves.easeOut,
-              builder: (context, v, _) => ClipRRect(
-                borderRadius: BorderRadius.circular(2),
-                child: LinearProgressIndicator(
-                  key: const Key('splash_progress'),
-                  value: v,
-                  minHeight: 4,
-                  color: AppColors.amber,
-                  backgroundColor: AppColors.navyMuted,
+      child: ExcludeSemantics(
+        child: Column(
+          children: [
+            SizedBox(
+              width: 160,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(end: slow ? 0.8 : 0.35),
+                duration: const Duration(milliseconds: 900),
+                curve: Curves.easeOut,
+                builder: (context, v, _) => ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  child: LinearProgressIndicator(
+                    key: const Key('splash_progress'),
+                    value: v,
+                    minHeight: 4,
+                    color: AppColors.teal,
+                    backgroundColor: AppColors.hairline,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            slow ? l10n.splashSlow : l10n.splashLoading,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 16,
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              slow ? l10n.splashSlow : l10n.splashLoading,
+              textAlign: TextAlign.center,
+              style: AppText.bodyLarge,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -198,30 +247,36 @@ class _TrustRow extends StatelessWidget {
     Widget item(IconData icon, String label) => Expanded(
       child: Column(
         children: [
-          Icon(icon, color: Colors.white.withValues(alpha: 0.85), size: 28),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: AppColors.tileWell,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppColors.teal, size: 24),
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: 15,
-            ),
+            style: AppText.card.copyWith(fontSize: 13),
           ),
         ],
       ),
     );
-    final divider = Container(
+    const divider = VerticalDivider(
       width: 1,
-      height: 56,
-      color: Colors.white.withValues(alpha: 0.2),
+      thickness: 1,
+      color: AppColors.hairline,
     );
     return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           item(Icons.verified_user_outlined, l10n.trustVerifiedWorkers),
           divider,
-          item(Icons.lock_outline, l10n.trustSecurePayments),
+          item(Icons.credit_card_outlined, l10n.trustSecurePayments),
           divider,
           item(Icons.headset_mic_outlined, l10n.trustHelpSupport),
         ],
@@ -238,13 +293,7 @@ class _FailedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.lg + 4),
-      ),
+    return SnCard(
       child: Semantics(
         liveRegion: true,
         child: Column(
@@ -259,24 +308,20 @@ class _FailedCard extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.warning_amber_rounded,
-                color: AppColors.warn,
+                color: AppColors.warnIcon,
               ),
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.splashFailedTitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
-              ),
+              style: AppText.screenTitle,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.splashFailedBody,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: AppColors.slate),
+              style: AppText.bodyLarge,
             ),
             const SizedBox(height: AppSpacing.lg),
             SnButton(
