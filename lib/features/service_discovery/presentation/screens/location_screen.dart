@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_form_screen.dart';
@@ -153,6 +155,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
         ),
         children: [
           Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               if (category != null)
@@ -211,41 +215,42 @@ class _CurrentLocationButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Material(
       color: AppColors.surface,
+      elevation: 2,
+      shadowColor: AppColors.navy.withValues(alpha: 0.15),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.button),
         side: BorderSide(
-          color: finding ? AppColors.teal : AppColors.slate,
-          width: finding ? 2 : 1.2,
+          color: finding ? AppColors.teal : AppColors.hairline,
+          width: finding ? 2 : 1,
         ),
       ),
       child: InkWell(
         key: const Key('discover_use_location_btn'),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.button),
         onTap: finding ? null : onTap,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 64),
+          constraints: const BoxConstraints(minHeight: 72),
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm + 4),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Row(
               children: [
-                Container(
+                SizedBox(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.tealWash,
-                    borderRadius: BorderRadius.circular(AppRadius.sm + 2),
-                  ),
                   child: finding
                       ? const Padding(
                           padding: EdgeInsets.all(10),
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.my_location, color: AppColors.teal),
+                      : const Icon(
+                          Icons.location_on_outlined,
+                          color: AppColors.teal,
+                          size: 28,
+                        ),
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,20 +259,19 @@ class _CurrentLocationButton extends StatelessWidget {
                         finding
                             ? l10n.locationFinding
                             : l10n.locationUseCurrent,
-                        style: text.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: AppText.heading,
                       ),
                       Text(
                         finding
                             ? l10n.locationFindingSub
                             : l10n.locationUseCurrentSub,
-                        style: text.bodySmall?.copyWith(color: AppColors.slate),
+                        style: AppText.body,
                       ),
                     ],
                   ),
                 ),
-                if (!finding) const Icon(Icons.chevron_right),
+                if (!finding)
+                  const Icon(Icons.chevron_right, color: AppColors.teal),
               ],
             ),
           ),
@@ -288,63 +292,49 @@ class _PermissionOffCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: const BorderSide(color: AppColors.hairline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const CircleAvatar(
-              backgroundColor: AppColors.dangerBg,
-              child: Icon(Icons.location_off_outlined, color: AppColors.danger),
+    return SnCard(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CircleAvatar(
+            backgroundColor: AppColors.dangerBg,
+            child: Icon(Icons.location_off_outlined, color: AppColors.danger),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.locationOffTitle,
+                  key: const Key('discover_location_off'),
+                  style: AppText.heading,
+                ),
+                Text(l10n.locationOffBody, style: AppText.bodyLarge),
+                const SizedBox(height: AppSpacing.sm),
+                SizedBox(
+                  width: 180,
+                  child: SnButton(
+                    key: const Key('discover_open_settings_btn'),
+                    label: l10n.locationOpenSettings,
+                    variant: SnButtonVariant.secondary,
+                    onPressed: onOpenSettings,
+                  ),
+                ),
+                TextButton(
+                  key: const Key('discover_choose_saved_btn'),
+                  onPressed: onChooseSaved,
+                  child: Text(
+                    l10n.locationChooseSaved,
+                    style: const TextStyle(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.locationOffTitle,
-                    key: const Key('discover_location_off'),
-                    style: text.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    l10n.locationOffBody,
-                    style: text.bodyMedium?.copyWith(color: AppColors.slate),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  SizedBox(
-                    width: 180,
-                    child: SnButton(
-                      key: const Key('discover_open_settings_btn'),
-                      label: l10n.locationOpenSettings,
-                      variant: SnButtonVariant.secondary,
-                      onPressed: onOpenSettings,
-                    ),
-                  ),
-                  TextButton(
-                    key: const Key('discover_choose_saved_btn'),
-                    onPressed: onChooseSaved,
-                    child: Text(
-                      l10n.locationChooseSaved,
-                      style: const TextStyle(
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -357,40 +347,29 @@ class _NoAddressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: const BorderSide(color: AppColors.hairline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            const Icon(
-              Icons.add_home_outlined,
-              size: 56,
-              color: AppColors.navy,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              l10n.locationNoAddressTitle,
-              style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            Text(
-              l10n.locationNoAddressBody,
-              textAlign: TextAlign.center,
-              style: text.bodyMedium?.copyWith(color: AppColors.slate),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SnButton(
-              key: const Key('discover_empty_add_address_btn'),
-              label: l10n.addAddress,
-              onPressed: () => onAdd(),
-            ),
-          ],
-        ),
+    return SnCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.add_home_outlined,
+            size: 56,
+            color: AppColors.brandInk,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(l10n.locationNoAddressTitle, style: AppText.heading),
+          Text(
+            l10n.locationNoAddressBody,
+            textAlign: TextAlign.center,
+            style: AppText.bodyLarge,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SnButton(
+            key: const Key('discover_empty_add_address_btn'),
+            label: l10n.addAddress,
+            onPressed: () => onAdd(),
+          ),
+        ],
       ),
     );
   }
@@ -414,38 +393,32 @@ class _SavedList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Expanded(
-              child: Text(
-                l10n.locationSaved,
-                style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-              ),
-            ),
+            Expanded(child: Text(l10n.locationSaved, style: AppText.heading)),
             Text(
               l10n.locationSavedCount(addresses.length),
-              style: text.bodySmall?.copyWith(color: AppColors.slate),
+              style: AppText.body,
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
-        for (final a in addresses)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: _AddressRow(
-              address: a,
-              selected: a.id == selectedId,
-              onTap: () => onSelect(a),
-              onEdit: () => context.push<Object?>(
-                Routes.path(Routes.addressEdit, {'id': a.id}),
-              ),
-              onMakeDefault: () => onMakeDefault(a),
+        for (final a in addresses) ...[
+          const Divider(height: 1, color: AppColors.hairline),
+          _AddressRow(
+            address: a,
+            selected: a.id == selectedId,
+            onTap: () => onSelect(a),
+            onEdit: () => context.push<Object?>(
+              Routes.path(Routes.addressEdit, {'id': a.id}),
             ),
+            onMakeDefault: () => onMakeDefault(a),
           ),
+        ],
+        const Divider(height: 1, color: AppColors.hairline),
         TextButton.icon(
           key: const Key('discover_add_address_btn'),
           onPressed: onAdd,
@@ -475,8 +448,6 @@ class _AddressRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    final title = address.title;
     final detail = [
       address.fullLine,
       '${address.city} ${address.pincode}'.trim(),
@@ -486,64 +457,62 @@ class _AddressRow extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       child: Material(
         color: selected ? AppColors.tealWash : AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: BorderSide(
-            color: selected ? AppColors.teal : AppColors.slate,
-            width: selected ? 2 : 1.2,
-          ),
-        ),
         child: InkWell(
           key: Key('discover_address_${address.id}'),
-          borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: onTap,
-          child: Padding(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: selected ? AppColors.teal : Colors.transparent,
+                  width: 3,
+                ),
+              ),
+            ),
             padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm + 4,
+              AppSpacing.s12,
+              AppSpacing.s12,
               AppSpacing.xs,
-              AppSpacing.sm + 4,
+              AppSpacing.s12,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.location_on_outlined,
-                    color: AppColors.teal,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.surface : AppColors.canvasCool,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
+                  child: const Icon(Icons.home_outlined, color: AppColors.teal),
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 8,
+                        spacing: AppSpacing.sm,
                         children: [
-                          Text(
-                            title,
-                            style: text.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                          Text(address.title, style: AppText.heading),
                           if (address.isDefault)
                             Container(
                               key: Key('discover_default_tag_${address.id}'),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
+                                horizontal: AppSpacing.sm,
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.hairline),
+                                color: AppColors.slateBg,
+                                borderRadius: BorderRadius.circular(
+                                  AppRadius.pill,
+                                ),
                               ),
                               child: Text(
                                 l10n.defaultTag,
-                                style: text.bodySmall,
+                                style: AppText.body.copyWith(fontSize: 11),
                               ),
                             ),
                         ],
@@ -552,9 +521,7 @@ class _AddressRow extends StatelessWidget {
                         detail,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: text.bodyMedium?.copyWith(
-                          color: AppColors.slate,
-                        ),
+                        style: AppText.bodyLarge,
                       ),
                     ],
                   ),
@@ -576,25 +543,15 @@ class _AddressRow extends StatelessWidget {
                       ],
                     ),
                     selected
-                        ? const CircleAvatar(
-                            radius: 13,
-                            backgroundColor: AppColors.teal,
-                            child: Icon(
-                              Icons.check,
-                              size: 17,
-                              color: Colors.white,
-                            ),
+                        ? const Icon(
+                            Icons.radio_button_checked,
+                            color: AppColors.teal,
+                            size: 28,
                           )
-                        : Container(
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.slate,
-                                width: 1.5,
-                              ),
-                            ),
+                        : const Icon(
+                            Icons.circle_outlined,
+                            color: AppColors.slate300,
+                            size: 28,
                           ),
                     const SizedBox(height: AppSpacing.sm),
                   ],
@@ -617,31 +574,30 @@ class _AddressSkeleton extends StatelessWidget {
     child: Column(
       children: [
         for (var i = 0; i < 3; i++)
-          Container(
-            height: 88,
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.hairline),
-            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
             child: Row(
               children: [
-                const CircleAvatar(backgroundColor: AppColors.hairline),
-                const SizedBox(width: AppSpacing.md),
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.hairline,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 10,
+                        height: 14,
                         width: 90,
                         color: AppColors.hairline,
                       ),
-                      const SizedBox(height: 8),
-                      Container(height: 10, color: AppColors.hairline),
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(height: 12, color: AppColors.hairline),
                     ],
                   ),
                 ),
