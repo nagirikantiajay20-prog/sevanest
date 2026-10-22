@@ -20,13 +20,13 @@ class SnBadge extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final (Color bg, Color fg, IconData icon) = switch (tone) {
       SnBadgeTone.success => (
-        AppColors.successBgAlt,
-        AppColors.successInk,
+        AppColors.successBg,
+        AppColors.successText,
         Icons.verified,
       ),
       SnBadgeTone.warning => (
-        AppColors.amberBg,
-        AppColors.amberInk,
+        AppColors.warnBg,
+        AppColors.warnText,
         Icons.hourglass_top,
       ),
       SnBadgeTone.error => (
@@ -43,7 +43,7 @@ class SnBadge extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(

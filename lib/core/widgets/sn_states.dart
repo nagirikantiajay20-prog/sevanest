@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -18,19 +19,34 @@ class _CenteredMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: Theme.of(context).colorScheme.outline),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: const BoxDecoration(
+                color: AppColors.tealWash,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 32, color: AppColors.teal),
+            ),
             const SizedBox(height: AppSpacing.md),
-            Text(title, style: text.titleMedium, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: AppText.screenTitle,
+              textAlign: TextAlign.center,
+            ),
             if (message != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              Text(message!, textAlign: TextAlign.center),
+              Text(
+                message!,
+                style: AppText.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
             ],
             if (action != null) ...[
               const SizedBox(height: AppSpacing.lg),
@@ -103,6 +119,32 @@ class SnErrorState extends StatelessWidget {
   }
 }
 
+/// No connection. Same look as [SnErrorState] with a Wi-Fi icon; the retry is optional.
+class SnOfflineState extends StatelessWidget {
+  const SnOfflineState({required this.message, this.onRetry, super.key});
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _CenteredMessage(
+      icon: Icons.wifi_off_rounded,
+      title: l10n.errorTitle,
+      message: message,
+      action: onRetry == null
+          ? null
+          : SnButton(
+              key: const Key('offline_retry_btn'),
+              label: l10n.retry,
+              onPressed: onRetry,
+              variant: SnButtonVariant.secondary,
+            ),
+    );
+  }
+}
+
 /// Static placeholder rows shown while loading.
 class SnSkeletonList extends StatelessWidget {
   const SnSkeletonList({this.count = 4, super.key});
@@ -111,7 +153,7 @@ class SnSkeletonList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.surfaceContainerHighest;
+    const color = AppColors.slateBg;
     return Semantics(
       label: AppLocalizations.of(context).loading,
       child: ListView.separated(

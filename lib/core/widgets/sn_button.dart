@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 
-enum SnButtonVariant { primary, secondary, text }
+/// [deep] is the darker teal CTA the design uses for the main action on dense screens.
+enum SnButtonVariant { primary, deep, secondary, text }
 
 /// The only button style used in the app. While [isLoading] it ignores taps (AGENTS §65).
 class SnButton extends StatelessWidget {
@@ -30,9 +31,9 @@ class SnButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final VoidCallback? tap = isLoading ? null : onPressed;
     final scheme = Theme.of(context).colorScheme;
-    final spinnerColor = variant == SnButtonVariant.primary
-        ? scheme.onPrimary
-        : scheme.primary;
+    final onFilled =
+        variant == SnButtonVariant.primary || variant == SnButtonVariant.deep;
+    final spinnerColor = onFilled ? scheme.onPrimary : scheme.primary;
     final Widget child = isLoading
         ? Row(
             mainAxisSize: MainAxisSize.min,
@@ -85,6 +86,16 @@ class SnButton extends StatelessWidget {
                 disabledForegroundColor: scheme.onPrimary,
               )
             : null,
+        child: child,
+      ),
+      SnButtonVariant.deep => FilledButton(
+        onPressed: tap,
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.actionDeepTeal,
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: isLoading ? AppColors.actionDeepTeal : null,
+          disabledForegroundColor: isLoading ? Colors.white : null,
+        ),
         child: child,
       ),
       SnButtonVariant.secondary => OutlinedButton(

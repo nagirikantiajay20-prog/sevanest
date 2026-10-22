@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sevanest_customer/core/widgets/sn_bottom_nav.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Bottom navigation shell (modules/03). Tab set is final pending design (OPEN_QUESTIONS #21).
@@ -19,35 +20,35 @@ class MainShell extends StatelessWidget {
       },
       child: Scaffold(
         body: navigationShell,
-        bottomNavigationBar: NavigationBar(
+        bottomNavigationBar: SnBottomNav(
           selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: (i) => navigationShell.goBranch(
+          onSelected: (i) => navigationShell.goBranch(
             i,
             initialLocation: i == navigationShell.currentIndex,
           ),
-          destinations: [
-            NavigationDestination(
+          items: [
+            SnNavItem(
               key: const Key('nav_home'),
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
+              icon: Icons.home_outlined,
+              selectedIcon: Icons.home,
               label: l10n.navHome,
             ),
-            NavigationDestination(
+            SnNavItem(
               key: const Key('nav_bookings'),
-              icon: const Icon(Icons.receipt_long_outlined),
-              selectedIcon: const Icon(Icons.receipt_long),
+              icon: Icons.receipt_long_outlined,
+              selectedIcon: Icons.receipt_long,
               label: l10n.navBookings,
             ),
-            NavigationDestination(
+            SnNavItem(
               key: const Key('nav_favourites'),
-              icon: const Icon(Icons.favorite_border),
-              selectedIcon: const Icon(Icons.favorite),
+              icon: Icons.favorite_border,
+              selectedIcon: Icons.favorite,
               label: l10n.navFavourites,
             ),
-            NavigationDestination(
+            SnNavItem(
               key: const Key('nav_account'),
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person),
+              icon: Icons.person_outline,
+              selectedIcon: Icons.person,
               label: l10n.navAccount,
             ),
           ],

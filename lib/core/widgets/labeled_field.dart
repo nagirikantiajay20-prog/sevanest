@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 
 /// Bold label above a bordered field, with a helper line that turns into a red error (design: screens 04, 08).
 /// The field is keyed [name]; its error text is keyed `${name}_error`.
@@ -21,6 +22,7 @@ class LabeledField extends StatelessWidget {
     this.enabled = true,
     this.readOnly = false,
     this.suffixIcon,
+    this.prefixIcon,
     this.onTap,
     this.onChanged,
     this.onSubmitted,
@@ -44,6 +46,7 @@ class LabeledField extends StatelessWidget {
   final bool enabled;
   final bool readOnly;
   final Widget? suffixIcon;
+  final IconData? prefixIcon;
   final VoidCallback? onTap;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -51,25 +54,18 @@ class LabeledField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasError = error != null;
-    OutlineInputBorder border(Color c) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      borderSide: BorderSide(color: c, width: 1.5),
+    OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.field),
+      borderSide: BorderSide(color: c, width: w),
     );
-    final idle = hasError ? AppColors.danger : AppColors.slate;
+    final idle = hasError ? AppColors.danger : AppColors.hairline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Flexible(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.ink,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: Text(label, style: AppText.label.copyWith(fontSize: 15)),
             ),
             if (optionalTag != null) ...[
               const SizedBox(width: AppSpacing.sm),
@@ -104,15 +100,17 @@ class LabeledField extends StatelessWidget {
           maxLength: maxLength,
           onChanged: onChanged,
           onSubmitted: onSubmitted,
-          style: const TextStyle(
-            color: AppColors.ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
+          style: AppText.card.copyWith(fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.slate),
+            hintStyle: AppText.card.copyWith(
+              fontWeight: FontWeight.w400,
+              color: AppColors.slate400,
+            ),
             counterText: '',
+            prefixIcon: prefixIcon == null
+                ? null
+                : Icon(prefixIcon, color: AppColors.slate),
             suffixIcon: suffixIcon,
             filled: !enabled || readOnly && onTap == null,
             fillColor: AppColors.fieldBg,
@@ -123,7 +121,10 @@ class LabeledField extends StatelessWidget {
             border: border(idle),
             enabledBorder: border(idle),
             disabledBorder: border(AppColors.hairline),
-            focusedBorder: border(hasError ? AppColors.danger : AppColors.teal),
+            focusedBorder: border(
+              hasError ? AppColors.danger : AppColors.teal,
+              1.5,
+            ),
           ),
         ),
         if (hasError)
