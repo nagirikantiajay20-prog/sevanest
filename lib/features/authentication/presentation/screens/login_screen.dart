@@ -596,11 +596,7 @@ class _LanguageChip extends StatelessWidget {
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.language_rounded,
-                color: AppColors.brandInk,
-                size: 20,
-              ),
+              Icon(Icons.language_rounded, color: AppColors.brandInk, size: 20),
               SizedBox(width: AppSpacing.xs),
               Text('EN', style: AppText.card),
               Icon(Icons.expand_more_rounded, color: AppColors.brandInk),

@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
@@ -84,90 +86,103 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: AuthBackdrop(
-        archAlignment: const Alignment(0, -0.82),
-        archSize: const Size(145, 230),
+      backgroundColor: AppColors.ivory,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.ivory, AppColors.surface],
+          ),
+        ),
         child: SafeArea(
-          bottom: false,
           child: CustomScrollView(
             slivers: [
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.md,
-                        AppSpacing.sm,
-                        AppSpacing.md,
-                        0,
-                      ),
-                      child: Stack(
-                        alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AuthBackButton(onPressed: _leave),
+                      const SizedBox(height: AppSpacing.md),
+                      Row(
                         children: [
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: AuthBackButton(onPressed: _leave),
+                          Image.asset(
+                            'assets/branding/logo_mark.png',
+                            height: 44,
+                            excludeFromSemantics: true,
                           ),
-                          const Padding(
-                            padding: EdgeInsets.only(top: AppSpacing.xs),
-                            child: LogoTile(size: 72),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md + 4,
-                        horizontal: AppSpacing.lg,
-                      ),
-                      child: Semantics(
-                        header: true,
-                        child: Text(
-                          l10n.otpTitle,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: AuthSheet(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.otpEnterCode(otpLength),
-                              style: const TextStyle(
-                                color: AppColors.slate,
-                                fontSize: 17,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Row(
+                          const SizedBox(width: AppSpacing.s12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    '+91 ${_spaced(otp.mobile)}',
-                                    key: const Key('otp_mobile_text'),
-                                    style: const TextStyle(
-                                      color: AppColors.ink,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
+                                Text(
+                                  l10n.appName,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.screenTitle,
                                 ),
-                                AuthLink(
-                                  key: const Key('otp_change_number_btn'),
-                                  label: l10n.changeNumber,
-                                  onTap: _leave,
+                                Text(
+                                  l10n.brandCaption,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.body.copyWith(
+                                    fontSize: 10,
+                                    letterSpacing: 1.2,
+                                    color: AppColors.slate400,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: AppSpacing.md),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          l10n.otpTitle,
+                          style: AppText.display.copyWith(fontSize: 32),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        l10n.otpEnterCode(otpLength),
+                        style: AppText.bodyLarge,
+                      ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              '+91 ${_spaced(otp.mobile)}',
+                              key: const Key('otp_mobile_text'),
+                              style: AppText.title.copyWith(
+                                fontFamily: AppFonts.body,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            key: const Key('otp_change_number_btn'),
+                            tooltip: l10n.changeNumber,
+                            constraints: const BoxConstraints.tightFor(
+                              width: kMinTapTarget,
+                              height: kMinTapTarget,
+                            ),
+                            onPressed: _leave,
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              color: AppColors.slate,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      SnCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             _OtpBoxes(
                               controller: _controller,
                               focusNode: _focus,
@@ -183,8 +198,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             _Status(otp: otp, onResend: _resend),
-                            const Spacer(),
-                            const Divider(height: 1, color: AppColors.hairline),
                             const SizedBox(height: AppSpacing.md),
                             _VerifyButton(
                               loading: otp.phase == OtpPhase.verifying,
@@ -206,20 +219,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                                     l10n.otpFooter(
                                       (otp.expiresInSeconds / 60).ceil(),
                                     ),
-                                    style: const TextStyle(
-                                      color: AppColors.slate,
-                                      fontSize: 15,
-                                    ),
+                                    style: AppText.body,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: AppSpacing.sm),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -501,11 +510,11 @@ class _Box extends StatelessWidget {
       _BoxStyle.error => AppColors.danger,
       _BoxStyle.success => AppColors.success,
       _ when focused => AppColors.teal,
-      _ => AppColors.slate,
+      _ => AppColors.hairline,
     };
     final fill = style == _BoxStyle.locked
         ? AppColors.navyMist
-        : AppColors.fieldBg;
+        : AppColors.surface;
     return AspectRatio(
       aspectRatio: 48 / 56,
       child: Container(

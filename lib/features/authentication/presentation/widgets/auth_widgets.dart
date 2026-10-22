@@ -119,7 +119,7 @@ class LogoTile extends StatelessWidget {
   }
 }
 
-/// Round translucent back button (OTP screen).
+/// Round white back button (OTP screen).
 class AuthBackButton extends StatelessWidget {
   const AuthBackButton({required this.onPressed, super.key});
   final VoidCallback onPressed;
@@ -127,16 +127,16 @@ class AuthBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white.withValues(alpha: 0.12),
-      shape: CircleBorder(
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.25)),
-      ),
+      color: AppColors.surface,
+      elevation: 1,
+      shadowColor: AppColors.navy.withValues(alpha: 0.2),
+      shape: const CircleBorder(side: BorderSide(color: AppColors.hairline)),
       child: IconButton(
         key: const Key('app_back_btn'),
         tooltip: AppLocalizations.of(context).back,
         constraints: const BoxConstraints.tightFor(width: 48, height: 48),
         onPressed: onPressed,
-        icon: const Icon(Icons.chevron_left_rounded, color: Colors.white),
+        icon: const Icon(Icons.chevron_left_rounded, color: AppColors.brandInk),
       ),
     );
   }
@@ -281,7 +281,7 @@ class AuthLink extends StatelessWidget {
               Icon(icon, size: 20, color: color),
               const SizedBox(width: AppSpacing.sm),
             ],
-            Text(label, style: style),
+            Flexible(child: Text(label, style: style)),
           ],
         ),
       ),
