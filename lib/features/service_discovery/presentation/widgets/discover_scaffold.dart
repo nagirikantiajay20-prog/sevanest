@@ -104,8 +104,8 @@ class DiscoverScaffold extends ConsumerWidget {
             padding: EdgeInsets.only(top: top),
             child: Column(
               children: [
-                SizedBox(
-                  height: 64,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 64),
                   child: Row(
                     children: [
                       const SizedBox(width: AppSpacing.sm),
