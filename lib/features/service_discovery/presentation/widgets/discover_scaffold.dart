@@ -239,40 +239,38 @@ class SelectionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.hairline),
+    return Container(
+      padding: const EdgeInsets.only(left: AppSpacing.s12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: AppColors.hairline),
+        boxShadow: AppShadows.card,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 18, color: AppColors.teal),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Flexible(child: Text(label, style: AppText.card)),
+          const Text(' · ', style: AppText.body),
+          TextButton(
+            key: changeKey,
+            onPressed: onChange,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(kMinTapTarget, kMinTapTarget),
+              padding: const EdgeInsets.only(right: AppSpacing.s12),
+              foregroundColor: AppColors.teal,
+            ),
+            child: Text(
+              l10n.discoverChange,
+              style: AppText.label.copyWith(fontSize: 13),
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18, color: AppColors.teal),
-                const SizedBox(width: 6),
-              ],
-              Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-            ],
-          ),
-        ),
-        TextButton(
-          key: changeKey,
-          onPressed: onChange,
-          style: TextButton.styleFrom(
-            minimumSize: const Size(kMinTapTarget, kMinTapTarget),
-            foregroundColor: AppColors.teal,
-          ),
-          child: Text(
-            l10n.discoverChange,
-            style: const TextStyle(decoration: TextDecoration.underline),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

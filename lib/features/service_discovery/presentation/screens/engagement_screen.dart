@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
@@ -75,17 +76,17 @@ class _EngagementScreenState extends ConsumerState<EngagementScreen> {
     } else {
       content = Column(
         children: [
-          for (final o in category.engagements)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: _EngagementCard(
-                option: o,
-                selected: draft.engagement == o.type,
-                onTap: () => ref
-                    .read(requirementDraftProvider.notifier)
-                    .setEngagement(o.type),
-              ),
+          for (final o in category.engagements) ...[
+            const Divider(height: 1, color: AppColors.hairline),
+            _EngagementCard(
+              option: o,
+              selected: draft.engagement == o.type,
+              onTap: () => ref
+                  .read(requirementDraftProvider.notifier)
+                  .setEngagement(o.type),
             ),
+          ],
+          const Divider(height: 1, color: AppColors.hairline),
         ],
       );
     }
@@ -141,7 +142,6 @@ class _EngagementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final labels = engagementLabels(l10n, option.type);
     final enabled = option.available;
     return Opacity(
@@ -150,60 +150,41 @@ class _EngagementCard extends StatelessWidget {
         selected: selected,
         enabled: enabled,
         inMutuallyExclusiveGroup: true,
-        child: Material(
-          color: selected ? AppColors.tealWash : AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            side: BorderSide(
-              color: selected ? AppColors.teal : AppColors.slate,
-              width: selected ? 2 : 1.2,
-            ),
-          ),
-          child: InkWell(
-            key: Key('discover_engagement_${option.type.name}'),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            onTap: enabled ? onTap : null,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: selected ? Colors.white : AppColors.tealWash,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Icon(labels.icon, color: AppColors.teal),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          labels.name,
-                          style: text.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+        child: InkWell(
+          key: Key('discover_engagement_${option.type.name}'),
+          onTap: enabled ? onTap : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(labels.name, style: AppText.heading),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(labels.description, style: AppText.bodyLarge),
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.s12,
+                          vertical: AppSpacing.xs,
                         ),
-                        Text(
-                          labels.description,
-                          style: text.bodyMedium?.copyWith(
-                            color: AppColors.slate,
-                          ),
+                        decoration: BoxDecoration(
+                          color: AppColors.tealWash,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
                         ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Row(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               enabled ? Icons.schedule : Icons.lock_outline,
-                              size: 16,
-                              color: AppColors.slate,
+                              size: 14,
+                              color: AppColors.teal,
                             ),
-                            const SizedBox(width: 6),
-                            Expanded(
+                            const SizedBox(width: AppSpacing.xs),
+                            Flexible(
                               child: Text(
                                 option.unavailableReason ?? labels.meta,
                                 key: enabled
@@ -211,40 +192,31 @@ class _EngagementCard extends StatelessWidget {
                                     : Key(
                                         'discover_engagement_reason_${option.type.name}',
                                       ),
-                                style: text.bodySmall?.copyWith(
-                                  color: AppColors.slate,
+                                style: AppText.label.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.teal,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  selected
-                      ? const CircleAvatar(
-                          radius: 14,
-                          backgroundColor: AppColors.teal,
-                          child: Icon(
-                            Icons.check,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.slate,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                ],
-              ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                selected
+                    ? const Icon(
+                        Icons.check_circle,
+                        color: AppColors.teal,
+                        size: 28,
+                      )
+                    : const Icon(
+                        Icons.circle_outlined,
+                        color: AppColors.slate300,
+                        size: 28,
+                      ),
+              ],
             ),
           ),
         ),
@@ -262,34 +234,30 @@ class _EngagementSkeleton extends StatelessWidget {
     child: Column(
       children: [
         for (var i = 0; i < 4; i++)
-          Container(
-            height: 96,
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: AppColors.hairline),
-            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Row(
               children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: AppColors.hairline,
-                ),
-                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 10,
-                        width: 80,
+                        height: 14,
+                        width: 90,
                         color: AppColors.hairline,
                       ),
-                      const SizedBox(height: 8),
-                      Container(height: 10, color: AppColors.hairline),
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(height: 12, color: AppColors.hairline),
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        height: 20,
+                        width: 140,
+                        decoration: BoxDecoration(
+                          color: AppColors.hairline,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                        ),
+                      ),
                     ],
                   ),
                 ),
