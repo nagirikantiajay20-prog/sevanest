@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
@@ -42,9 +43,11 @@ void main() {
     WidgetTester t, {
     List<Address>? addrs,
     bool failAddresses = false,
+    void Function(FakeCatalogRepository)? setup,
   }) async {
     useTestPhone(t);
     catalog = FakeCatalogRepository();
+    setup?.call(catalog);
     addresses = FakeAddressRepository(addrs ?? [_home, _office]);
     location = FakeLocationService();
     if (failAddresses) addresses.failList = const NetworkFailure();
@@ -141,10 +144,8 @@ void main() {
         findsOneWidget,
       );
     });
-
     testWidgets('DISC-01 error -> Try again refetches', (t) async {
-      await launch(t);
-      catalog.failNext = const NetworkFailure();
+      await launch(t, setup: (c) => c.failNext = const NetworkFailure());
       await start(t);
       expect(find.text("We couldn't load services"), findsOneWidget);
       await tapKey(t, 'error_retry_btn');
@@ -156,8 +157,7 @@ void main() {
     });
 
     testWidgets('DISC-01 empty catalogue shows a message', (t) async {
-      await launch(t);
-      catalog.items = const [];
+      await launch(t, setup: (c) => c.items = const []);
       await start(t);
       expect(find.text('No services available right now'), findsOneWidget);
     });
@@ -275,16 +275,18 @@ void main() {
     );
 
     testWidgets('DISC-05 a single supported option is preselected', (t) async {
-      await launch(t);
-      catalog.items = const [
-        ServiceCategory(
-          id: 'cook',
-          name: 'Cook',
-          description: 'x',
-          icon: Icons.soup_kitchen,
-          engagements: [EngagementOption(EngagementType.daily)],
-        ),
-      ];
+      await launch(
+        t,
+        setup: (c) => c.items = const [
+          ServiceCategory(
+            id: 'cook',
+            name: 'Cook',
+            description: 'x',
+            icon: Icons.soup_kitchen,
+            engagements: [EngagementOption(EngagementType.daily)],
+          ),
+        ],
+      );
       await toEngagement(t);
       expect(
         container.read(requirementDraftProvider).engagement,
@@ -331,9 +333,18 @@ void main() {
     testWidgets('error state (resumed draft, catalogue down) -> Try again', (
       t,
     ) async {
-      await launch(t);
-      catalog.failNext = const NetworkFailure();
-      await tapKey(t, 'home_category_tile_cook'); // straight to step 2
+      await launch(t, setup: (c) => c.failNext = const NetworkFailure());
+      // Home's tiles are empty while the catalogue is down, so open step 2 with a preset draft.
+      container
+          .read(requirementDraftProvider.notifier)
+          .startWithService('cook');
+      unawaited(
+        GoRouter.of(
+          t.element(find.byType(Scaffold).first),
+        ).push(Routes.discoverEngagement),
+      );
+      await t.pumpAndSettle();
+      await t.pumpAndSettle();
       expect(find.text("We couldn't load options"), findsOneWidget);
       await tapKey(t, 'error_retry_btn');
       expect(

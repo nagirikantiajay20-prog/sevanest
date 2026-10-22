@@ -1059,6 +1059,8 @@ void main() {
           ),
         );
         await settle(t);
+        await t.ensureVisible(k('home_active_booking_card'));
+        await t.pump();
         await t.tap(k('home_active_booking_card'));
         await settle(t);
         expect(where(t), expected);

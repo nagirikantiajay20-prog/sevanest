@@ -138,10 +138,10 @@ void main() {
       expect(location(t), '/addresses/new');
     });
 
-    testWidgets('hero pause toggles its label', (t) async {
+    testWidgets('See all opens the service step with a fresh draft', (t) async {
       await launch(t);
-      await tapKey(t, 'home_hero_toggle');
-      expect(find.byTooltip('Play'), findsOneWidget);
+      await tapKey(t, 'home_see_all_btn');
+      expect(location(t), '/discover/category');
     });
   });
 
@@ -157,7 +157,7 @@ void main() {
       },
     );
 
-    testWidgets('HOME-03 hero service chip presets the draft and skips ahead', (
+    testWidgets('HOME-03 service tile presets the draft and skips ahead', (
       t,
     ) async {
       final c = await launch(t);
@@ -287,7 +287,7 @@ void main() {
       );
       await t.pumpAndSettle();
       expect(find.text("We couldn't load your home"), findsOneWidget);
-      // The hero and CTA stay usable.
+      // The CTA stays usable.
       expect(find.byKey(const Key('home_find_worker_btn')), findsOneWidget);
       await tapKey(t, 'home_retry_btn');
       expect(home.fetchCalls, 2);

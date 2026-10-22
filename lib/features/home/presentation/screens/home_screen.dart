@@ -5,16 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/mock/dev_menu.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
-import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_widgets.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/discover_navigation.dart';
@@ -24,15 +25,11 @@ import 'package:sevanest_customer/features/service_discovery/presentation/provid
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// Service ids match module 4's catalogue (`cook`, `driver`, `maid`).
-const _heroServices = [
-  (id: 'cook', icon: Icons.soup_kitchen_outlined),
-  (id: 'driver', icon: Icons.directions_car_outlined),
-  (id: 'maid', icon: Icons.cleaning_services_outlined),
-];
+/// Design shows eight service tiles; "See all" opens the full list.
+const _maxServiceTiles = 8;
 
-/// `/home` (screen 05): hero, "Find a worker" CTA, then Loading / Error / New user / Returning,
-/// each with an offline-cache banner. Sections are hidden when the backend sends nothing for them.
+/// `/home` (screen 05): header, "Find a worker" CTA, service tiles, then Loading / Error / New user /
+/// Returning, each with an offline-cache banner. Sections are hidden when the backend sends nothing.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -41,10 +38,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _slide = 0;
-  bool _paused = false;
-  Timer? _timer;
-
   @override
   void initState() {
     super.initState();
@@ -54,19 +47,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         unawaited(ref.read(requirementDraftProvider.notifier).restore());
       }
     });
-    if (ref.read(heroAutoplayProvider)) {
-      _timer = Timer.periodic(const Duration(seconds: 4), (_) {
-        if (!_paused && mounted) {
-          setState(() => _slide = (_slide + 1) % _heroServices.length);
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 
   /// "Find a worker" and the onboarding CTA: always a fresh draft (HOME-02).
@@ -75,7 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     context.push(Routes.discoverCategory);
   }
 
-  /// Hero chip: fresh draft with the service preset; the service step is skipped (HOME-03).
+  /// Service tile: fresh draft with the service preset; the service step is skipped (HOME-03).
   void _startWithService(String id) {
     ref.read(requirementDraftProvider.notifier).startWithService(id);
     context.push(Routes.discoverEngagement);
@@ -105,6 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _refresh() async {
     ref.invalidate(addressesProvider);
     ref.invalidate(profileProvider);
+    ref.invalidate(categoriesProvider);
     await ref.read(homeProvider.notifier).refresh();
   }
 
@@ -137,15 +118,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final data = home.value;
     final loading = !home.hasValue && !home.hasError;
     final offline = data?.fromCache ?? false;
-    final hero = _heroServices[_slide];
-    final heroLabel = switch (hero.id) {
-      'driver' => l10n.homeHeroDriver,
-      'maid' => l10n.homeHeroMaid,
-      _ => l10n.homeHeroCook,
-    };
+    final categories = ref.watch(categoriesProvider).value ?? const [];
 
     return Scaffold(
-      backgroundColor: AppColors.fieldBg,
+      backgroundColor: AppColors.canvasCool,
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
@@ -153,24 +129,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             _Header(
-              addressLabel: active == null
+              addressTitle: active == null
                   ? l10n.homeAddAddress
                   : '${active.area}, ${active.city}',
+              addressLine: active?.line,
               unread: ref.watch(unreadCountProvider),
               greeting: name == null || name.isEmpty
                   ? l10n.homeGreetingNoName
                   : l10n.homeGreeting(name),
-              heroLabel: heroLabel,
-              heroId: hero.id,
-              heroIcon: hero.icon,
-              slide: _slide,
-              slides: _heroServices.length,
-              paused: _paused,
               ctaEnabled: !loading && !offline,
               onAddress: () => _pickAddress(list),
               onBell: () => context.push(Routes.notifications),
-              onHeroTap: () => _startWithService(hero.id),
-              onTogglePause: () => setState(() => _paused = !_paused),
               onTitleLongPress: () => showDevMenu(context, ref),
               onFind: _startHire,
             ),
@@ -201,6 +170,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   if (addresses.hasValue && list.isEmpty) ...[
                     const AddAddressBanner(),
                     const SizedBox(height: AppSpacing.md),
+                  ],
+                  if (categories.isNotEmpty) ...[
+                    _ExploreServices(
+                      categories: categories.take(_maxServiceTiles).toList(),
+                      onTile: _startWithService,
+                      onSeeAll: _startHire,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                   ..._content(home, data, loading),
                   const SizedBox(height: AppSpacing.lg),
@@ -241,295 +218,183 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 class _Header extends StatelessWidget {
   const _Header({
-    required this.addressLabel,
+    required this.addressTitle,
+    required this.addressLine,
     required this.unread,
     required this.greeting,
-    required this.heroLabel,
-    required this.heroId,
-    required this.heroIcon,
-    required this.slide,
-    required this.slides,
-    required this.paused,
     required this.ctaEnabled,
     required this.onAddress,
     required this.onBell,
-    required this.onHeroTap,
-    required this.onTogglePause,
     required this.onTitleLongPress,
     required this.onFind,
   });
 
-  final String addressLabel;
+  final String addressTitle;
+  final String? addressLine;
   final int unread;
   final String greeting;
-  final String heroLabel;
-  final String heroId;
-  final IconData heroIcon;
-  final int slide;
-  final int slides;
-  final bool paused;
   final bool ctaEnabled;
   final VoidCallback onAddress;
   final VoidCallback onBell;
-  final VoidCallback onHeroTap;
-  final VoidCallback onTogglePause;
   final VoidCallback onTitleLongPress;
   final VoidCallback onFind;
-
-  static const _ctaHeight = 64.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final top = MediaQuery.paddingOf(context).top;
-
-    // The CTA overlaps the header's bottom edge; the stack reserves its lower half so it stays tappable.
-    return Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: _ctaHeight / 2),
-          child: Container(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              top + AppSpacing.sm,
-              AppSpacing.md,
-              AppSpacing.md + _ctaHeight / 2,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.navyDeep, AppColors.tealDeep],
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.ivory, AppColors.canvasCool],
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          top + AppSpacing.sm,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const LogoTile(size: 40),
-                    const SizedBox(width: AppSpacing.sm),
-                    Flexible(
-                      child: Material(
-                        color: Colors.white10,
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: .25),
-                          ),
-                        ),
-                        child: InkWell(
-                          key: const Key('home_address_chip'),
-                          customBorder: const StadiumBorder(),
-                          onTap: onAddress,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              minHeight: kMinTapTarget,
+                Expanded(
+                  child: InkWell(
+                    key: const Key('home_address_chip'),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    onTap: onAddress,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: kMinTapTarget,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(
+                              color: AppColors.teal,
+                              shape: BoxShape.circle,
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.md,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.location_on_outlined,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  Flexible(
-                                    child: Text(
-                                      addressLabel,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: text.titleSmall?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
+                            child: const Icon(
+                              Icons.location_on_outlined,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.s12),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        addressTitle,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppText.card,
                                       ),
                                     ),
-                                  ),
-                                  const Icon(
-                                    Icons.keyboard_arrow_down,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Semantics(
-                      label: unread > 0
-                          ? l10n.homeNotificationsUnread(unread)
-                          : l10n.homeNotifications,
-                      button: true,
-                      child: Material(
-                        color: Colors.white10,
-                        shape: CircleBorder(
-                          side: BorderSide(
-                            color: Colors.white.withValues(alpha: .25),
-                          ),
-                        ),
-                        child: InkWell(
-                          key: const Key('home_bell_btn'),
-                          customBorder: const CircleBorder(),
-                          onTap: onBell,
-                          child: SizedBox(
-                            width: kMinTapTarget,
-                            height: kMinTapTarget,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.notifications_none,
-                                  color: Colors.white,
-                                ),
-                                if (unread > 0)
-                                  const Positioned(
-                                    top: 10,
-                                    right: 12,
-                                    child: CircleAvatar(
-                                      key: Key('home_bell_badge'),
-                                      radius: 5,
-                                      backgroundColor: AppColors.amber,
+                                    const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      size: 20,
+                                      color: AppColors.brandInk,
                                     ),
+                                  ],
+                                ),
+                                if (addressLine != null)
+                                  Text(
+                                    addressLine!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppText.body.copyWith(fontSize: 12),
                                   ),
                               ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Material(
-                            color: Colors.white10,
-                            shape: StadiumBorder(
-                              side: BorderSide(
-                                color: Colors.white.withValues(alpha: .25),
-                              ),
-                            ),
-                            child: InkWell(
-                              key: Key('home_category_tile_$heroId'),
-                              customBorder: const StadiumBorder(),
-                              onTap: onHeroTap,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: kMinTapTarget,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.md,
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(
-                                        Icons.verified_user_outlined,
-                                        size: 18,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(width: AppSpacing.sm),
-                                      Flexible(
-                                        child: Text(
-                                          heroLabel,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          GestureDetector(
-                            key: const Key('home_greeting'),
-                            onLongPress: onTitleLongPress,
-                            child: Text(
-                              greeting,
-                              style: text.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            l10n.homeSubtitle,
-                            style: text.titleSmall?.copyWith(
-                              color: Colors.white70,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Container(
-                      width: 96,
-                      height: 112,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .06),
-                        border: Border.all(color: Colors.white24),
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(48),
-                          bottom: Radius.circular(12),
-                        ),
-                      ),
-                      child: Icon(heroIcon, color: Colors.white60, size: 44),
-                    ),
-                  ],
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    for (var i = 0; i < slides; i++)
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        margin: const EdgeInsets.only(right: AppSpacing.sm),
-                        width: i == slide ? 36 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: i == slide ? Colors.white : Colors.white38,
-                          borderRadius: BorderRadius.circular(4),
+                const SizedBox(width: AppSpacing.sm),
+                Semantics(
+                  label: unread > 0
+                      ? l10n.homeNotificationsUnread(unread)
+                      : l10n.homeNotifications,
+                  button: true,
+                  child: Material(
+                    color: AppColors.surface,
+                    elevation: 1,
+                    shadowColor: AppColors.navy.withValues(alpha: 0.2),
+                    shape: const CircleBorder(
+                      side: BorderSide(color: AppColors.hairline),
+                    ),
+                    child: InkWell(
+                      key: const Key('home_bell_btn'),
+                      customBorder: const CircleBorder(),
+                      onTap: onBell,
+                      child: SizedBox(
+                        width: kMinTapTarget,
+                        height: kMinTapTarget,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const Icon(
+                              Icons.notifications_none,
+                              color: AppColors.brandInk,
+                            ),
+                            if (unread > 0)
+                              const Positioned(
+                                top: 10,
+                                right: 12,
+                                child: CircleAvatar(
+                                  key: Key('home_bell_badge'),
+                                  radius: 5,
+                                  backgroundColor: AppColors.amber,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                    IconButton(
-                      key: const Key('home_hero_toggle'),
-                      tooltip: paused ? l10n.homePlay : l10n.homePause,
-                      onPressed: onTogglePause,
-                      color: Colors.white,
-                      icon: Icon(paused ? Icons.play_arrow : Icons.pause),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: AppSpacing.lg),
+            GestureDetector(
+              key: const Key('home_greeting'),
+              onLongPress: onTitleLongPress,
+              child: Text(
+                greeting,
+                style: AppText.bodyLarge.copyWith(
+                  fontSize: 17,
+                  color: AppColors.brandInk,
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.homeHeadline,
+                style: AppText.display.copyWith(fontSize: 32),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(l10n.homeSubtitle, style: AppText.bodyLarge),
+            const SizedBox(height: AppSpacing.lg),
+            _FindCta(enabled: ctaEnabled, onTap: onFind),
+          ],
         ),
-        // Search-style CTA straddling the header's bottom edge.
-        Positioned(
-          left: AppSpacing.md,
-          right: AppSpacing.md,
-          bottom: 0,
-          child: _FindCta(enabled: ctaEnabled, onTap: onFind),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -543,33 +408,39 @@ class _FindCta extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Material(
-      elevation: 6,
-      shadowColor: Colors.black26,
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
+      elevation: 2,
+      shadowColor: AppColors.navy.withValues(alpha: 0.15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.button),
+        side: const BorderSide(color: AppColors.hairline),
+      ),
       child: InkWell(
         key: const Key('home_find_worker_btn'),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.button),
         onTap: enabled ? onTap : null,
-        child: SizedBox(
-          height: _Header._ctaHeight,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(AppSpacing.md, 8, 8, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.sm,
+              AppSpacing.sm,
+              AppSpacing.sm,
+            ),
             child: Row(
               children: [
                 Icon(
                   Icons.search,
-                  color: enabled ? AppColors.teal : AppColors.slate,
+                  color: enabled ? AppColors.teal : AppColors.slate400,
                 ),
-                const SizedBox(width: AppSpacing.md),
+                const SizedBox(width: AppSpacing.s12),
                 Expanded(
                   child: Text(
                     l10n.homeFindWorkerCta,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppText.card,
                   ),
                 ),
                 Container(
@@ -577,11 +448,11 @@ class _FindCta extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(
                     color: enabled ? AppColors.teal : AppColors.hairline,
-                    borderRadius: BorderRadius.circular(AppRadius.md + 2),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Icon(
                     Icons.arrow_forward,
-                    color: enabled ? Colors.white : AppColors.slate,
+                    color: enabled ? Colors.white : AppColors.slate400,
                   ),
                 ),
               ],
@@ -589,6 +460,92 @@ class _FindCta extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "Explore services": one tile per catalogue category (design 09-10, module 03 category row).
+class _ExploreServices extends StatelessWidget {
+  const _ExploreServices({
+    required this.categories,
+    required this.onTile,
+    required this.onSeeAll,
+  });
+
+  final List<ServiceCategory> categories;
+  final ValueChanged<String> onTile;
+  final VoidCallback onSeeAll;
+
+  static const _columns = 4;
+  static const _gap = AppSpacing.sm;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(l10n.homeExplore, style: AppText.title),
+              ),
+            ),
+            TextButton.icon(
+              key: const Key('home_see_all_btn'),
+              onPressed: onSeeAll,
+              iconAlignment: IconAlignment.end,
+              icon: const Icon(Icons.arrow_forward, size: 18),
+              label: Text(l10n.homeSeeAll),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.s12),
+        LayoutBuilder(
+          builder: (context, box) {
+            final w = (box.maxWidth - _gap * (_columns - 1)) / _columns;
+            return Wrap(
+              spacing: _gap,
+              runSpacing: AppSpacing.md,
+              children: [
+                for (final c in categories)
+                  SizedBox(
+                    width: w,
+                    child: InkWell(
+                      key: Key('home_category_tile_${c.id}'),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      onTap: () => onTile(c.id),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: AppColors.tileWell,
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              border: Border.all(color: AppColors.tileLine),
+                            ),
+                            child: Icon(c.icon, color: AppColors.teal),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            c.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: AppText.card.copyWith(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

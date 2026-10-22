@@ -441,22 +441,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreetingNoName => 'Namaste';
 
   @override
-  String get homeSubtitle => 'What help do you need today?';
+  String get homeHeadline => 'Find the right help for your home';
 
   @override
-  String get homeHeroCook => 'Verified cooks near you';
+  String get homeSubtitle => 'Nearby professionals for all your home needs.';
 
   @override
-  String get homeHeroDriver => 'Trusted drivers near you';
+  String get homeExplore => 'Explore services';
 
   @override
-  String get homeHeroMaid => 'Reliable maids near you';
-
-  @override
-  String get homePause => 'Pause';
-
-  @override
-  String get homePlay => 'Play';
+  String get homeSeeAll => 'See all';
 
   @override
   String get homeNotifications => 'Notifications';

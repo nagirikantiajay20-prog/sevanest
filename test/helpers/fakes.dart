@@ -149,7 +149,6 @@ Widget testRootApp({
     appConfigProvider.overrideWithValue(AppConfig.dev),
     sessionStoreProvider.overrideWithValue(store),
     authRepositoryProvider.overrideWithValue(repo),
-    heroAutoplayProvider.overrideWithValue(false),
     homeRepositoryProvider.overrideWithValue(home ?? FakeHomeRepository()),
     catalogRepositoryProvider.overrideWithValue(
       catalog ?? FakeCatalogRepository(),

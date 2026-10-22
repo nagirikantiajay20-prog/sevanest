@@ -192,12 +192,10 @@
     }
   },
   "homeGreetingNoName": "Namaste",
-  "homeSubtitle": "What help do you need today?",
-  "homeHeroCook": "Verified cooks near you",
-  "homeHeroDriver": "Trusted drivers near you",
-  "homeHeroMaid": "Reliable maids near you",
-  "homePause": "Pause",
-  "homePlay": "Play",
+  "homeHeadline": "Find the right help for your home",
+  "homeSubtitle": "Nearby professionals for all your home needs.",
+  "homeExplore": "Explore services",
+  "homeSeeAll": "See all",
   "homeNotifications": "Notifications",
   "homeNotificationsUnread": "Notifications, {count} unread",
   "@homeNotificationsUnread": {

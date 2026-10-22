@@ -910,41 +910,29 @@ abstract class AppLocalizations {
   /// **'Namaste'**
   String get homeGreetingNoName;
 
+  /// No description provided for @homeHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Find the right help for your home'**
+  String get homeHeadline;
+
   /// No description provided for @homeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'What help do you need today?'**
+  /// **'Nearby professionals for all your home needs.'**
   String get homeSubtitle;
 
-  /// No description provided for @homeHeroCook.
+  /// No description provided for @homeExplore.
   ///
   /// In en, this message translates to:
-  /// **'Verified cooks near you'**
-  String get homeHeroCook;
+  /// **'Explore services'**
+  String get homeExplore;
 
-  /// No description provided for @homeHeroDriver.
+  /// No description provided for @homeSeeAll.
   ///
   /// In en, this message translates to:
-  /// **'Trusted drivers near you'**
-  String get homeHeroDriver;
-
-  /// No description provided for @homeHeroMaid.
-  ///
-  /// In en, this message translates to:
-  /// **'Reliable maids near you'**
-  String get homeHeroMaid;
-
-  /// No description provided for @homePause.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause'**
-  String get homePause;
-
-  /// No description provided for @homePlay.
-  ///
-  /// In en, this message translates to:
-  /// **'Play'**
-  String get homePlay;
+  /// **'See all'**
+  String get homeSeeAll;
 
   /// No description provided for @homeNotifications.
   ///

@@ -60,6 +60,3 @@ final selectedAddressProvider =
     NotifierProvider<SelectedAddressNotifier, Address?>(
       SelectedAddressNotifier.new,
     );
-
-/// Hero rotation. Tests turn it off: a periodic timer never lets `pumpAndSettle` finish.
-final heroAutoplayProvider = Provider<bool>((ref) => true);
