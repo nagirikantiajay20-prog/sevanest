@@ -146,6 +146,7 @@ void main() {
 
     Future<void> tapKey(WidgetTester t, String key) async {
       await t.ensureVisible(find.byKey(Key(key)));
+      await t.pump();
       await t.tap(find.byKey(Key(key)));
       await settle(t);
     }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/favourites/presentation/widgets/favourite_button.dart';
@@ -74,51 +75,131 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: _editRequirement,
-        ),
-        title: Text(l10n.resultsTitle(category?.name ?? '', area)),
-        actions: [
-          Semantics(
-            label: filterCount == 0
-                ? l10n.filterButton
-                : l10n.filterActiveSemantics(filterCount),
-            child: IconButton(
-              key: const Key('results_filter_btn'),
-              tooltip: l10n.filterButton,
-              onPressed: _openFilters,
-              icon: Badge(
-                key: const Key('results_filter_badge'),
-                isLabelVisible: filterCount > 0,
-                label: Text('$filterCount'),
-                child: const Icon(Icons.tune),
+      backgroundColor: AppColors.surface,
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              MediaQuery.paddingOf(context).top + AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: Row(
+              children: [
+                Material(
+                  color: AppColors.surface,
+                  elevation: 1,
+                  shadowColor: AppColors.navy.withValues(alpha: 0.2),
+                  shape: const CircleBorder(
+                    side: BorderSide(color: AppColors.hairline),
+                  ),
+                  child: IconButton(
+                    key: const Key('app_back_btn'),
+                    tooltip: l10n.back,
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      color: AppColors.brandInk,
+                    ),
+                    onPressed: _editRequirement,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.s12),
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      l10n.resultsTitle(category?.name ?? '', area),
+                      style: AppText.screenTitle,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Material(
+                  color: AppColors.surface,
+                  elevation: 1,
+                  shadowColor: AppColors.navy.withValues(alpha: 0.2),
+                  shape: const CircleBorder(
+                    side: BorderSide(color: AppColors.hairline),
+                  ),
+                  child: IconButton(
+                    key: const Key('results_shortlist_btn'),
+                    tooltip: l10n.navFavourites,
+                    icon: const Icon(
+                      Icons.favorite_border,
+                      color: AppColors.brandInk,
+                    ),
+                    onPressed: () => context.go(Routes.favourites),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (final (i, c) in chips.indexed)
+                    ActionChip(
+                      key: i == 0
+                          ? const Key('results_summary_chip')
+                          : Key('results_summary_chip_$i'),
+                      label: Text(c),
+                      onPressed: _editRequirement,
+                    ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (chips.isNotEmpty)
-            SizedBox(
-              height: 48,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                itemCount: chips.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: AppSpacing.sm),
-                itemBuilder: (_, i) => ActionChip(
-                  key: const Key('results_summary_chip'),
-                  label: Text(chips[i]),
-                  onPressed: _editRequirement,
-                ),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.sm,
             ),
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Semantics(
+                  label: filterCount == 0
+                      ? l10n.filterButton
+                      : l10n.filterActiveSemantics(filterCount),
+                  child: OutlinedButton.icon(
+                    key: const Key('results_filter_btn'),
+                    onPressed: _openFilters,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, kMinTapTarget),
+                      shape: const StadiumBorder(),
+                      side: const BorderSide(color: AppColors.hairline),
+                      foregroundColor: AppColors.brandInk,
+                    ),
+                    icon: Badge(
+                      key: const Key('results_filter_badge'),
+                      isLabelVisible: filterCount > 0,
+                      label: Text('$filterCount'),
+                      child: const Icon(Icons.tune, size: 20),
+                    ),
+                    label: Text(l10n.filterButton),
+                  ),
+                ),
+                TextButton(
+                  key: const Key('results_edit_link'),
+                  onPressed: _editRequirement,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, kMinTapTarget),
+                  ),
+                  child: Text(l10n.resultsEditRequirement),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: AppColors.hairline),
           Expanded(
             child: AsyncValueView<PagedState<WorkerSummary>>(
               value: results,

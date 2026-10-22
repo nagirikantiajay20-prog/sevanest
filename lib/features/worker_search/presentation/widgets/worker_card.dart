@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
@@ -14,23 +15,66 @@ String experienceLabel(AppLocalizations l, int? months) {
       : l.workerExperienceMonths(months);
 }
 
-/// Round avatar: the short-lived photo link when there is one, else the category initial.
+/// Rounded tile: the short-lived photo link when there is one, else the category initial.
+/// [verified] adds the teal tick (only from the backend verification status).
 class WorkerAvatar extends StatelessWidget {
-  const WorkerAvatar(this.worker, {this.radius = 28, super.key});
+  const WorkerAvatar(
+    this.worker, {
+    this.radius = 28,
+    this.verified = false,
+    super.key,
+  });
   final WorkerSummary worker;
   final double radius;
+  final bool verified;
 
   @override
   Widget build(BuildContext context) {
     final title = worker.categories.isEmpty ? '' : worker.categories.first;
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.hairline,
-      // Photo links expire, so they are only shown, never stored.
-      foregroundImage: worker.photoUrl == null
-          ? null
-          : NetworkImage(worker.photoUrl!),
-      child: Text(title.isEmpty ? '?' : title.characters.first.toUpperCase()),
+    final size = radius * 2;
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: size + (verified ? 6 : 0),
+        height: size + (verified ? 6 : 0),
+        child: Stack(
+          children: [
+            Container(
+              width: size,
+              height: size,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.tileWell,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                // Photo links expire, so they are only shown, never stored.
+                image: worker.photoUrl == null
+                    ? null
+                    : DecorationImage(
+                        image: NetworkImage(worker.photoUrl!),
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              child: worker.photoUrl != null
+                  ? null
+                  : Text(
+                      title.isEmpty
+                          ? '?'
+                          : title.characters.first.toUpperCase(),
+                      style: AppText.heading.copyWith(color: AppColors.teal),
+                    ),
+            ),
+            if (verified)
+              const Positioned(
+                right: 0,
+                bottom: 0,
+                child: CircleAvatar(
+                  radius: 10,
+                  backgroundColor: AppColors.teal,
+                  child: Icon(Icons.check, size: 13, color: Colors.white),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -47,7 +91,7 @@ class RatingLabel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final style = Theme.of(context).textTheme.bodySmall;
+    final style = AppText.card.copyWith(fontSize: 13);
     if (!worker.hasRating) return Text(l10n.workerNew, style: style);
     final avg = ratingText(
       worker.ratingAverage!,
@@ -92,22 +136,38 @@ class WorkerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final title = worker.categories.isEmpty ? '' : worker.categories.first;
     final window = worker.availability.firstOrNull;
     final chips = worker.categories.skip(1).toList();
     final shown = chips.take(_maxChips).toList();
-    return Card(
-      margin: EdgeInsets.zero,
+    Widget pill(String label) => Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.slateBg,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Text(label, style: AppText.body.copyWith(fontSize: 12)),
+    );
+    return Material(
+      color: AppColors.surface,
+      elevation: 1,
+      shadowColor: AppColors.navy.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        side: const BorderSide(color: AppColors.hairline),
+      ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              WorkerAvatar(worker),
+              WorkerAvatar(worker, verified: worker.verified),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -117,30 +177,45 @@ class WorkerCard extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: text.titleMedium,
+                      style: AppText.heading,
                     ),
                     Text(
                       experienceLabel(l10n, worker.experienceMonths),
-                      style: text.bodyMedium,
+                      style: AppText.bodyLarge,
                     ),
                     if (worker.languages.isNotEmpty)
                       Text(
                         worker.languages.map(languageName).join(', '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: text.bodySmall,
+                        style: AppText.body,
                       ),
                     if (worker.areas.isNotEmpty)
                       Text(
                         worker.areas.join(', '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: text.bodySmall,
+                        style: AppText.body,
                       ),
                     if (window != null)
-                      Text(
-                        l10n.workerAvailableWindow(window.start, window.end),
-                        style: text.bodySmall,
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.circle,
+                            size: 8,
+                            color: AppColors.success,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Flexible(
+                            child: Text(
+                              l10n.workerAvailableWindow(
+                                window.start,
+                                window.end,
+                              ),
+                              style: AppText.body,
+                            ),
+                          ),
+                        ],
                       ),
                     if (shown.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.sm),
@@ -148,18 +223,9 @@ class WorkerCard extends StatelessWidget {
                         spacing: AppSpacing.xs,
                         runSpacing: AppSpacing.xs,
                         children: [
-                          for (final c in shown)
-                            Chip(
-                              label: Text(c),
-                              visualDensity: VisualDensity.compact,
-                            ),
+                          for (final c in shown) pill(c),
                           if (chips.length > _maxChips)
-                            Chip(
-                              label: Text(
-                                l10n.workerMoreChip(chips.length - _maxChips),
-                              ),
-                              visualDensity: VisualDensity.compact,
-                            ),
+                            pill(l10n.workerMoreChip(chips.length - _maxChips)),
                         ],
                       ),
                     ],

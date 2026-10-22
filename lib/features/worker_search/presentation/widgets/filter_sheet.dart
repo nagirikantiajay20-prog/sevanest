@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
@@ -53,6 +54,19 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
     key: key,
     label: Text(label),
     selected: current == value,
+    showCheckmark: true,
+    checkmarkColor: AppColors.teal,
+    selectedColor: AppColors.tealWash,
+    backgroundColor: AppColors.surface,
+    labelStyle: AppText.label.copyWith(
+      fontSize: 14,
+      color: current == value ? AppColors.teal : AppColors.brandInk,
+    ),
+    shape: StadiumBorder(
+      side: BorderSide(
+        color: current == value ? AppColors.teal : AppColors.hairline,
+      ),
+    ),
     onSelected: (on) => setState(() => onChanged(on ? value : null)),
   );
 
@@ -64,7 +78,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
           top: AppSpacing.md,
           bottom: AppSpacing.sm,
         ),
-        child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+        child: Text(title, style: AppText.heading.copyWith(fontSize: 16)),
       ),
       Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: chips),
     ],
@@ -84,10 +98,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  l10n.filterTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                child: Text(l10n.filterTitle, style: AppText.screenTitle),
               ),
               IconButton(
                 key: const Key('filter_close_btn'),
