@@ -1,5 +1,7 @@
 # Module 05 — Worker Search Results, Filters & Worker Profile
 
+> **Deployed API (see DECISIONS):** search is `GET /search/workers?category&areaId&engagement&page&limit` (page-numbered, `meta.total`), detail is `GET /search/workers/{id}`; worker cards are anonymous (no name), so the title is the category. Filters = availability window, language, minimum experience (no budget or star filter). Reviews: `/workers/:id/reviews` is mock-only until the backend serves it. The cursor wording below is the original assumption.
+
 **Backend:** `POST /workers/search` (cursor), `GET /workers/{id}`, `GET /workers/{id}/reviews`, `PUT/DELETE /favourites/{id}` (module 06).
 **Routes:** `/workers`, `/workers/:id`, `/workers/:id/reviews`.
 **Rules:** never show fake workers; verified badge only from backend `verificationStatus`; no KYC data; handle null optional fields; cancel obsolete search requests.

@@ -1,5 +1,7 @@
 # Module 06 — Favourites / Shortlist
 
+> **Deployed API (see DECISIONS):** shortlist is `GET /shortlist` (paged), `PUT/DELETE /shortlist/{workerId}`, not `/favourites`. One `favouriteProvider` holds every heart.
+
 **Backend:** `GET /favourites`, `PUT /favourites/{workerId}`, `DELETE /favourites/{workerId}`.
 **Route:** `/favourites` (bottom-nav tab). Heart control also appears on worker card (05) and worker detail (05).
 

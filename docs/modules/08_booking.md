@@ -1,5 +1,7 @@
 # Module 08 — Booking (Confirm, Detail, List, Cancel)
 
+> **Deployed API (see DECISIONS):** there is no `POST /bookings/quote`. Confirm worker = `confirm-worker {startDate}` on the booking, and the fee is set at payment, so the screen shows no fee breakdown or policy text. Cancel reasons are a local list sent as free text. `allowedActions` are derived from the status until the backend sends them. Current / Past is a filter over one paged list.
+
 **Backend:** `POST /bookings/quote`, `POST /bookings`, `GET /bookings?status=`, `GET /bookings/{id}` (with `timeline[]`, `allowedActions[]`, `payment`), `POST /bookings/{id}/cancel`.
 **Routes:** `/bookings/confirm`, `/bookings`, `/bookings/:id`.
 **Rules:** booking status is backend-owned (customer cannot change it); amounts only from backend; protect from duplicate submission; success message only after backend 2xx.

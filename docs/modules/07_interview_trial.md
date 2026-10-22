@@ -1,5 +1,7 @@
 # Module 07 — Interview / Trial
 
+> **Deployed API (see DECISIONS):** the Swagger has no `/interviews`. An interview or trial is a booking state: request = `POST /bookings {workerId}` + `schedule`; done = `interview-complete` (needs `outcomeNote`); Not a fit = `reopen-matching`; cancel = `cancel {reason}`; slot length from `GET /search/workers/{id}/slots` (`slotMinutes`). Routes and keys below are unchanged.
+
 **Backend:** `POST /interviews`, `GET /interviews`, `GET /interviews/{id}`, `POST /interviews/{id}/cancel`, `POST /interviews/{id}/decision`, slots from `GET /catalog/time-slots` or `/workers/{id}/slots` (TBD).
 **Routes:** `/interviews/new`, `/interviews` (list, from Bookings tab segment or Home), `/interviews/:id`.
 **Rules:** statuses are backend-owned; use `InterviewStatusMapper` with `unknown` fallback; action buttons appear only if present in `allowedActions[]`.

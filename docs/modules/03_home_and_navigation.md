@@ -1,5 +1,7 @@
 # Module 03 — Main Shell & Home
 
+> **Deployed API (2026-10-13/15, see DECISIONS):** Home = `GET /customers/me/home` (aggregate); unread count from `GET /notifications/unread-count`. The routes in the Backend line below are the original assumption. Live Home shows the new-customer view until bookings exist for the customer.
+
 **Goal:** persistent bottom navigation + Home as launch surface. No fake metrics (AGENTS §13).
 **Backend:** `GET /home` (aggregate, assumed) else compose: `GET /bookings?status=current&limit=1`, `GET /interviews?upcoming=true&limit=1`, `GET /catalog/categories`, `GET /notifications/unread-count`.
 **Routes:** `/home` (inside shell). Shell tabs: Home `/home`, Bookings `/bookings`, Favourites `/favourites`, Account `/account` (final tab set TBD with design).

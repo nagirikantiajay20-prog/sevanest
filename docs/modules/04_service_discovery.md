@@ -1,5 +1,7 @@
 # Module 04 — Service Discovery (Requirement Builder)
 
+> **Deployed API (see DECISIONS):** categories come from `GET /service-categories` (`code` is the id), areas from `GET /service-areas`. There is no time-slot, schedule or price-guidance endpoint for Timing / Start date / Budget, so those rules are client-side (`domain/timing.dart`, mock `ScheduleRepository`); guidance hides on 404. Step count follows the design ("Step n of 6"), Review is the end.
+
 **Goal:** collect a service requirement in 7 short steps, preserving values on back, then search.
 **State:** `requirementDraftProvider` (in-memory; created on entry, disposed on exit/search-complete-reset). Fields: `categoryId, engagement, addressId, timing, startDate, budgetMin, budgetMax`.
 **Backend:** `GET /catalog/categories` (incl. `engagementTypes[]`, `requiresBudget`), `GET /catalog/time-slots`, addresses (module 02). Search call is in module 05.

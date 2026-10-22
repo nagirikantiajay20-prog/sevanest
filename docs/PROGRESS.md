@@ -106,8 +106,8 @@ stg / prod use the real repositories for categories, worker search + profile, sh
 ## Backend integration of 2026-10-13 (typed OpenAPI: docs/backend_openapi_2026-10-13.json)
 Wired and tested (484 tests, analyzer clean): live `/interviews` (booking first, then interview; reschedule, cancel, complete, accept / reject proposal, `/slots`), worker reviews, `ratingScaleMax`, search `minRating` / `sort` / `startDate`, `GET /customers/me/home`, `/pricing/guidance` (404 hides the card), address `label` / `line2` / `state`, `/locations/service-area` after "Use my current location".
 Not built by design: budget filter in search, weekday matching, customer profile photo (backend says out of V1).
-Not verified: nothing has run against a live customer (backend not deployed, no test customer). Interview request is built on assumptions the backend marked unconfirmed (1-hour slots, 14-day horizon).
-Modules 7-11 (payment, active service, replacement, support, push, hardening) are not started. Release APK is debug-signed until `android/key.properties` exists.
+Not verified (at the time of this note; later live runs are in steps 3.1, 3.2, 7.8): nothing had run against a live customer. Interview request is built on assumptions the backend marked unconfirmed (1-hour slots, 14-day horizon).
+(Superseded: modules 7-11 are built, see the steps above.) Release APK is debug-signed until `android/key.properties` exists.
 
 ## 2026-10-15 completion pass
 
@@ -122,3 +122,11 @@ Modules 7-11 (payment, active service, replacement, support, push, hardening) ar
 - History filters/search (23): already built on `GET /customers/me/booking-history` (year, service, status, search); the old "not built" note in AGE/PROGRESS 8.2 was stale.
 - Notification settings sheet (32): gear in the centre; per-category switches (bookings, payments, replacements, support) saved on the device and applied to the in-app foreground banner only. Server pushes and system notifications are unchanged (no preference API, BACKEND_REQUESTS 53). Row actions still not built.
 
+
+## 2026-10-22 hardening pass
+
+- Fixed the notification settings test (it never mocked `SharedPreferences`); full suite 972 passed, 12 live skipped, analyzer clean.
+- Pending work committed in four scoped commits; Firebase client files (`google-services.json`, `GoogleService-Info.plist`) stay untracked pending a decision, so CI needs them supplied.
+- Colours: every inline `Color(0x..)` moved to `AppColors` (values unchanged). `Colors.white` / `transparent` are still used directly.
+- Flow A (AUTH-17) now has one end-to-end widget test. Flows B-J and F's payment retry were already covered by widget tests; there is still no `integration_test/` run on a device.
+- Module docs 03-08 now carry a "Deployed API" note where the endpoints differ from the original assumption.
