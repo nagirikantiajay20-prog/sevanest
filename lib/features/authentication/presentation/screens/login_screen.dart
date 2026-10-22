@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
+import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
@@ -119,10 +121,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
       builder: (_) => const _LanguageSheet(),
     );
   }
@@ -149,8 +147,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: AuthBackdrop(
-        archAlignment: const Alignment(0.75, -0.62),
+      backgroundColor: AppColors.ivory,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.ivory, AppColors.surface],
+          ),
+        ),
         child: SafeArea(
           bottom: false,
           child: CustomScrollView(
@@ -168,17 +173,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       child: Row(
                         children: [
-                          const LogoTile(),
-                          const SizedBox(width: AppSpacing.md),
+                          Image.asset(
+                            'assets/branding/logo_mark.png',
+                            height: 44,
+                            excludeFromSemantics: true,
+                          ),
+                          const SizedBox(width: AppSpacing.s12),
                           Expanded(
-                            child: Text(
-                              l10n.appName,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w600,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.appName,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.screenTitle,
+                                ),
+                                Text(
+                                  l10n.brandCaption,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppText.body.copyWith(
+                                    fontSize: 10,
+                                    letterSpacing: 1.2,
+                                    color: AppColors.slate400,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           _LanguageChip(onTap: _chooseLanguage),
@@ -186,12 +205,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        96,
-                        AppSpacing.lg,
-                        AppSpacing.lg,
-                      ),
+                      padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Column(
@@ -200,22 +214,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Semantics(
                               header: true,
                               child: Text(
-                                l10n.loginWelcome,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                l10n.loginHeadline,
+                                style: AppText.display.copyWith(fontSize: 32),
                               ),
                             ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              l10n.loginSubtitle,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 18,
-                              ),
-                            ),
+                            const SizedBox(height: AppSpacing.s12),
+                            Text(l10n.loginSubhead, style: AppText.bodyLarge),
+                            const SizedBox(height: AppSpacing.md),
+                            const _HeroTrust(),
                           ],
                         ),
                       ),
@@ -225,35 +231,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const Center(child: SnGrabber()),
+                            const SizedBox(height: AppSpacing.md),
                             Semantics(
                               header: true,
                               child: Text(
                                 l10n.loginHeading,
-                                style: const TextStyle(
-                                  color: AppColors.ink,
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                style: AppText.title,
                               ),
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             Text(
                               l10n.loginHelp(otpLength),
-                              style: const TextStyle(
-                                color: AppColors.slate,
-                                fontSize: 16,
-                              ),
+                              style: AppText.bodyLarge,
                             ),
                             const SizedBox(height: AppSpacing.lg),
-                            Text(
-                              l10n.mobileLabel,
-                              style: const TextStyle(
-                                color: AppColors.ink,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
                             _MobileField(
                               controller: _controller,
                               focusNode: _focus,
@@ -267,7 +259,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               otp: otp,
                               invalidText: l10n.mobileInvalid,
                             ),
-                            const SizedBox(height: AppSpacing.lg),
+                            const SizedBox(height: AppSpacing.md),
                             SnButton(
                               key: const Key('login_get_otp_btn'),
                               label: l10n.getOtp,
@@ -276,8 +268,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               isLoading: otp.phase == OtpPhase.requesting,
                               onPressed: ready ? _submit : null,
                             ),
-                            const SizedBox(height: AppSpacing.lg),
-                            const _TrustStrip(),
+                            const SizedBox(height: AppSpacing.md),
+                            const _PrivacyNote(),
                             const SizedBox(height: AppSpacing.md),
                             _LegalText(terms: _terms, privacy: _privacy),
                             const SizedBox(height: AppSpacing.md),
@@ -316,48 +308,28 @@ class _MobileField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final borderColor = hasError ? AppColors.danger : AppColors.slate;
+    final borderColor = hasError ? AppColors.danger : AppColors.hairline;
+    const fieldText = TextStyle(
+      fontFamily: AppFonts.body,
+      color: AppColors.brandInk,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+    );
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md - 8),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.button),
         border: Border.all(color: borderColor, width: 1.5),
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.fieldBg,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: const Text(
-              'IN',
-              style: TextStyle(
-                color: AppColors.ink,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          const Text(
-            '+91',
-            style: TextStyle(
-              color: AppColors.ink,
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          const Text('+91', style: fieldText),
           Container(
             width: 1,
             height: 28,
-            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md - 4),
+            margin: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
             color: AppColors.hairline,
           ),
           Expanded(
@@ -372,18 +344,14 @@ class _MobileField extends StatelessWidget {
                 textInputAction: TextInputAction.done,
                 autofillHints: const [AutofillHints.telephoneNumberNational],
                 inputFormatters: [MobileNumberFormatter()],
-                style: const TextStyle(
-                  color: AppColors.ink,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: fieldText,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                   hintText: l10n.mobileHint,
-                  hintStyle: const TextStyle(color: AppColors.slate),
+                  hintStyle: fieldText.copyWith(color: AppColors.slate400),
                 ),
                 onChanged: onChanged,
                 onSubmitted: onSubmitted,
@@ -428,7 +396,7 @@ class _Feedback extends StatelessWidget {
                 child: Text(
                   invalidText,
                   key: const Key('login_mobile_error'),
-                  style: const TextStyle(color: AppColors.danger, fontSize: 16),
+                  style: AppText.bodyLarge.copyWith(color: AppColors.danger),
                 ),
               ),
             ],
@@ -475,54 +443,89 @@ class _Feedback extends StatelessWidget {
   );
 }
 
-class _TrustStrip extends StatelessWidget {
-  const _TrustStrip();
+/// Hero rows: icon well, bold first word, muted rest (design 02).
+class _HeroTrust extends StatelessWidget {
+  const _HeroTrust();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    Widget item(IconData icon, String label) => Expanded(
-      child: Column(
-        children: [
-          Icon(icon, color: AppColors.teal, size: 28),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.slate, fontSize: 15),
-          ),
-        ],
-      ),
-    );
-    return Column(
-      children: [
-        Row(
+    Widget row(IconData icon, String label) {
+      // ponytail: splits on the first space, fine for English-only V1; per-word strings when translating.
+      final i = label.indexOf(' ');
+      final head = i < 0 ? label : label.substring(0, i);
+      final tail = i < 0 ? '' : label.substring(i + 1);
+      return Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.s12),
+        child: Row(
           children: [
-            const Expanded(child: Divider(color: AppColors.hairline)),
-            Flexible(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: Text(
-                  l10n.secureAndPrivate,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.slate, fontSize: 16),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: AppColors.tileWell,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.teal, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.s12),
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: head,
+                      style: AppText.card.copyWith(fontSize: 15),
+                    ),
+                    if (tail.isNotEmpty)
+                      TextSpan(text: '\n$tail', style: AppText.body),
+                  ],
                 ),
               ),
             ),
-            const Expanded(child: Divider(color: AppColors.hairline)),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            item(Icons.lock_outline, l10n.trustOtpLogin),
-            item(Icons.verified_user_outlined, l10n.trustVerifiedWorkers),
-            item(Icons.visibility_off_outlined, l10n.trustNumberPrivate),
-          ],
-        ),
+      );
+    }
+
+    return Column(
+      children: [
+        row(Icons.verified_user_outlined, l10n.loginTrustNearby),
+        row(Icons.credit_card_outlined, l10n.trustSecurePayments),
+        row(Icons.headset_mic_outlined, l10n.loginTrustSupport),
       ],
+    );
+  }
+}
+
+class _PrivacyNote extends StatelessWidget {
+  const _PrivacyNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s12),
+      decoration: BoxDecoration(
+        color: AppColors.tealMist,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.tileLine),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lock_outline, color: AppColors.teal, size: 22),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.privateTitle, style: AppText.card),
+                Text(l10n.privateBody, style: AppText.body),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -535,11 +538,9 @@ class _LegalText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    const base = TextStyle(color: AppColors.slate, fontSize: 16, height: 1.4);
-    const link = TextStyle(
+    final base = AppText.body.copyWith(color: AppColors.slate);
+    final link = base.copyWith(
       color: AppColors.teal,
-      fontSize: 16,
-      height: 1.4,
       decoration: TextDecoration.underline,
       decorationColor: AppColors.teal,
     );
@@ -582,28 +583,27 @@ class _LanguageChip extends StatelessWidget {
       child: InkWell(
         key: const Key('login_language_btn'),
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: BorderRadius.circular(AppRadius.pill),
         child: Container(
           constraints: const BoxConstraints(minHeight: kMinTapTarget),
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+            border: Border.all(color: AppColors.hairline),
+            boxShadow: AppShadows.card,
           ),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'EN',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
+              Icon(
+                Icons.language_rounded,
+                color: AppColors.brandInk,
+                size: 20,
               ),
               SizedBox(width: AppSpacing.xs),
-              Icon(Icons.expand_more_rounded, color: Colors.white),
+              Text('EN', style: AppText.card),
+              Icon(Icons.expand_more_rounded, color: AppColors.brandInk),
             ],
           ),
         ),
@@ -641,28 +641,12 @@ class _LanguageSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                width: 48,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.slate,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
+            const Center(child: SnGrabber()),
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    l10n.chooseLanguage,
-                    style: const TextStyle(
-                      color: AppColors.ink,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: Text(l10n.chooseLanguage, style: AppText.screenTitle),
                 ),
                 IconButton(
                   key: const Key('language_close_btn'),
@@ -672,10 +656,7 @@ class _LanguageSheet extends StatelessWidget {
                 ),
               ],
             ),
-            Text(
-              l10n.chooseLanguageHint,
-              style: const TextStyle(color: AppColors.slate, fontSize: 16),
-            ),
+            Text(l10n.chooseLanguageHint, style: AppText.bodyLarge),
             const SizedBox(height: AppSpacing.sm),
             for (final (native, english, enabled) in _languages)
               ListTile(

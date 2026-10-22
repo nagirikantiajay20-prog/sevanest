@@ -39,8 +39,9 @@
   "trustVerifiedWorkers": "Verified workers",
   "trustSecurePayments": "Secure payments",
   "trustHelpSupport": "Help & support",
-  "loginWelcome": "Welcome to SevaNest",
-  "loginSubtitle": "Find verified, trusted help for your home.",
+  "loginHeadline": "A safer, happier home starts here",
+  "loginSubhead": "Book nearby professionals for all your home needs.",
+  "brandCaption": "TRUSTED HOME SERVICES",
   "loginHeading": "Log in or sign up",
   "loginHelp": "We'll send a {digits}-digit code to verify your number.",
   "@loginHelp": {
@@ -65,9 +66,10 @@
       }
     }
   },
-  "secureAndPrivate": "Secure & private",
-  "trustOtpLogin": "OTP-secured login",
-  "trustNumberPrivate": "Your number stays private",
+  "loginTrustNearby": "Nearby professionals",
+  "loginTrustSupport": "Dedicated support",
+  "privateTitle": "Your information stays private",
+  "privateBody": "We never share your number with anyone.",
   "legalPrefix": "By continuing, you agree to our ",
   "legalAnd": " and ",
   "termsOfService": "Terms of service",

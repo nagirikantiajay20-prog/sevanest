@@ -110,10 +110,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trustHelpSupport => 'Help & support';
 
   @override
-  String get loginWelcome => 'Welcome to SevaNest';
+  String get loginHeadline => 'A safer, happier home starts here';
 
   @override
-  String get loginSubtitle => 'Find verified, trusted help for your home.';
+  String get loginSubhead =>
+      'Book nearby professionals for all your home needs.';
+
+  @override
+  String get brandCaption => 'TRUSTED HOME SERVICES';
 
   @override
   String get loginHeading => 'Log in or sign up';
@@ -151,13 +155,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get secureAndPrivate => 'Secure & private';
+  String get loginTrustNearby => 'Nearby professionals';
 
   @override
-  String get trustOtpLogin => 'OTP-secured login';
+  String get loginTrustSupport => 'Dedicated support';
 
   @override
-  String get trustNumberPrivate => 'Your number stays private';
+  String get privateTitle => 'Your information stays private';
+
+  @override
+  String get privateBody => 'We never share your number with anyone.';
 
   @override
   String get legalPrefix => 'By continuing, you agree to our ';

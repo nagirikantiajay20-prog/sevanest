@@ -286,17 +286,23 @@ abstract class AppLocalizations {
   /// **'Help & support'**
   String get trustHelpSupport;
 
-  /// No description provided for @loginWelcome.
+  /// No description provided for @loginHeadline.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to SevaNest'**
-  String get loginWelcome;
+  /// **'A safer, happier home starts here'**
+  String get loginHeadline;
 
-  /// No description provided for @loginSubtitle.
+  /// No description provided for @loginSubhead.
   ///
   /// In en, this message translates to:
-  /// **'Find verified, trusted help for your home.'**
-  String get loginSubtitle;
+  /// **'Book nearby professionals for all your home needs.'**
+  String get loginSubhead;
+
+  /// No description provided for @brandCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'TRUSTED HOME SERVICES'**
+  String get brandCaption;
 
   /// No description provided for @loginHeading.
   ///
@@ -358,23 +364,29 @@ abstract class AppLocalizations {
   /// **'Too many requests. Please try again in {time}.'**
   String rateLimitedWait(String time);
 
-  /// No description provided for @secureAndPrivate.
+  /// No description provided for @loginTrustNearby.
   ///
   /// In en, this message translates to:
-  /// **'Secure & private'**
-  String get secureAndPrivate;
+  /// **'Nearby professionals'**
+  String get loginTrustNearby;
 
-  /// No description provided for @trustOtpLogin.
+  /// No description provided for @loginTrustSupport.
   ///
   /// In en, this message translates to:
-  /// **'OTP-secured login'**
-  String get trustOtpLogin;
+  /// **'Dedicated support'**
+  String get loginTrustSupport;
 
-  /// No description provided for @trustNumberPrivate.
+  /// No description provided for @privateTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your number stays private'**
-  String get trustNumberPrivate;
+  /// **'Your information stays private'**
+  String get privateTitle;
+
+  /// No description provided for @privateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We never share your number with anyone.'**
+  String get privateBody;
 
   /// No description provided for @legalPrefix.
   ///
