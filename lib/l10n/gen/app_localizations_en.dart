@@ -1275,6 +1275,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favsTitle => 'Shortlist';
 
   @override
+  String get accountSectionActivity => 'My activity';
+
+  @override
+  String get accountSectionDetails => 'My details';
+
+  @override
+  String get accountSectionHelp => 'Help and legal';
+
+  @override
+  String get accountEditProfile => 'Edit profile';
+
+  @override
   String get favsSubtitle =>
       'Workers you saved. Request an interview when you are ready.';
 

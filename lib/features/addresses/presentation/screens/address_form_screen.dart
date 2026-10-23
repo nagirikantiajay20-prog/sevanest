@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
@@ -36,26 +37,46 @@ class AddressFormScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final id = addressId;
-    final title = Text(id == null ? l10n.addAddress : l10n.editAddressTitle);
+    final title = id == null ? l10n.addAddress : l10n.editAddressTitle;
     if (id == null) {
       return Scaffold(
-        appBar: AppBar(title: title),
-        body: _AddressForm(firstTime: firstTime, prefill: prefill),
+        backgroundColor: AppColors.canvasCool,
+        body: Column(
+          children: [
+            SnHeader(
+              title: title,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(
+              child: _AddressForm(firstTime: firstTime, prefill: prefill),
+            ),
+          ],
+        ),
       );
     }
     final list = ref.watch(addressesProvider);
     return Scaffold(
-      appBar: AppBar(title: title),
-      body: AsyncValueView<List<Address>>(
-        value: list,
-        onRetry: () => ref.invalidate(addressesProvider),
-        data: (all) {
-          final match = all.where((a) => a.id == id);
-          if (match.isEmpty) {
-            return SnErrorState(message: l10n.addressNotFound);
-          }
-          return _AddressForm(initial: match.first, firstTime: firstTime);
-        },
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: title,
+            onBack: () => Navigator.of(context).maybePop(),
+          ),
+          Expanded(
+            child: AsyncValueView<List<Address>>(
+              value: list,
+              onRetry: () => ref.invalidate(addressesProvider),
+              data: (all) {
+                final match = all.where((a) => a.id == id);
+                if (match.isEmpty) {
+                  return SnErrorState(message: l10n.addressNotFound);
+                }
+                return _AddressForm(initial: match.first, firstTime: firstTime);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

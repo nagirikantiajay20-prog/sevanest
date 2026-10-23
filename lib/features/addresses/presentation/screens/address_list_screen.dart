@@ -7,6 +7,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
@@ -62,54 +63,67 @@ class AddressListScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addressesTitle)),
+      backgroundColor: AppColors.canvasCool,
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('addresses_add_btn'),
         onPressed: add,
         icon: const Icon(Icons.add),
         label: Text(l10n.addAddress),
       ),
-      body: AsyncValueView<List<Address>>(
-        value: ref.watch(addressesProvider),
-        onRetry: notifier.refresh,
-        isEmpty: (list) => list.isEmpty,
-        empty: SnEmptyState(
-          title: l10n.addFirstAddress,
-          message: l10n.addFirstAddressHelp,
-          actionLabel: l10n.addAddress,
-          actionKey: const Key('addresses_empty_add_btn'),
-          onAction: add,
-        ),
-        data: (list) => RefreshIndicator(
-          onRefresh: notifier.refresh,
-          child: ListView.separated(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.md,
-              AppSpacing.md,
-              96,
-            ),
-            itemCount: list.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (_, i) => _AddressCard(
-              address: list[i],
-              onTap: () => selectMode
-                  ? context.pop(list[i])
-                  : context.push<Object?>(
+
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.addressesTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.account),
+          ),
+          Expanded(
+            child: AsyncValueView<List<Address>>(
+              value: ref.watch(addressesProvider),
+              onRetry: notifier.refresh,
+              isEmpty: (list) => list.isEmpty,
+              empty: SnEmptyState(
+                title: l10n.addFirstAddress,
+                message: l10n.addFirstAddressHelp,
+                actionLabel: l10n.addAddress,
+                actionKey: const Key('addresses_empty_add_btn'),
+                onAction: add,
+              ),
+              data: (list) => RefreshIndicator(
+                onRefresh: notifier.refresh,
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    96,
+                  ),
+                  itemCount: list.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (_, i) => _AddressCard(
+                    address: list[i],
+                    onTap: () => selectMode
+                        ? context.pop(list[i])
+                        : context.push<Object?>(
+                            Routes.path(Routes.addressEdit, {'id': list[i].id}),
+                          ),
+                    onEdit: () => context.push<Object?>(
                       Routes.path(Routes.addressEdit, {'id': list[i].id}),
                     ),
-              onEdit: () => context.push<Object?>(
-                Routes.path(Routes.addressEdit, {'id': list[i].id}),
+                    onSetDefault: () => run(
+                      () => notifier.setDefault(list[i].id),
+                      l10n.defaultUpdated,
+                    ),
+                    onDelete: () => delete(list[i]),
+                  ),
+                ),
               ),
-              onSetDefault: () => run(
-                () => notifier.setDefault(list[i].id),
-                l10n.defaultUpdated,
-              ),
-              onDelete: () => delete(list[i]),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Ships hidden: retention rules are not confirmed yet (BACKEND_REQUESTS "Account deletion").
@@ -84,43 +86,56 @@ class _State extends ConsumerState<AccountDeletionScreen> {
     final l10n = AppLocalizations.of(context);
     final req = ref.watch(deletionRequestProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.deleteStatusTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: req.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => Center(
-            child: TextButton(
-              key: const Key('deletion_retry_btn'),
-              onPressed: () => ref.invalidate(deletionRequestProvider),
-              child: Text(l10n.deleteFailed),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.deleteStatusTitle,
+            onBack: () => Navigator.of(context).maybePop(),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: req.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => Center(
+                  child: TextButton(
+                    key: const Key('deletion_retry_btn'),
+                    onPressed: () => ref.invalidate(deletionRequestProvider),
+                    child: Text(l10n.deleteFailed),
+                  ),
+                ),
+                data: (r) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      key: const Key('deletion_status_text'),
+                      switch (r.status) {
+                        DeletionStatus.none => l10n.deleteStatusNone,
+                        DeletionStatus.completed => l10n.deleteStatusCompleted,
+                        DeletionStatus.requested => l10n.deleteStatusRequested(
+                          r.requestedAt == null
+                              ? ''
+                              : DateFormat.yMMMd().format(r.requestedAt!),
+                        ),
+                      },
+                    ),
+                    if (_failed) Text(l10n.deleteFailed),
+                    if (r.status == DeletionStatus.requested) ...[
+                      const SizedBox(height: 16),
+                      SnButton(
+                        key: const Key('deletion_cancel_btn'),
+                        label: l10n.deleteCancelRequest,
+                        isLoading: _busy,
+                        onPressed: _cancel,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
-          data: (r) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(key: const Key('deletion_status_text'), switch (r.status) {
-                DeletionStatus.none => l10n.deleteStatusNone,
-                DeletionStatus.completed => l10n.deleteStatusCompleted,
-                DeletionStatus.requested => l10n.deleteStatusRequested(
-                  r.requestedAt == null
-                      ? ''
-                      : DateFormat.yMMMd().format(r.requestedAt!),
-                ),
-              }),
-              if (_failed) Text(l10n.deleteFailed),
-              if (r.status == DeletionStatus.requested) ...[
-                const SizedBox(height: 16),
-                SnButton(
-                  key: const Key('deletion_cancel_btn'),
-                  label: l10n.deleteCancelRequest,
-                  isLoading: _busy,
-                  onPressed: _cancel,
-                ),
-              ],
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }

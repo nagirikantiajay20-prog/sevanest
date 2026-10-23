@@ -299,6 +299,8 @@ void main() {
         200,
         scrollable: find.byType(Scrollable).first,
       );
+      await t.ensureVisible(find.byKey(const Key('profile_cancel_btn')));
+      await t.pump();
       await t.tap(find.byKey(const Key('profile_cancel_btn')));
       await t.pumpAndSettle();
       expect(find.text('Discard changes?'), findsOneWidget);

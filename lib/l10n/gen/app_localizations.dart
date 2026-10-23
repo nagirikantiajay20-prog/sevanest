@@ -2344,6 +2344,30 @@ abstract class AppLocalizations {
   /// **'Shortlist'**
   String get favsTitle;
 
+  /// No description provided for @accountSectionActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'My activity'**
+  String get accountSectionActivity;
+
+  /// No description provided for @accountSectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'My details'**
+  String get accountSectionDetails;
+
+  /// No description provided for @accountSectionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and legal'**
+  String get accountSectionHelp;
+
+  /// No description provided for @accountEditProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get accountEditProfile;
+
   /// No description provided for @favsSubtitle.
   ///
   /// In en, this message translates to:

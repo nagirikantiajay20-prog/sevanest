@@ -6,6 +6,7 @@ import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/widgets/language_chips.dart';
@@ -21,11 +22,21 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.profileTitle)),
-      body: AsyncValueView<CustomerProfile>(
-        value: ref.watch(profileProvider),
-        onRetry: () => ref.invalidate(profileProvider),
-        data: (p) => _ProfileBody(profile: p),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.profileTitle,
+            onBack: () => Navigator.of(context).maybePop(),
+          ),
+          Expanded(
+            child: AsyncValueView<CustomerProfile>(
+              value: ref.watch(profileProvider),
+              onRetry: () => ref.invalidate(profileProvider),
+              data: (p) => _ProfileBody(profile: p),
+            ),
+          ),
+        ],
       ),
     );
   }
