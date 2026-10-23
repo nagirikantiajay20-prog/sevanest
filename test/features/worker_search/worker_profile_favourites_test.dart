@@ -133,9 +133,11 @@ void main() {
       WidgetTester t, {
       _SpyFavourites? spy,
       bool withDraft = true,
+      double? height,
     }) async {
       final env = await launchDiscover(
         t,
+        height: height ?? 844,
         overrides: [
           if (spy != null) favouritesRepositoryProvider.overrideWithValue(spy),
         ],
@@ -411,7 +413,7 @@ void main() {
     testWidgets('reviews: a short first page pulls in the next one by itself', (
       t,
     ) async {
-      final env = await open(t);
+      final env = await open(t, height: 3000);
       await env.go('/workers/cook-43/reviews'); // 45 reviews, 10 per page
       await settle(t);
       final loaded = env.container

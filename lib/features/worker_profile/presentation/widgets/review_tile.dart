@@ -17,8 +17,15 @@ class ReviewTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+    // Design: soft quote card with a teal rule on the left.
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: const BoxDecoration(
+        color: AppColors.canvasCool,
+        borderRadius: BorderRadius.all(Radius.circular(AppRadius.md)),
+        border: Border(left: BorderSide(color: AppColors.teal, width: 3)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -42,7 +49,10 @@ class ReviewTile extends ConsumerWidget {
               ),
             ],
           ),
-          if (review.text != null) Text(review.text!, style: text.bodyMedium),
+          if (review.text != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(review.text!, style: text.bodyMedium),
+          ],
         ],
       ),
     );

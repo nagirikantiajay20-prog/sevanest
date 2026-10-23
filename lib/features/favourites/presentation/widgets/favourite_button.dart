@@ -11,10 +11,14 @@ class FavouriteButton extends ConsumerWidget {
     required this.workerId,
     required this.keyName,
     this.onChanged,
+    this.showLabel = false,
     super.key,
   });
 
   final String workerId;
+
+  /// Text button ("Shortlist") for the profile's sticky bar instead of the bare heart.
+  final bool showLabel;
 
   /// e.g. `worker_card_fav_btn_<id>` or `worker_detail_fav_btn`.
   final String keyName;
@@ -39,6 +43,21 @@ class FavouriteButton extends ConsumerWidget {
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text(l10n.favouriteFailed)));
       }
+    }
+
+    if (showLabel) {
+      return OutlinedButton.icon(
+        key: Key(keyName),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, kMinTapTarget),
+        ),
+        onPressed: s == null || busy ? null : tap,
+        icon: Icon(
+          isFav ? Icons.favorite : Icons.favorite_border,
+          color: isFav ? AppColors.danger : null,
+        ),
+        label: Text(isFav ? l10n.workerShortlisted : l10n.workerShortlist),
+      );
     }
 
     return IconButton(

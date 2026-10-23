@@ -801,6 +801,37 @@
     }
   },
   "workerSkillsLabel": "Skills",
+  "workerVerificationInProgress": "Verification in progress",
+  "workerCannotRequestReason": "You can request an interview once this worker's verification is complete.",
+  "workerStatReviews": "{count} reviews",
+  "@workerStatReviews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workerStatExperience": "Experience",
+  "workerStatYears": "{years} yrs",
+  "@workerStatYears": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "workerStatMonths": "{months} mo",
+  "@workerStatMonths": {
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "workerStatUnknown": "Not listed",
+  "workerShortlist": "Shortlist",
+  "workerShortlisted": "Shortlisted",
+  "reviewsLoadFailed": "Couldn't load reviews.",
   "addressLocationFailed": "Couldn't get your location. Check the location permission, or fill in the address yourself.",
   "logout": "Log out",
   "logoutConfirmTitle": "Log out of SevaNest?",

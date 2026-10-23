@@ -203,6 +203,8 @@ void main() {
       await t.pumpAndSettle();
       expect(env.where, '/workers/cook-1');
       await settle(t); // let the detail request finish
+      await t.pump(const Duration(seconds: 1));
+      await t.pumpAndSettle();
     });
 
     testWidgets('SRCH-04 scrolling to the end loads the next page', (t) async {

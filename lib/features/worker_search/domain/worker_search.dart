@@ -127,6 +127,8 @@ class WorkerSummary {
     this.photoUrl,
     this.verified = false,
     this.engagement,
+    this.verificationPending = false,
+    this.canRequestInterview = true,
   });
 
   final String id;
@@ -144,6 +146,12 @@ class WorkerSummary {
 
   /// The engagement type the worker prefers (null when not stated or not recognised).
   final EngagementType? engagement;
+
+  /// Backend status is `PENDING`: the badge reads "Verification in progress" (module 05, 5.3).
+  final bool verificationPending;
+
+  /// Backend flag `canRequestInterview`; only an explicit `false` disables the button.
+  final bool canRequestInterview;
 
   bool get hasRating => ratingAverage != null && ratingCount > 0;
 
@@ -191,6 +199,8 @@ class WorkerSummary {
       // Badge only from the backend status (AGENTS §27).
       verified: j['verification'] == 'VERIFIED',
       engagement: _engagementFromCode(j['engagementPreference']),
+      verificationPending: j['verification'] == 'PENDING',
+      canRequestInterview: j['canRequestInterview'] != false,
     );
   }
 }

@@ -1404,6 +1404,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workerSkillsLabel => 'Skills';
 
   @override
+  String get workerVerificationInProgress => 'Verification in progress';
+
+  @override
+  String get workerCannotRequestReason =>
+      'You can request an interview once this worker\'s verification is complete.';
+
+  @override
+  String workerStatReviews(int count) {
+    return '$count reviews';
+  }
+
+  @override
+  String get workerStatExperience => 'Experience';
+
+  @override
+  String workerStatYears(int years) {
+    return '$years yrs';
+  }
+
+  @override
+  String workerStatMonths(int months) {
+    return '$months mo';
+  }
+
+  @override
+  String get workerStatUnknown => 'Not listed';
+
+  @override
+  String get workerShortlist => 'Shortlist';
+
+  @override
+  String get workerShortlisted => 'Shortlisted';
+
+  @override
+  String get reviewsLoadFailed => 'Couldn\'t load reviews.';
+
+  @override
   String get addressLocationFailed =>
       'Couldn\'t get your location. Check the location permission, or fill in the address yourself.';
 

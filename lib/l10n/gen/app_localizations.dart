@@ -2584,6 +2584,66 @@ abstract class AppLocalizations {
   /// **'Skills'**
   String get workerSkillsLabel;
 
+  /// No description provided for @workerVerificationInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification in progress'**
+  String get workerVerificationInProgress;
+
+  /// No description provided for @workerCannotRequestReason.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request an interview once this worker\'s verification is complete.'**
+  String get workerCannotRequestReason;
+
+  /// No description provided for @workerStatReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} reviews'**
+  String workerStatReviews(int count);
+
+  /// No description provided for @workerStatExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get workerStatExperience;
+
+  /// No description provided for @workerStatYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{years} yrs'**
+  String workerStatYears(int years);
+
+  /// No description provided for @workerStatMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{months} mo'**
+  String workerStatMonths(int months);
+
+  /// No description provided for @workerStatUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not listed'**
+  String get workerStatUnknown;
+
+  /// No description provided for @workerShortlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortlist'**
+  String get workerShortlist;
+
+  /// No description provided for @workerShortlisted.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortlisted'**
+  String get workerShortlisted;
+
+  /// No description provided for @reviewsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load reviews.'**
+  String get reviewsLoadFailed;
+
   /// No description provided for @addressLocationFailed.
   ///
   /// In en, this message translates to:

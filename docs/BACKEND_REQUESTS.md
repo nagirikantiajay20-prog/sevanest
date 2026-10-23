@@ -393,3 +393,15 @@ Numbers match our message.
 - **Account deletion**: retention rules, and a remote flag in `/app-config` to show the row (owner: Backend/Legal). Until then the row is hidden by build flag.
 - **Interview horizon**: `horizonDays` only arrives with a slots response; ask whether `/app-config` can carry it.
 - **Production host** distinct from the free-tier host; stg and prod still point at the same URL (owner: DevOps).
+
+## Figma design integration 2026-10-22 (gaps found; UI hides these until served, no mock data)
+
+- **Booking quote**: Confirm booking design shows wage, service fee (design example ₹500) and taxes (₹90) before payment. No quote endpoint exists; fee is set at payment. Needs e.g. `GET /bookings/{id}/quote` -> `{ wageMinor, feeMinor, taxMinor, totalMinor, currency }`. Until then the screen shows only what the booking/payment already returns.
+- **Service history**: totals (services, workers, total spent), category/year filters, search. Not in the API.
+- **Search filters**: design shows "Top rated" only; app uses availability, language, experience. Rating filter/sort pending #40.
+- **Worker profile**: design shows jobs done, repeat-customer %, per-check verification list with "in progress", price per month, hours/day. Confirm which fields `GET /search/workers/{id}` serves.
+- **Home**: promo carousel, "Explore services" tiles with photos, location header need catalogue images/promos (not served).
+- **Transactions**: month summary (paid / refunds / pending) and search not served.
+- **Video interview join**: no video provider in V1 (V2). Button hidden until then.
+- **Bookings search**, **budget guidance** ("typical for a part-time cook"): not served.
+- **Worker detail**: worker display name, distance, About text, price/month, jobs done, repeat-customer %, per-check verification list, and `canRequestInterview` / `verification: PENDING` on `GET /search/workers/{id}` are not served (UI reads them when present, else hides). Customer photo endpoint, worker total count / price / distance on search, address serviceability flag, `BookingQuote` endpoint and `/workers/{id}/reviews` also still needed.

@@ -65,12 +65,11 @@ class _State extends ConsumerState<WorkerReviewsScreen> {
           loadMoreIfShort(_scroll, p, notifier.loadMore);
           return RefreshIndicator(
             onRefresh: notifier.refresh,
-            child: ListView.separated(
+            child: ListView.builder(
               controller: _scroll,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(AppSpacing.md),
               itemCount: p.items.length + 1,
-              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (_, i) => i == p.items.length
                   ? PagedFooter(
                       page: p,
