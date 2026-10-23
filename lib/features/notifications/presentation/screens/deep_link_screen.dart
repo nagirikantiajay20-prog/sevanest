@@ -7,6 +7,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
@@ -59,67 +60,71 @@ class DeepLinkScreen extends ConsumerWidget {
     final err = probe?.error;
     final gone = !ok || err is NotFoundFailure || err is ForbiddenFailure;
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: gone
-              ? Column(
-                  key: const Key('link_unavailable'),
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircleAvatar(
-                      radius: 36,
-                      backgroundColor: AppColors.slateBg,
-                      child: Icon(Icons.search_off, size: 36),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      l10n.linkUnavailableTitle,
-                      style: text.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      l10n.linkUnavailableBody,
-                      textAlign: TextAlign.center,
-                      style: text.bodyMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    SnButton(
-                      key: const Key('link_home_btn'),
-                      label: l10n.linkGoHome,
-                      onPressed: () => context.go(Routes.home),
-                    ),
-                  ],
-                )
-              : err != null
-              ? Column(
-                  key: const Key('link_error'),
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      plainFailureMessage(l10n, err),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    SnButton(
-                      key: const Key('error_retry_btn'),
-                      label: l10n.retry,
-                      onPressed: () => ref.invalidate(linkProbeProvider(to)),
-                    ),
-                  ],
-                )
-              : const CircularProgressIndicator(key: Key('link_loading')),
-        ),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: '',
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.home),
+          ),
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: gone
+                    ? Column(
+                        key: const Key('link_unavailable'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircleAvatar(
+                            radius: 36,
+                            backgroundColor: AppColors.slateBg,
+                            child: Icon(Icons.search_off, size: 36),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            l10n.linkUnavailableTitle,
+                            style: text.titleLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            l10n.linkUnavailableBody,
+                            textAlign: TextAlign.center,
+                            style: text.bodyMedium,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          SnButton(
+                            key: const Key('link_home_btn'),
+                            label: l10n.linkGoHome,
+                            onPressed: () => context.go(Routes.home),
+                          ),
+                        ],
+                      )
+                    : err != null
+                    ? Column(
+                        key: const Key('link_error'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            plainFailureMessage(l10n, err),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          SnButton(
+                            key: const Key('error_retry_btn'),
+                            label: l10n.retry,
+                            onPressed: () =>
+                                ref.invalidate(linkProbeProvider(to)),
+                          ),
+                        ],
+                      )
+                    : const CircularProgressIndicator(key: Key('link_loading')),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

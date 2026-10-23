@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/localization/time_format.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
@@ -93,8 +94,8 @@ class _State extends ConsumerState<NotificationCentreScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
+    final l10n = AppLocalizations.of(context);
     // A push arrived, or the app came back: read the list again.
     ref.listen(notificationTickProvider, (_, _) => unawaited(_refresh()));
     final unread = ref.watch(notificationUnreadProvider).value ?? 0;
@@ -102,40 +103,30 @@ class _State extends ConsumerState<NotificationCentreScreen>
     final perm = ref.watch(pushPermissionProvider).value;
     return Scaffold(
       backgroundColor: AppColors.fieldBg,
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-        title: Text(
-          l10n.notifTitle,
-          style: text.headlineSmall?.copyWith(
-            color: AppColors.navy,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        actions: [
-          IconButton(
-            key: const Key('notif_settings_btn'),
-            tooltip: l10n.notifSettingsTitle,
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => showModalBottomSheet<void>(
-              context: context,
-              builder: (_) => const _SettingsSheet(),
-            ),
-          ),
-          TextButton(
-            key: const Key('notif_mark_all_btn'),
-            onPressed: unread == 0 || _markingAll ? null : _markAll,
-            child: Text(l10n.notifMarkAll),
-          ),
-        ],
-      ),
       body: Column(
         children: [
+          SnHeader(
+            title: l10n.notifTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.home),
+            trailing: IconButton(
+              key: const Key('notif_settings_btn'),
+              tooltip: l10n.notifSettingsTitle,
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => showModalBottomSheet<void>(
+                context: context,
+                builder: (_) => const _SettingsSheet(),
+              ),
+            ),
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TextButton(
+              key: const Key('notif_mark_all_btn'),
+              onPressed: unread == 0 || _markingAll ? null : _markAll,
+              child: Text(l10n.notifMarkAll),
+            ),
+          ),
           Material(
             color: AppColors.surface,
             child: Row(
