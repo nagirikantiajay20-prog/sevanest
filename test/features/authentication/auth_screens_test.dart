@@ -283,10 +283,9 @@ void main() {
       'legal links: no URL defined yet -> friendly message, no crash',
       (t) async {
         await launch(t);
-        final rich = t.widget<Text>(find.byKey(const Key('login_legal_text')));
-        final spans = (rich.textSpan! as TextSpan).children!.cast<TextSpan>();
-        final terms = spans.firstWhere((s) => s.text == 'Terms of service');
-        (terms.recognizer! as dynamic).onTap();
+        await t.ensureVisible(find.byKey(const Key('login_terms_link')));
+        await t.pump();
+        await t.tap(find.byKey(const Key('login_terms_link')));
         await t.pump();
         await t.pump(const Duration(milliseconds: 100));
         expect(find.text("This link isn't available yet."), findsOneWidget);

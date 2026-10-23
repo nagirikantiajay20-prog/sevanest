@@ -550,6 +550,22 @@ class _PrivacyNote extends StatelessWidget {
   }
 }
 
+/// An inline link with a key (module 01) that still taps through the shared recognizer.
+InlineSpan _link(
+  String key,
+  String label,
+  TextStyle style,
+  TapGestureRecognizer r,
+) => WidgetSpan(
+  alignment: PlaceholderAlignment.baseline,
+  baseline: TextBaseline.alphabetic,
+  child: InkWell(
+    key: Key(key),
+    onTap: r.onTap,
+    child: Text(label, style: style),
+  ),
+);
+
 class _LegalText extends StatelessWidget {
   const _LegalText({required this.terms, required this.privacy});
   final TapGestureRecognizer terms;
@@ -569,19 +585,9 @@ class _LegalText extends StatelessWidget {
         style: base,
         children: [
           TextSpan(text: l10n.legalPrefix),
-          TextSpan(
-            text: l10n.termsOfService,
-            style: link,
-            recognizer: terms,
-            semanticsLabel: l10n.termsOfService,
-          ),
+          _link('login_terms_link', l10n.termsOfService, link, terms),
           TextSpan(text: l10n.legalAnd),
-          TextSpan(
-            text: l10n.privacyPolicy,
-            style: link,
-            recognizer: privacy,
-            semanticsLabel: l10n.privacyPolicy,
-          ),
+          _link('login_privacy_link', l10n.privacyPolicy, link, privacy),
           const TextSpan(text: '.'),
         ],
       ),
