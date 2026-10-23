@@ -5,12 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
@@ -94,18 +97,14 @@ class _State extends ConsumerState<ServiceHistoryScreen> {
     final categories = ref.watch(categoriesProvider).value ?? const [];
     final year = ref.read(nowProvider)().year;
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.account),
-        ),
-        title: Text(l10n.historyTitle),
-      ),
+      backgroundColor: AppColors.canvasCool,
       body: Column(
         children: [
+          SnHeader(
+            title: l10n.historyTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.account),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
@@ -171,19 +170,28 @@ class _State extends ConsumerState<ServiceHistoryScreen> {
           ),
           if (summary != null)
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.md,
+                0,
               ),
-              child: Text(
-                l10n.historySummaryLine(
-                  summary.totalServices,
-                  summary.distinctWorkers,
-                  summary.currency == 'INR'
-                      ? formatRupees(summary.totalSpent)
-                      : '${summary.currency} ${summary.totalSpent}',
+              child: SnCard(
+                tinted: true,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    l10n.historySummaryLine(
+                      summary.totalServices,
+                      summary.distinctWorkers,
+                      summary.currency == 'INR'
+                          ? formatRupees(summary.totalSpent)
+                          : '${summary.currency} ${summary.totalSpent}',
+                    ),
+                    key: const Key('history_summary'),
+                    style: AppText.card,
+                  ),
                 ),
-                key: const Key('history_summary'),
               ),
             ),
           Expanded(child: _list(l10n, value)),
@@ -262,7 +270,7 @@ class _State extends ConsumerState<ServiceHistoryScreen> {
                     child: Text(
                       title,
                       key: Key('history_section_$key'),
-                      style: Theme.of(context).textTheme.titleMedium,
+                      style: AppText.heading,
                     ),
                   ),
                   for (final b in items)
@@ -304,18 +312,17 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final b = booking;
     final canRate = score == null && b.actions.contains(BookingAction.rate);
-    return Card(
-      child: InkWell(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: SnCard(
         key: Key('history_card_${b.id}'),
-        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: () =>
             context.push(Routes.path(Routes.bookingDetail, {'id': b.id})),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+        child: SizedBox(
+          width: double.infinity,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -330,7 +337,7 @@ class _Card extends StatelessWidget {
                       if (b.engagement != null)
                         engagementLabels(l10n, b.engagement!).name,
                     ].whereType<String>().join(' · '),
-                    style: text.titleSmall,
+                    style: AppText.card,
                   ),
                   SnBadge(
                     label: bookingStatusLabel(l10n, b.status),
@@ -344,7 +351,7 @@ class _Card extends StatelessWidget {
                   child: Text(
                     b.identity!.displayName,
                     key: Key('history_worker_${b.id}'),
-                    style: text.bodyMedium,
+                    style: AppText.bodyLarge,
                   ),
                 ),
               const SizedBox(height: AppSpacing.xs),
@@ -353,7 +360,7 @@ class _Card extends StatelessWidget {
                   if (b.startDate != null) formatDate(b.startDate!, locale),
                   ?b.areaName,
                 ].join(' · '),
-                style: text.bodySmall,
+                style: AppText.meta,
               ),
               if (score != null)
                 Padding(
