@@ -8,6 +8,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
@@ -98,56 +99,71 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             stops: [0, 0.55, 1],
           ),
         ),
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: AppSpacing.xl),
-                      const _Brand(),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        l10n.splashTagline,
-                        textAlign: TextAlign.center,
-                        style: AppText.display,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      const _TrustRow(),
-                      const Spacer(),
-                      if (failed) ...[
-                        _FailedCard(
-                          onRetry: _boot,
-                          onSignInAgain: _signInAgain,
-                        ),
-                        AuthLink(
-                          key: const Key('splash_support_link'),
-                          label: l10n.contactSupport,
-                          icon: Icons.headset_mic_outlined,
-                          onTap: () => openSupport(context, ref),
-                        ),
-                      ] else
-                        _Progress(slow: _state == _Splash.slow),
-                      const SizedBox(height: AppSpacing.md),
-                      if (version != null)
-                        Text(
-                          l10n.versionLabel(version),
-                          style: AppText.body.copyWith(
-                            color: AppColors.slate400,
-                          ),
-                        ),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
-                  ),
-                ),
+        child: Stack(
+          children: [
+            const Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 320,
+              child: SnPhotoBackdrop(
+                asset: AppPhotos.splash,
+                fadeFromBottom: false,
+                alignment: Alignment.bottomCenter,
               ),
-            ],
-          ),
+            ),
+            SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: AppSpacing.xl),
+                          const _Brand(),
+                          const SizedBox(height: AppSpacing.lg),
+                          Text(
+                            l10n.splashTagline,
+                            textAlign: TextAlign.center,
+                            style: AppText.display,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          const _TrustRow(),
+                          const Spacer(),
+                          if (failed) ...[
+                            _FailedCard(
+                              onRetry: _boot,
+                              onSignInAgain: _signInAgain,
+                            ),
+                            AuthLink(
+                              key: const Key('splash_support_link'),
+                              label: l10n.contactSupport,
+                              icon: Icons.headset_mic_outlined,
+                              onTap: () => openSupport(context, ref),
+                            ),
+                          ] else
+                            _Progress(slow: _state == _Splash.slow),
+                          const SizedBox(height: AppSpacing.md),
+                          if (version != null)
+                            Text(
+                              l10n.versionLabel(version),
+                              style: AppText.body.copyWith(
+                                color: AppColors.slate400,
+                              ),
+                            ),
+                          const SizedBox(height: AppSpacing.md),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

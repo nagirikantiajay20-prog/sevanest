@@ -8,6 +8,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/mock/dev_menu.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
+import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
@@ -251,149 +252,163 @@ class _Header extends StatelessWidget {
           colors: [AppColors.ivory, AppColors.canvasCool],
         ),
       ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          top + AppSpacing.sm,
-          AppSpacing.md,
-          AppSpacing.md,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: SnPhotoBackdrop(
+              asset: AppPhotos.room,
+              fadeTo: AppColors.ivory,
+              washAtEdge: 0.9,
+              alignment: Alignment.topRight,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              top + AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.md,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: InkWell(
-                    key: const Key('home_address_chip'),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    onTap: onAddress,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minHeight: kMinTapTarget,
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: const BoxDecoration(
-                              color: AppColors.teal,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.location_on_outlined,
-                              color: Colors.white,
-                            ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        key: const Key('home_address_chip'),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        onTap: onAddress,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minHeight: kMinTapTarget,
                           ),
-                          const SizedBox(width: AppSpacing.s12),
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.teal,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.location_on_outlined,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.s12),
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Flexible(
-                                      child: Text(
-                                        addressTitle,
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            addressTitle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: AppText.card,
+                                          ),
+                                        ),
+                                        const Icon(
+                                          Icons.keyboard_arrow_down,
+                                          size: 20,
+                                          color: AppColors.brandInk,
+                                        ),
+                                      ],
+                                    ),
+                                    if (addressLine != null)
+                                      Text(
+                                        addressLine!,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: AppText.card,
+                                        style: AppText.body.copyWith(
+                                          fontSize: 12,
+                                        ),
                                       ),
-                                    ),
-                                    const Icon(
-                                      Icons.keyboard_arrow_down,
-                                      size: 20,
-                                      color: AppColors.brandInk,
-                                    ),
                                   ],
                                 ),
-                                if (addressLine != null)
-                                  Text(
-                                    addressLine!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppText.body.copyWith(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Semantics(
+                      label: unread > 0
+                          ? l10n.homeNotificationsUnread(unread)
+                          : l10n.homeNotifications,
+                      button: true,
+                      child: Material(
+                        color: AppColors.surface,
+                        elevation: 1,
+                        shadowColor: AppColors.navy.withValues(alpha: 0.2),
+                        shape: const CircleBorder(
+                          side: BorderSide(color: AppColors.hairline),
+                        ),
+                        child: InkWell(
+                          key: const Key('home_bell_btn'),
+                          customBorder: const CircleBorder(),
+                          onTap: onBell,
+                          child: SizedBox(
+                            width: kMinTapTarget,
+                            height: kMinTapTarget,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.notifications_none,
+                                  color: AppColors.brandInk,
+                                ),
+                                if (unread > 0)
+                                  const Positioned(
+                                    top: 10,
+                                    right: 12,
+                                    child: CircleAvatar(
+                                      key: Key('home_bell_badge'),
+                                      radius: 5,
+                                      backgroundColor: AppColors.amber,
+                                    ),
                                   ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Semantics(
-                  label: unread > 0
-                      ? l10n.homeNotificationsUnread(unread)
-                      : l10n.homeNotifications,
-                  button: true,
-                  child: Material(
-                    color: AppColors.surface,
-                    elevation: 1,
-                    shadowColor: AppColors.navy.withValues(alpha: 0.2),
-                    shape: const CircleBorder(
-                      side: BorderSide(color: AppColors.hairline),
-                    ),
-                    child: InkWell(
-                      key: const Key('home_bell_btn'),
-                      customBorder: const CircleBorder(),
-                      onTap: onBell,
-                      child: SizedBox(
-                        width: kMinTapTarget,
-                        height: kMinTapTarget,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            const Icon(
-                              Icons.notifications_none,
-                              color: AppColors.brandInk,
-                            ),
-                            if (unread > 0)
-                              const Positioned(
-                                top: 10,
-                                right: 12,
-                                child: CircleAvatar(
-                                  key: Key('home_bell_badge'),
-                                  radius: 5,
-                                  backgroundColor: AppColors.amber,
-                                ),
-                              ),
-                          ],
                         ),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                GestureDetector(
+                  key: const Key('home_greeting'),
+                  onLongPress: onTitleLongPress,
+                  child: Text(
+                    greeting,
+                    style: AppText.bodyLarge.copyWith(
+                      fontSize: 17,
+                      color: AppColors.brandInk,
+                    ),
                   ),
                 ),
+                const SizedBox(height: AppSpacing.xs),
+                Semantics(
+                  header: true,
+                  child: Text(
+                    l10n.homeHeadline,
+                    style: AppText.display.copyWith(fontSize: 32),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(l10n.homeSubtitle, style: AppText.bodyLarge),
+                const SizedBox(height: AppSpacing.lg),
+                _FindCta(enabled: ctaEnabled, onTap: onFind),
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
-            GestureDetector(
-              key: const Key('home_greeting'),
-              onLongPress: onTitleLongPress,
-              child: Text(
-                greeting,
-                style: AppText.bodyLarge.copyWith(
-                  fontSize: 17,
-                  color: AppColors.brandInk,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Semantics(
-              header: true,
-              child: Text(
-                l10n.homeHeadline,
-                style: AppText.display.copyWith(fontSize: 32),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(l10n.homeSubtitle, style: AppText.bodyLarge),
-            const SizedBox(height: AppSpacing.lg),
-            _FindCta(enabled: ctaEnabled, onTap: onFind),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -527,7 +542,17 @@ class _ExploreServices extends StatelessWidget {
                               borderRadius: BorderRadius.circular(AppRadius.md),
                               border: Border.all(color: AppColors.tileLine),
                             ),
-                            child: Icon(c.icon, color: AppColors.teal),
+                            clipBehavior: Clip.antiAlias,
+                            child:
+                                AppPhotos.forService('${c.id} ${c.name}') ==
+                                    null
+                                ? Icon(c.icon, color: AppColors.teal)
+                                : Image.asset(
+                                    AppPhotos.forService('${c.id} ${c.name}')!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) =>
+                                        Icon(c.icon, color: AppColors.teal),
+                                  ),
                           ),
                           const SizedBox(height: AppSpacing.xs),
                           Text(

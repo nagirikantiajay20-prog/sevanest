@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
@@ -156,132 +157,151 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             colors: [AppColors.ivory, AppColors.surface],
           ),
         ),
-        child: SafeArea(
-          bottom: false,
-          child: CustomScrollView(
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        AppSpacing.md,
-                        AppSpacing.lg,
-                        0,
-                      ),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            'assets/branding/logo_mark.png',
-                            height: 44,
-                            excludeFromSemantics: true,
+        child: Stack(
+          children: [
+            const Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: 380,
+              child: SnPhotoBackdrop(
+                asset: AppPhotos.room,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+            SafeArea(
+              bottom: false,
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.lg,
+                            AppSpacing.md,
+                            AppSpacing.lg,
+                            0,
                           ),
-                          const SizedBox(width: AppSpacing.s12),
-                          Expanded(
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                'assets/branding/logo_mark.png',
+                                height: 44,
+                                excludeFromSemantics: true,
+                              ),
+                              const SizedBox(width: AppSpacing.s12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.appName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.screenTitle,
+                                    ),
+                                    Text(
+                                      l10n.brandCaption,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.body.copyWith(
+                                        fontSize: 10,
+                                        letterSpacing: 1.2,
+                                        color: AppColors.slate400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              _LanguageChip(onTap: _chooseLanguage),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  l10n.appName,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppText.screenTitle,
-                                ),
-                                Text(
-                                  l10n.brandCaption,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppText.body.copyWith(
-                                    fontSize: 10,
-                                    letterSpacing: 1.2,
-                                    color: AppColors.slate400,
+                                Semantics(
+                                  header: true,
+                                  child: Text(
+                                    l10n.loginHeadline,
+                                    style: AppText.display.copyWith(
+                                      fontSize: 32,
+                                    ),
                                   ),
                                 ),
+                                const SizedBox(height: AppSpacing.s12),
+                                Text(
+                                  l10n.loginSubhead,
+                                  style: AppText.bodyLarge,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                const _HeroTrust(),
                               ],
                             ),
                           ),
-                          _LanguageChip(onTap: _chooseLanguage),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Semantics(
-                              header: true,
-                              child: Text(
-                                l10n.loginHeadline,
-                                style: AppText.display.copyWith(fontSize: 32),
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.s12),
-                            Text(l10n.loginSubhead, style: AppText.bodyLarge),
-                            const SizedBox(height: AppSpacing.md),
-                            const _HeroTrust(),
-                          ],
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: AuthSheet(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Center(child: SnGrabber()),
-                            const SizedBox(height: AppSpacing.md),
-                            Semantics(
-                              header: true,
-                              child: Text(
-                                l10n.loginHeading,
-                                style: AppText.title,
-                              ),
+                        Expanded(
+                          child: AuthSheet(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Center(child: SnGrabber()),
+                                const SizedBox(height: AppSpacing.md),
+                                Semantics(
+                                  header: true,
+                                  child: Text(
+                                    l10n.loginHeading,
+                                    style: AppText.title,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  l10n.loginHelp(otpLength),
+                                  style: AppText.bodyLarge,
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                _MobileField(
+                                  controller: _controller,
+                                  focusNode: _focus,
+                                  hasError: invalid,
+                                  enabled: !otp.busy,
+                                  onChanged: (_) => setState(() {}),
+                                  onSubmitted: (_) => _submit(),
+                                ),
+                                _Feedback(
+                                  invalid: invalid,
+                                  otp: otp,
+                                  invalidText: l10n.mobileInvalid,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                SnButton(
+                                  key: const Key('login_get_otp_btn'),
+                                  label: l10n.getOtp,
+                                  loadingLabel: l10n.sendingCode,
+                                  icon: Icons.arrow_forward_rounded,
+                                  isLoading: otp.phase == OtpPhase.requesting,
+                                  onPressed: ready ? _submit : null,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                const _PrivacyNote(),
+                                const SizedBox(height: AppSpacing.md),
+                                _LegalText(terms: _terms, privacy: _privacy),
+                                const SizedBox(height: AppSpacing.md),
+                              ],
                             ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              l10n.loginHelp(otpLength),
-                              style: AppText.bodyLarge,
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            _MobileField(
-                              controller: _controller,
-                              focusNode: _focus,
-                              hasError: invalid,
-                              enabled: !otp.busy,
-                              onChanged: (_) => setState(() {}),
-                              onSubmitted: (_) => _submit(),
-                            ),
-                            _Feedback(
-                              invalid: invalid,
-                              otp: otp,
-                              invalidText: l10n.mobileInvalid,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            SnButton(
-                              key: const Key('login_get_otp_btn'),
-                              label: l10n.getOtp,
-                              loadingLabel: l10n.sendingCode,
-                              icon: Icons.arrow_forward_rounded,
-                              isLoading: otp.phase == OtpPhase.requesting,
-                              onPressed: ready ? _submit : null,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            const _PrivacyNote(),
-                            const SizedBox(height: AppSpacing.md),
-                            _LegalText(terms: _terms, privacy: _privacy),
-                            const SizedBox(height: AppSpacing.md),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

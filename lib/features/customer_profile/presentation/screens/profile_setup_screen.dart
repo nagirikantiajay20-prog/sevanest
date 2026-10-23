@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_header.dart';
+import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/widgets/language_chips.dart';
@@ -97,128 +98,150 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               colors: [AppColors.ivory, AppColors.surface],
             ),
           ),
-          child: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.md,
-                    AppSpacing.lg,
-                    AppSpacing.lg,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SnStepBar(step: 3, total: 4),
-                      const SizedBox(height: AppSpacing.lg),
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          l10n.profileSetupTitle,
-                          style: AppText.display,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(l10n.profileSetupSubtitle, style: AppText.bodyLarge),
-                    ],
-                  ),
+          child: Stack(
+            children: [
+              const Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                height: 380,
+                child: SnPhotoBackdrop(
+                  asset: AppPhotos.room,
+                  alignment: Alignment.topCenter,
                 ),
-                Expanded(
-                  child: AuthSheet(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                LabeledField(
-                                  name: 'profile_name_field',
-                                  controller: _name,
-                                  label: l10n.fullNameLabel,
-                                  hint: l10n.fullNameHint,
-                                  helper: l10n.fullNameHelp,
-                                  error: nameError,
-                                  enabled: !form.busy,
-                                  prefixIcon: Icons.person_outline,
-                                  textInputAction: TextInputAction.next,
-                                  autofillHints: const [AutofillHints.name],
-                                  onChanged: (_) => setState(() {}),
-                                ),
-                                const SizedBox(height: AppSpacing.lg),
-                                LabeledField(
-                                  name: 'profile_email_field',
-                                  controller: _email,
-                                  label: l10n.emailLabel,
-                                  hint: l10n.emailHint,
-                                  helper: l10n.emailHelp,
-                                  error: emailError,
-                                  enabled: !form.busy,
-                                  prefixIcon: Icons.mail_outline,
-                                  keyboardType: TextInputType.emailAddress,
-                                  textInputAction: TextInputAction.done,
-                                  autofillHints: const [AutofillHints.email],
-                                  onChanged: (_) => setState(() {}),
-                                  onSubmitted: (_) => _submit(),
-                                ),
-                                const SizedBox(height: AppSpacing.lg),
-                                Text(
-                                  l10n.preferredLanguage,
-                                  style: AppText.label.copyWith(fontSize: 15),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                LanguageChips(
-                                  selected: _language,
-                                  onSelected: form.busy
-                                      ? null
-                                      : (c) => setState(() => _language = c),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  l10n.chooseLanguageHint,
-                                  style: AppText.body,
-                                ),
-                                if (generalError != null) ...[
-                                  const SizedBox(height: AppSpacing.md),
-                                  FormErrorBanner(
-                                    generalError,
-                                    key: const Key('profile_error_banner'),
-                                  ),
-                                ],
-                                const SizedBox(height: AppSpacing.md),
-                              ],
+              ),
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SnStepBar(step: 3, total: 4),
+                          const SizedBox(height: AppSpacing.lg),
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.profileSetupTitle,
+                              style: AppText.display,
                             ),
                           ),
-                        ),
-                        SnButton(
-                          key: const Key('profile_continue_btn'),
-                          label: l10n.continueLabel,
-                          loadingLabel: l10n.saving,
-                          icon: Icons.arrow_forward_rounded,
-                          isLoading: form.busy,
-                          onPressed: isValidName(_name.text) && !form.busy
-                              ? _submit
-                              : null,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          l10n.ageConfirm,
-                          textAlign: TextAlign.center,
-                          style: AppText.body.copyWith(
-                            color: AppColors.slate400,
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            l10n.profileSetupSubtitle,
+                            style: AppText.bodyLarge,
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                    Expanded(
+                      child: AuthSheet(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    LabeledField(
+                                      name: 'profile_name_field',
+                                      controller: _name,
+                                      label: l10n.fullNameLabel,
+                                      hint: l10n.fullNameHint,
+                                      helper: l10n.fullNameHelp,
+                                      error: nameError,
+                                      enabled: !form.busy,
+                                      prefixIcon: Icons.person_outline,
+                                      textInputAction: TextInputAction.next,
+                                      autofillHints: const [AutofillHints.name],
+                                      onChanged: (_) => setState(() {}),
+                                    ),
+                                    const SizedBox(height: AppSpacing.lg),
+                                    LabeledField(
+                                      name: 'profile_email_field',
+                                      controller: _email,
+                                      label: l10n.emailLabel,
+                                      hint: l10n.emailHint,
+                                      helper: l10n.emailHelp,
+                                      error: emailError,
+                                      enabled: !form.busy,
+                                      prefixIcon: Icons.mail_outline,
+                                      keyboardType: TextInputType.emailAddress,
+                                      textInputAction: TextInputAction.done,
+                                      autofillHints: const [
+                                        AutofillHints.email,
+                                      ],
+                                      onChanged: (_) => setState(() {}),
+                                      onSubmitted: (_) => _submit(),
+                                    ),
+                                    const SizedBox(height: AppSpacing.lg),
+                                    Text(
+                                      l10n.preferredLanguage,
+                                      style: AppText.label.copyWith(
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    LanguageChips(
+                                      selected: _language,
+                                      onSelected: form.busy
+                                          ? null
+                                          : (c) =>
+                                                setState(() => _language = c),
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
+                                    Text(
+                                      l10n.chooseLanguageHint,
+                                      style: AppText.body,
+                                    ),
+                                    if (generalError != null) ...[
+                                      const SizedBox(height: AppSpacing.md),
+                                      FormErrorBanner(
+                                        generalError,
+                                        key: const Key('profile_error_banner'),
+                                      ),
+                                    ],
+                                    const SizedBox(height: AppSpacing.md),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SnButton(
+                              key: const Key('profile_continue_btn'),
+                              label: l10n.continueLabel,
+                              loadingLabel: l10n.saving,
+                              icon: Icons.arrow_forward_rounded,
+                              isLoading: form.busy,
+                              onPressed: isValidName(_name.text) && !form.busy
+                                  ? _submit
+                                  : null,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              l10n.ageConfirm,
+                              textAlign: TextAlign.center,
+                              style: AppText.body.copyWith(
+                                color: AppColors.slate400,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

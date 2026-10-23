@@ -9,6 +9,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
@@ -95,144 +96,158 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             colors: [AppColors.ivory, AppColors.surface],
           ),
         ),
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AuthBackButton(onPressed: _leave),
-                      const SizedBox(height: AppSpacing.md),
-                      Row(
+        child: Stack(
+          children: [
+            const Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: 380,
+              child: SnPhotoBackdrop(
+                asset: AppPhotos.room,
+                alignment: Alignment.topCenter,
+              ),
+            ),
+            SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Image.asset(
-                            'assets/branding/logo_mark.png',
-                            height: 44,
-                            excludeFromSemantics: true,
+                          AuthBackButton(onPressed: _leave),
+                          const SizedBox(height: AppSpacing.md),
+                          Row(
+                            children: [
+                              Image.asset(
+                                'assets/branding/logo_mark.png',
+                                height: 44,
+                                excludeFromSemantics: true,
+                              ),
+                              const SizedBox(width: AppSpacing.s12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.appName,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.screenTitle,
+                                    ),
+                                    Text(
+                                      l10n.brandCaption,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.body.copyWith(
+                                        fontSize: 10,
+                                        letterSpacing: 1.2,
+                                        color: AppColors.slate400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: AppSpacing.s12),
-                          Expanded(
+                          const SizedBox(height: AppSpacing.lg),
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.otpTitle,
+                              style: AppText.display.copyWith(fontSize: 32),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            l10n.otpEnterCode(otpLength),
+                            style: AppText.bodyLarge,
+                          ),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '+91 ${_spaced(otp.mobile)}',
+                                  key: const Key('otp_mobile_text'),
+                                  style: AppText.title.copyWith(
+                                    fontFamily: AppFonts.body,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                key: const Key('otp_change_number_btn'),
+                                tooltip: l10n.changeNumber,
+                                constraints: const BoxConstraints.tightFor(
+                                  width: kMinTapTarget,
+                                  height: kMinTapTarget,
+                                ),
+                                onPressed: _leave,
+                                icon: const Icon(
+                                  Icons.edit_outlined,
+                                  color: AppColors.slate,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          SnCard(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  l10n.appName,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppText.screenTitle,
+                                _OtpBoxes(
+                                  controller: _controller,
+                                  focusNode: _focus,
+                                  style: style,
+                                  enabled: otp.canVerify,
+                                  onChanged: (_) {
+                                    ref
+                                        .read(otpControllerProvider.notifier)
+                                        .codeEdited();
+                                    setState(() {});
+                                  },
+                                  onSubmitted: _verify,
                                 ),
-                                Text(
-                                  l10n.brandCaption,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppText.body.copyWith(
-                                    fontSize: 10,
-                                    letterSpacing: 1.2,
-                                    color: AppColors.slate400,
-                                  ),
+                                const SizedBox(height: AppSpacing.sm),
+                                _Status(otp: otp, onResend: _resend),
+                                const SizedBox(height: AppSpacing.md),
+                                _VerifyButton(
+                                  loading: otp.phase == OtpPhase.verifying,
+                                  verified: isVerified,
+                                  onPressed: canSubmit ? _verify : null,
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          l10n.otpTitle,
-                          style: AppText.display.copyWith(fontSize: 32),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        l10n.otpEnterCode(otpLength),
-                        style: AppText.bodyLarge,
-                      ),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              '+91 ${_spaced(otp.mobile)}',
-                              key: const Key('otp_mobile_text'),
-                              style: AppText.title.copyWith(
-                                fontFamily: AppFonts.body,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            key: const Key('otp_change_number_btn'),
-                            tooltip: l10n.changeNumber,
-                            constraints: const BoxConstraints.tightFor(
-                              width: kMinTapTarget,
-                              height: kMinTapTarget,
-                            ),
-                            onPressed: _leave,
-                            icon: const Icon(
-                              Icons.edit_outlined,
-                              color: AppColors.slate,
-                              size: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      SnCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _OtpBoxes(
-                              controller: _controller,
-                              focusNode: _focus,
-                              style: style,
-                              enabled: otp.canVerify,
-                              onChanged: (_) {
-                                ref
-                                    .read(otpControllerProvider.notifier)
-                                    .codeEdited();
-                                setState(() {});
-                              },
-                              onSubmitted: _verify,
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            _Status(otp: otp, onResend: _resend),
-                            const SizedBox(height: AppSpacing.md),
-                            _VerifyButton(
-                              loading: otp.phase == OtpPhase.verifying,
-                              verified: isVerified,
-                              onPressed: canSubmit ? _verify : null,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.lock_outline,
-                                  size: 20,
-                                  color: AppColors.teal,
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Expanded(
-                                  child: Text(
-                                    l10n.otpFooter(
-                                      (otp.expiresInSeconds / 60).ceil(),
+                                const SizedBox(height: AppSpacing.md),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.lock_outline,
+                                      size: 20,
+                                      color: AppColors.teal,
                                     ),
-                                    style: AppText.body,
-                                  ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    Expanded(
+                                      child: Text(
+                                        l10n.otpFooter(
+                                          (otp.expiresInSeconds / 60).ceil(),
+                                        ),
+                                        style: AppText.body,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
