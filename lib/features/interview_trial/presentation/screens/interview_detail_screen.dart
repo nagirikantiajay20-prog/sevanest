@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
@@ -109,36 +112,40 @@ class _State extends ConsumerState<InterviewDetailScreen> {
     final l10n = AppLocalizations.of(context);
     final value = ref.watch(interviewProvider(widget.interviewId));
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-        title: Text(l10n.interviewDetailTitle),
-      ),
-      body: AsyncValueView<Interview>(
-        value: value,
-        onRetry: () => ref.invalidate(interviewProvider(widget.interviewId)),
-        data: (iv) => RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(interviewProvider(widget.interviewId));
-            try {
-              await ref.read(interviewProvider(widget.interviewId).future);
-            } on Object {
-              // shown by the view
-            }
-          },
-          child: _Body(
-            interview: iv,
-            busy: _busy,
-            onCancel: _cancel,
-            onDecline: _decline,
-            onComplete: _complete,
-            onAnswer: _answer,
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.interviewDetailTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.home),
           ),
+          Expanded(child: _content(value)),
+        ],
+      ),
+    );
+  }
+
+  Widget _content(AsyncValue<Interview> value) {
+    return AsyncValueView<Interview>(
+      value: value,
+      onRetry: () => ref.invalidate(interviewProvider(widget.interviewId)),
+      data: (iv) => RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(interviewProvider(widget.interviewId));
+          try {
+            await ref.read(interviewProvider(widget.interviewId).future);
+          } on Object {
+            // shown by the view
+          }
+        },
+        child: _Body(
+          interview: iv,
+          busy: _busy,
+          onCancel: _cancel,
+          onDecline: _decline,
+          onComplete: _complete,
+          onAnswer: _answer,
         ),
       ),
     );
@@ -206,7 +213,6 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final iv = interview;
     final when = interviewWhen(iv, locale);
@@ -228,8 +234,8 @@ class _Body extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 110, child: Text(label, style: text.bodySmall)),
-          Expanded(child: Text(value, style: text.bodyMedium)),
+          SizedBox(width: 110, child: Text(label, style: AppText.meta)),
+          Expanded(child: Text(value, style: AppText.bodyLarge)),
         ],
       ),
     );
@@ -238,22 +244,26 @@ class _Body extends ConsumerWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              SnBadge(
-                key: const Key('interview_status_chip'),
-                label: interviewStatusLabel(l10n, iv.status),
-                tone: interviewStatusTone(iv.status),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            interviewStatusCopy(l10n, iv, locale),
-            key: const Key('interview_status_copy'),
-            style: text.titleMedium,
+          SnCard(
+            tinted: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SnBadge(
+                  key: const Key('interview_status_chip'),
+                  label: interviewStatusLabel(l10n, iv.status),
+                  tone: interviewStatusTone(iv.status),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  interviewStatusCopy(l10n, iv, locale),
+                  key: const Key('interview_status_copy'),
+                  style: AppText.card,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           if (worker != null)
@@ -265,42 +275,54 @@ class _Body extends ConsumerWidget {
               ),
             )
           else
-            ListTile(
+            SnCard(
               key: const Key('interview_worker_card'),
-              leading: const Icon(Icons.person_outline),
-              title: Text(l10n.workerProfileTitle),
               onTap: () => context.push(
                 Routes.path(Routes.workerDetail, {'id': iv.workerId}),
               ),
+              child: Row(
+                children: [
+                  const Icon(Icons.person_outline),
+                  const SizedBox(width: AppSpacing.md),
+                  Text(l10n.workerProfileTitle, style: AppText.card),
+                ],
+              ),
             ),
           const SizedBox(height: AppSpacing.md),
-          row(l10n.interviewTypeRow, interviewTypeName(l10n, iv.type)),
-          if (when != null)
-            row(
-              l10n.interviewWhenRow,
-              l10n.interviewWhenValue(when.date, when.time),
+          SnCard(
+            child: Column(
+              children: [
+                row(l10n.interviewTypeRow, interviewTypeName(l10n, iv.type)),
+                if (when != null)
+                  row(
+                    l10n.interviewWhenRow,
+                    l10n.interviewWhenValue(when.date, when.time),
+                  ),
+                if (req != null)
+                  row(
+                    l10n.interviewRequirementRow,
+                    [
+                      category?.name ?? req.serviceId,
+                      if (req.engagement != null)
+                        engagementLabels(l10n, req.engagement!).name,
+                      req.address?.area,
+                    ].whereType<String>().join(' · '),
+                  ),
+                if (iv.note != null && iv.note!.isNotEmpty)
+                  row(l10n.interviewNoteLabel, iv.note!),
+              ],
             ),
-          if (req != null)
-            row(
-              l10n.interviewRequirementRow,
-              [
-                category?.name ?? req.serviceId,
-                if (req.engagement != null)
-                  engagementLabels(l10n, req.engagement!).name,
-                req.address?.area,
-              ].whereType<String>().join(' · '),
-            ),
-          if (iv.note != null && iv.note!.isNotEmpty)
-            row(l10n.interviewNoteLabel, iv.note!),
-          const Divider(height: AppSpacing.lg * 2),
-          Text(l10n.interviewProgress, style: text.titleMedium),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(l10n.interviewProgress, style: AppText.heading),
           const SizedBox(height: AppSpacing.sm),
-          SnTimeline(items: _timeline(l10n)),
+          SnCard(child: SnTimeline(items: _timeline(l10n))),
           const SizedBox(height: AppSpacing.md),
           if (a.contains(InterviewAction.confirm))
             SnButton(
               key: const Key('interview_confirm_worker_btn'),
               label: l10n.interviewConfirmWorker,
+              variant: SnButtonVariant.deep,
               onPressed: busy
                   ? null
                   : () => context.push(
@@ -311,6 +333,7 @@ class _Body extends ConsumerWidget {
             SnButton(
               key: const Key('interview_accept_proposal_btn'),
               label: l10n.interviewAcceptProposal,
+              variant: SnButtonVariant.deep,
               onPressed: busy ? null : () => onAnswer(accept: true),
             ),
             const SizedBox(height: AppSpacing.sm),
