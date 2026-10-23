@@ -2734,6 +2734,30 @@ abstract class AppLocalizations {
   /// **'Trial visit'**
   String get interviewTypeTrial;
 
+  /// No description provided for @interviewTypeInterviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A short chat to talk about the work.'**
+  String get interviewTypeInterviewHint;
+
+  /// No description provided for @interviewTypeTrialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet in person and see them work.'**
+  String get interviewTypeTrialHint;
+
+  /// No description provided for @interviewHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet before you decide'**
+  String get interviewHeadline;
+
+  /// No description provided for @interviewPickToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date and time to continue'**
+  String get interviewPickToContinue;
+
   /// No description provided for @interviewDateLabel.
   ///
   /// In en, this message translates to:

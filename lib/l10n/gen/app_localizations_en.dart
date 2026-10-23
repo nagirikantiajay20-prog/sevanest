@@ -1489,6 +1489,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewTypeTrial => 'Trial visit';
 
   @override
+  String get interviewTypeInterviewHint =>
+      'A short chat to talk about the work.';
+
+  @override
+  String get interviewTypeTrialHint => 'Meet in person and see them work.';
+
+  @override
+  String get interviewHeadline => 'Meet before you decide';
+
+  @override
+  String get interviewPickToContinue => 'Pick a date and time to continue';
+
+  @override
   String get interviewDateLabel => 'Date';
 
   @override
