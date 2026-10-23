@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/active_service/domain/attendance.dart';
 import 'package:sevanest_customer/features/active_service/presentation/providers/service_providers.dart';
@@ -16,6 +19,7 @@ import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/booking/presentation/widgets/worker_identity_tile.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_links.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
@@ -85,22 +89,33 @@ class _State extends ConsumerState<ActiveServiceScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final id = widget.bookingId;
+    // A notification arrived (attendance, replacement...): read the service again.
+    ref.listen(notificationTickProvider, (_, _) {
+      if (id == null) {
+        ref.invalidate(bookingListProvider);
+      } else {
+        ref
+          ..invalidate(bookingProvider(id))
+          ..invalidate(attendanceProvider(id))
+          ..invalidate(attendanceSummaryProvider(id));
+      }
+    });
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
-        ),
-        title: Text(l10n.serviceTitle),
-        actions: [
-          // Report / block the worker of this service (module 12), named by the booking.
-          if (id != null) SafetyMenuButton(bookingId: id),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.serviceTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.home),
+            // Report / block the worker of this service (module 12), named by the booking.
+            trailing: id != null ? SafetyMenuButton(bookingId: id) : null,
+          ),
+          Expanded(
+            child: id == null ? const _Picker() : _Service(bookingId: id),
+          ),
         ],
       ),
-      body: id == null ? const _Picker() : _Service(bookingId: id),
     );
   }
 }
@@ -156,27 +171,29 @@ class _Picker extends ConsumerWidget {
         return ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
-            Text(
-              l10n.servicePickTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(l10n.servicePickTitle, style: AppText.heading),
+            const SizedBox(height: AppSpacing.sm),
             for (final b in active)
-              Card(
-                child: ListTile(
-                  key: Key('service_pick_${b.id}'),
-                  title: Text(
-                    [
-                      b.categoryName ?? b.categoryCode,
-                      if (b.engagement != null)
-                        engagementLabels(l10n, b.engagement!).name,
-                    ].whereType<String>().join(' · '),
-                  ),
-                  subtitle: Text(
-                    b.areaName ?? bookingStatusLabel(l10n, b.status),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push(
-                    '${Routes.serviceCurrent}?bookingId=${Uri.encodeComponent(b.id)}',
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: SnCard(
+                  padding: EdgeInsets.zero,
+                  child: ListTile(
+                    key: Key('service_pick_${b.id}'),
+                    title: Text(
+                      [
+                        b.categoryName ?? b.categoryCode,
+                        if (b.engagement != null)
+                          engagementLabels(l10n, b.engagement!).name,
+                      ].whereType<String>().join(' · '),
+                    ),
+                    subtitle: Text(
+                      b.areaName ?? bookingStatusLabel(l10n, b.status),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(
+                      '${Routes.serviceCurrent}?bookingId=${Uri.encodeComponent(b.id)}',
+                    ),
                   ),
                 ),
               ),
@@ -329,10 +346,10 @@ class _Body extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: AppSpacing.md),
-        Card(
+        SnCard(
           key: const Key('service_today_card'),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+          child: SizedBox(
+            width: double.infinity,
             child: Wrap(
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
@@ -366,10 +383,10 @@ class _Body extends ConsumerWidget {
           ),
         ),
         if (summary != null)
-          Card(
-            key: const Key('service_summary_card'),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.md),
+            child: SnCard(
+              key: const Key('service_summary_card'),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -391,9 +408,9 @@ class _Body extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: AppSpacing.md),
-        Text(l10n.attendanceTitle, style: text.titleMedium),
+        Text(l10n.attendanceTitle, style: AppText.heading),
         const SizedBox(height: AppSpacing.sm),
-        _AttendanceList(bookingId: b.id),
+        SnCard(child: _AttendanceList(bookingId: b.id)),
         const Divider(height: AppSpacing.lg * 2),
         action(
           'service_booking_link',
@@ -405,7 +422,7 @@ class _Body extends ConsumerWidget {
             'service_rate_btn',
             l10n.bookingRate,
             () => context.push(Routes.path(Routes.rating, {'id': b.id})),
-            variant: SnButtonVariant.primary,
+            variant: SnButtonVariant.deep,
           ),
         if (a.contains(BookingAction.replace))
           action(
