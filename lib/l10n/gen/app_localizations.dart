@@ -3565,8 +3565,32 @@ abstract class AppLocalizations {
   /// No description provided for @confirmFeeNote.
   ///
   /// In en, this message translates to:
-  /// **'The booking fee is shown at the payment step.'**
+  /// **'Estimate. The final amount is shown at the payment step.'**
   String get confirmFeeNote;
+
+  /// No description provided for @confirmTaxRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxes'**
+  String get confirmTaxRow;
+
+  /// No description provided for @confirmTotalRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Total due today'**
+  String get confirmTotalRow;
+
+  /// No description provided for @confirmPriceDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Price details'**
+  String get confirmPriceDetails;
+
+  /// No description provided for @confirmSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking summary'**
+  String get confirmSummary;
 
   /// No description provided for @confirmButton.
   ///

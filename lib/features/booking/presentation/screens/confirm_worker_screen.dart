@@ -5,13 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
+import 'package:sevanest_customer/features/booking/domain/booking_quote.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/policy_sheet.dart';
@@ -171,112 +175,184 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
     final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final value = ref.watch(bookingProvider(widget.bookingId));
+    final fee = ref.watch(bookingFeeProvider(widget.bookingId)).value;
+    final quote = bookingQuote(backendFeeMinor: fee);
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.bookings),
-        ),
-        title: Text(l10n.confirmTitle),
-      ),
-      body: AsyncValueView<Booking>(
-        value: value,
-        onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
-        data: (b) {
-          final start = _effectiveStart(b);
-          final budget = bookingBudgetLabel(l10n, b);
-          Widget row(String label, String v) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(width: 110, child: Text(label, style: text.bodySmall)),
-                Expanded(child: Text(v, style: text.bodyMedium)),
-              ],
-            ),
-          );
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.confirmHeading, style: text.headlineSmall),
-                const SizedBox(height: AppSpacing.xs),
-                Text(l10n.confirmSub, style: text.bodyMedium),
-                const SizedBox(height: AppSpacing.md),
-                if (b.worker != null)
-                  WorkerCard(
-                    key: const Key('confirm_worker_card'),
-                    worker: b.worker!,
-                    onTap: () => context.push(
-                      Routes.path(Routes.workerDetail, {'id': b.worker!.id}),
-                    ),
-                  ),
-                const SizedBox(height: AppSpacing.md),
-                row(
-                  l10n.bookingServiceRow,
-                  [
-                    b.categoryName ?? b.categoryCode,
-                    if (b.engagement != null)
-                      engagementLabels(l10n, b.engagement!).name,
-                  ].whereType<String>().join(' · '),
-                ),
-                if (b.areaName != null) row(l10n.bookingAreaRow, b.areaName!),
-                if (budget != null) row(l10n.bookingBudgetRow, budget),
-                const SizedBox(height: AppSpacing.sm),
-                Text(l10n.confirmStartDate, style: text.titleSmall),
-                const SizedBox(height: AppSpacing.sm),
-                OutlinedButton.icon(
-                  key: const Key('confirm_start_date_btn'),
-                  onPressed: _busy ? null : () => _pickDate(b),
-                  icon: const Icon(Icons.calendar_today_outlined),
-                  label: Text(formatDate(start, locale)),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                if (ref.watch(bookingFeeProvider(b.id)).value case final fee?)
-                  row(l10n.confirmFeeRow, minorAmount(fee))
-                else
-                  Text(
-                    l10n.confirmFeeNote,
-                    key: const Key('confirm_fee_note'),
-                    style: text.bodySmall,
-                  ),
-                if (ref.watch(accountConfigProvider).value?.policy
-                    case final policy? when !policy.isEmpty)
-                  TextButton(
-                    key: const Key('confirm_policy_btn'),
-                    onPressed: () => showPolicySheet(context, ref, policy),
-                    child: Text(l10n.policyLink),
-                  ),
-                TextButton(
-                  key: const Key('confirm_edit_req_btn'),
-                  onPressed: () => context.push(Routes.discoverReview),
-                  child: Text(l10n.confirmEditRequirement),
-                ),
-                if (_error != null)
-                  FormErrorBanner(_error!, key: const Key('confirm_error')),
-              ],
-            ),
-          );
-        },
-      ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: SnButton(
-            key: const Key('confirm_pay_btn'),
-            label: l10n.confirmButton,
-            loadingLabel: l10n.confirmButtonBusy,
-            isLoading: _busy,
-            onPressed: value.hasValue && !_busy
-                ? () => _confirm(value.requireValue)
-                : null,
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.confirmTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.bookings),
           ),
+          Expanded(child: _content(l10n, text, locale, value, quote)),
+          _bottomBar(l10n, value, quote),
+        ],
+      ),
+    );
+  }
+
+  Widget _bottomBar(
+    AppLocalizations l10n,
+    AsyncValue<Booking> value,
+    BookingQuote quote,
+  ) => DecoratedBox(
+    decoration: const BoxDecoration(
+      color: AppColors.surface,
+      boxShadow: AppShadows.floating,
+    ),
+    child: SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(l10n.confirmTotalRow, style: AppText.body),
+                ),
+                Text(
+                  minorAmount(quote.totalMinor),
+                  key: const Key('confirm_total'),
+                  style: AppText.title,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SnButton(
+              key: const Key('confirm_pay_btn'),
+              label: l10n.confirmButton,
+              loadingLabel: l10n.confirmButtonBusy,
+              isLoading: _busy,
+              variant: SnButtonVariant.deep,
+              onPressed: value.hasValue && !_busy
+                  ? () => _confirm(value.requireValue)
+                  : null,
+            ),
+          ],
         ),
       ),
+    ),
+  );
+
+  Widget _content(
+    AppLocalizations l10n,
+    TextTheme text,
+    String locale,
+    AsyncValue<Booking> value,
+    BookingQuote quote,
+  ) {
+    return AsyncValueView<Booking>(
+      value: value,
+      onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
+      data: (b) {
+        final start = _effectiveStart(b);
+        final budget = bookingBudgetLabel(l10n, b);
+        Widget row(String label, String v) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 110, child: Text(label, style: AppText.meta)),
+              Expanded(child: Text(v, style: AppText.bodyLarge)),
+            ],
+          ),
+        );
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.confirmHeading, style: AppText.title),
+              const SizedBox(height: AppSpacing.xs),
+              Text(l10n.confirmSub, style: AppText.bodyLarge),
+              const SizedBox(height: AppSpacing.md),
+              if (b.worker != null)
+                WorkerCard(
+                  key: const Key('confirm_worker_card'),
+                  worker: b.worker!,
+                  onTap: () => context.push(
+                    Routes.path(Routes.workerDetail, {'id': b.worker!.id}),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.md),
+              SnCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.confirmSummary,
+                            style: AppText.heading,
+                          ),
+                        ),
+                        TextButton(
+                          key: const Key('confirm_edit_req_btn'),
+                          onPressed: () => context.push(Routes.discoverReview),
+                          child: Text(l10n.confirmEditRequirement),
+                        ),
+                      ],
+                    ),
+                    row(
+                      l10n.bookingServiceRow,
+                      [
+                        b.categoryName ?? b.categoryCode,
+                        if (b.engagement != null)
+                          engagementLabels(l10n, b.engagement!).name,
+                      ].whereType<String>().join(' · '),
+                    ),
+                    if (b.areaName != null)
+                      row(l10n.bookingAreaRow, b.areaName!),
+                    if (budget != null) row(l10n.bookingBudgetRow, budget),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(l10n.confirmStartDate, style: AppText.label),
+                    const SizedBox(height: AppSpacing.sm),
+                    OutlinedButton.icon(
+                      key: const Key('confirm_start_date_btn'),
+                      onPressed: _busy ? null : () => _pickDate(b),
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      label: Text(formatDate(start, locale)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              SnCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.confirmPriceDetails, style: AppText.heading),
+                    const SizedBox(height: AppSpacing.sm),
+                    row(l10n.confirmFeeRow, minorAmount(quote.feeMinor)),
+                    if (quote.taxMinor != null)
+                      row(l10n.confirmTaxRow, minorAmount(quote.taxMinor!)),
+                    if (quote.isEstimate)
+                      Text(
+                        l10n.confirmFeeNote,
+                        key: const Key('confirm_fee_note'),
+                        style: AppText.meta,
+                      ),
+                  ],
+                ),
+              ),
+              if (ref.watch(accountConfigProvider).value?.policy
+                  case final policy? when !policy.isEmpty)
+                TextButton(
+                  key: const Key('confirm_policy_btn'),
+                  onPressed: () => showPolicySheet(context, ref, policy),
+                  child: Text(l10n.policyLink),
+                ),
+              if (_error != null)
+                FormErrorBanner(_error!, key: const Key('confirm_error')),
+            ],
+          ),
+        );
+      },
     );
   }
 }

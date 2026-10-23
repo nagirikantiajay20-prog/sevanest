@@ -386,8 +386,10 @@ void main() {
       expect(find.byKey(const Key('confirm_worker_card')), findsOneWidget);
       expect(find.byKey(const Key('confirm_start_date_btn')), findsOneWidget);
       expect(find.byKey(const Key('confirm_fee_note')), findsOneWidget);
-      // No quote endpoint: the app never shows or computes an amount here.
-      expect(find.textContaining('₹'), findsNothing);
+      // No quote endpoint yet: the marked BookingQuote mock fills the rows (fee 500 + tax 90).
+      expect(find.text('₹500'), findsOneWidget);
+      expect(find.text('₹90'), findsOneWidget);
+      expect(find.byKey(const Key('confirm_total')), findsOneWidget);
     });
 
     testWidgets('BOOK-02 Confirm is disabled while the booking loads', (

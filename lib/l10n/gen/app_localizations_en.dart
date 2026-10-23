@@ -1920,7 +1920,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmFeeRow => 'Booking fee';
 
   @override
-  String get confirmFeeNote => 'The booking fee is shown at the payment step.';
+  String get confirmFeeNote =>
+      'Estimate. The final amount is shown at the payment step.';
+
+  @override
+  String get confirmTaxRow => 'Taxes';
+
+  @override
+  String get confirmTotalRow => 'Total due today';
+
+  @override
+  String get confirmPriceDetails => 'Price details';
+
+  @override
+  String get confirmSummary => 'Booking summary';
 
   @override
   String get confirmButton => 'Confirm worker';
