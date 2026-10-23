@@ -138,10 +138,10 @@ void main() {
         ..failList = const NetworkFailure();
       await launch(t);
       await openList(t);
-      expect(find.byKey(const Key('error_retry_btn')), findsOneWidget);
+      expect(find.byKey(const Key('offline_retry_btn')), findsOneWidget);
 
       addresses.failList = null;
-      await t.tap(find.byKey(const Key('error_retry_btn')));
+      await t.tap(find.byKey(const Key('offline_retry_btn')));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('address_card_h1')), findsOneWidget);
     });

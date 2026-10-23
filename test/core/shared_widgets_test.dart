@@ -72,7 +72,7 @@ void main() {
         ),
       );
       expect(find.textContaining("Couldn't reach SevaNest"), findsOneWidget);
-      await t.tap(find.byKey(const Key('error_retry_btn')));
+      await t.tap(find.byKey(const Key('offline_retry_btn')));
       expect(retries, 1);
     });
 

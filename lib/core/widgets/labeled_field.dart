@@ -224,11 +224,12 @@ Future<bool> confirmDialog(
           onPressed: () => Navigator.of(ctx).pop(false),
           child: Text(cancelLabel),
         ),
-        TextButton(
+        FilledButton(
           key: confirmKey,
-          style: destructive
-              ? TextButton.styleFrom(foregroundColor: AppColors.danger)
-              : null,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, kMinTapTarget),
+            backgroundColor: destructive ? AppColors.danger : null,
+          ),
           onPressed: () => Navigator.of(ctx).pop(true),
           child: Text(confirmLabel),
         ),

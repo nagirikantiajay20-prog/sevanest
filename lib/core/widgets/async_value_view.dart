@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -58,10 +59,16 @@ class AsyncValueView<T> extends StatelessWidget {
     }
 
     if (value.hasError) {
-      return SnErrorState(
-        message: failureMessage(l10n, value.error!),
-        onRetry: onRetry,
-      );
+      // No connection reads differently from a server problem (global offline state).
+      return value.error is NetworkFailure
+          ? SnOfflineState(
+              message: failureMessage(l10n, value.error!),
+              onRetry: onRetry,
+            )
+          : SnErrorState(
+              message: failureMessage(l10n, value.error!),
+              onRetry: onRetry,
+            );
     }
     return loading ?? const SnSkeletonList();
   }
