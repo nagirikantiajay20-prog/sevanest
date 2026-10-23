@@ -208,6 +208,7 @@
   "homeFindWorkerCta": "Find a worker for your home",
   "homeAddAddress": "Add address",
   "homeAddressBanner": "Add an address to find workers",
+  "offlineBanner": "You are offline. Some things may not load.",
   "homeOffline": "You're offline. Showing saved info.",
   "homeLoadFailedTitle": "We couldn't load your home",
   "homeLoadFailedBody": "Please try again.",

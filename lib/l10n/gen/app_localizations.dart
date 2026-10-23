@@ -964,6 +964,12 @@ abstract class AppLocalizations {
   /// **'Add an address to find workers'**
   String get homeAddressBanner;
 
+  /// No description provided for @offlineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Some things may not load.'**
+  String get offlineBanner;
+
   /// No description provided for @homeOffline.
   ///
   /// In en, this message translates to:

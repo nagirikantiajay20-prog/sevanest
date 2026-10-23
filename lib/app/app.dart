@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/router/app_router.dart';
 import 'package:sevanest_customer/app/theme/app_theme.dart';
+import 'package:sevanest_customer/core/widgets/offline_banner.dart';
 import 'package:sevanest_customer/features/app_gate/app_gate_host.dart';
 import 'package:sevanest_customer/features/notifications/presentation/push_host.dart';
 import 'package:sevanest_customer/features/payment/presentation/payment_recovery.dart';
@@ -18,7 +19,9 @@ class SevaNestApp extends ConsumerWidget {
       theme: AppTheme.light,
       routerConfig: ref.watch(appRouterProvider),
       builder: (context, child) => AppGateHost(
-        child: PushHost(child: PaymentRecoveryHost(child: child!)),
+        child: OfflineBannerHost(
+          child: PushHost(child: PaymentRecoveryHost(child: child!)),
+        ),
       ),
       localizationsDelegates: const [
         AppLocalizations.delegate,

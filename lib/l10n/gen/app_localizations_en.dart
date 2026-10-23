@@ -470,6 +470,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeAddressBanner => 'Add an address to find workers';
 
   @override
+  String get offlineBanner => 'You are offline. Some things may not load.';
+
+  @override
   String get homeOffline => 'You\'re offline. Showing saved info.';
 
   @override
