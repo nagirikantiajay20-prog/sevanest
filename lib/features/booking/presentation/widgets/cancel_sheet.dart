@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
@@ -71,12 +72,9 @@ class _CancelSheetState extends State<_CancelSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.cancelSheetTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text(l10n.cancelSheetTitle, style: AppText.screenTitle),
           const SizedBox(height: AppSpacing.sm),
-          Text(l10n.cancelSheetReason),
+          Text(l10n.cancelSheetReason, style: AppText.bodyLarge),
           RadioGroup<int>(
             groupValue: _reason,
             onChanged: (v) {
@@ -111,6 +109,7 @@ class _CancelSheetState extends State<_CancelSheet> {
           SnButton(
             key: const Key('cancel_confirm_btn'),
             label: l10n.cancelConfirm,
+            variant: SnButtonVariant.deep,
             isLoading: _busy,
             onPressed: _reason == null ? null : () => _confirm(reasons),
           ),

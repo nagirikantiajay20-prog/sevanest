@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
@@ -102,38 +105,41 @@ class _State extends ConsumerState<BookingDetailScreen>
       (_, _) => ref.invalidate(bookingProvider(widget.bookingId)),
     );
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.bookings),
-        ),
-        title: Text(l10n.bookingDetailTitle),
-        actions: [
-          // Report / block the worker of this booking (module 12), named by the booking.
-          if (value.hasValue && value.requireValue.workerId != null)
-            SafetyMenuButton(bookingId: widget.bookingId),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.bookingDetailTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.bookings),
+            // Report / block the worker of this booking (module 12), named by the booking.
+            trailing: value.hasValue && value.requireValue.workerId != null
+                ? SafetyMenuButton(bookingId: widget.bookingId)
+                : null,
+          ),
+          Expanded(child: _content(value)),
         ],
       ),
-      body: AsyncValueView<Booking>(
-        value: value,
-        onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
-        data: (b) => RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(bookingProvider(widget.bookingId));
-            try {
-              await ref.read(bookingProvider(widget.bookingId).future);
-            } on Object {
-              // shown by the view
-            }
-          },
-          child: _Body(
-            booking: b,
-            onCancel: _cancel,
-            onReceipt: () => _receipt(b),
-          ),
+    );
+  }
+
+  Widget _content(AsyncValue<Booking> value) {
+    return AsyncValueView<Booking>(
+      value: value,
+      onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
+      data: (b) => RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(bookingProvider(widget.bookingId));
+          try {
+            await ref.read(bookingProvider(widget.bookingId).future);
+          } on Object {
+            // shown by the view
+          }
+        },
+        child: _Body(
+          booking: b,
+          onCancel: _cancel,
+          onReceipt: () => _receipt(b),
         ),
       ),
     );
@@ -201,7 +207,6 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final b = booking;
     final a = b.actions;
@@ -218,8 +223,8 @@ class _Body extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 110, child: Text(label, style: text.bodySmall)),
-          Expanded(child: Text(value, style: text.bodyMedium)),
+          SizedBox(width: 110, child: Text(label, style: AppText.meta)),
+          Expanded(child: Text(value, style: AppText.bodyLarge)),
         ],
       ),
     );
@@ -243,23 +248,27 @@ class _Body extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           PendingPaymentBanner(bookingId: b.id),
-          Row(
-            children: [
-              SnBadge(
-                key: const Key('booking_status_chip'),
-                label: bookingStatusLabel(l10n, b.status),
-                tone: bookingStatusTone(b.status),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            bookingStatusCopy(l10n, b, locale),
-            key: const Key('booking_status_copy'),
-            style: text.titleMedium,
+          SnCard(
+            tinted: true,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SnBadge(
+                  key: const Key('booking_status_chip'),
+                  label: bookingStatusLabel(l10n, b.status),
+                  tone: bookingStatusTone(b.status),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  bookingStatusCopy(l10n, b, locale),
+                  key: const Key('booking_status_copy'),
+                  style: AppText.card,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           if (b.identity != null && b.workerId != null)
@@ -288,42 +297,51 @@ class _Body extends StatelessWidget {
               ),
             ),
           const SizedBox(height: AppSpacing.md),
-          row(
-            l10n.bookingServiceRow,
-            [
-              b.categoryName ?? b.categoryCode,
-              if (b.engagement != null)
-                engagementLabels(l10n, b.engagement!).name,
-            ].whereType<String>().join(' · '),
-          ),
-          if (b.startDate != null)
-            row(l10n.bookingScheduleRow, formatDate(b.startDate!, locale)),
-          if (at != null)
-            row(
-              l10n.bookingInterviewRow,
-              '${interviewTypeName(l10n, b.scheduleType!)} · ${formatDate(at, locale)}, ${formatTime(at.hour * 60 + at.minute)}',
+          SnCard(
+            child: Column(
+              children: [
+                row(
+                  l10n.bookingServiceRow,
+                  [
+                    b.categoryName ?? b.categoryCode,
+                    if (b.engagement != null)
+                      engagementLabels(l10n, b.engagement!).name,
+                  ].whereType<String>().join(' · '),
+                ),
+                if (b.startDate != null)
+                  row(
+                    l10n.bookingScheduleRow,
+                    formatDate(b.startDate!, locale),
+                  ),
+                if (at != null)
+                  row(
+                    l10n.bookingInterviewRow,
+                    '${interviewTypeName(l10n, b.scheduleType!)} · ${formatDate(at, locale)}, ${formatTime(at.hour * 60 + at.minute)}',
+                  ),
+                if (b.areaName != null) row(l10n.bookingAreaRow, b.areaName!),
+                if (budget != null) row(l10n.bookingBudgetRow, budget),
+                if (b.note != null) row(l10n.bookingNoteRow, b.note!),
+                row(l10n.bookingReferenceRow, b.reference),
+                row(
+                  l10n.bookingPaymentRow,
+                  b.status == BookingStatus.pendingPayment
+                      ? l10n.bookingPaymentDue
+                      : l10n.bookingPaymentNone,
+                ),
+              ],
             ),
-          if (b.areaName != null) row(l10n.bookingAreaRow, b.areaName!),
-          if (budget != null) row(l10n.bookingBudgetRow, budget),
-          if (b.note != null) row(l10n.bookingNoteRow, b.note!),
-          row(l10n.bookingReferenceRow, b.reference),
-          row(
-            l10n.bookingPaymentRow,
-            b.status == BookingStatus.pendingPayment
-                ? l10n.bookingPaymentDue
-                : l10n.bookingPaymentNone,
           ),
-          const Divider(height: AppSpacing.lg * 2),
-          Text(l10n.bookingTimeline, style: text.titleMedium),
+          const SizedBox(height: AppSpacing.lg),
+          Text(l10n.bookingTimeline, style: AppText.heading),
           const SizedBox(height: AppSpacing.sm),
-          SnTimeline(items: _timeline(l10n, locale)),
+          SnCard(child: SnTimeline(items: _timeline(l10n, locale))),
           const SizedBox(height: AppSpacing.md),
           if (a.contains(BookingAction.pay))
             action(
               'booking_pay_btn',
               l10n.bookingPayNow,
               () => context.push(paymentStartPath(b.id)),
-              variant: SnButtonVariant.primary,
+              variant: SnButtonVariant.deep,
             ),
           if (a.contains(BookingAction.confirmWorker))
             action(
@@ -332,7 +350,7 @@ class _Body extends StatelessWidget {
               () => context.push(
                 '${Routes.bookingConfirm}?interviewId=${Uri.encodeComponent(b.id)}',
               ),
-              variant: SnButtonVariant.primary,
+              variant: SnButtonVariant.deep,
             ),
           if (a.contains(BookingAction.schedule) && b.workerId != null)
             action(
@@ -357,21 +375,21 @@ class _Body extends StatelessWidget {
               () => context.push(
                 '${Routes.serviceCurrent}?bookingId=${Uri.encodeComponent(b.id)}',
               ),
-              variant: SnButtonVariant.primary,
+              variant: SnButtonVariant.deep,
             ),
           if (a.contains(BookingAction.rate))
             action(
               'booking_rate_btn',
               l10n.bookingRate,
               () => context.push(Routes.path(Routes.rating, {'id': b.id})),
-              variant: SnButtonVariant.primary,
+              variant: SnButtonVariant.deep,
             ),
           if (a.contains(BookingAction.rebook))
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.sm),
               child: HireAgainButton(
                 bookingId: b.id,
-                variant: SnButtonVariant.primary,
+                variant: SnButtonVariant.deep,
               ),
             ),
           if (a.contains(BookingAction.replace))
