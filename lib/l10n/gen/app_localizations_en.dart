@@ -1275,6 +1275,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favsTitle => 'Shortlist';
 
   @override
+  String get favsSubtitle =>
+      'Workers you saved. Request an interview when you are ready.';
+
+  @override
+  String get favsFilterAll => 'All';
+
+  @override
+  String get favsRequestInterview => 'Request interview';
+
+  @override
   String get favsEmptyTitle => 'Your shortlist is empty';
 
   @override

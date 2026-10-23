@@ -22,6 +22,44 @@ import 'package:sevanest_customer/features/worker_search/presentation/providers/
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
+/// Request interview from the profile or the shortlist: needs a requirement draft first.
+Future<void> requestInterviewFor(
+  BuildContext context,
+  WidgetRef ref,
+  String workerId,
+) async {
+  // An interview request carries the requirement, so there must be one.
+  if (ref.read(requirementDraftProvider).isEmpty) {
+    final l10n = AppLocalizations.of(context);
+    final start = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.workerStartSearchTitle),
+        content: Text(l10n.workerStartSearchBody),
+        actions: [
+          TextButton(
+            key: const Key('worker_start_search_cancel_btn'),
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            key: const Key('worker_start_search_btn'),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.workerStartSearch),
+          ),
+        ],
+      ),
+    );
+    if ((start ?? false) && context.mounted) {
+      await context.push<Object?>(Routes.discoverCategory);
+    }
+    return;
+  }
+  await context.push<Object?>(
+    '${Routes.interviewNew}?workerId=${Uri.encodeComponent(workerId)}',
+  );
+}
+
 /// `/workers/:id` (module 05, screen 5.3). Shows only the allow-listed public card: no KYC, no
 /// contact details, no account id.
 class WorkerDetailScreen extends ConsumerWidget {
@@ -36,39 +74,6 @@ class WorkerDetailScreen extends ConsumerWidget {
     } else {
       context.go(Routes.workers);
     }
-  }
-
-  Future<void> _requestInterview(BuildContext context, WidgetRef ref) async {
-    // An interview request carries the requirement, so there must be one.
-    if (ref.read(requirementDraftProvider).isEmpty) {
-      final l10n = AppLocalizations.of(context);
-      final start = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.workerStartSearchTitle),
-          content: Text(l10n.workerStartSearchBody),
-          actions: [
-            TextButton(
-              key: const Key('worker_start_search_cancel_btn'),
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              key: const Key('worker_start_search_btn'),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text(l10n.workerStartSearch),
-            ),
-          ],
-        ),
-      );
-      if ((start ?? false) && context.mounted) {
-        await context.push<Object?>(Routes.discoverCategory);
-      }
-      return;
-    }
-    await context.push<Object?>(
-      '${Routes.interviewNew}?workerId=${Uri.encodeComponent(workerId)}',
-    );
   }
 
   @override
@@ -126,7 +131,7 @@ class WorkerDetailScreen extends ConsumerWidget {
           : _StickyBar(
               workerId: workerId,
               canRequest: worker.canRequestInterview,
-              onRequest: () => _requestInterview(context, ref),
+              onRequest: () => requestInterviewFor(context, ref, workerId),
             ),
     );
   }

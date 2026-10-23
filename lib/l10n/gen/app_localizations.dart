@@ -2344,6 +2344,24 @@ abstract class AppLocalizations {
   /// **'Shortlist'**
   String get favsTitle;
 
+  /// No description provided for @favsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Workers you saved. Request an interview when you are ready.'**
+  String get favsSubtitle;
+
+  /// No description provided for @favsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get favsFilterAll;
+
+  /// No description provided for @favsRequestInterview.
+  ///
+  /// In en, this message translates to:
+  /// **'Request interview'**
+  String get favsRequestInterview;
+
   /// No description provided for @favsEmptyTitle.
   ///
   /// In en, this message translates to:
