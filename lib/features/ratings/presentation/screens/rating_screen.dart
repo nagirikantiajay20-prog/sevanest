@@ -3,15 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_chip.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/ratings/domain/rating.dart';
 import 'package:sevanest_customer/features/ratings/presentation/providers/rating_providers.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -136,61 +141,68 @@ class _State extends ConsumerState<RatingScreen> {
     final booking = ref.watch(bookingProvider(widget.bookingId));
     final rated = ref.watch(bookingRatingProvider(widget.bookingId));
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.close),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.bookings),
-        ),
-        title: Text(l10n.ratingTitle),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.ratingTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.bookings),
+          ),
+          Expanded(child: _content(l10n, booking, rated)),
+        ],
       ),
-      body: _thanks
-          ? _Message(
-              key: const Key('rating_thanks'),
-              icon: Icons.favorite,
-              title: l10n.ratingThanksTitle,
-              body: l10n.ratingThanksBody,
-              onDone: _toBooking,
-            )
-          : AsyncValueView<Booking>(
-              value: booking,
-              onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
-              data: (b) => AsyncValueView<Rating?>(
-                value: rated,
-                onRetry: () =>
-                    ref.invalidate(bookingRatingProvider(widget.bookingId)),
-                data: (existing) {
-                  if (existing != null || _alreadyRated) {
-                    return _Message(
-                      key: const Key('rating_already_rated'),
-                      icon: Icons.star,
-                      title: l10n.ratingAlreadyTitle,
-                      score: existing?.score,
-                      scale: ref.watch(ratingScaleMaxProvider).value ?? 5,
-                      body: existing?.review,
-                      onDone: _toBooking,
-                    );
-                  }
-                  if (_notEligible || !b.actions.contains(BookingAction.rate)) {
-                    return _Message(
-                      key: const Key('rating_not_eligible'),
-                      icon: Icons.info_outline,
-                      title: l10n.ratingNotEligibleTitle,
-                      body: l10n.ratingNotEligibleBody,
-                      onDone: _toBooking,
-                    );
-                  }
-                  return _form(l10n);
-                },
-              ),
-            ),
     );
   }
 
-  Widget _form(AppLocalizations l10n) {
-    final text = Theme.of(context).textTheme;
+  Widget _content(
+    AppLocalizations l10n,
+    AsyncValue<Booking> booking,
+    AsyncValue<Rating?> rated,
+  ) {
+    return _thanks
+        ? _Message(
+            key: const Key('rating_thanks'),
+            icon: Icons.favorite,
+            title: l10n.ratingThanksTitle,
+            body: l10n.ratingThanksBody,
+            onDone: _toBooking,
+          )
+        : AsyncValueView<Booking>(
+            value: booking,
+            onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
+            data: (b) => AsyncValueView<Rating?>(
+              value: rated,
+              onRetry: () =>
+                  ref.invalidate(bookingRatingProvider(widget.bookingId)),
+              data: (existing) {
+                if (existing != null || _alreadyRated) {
+                  return _Message(
+                    key: const Key('rating_already_rated'),
+                    icon: Icons.star,
+                    title: l10n.ratingAlreadyTitle,
+                    score: existing?.score,
+                    scale: ref.watch(ratingScaleMaxProvider).value ?? 5,
+                    body: existing?.review,
+                    onDone: _toBooking,
+                  );
+                }
+                if (_notEligible || !b.actions.contains(BookingAction.rate)) {
+                  return _Message(
+                    key: const Key('rating_not_eligible'),
+                    icon: Icons.info_outline,
+                    title: l10n.ratingNotEligibleTitle,
+                    body: l10n.ratingNotEligibleBody,
+                    onDone: _toBooking,
+                  );
+                }
+                return _form(l10n, b);
+              },
+            ),
+          );
+  }
+
+  Widget _form(AppLocalizations l10n, Booking b) {
     final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
     final max = ref.watch(ratingReviewMaxProvider);
     return SingleChildScrollView(
@@ -198,10 +210,28 @@ class _State extends ConsumerState<RatingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (b.worker != null) ...[
+            SnCard(
+              key: const Key('rating_worker_card'),
+              child: Row(
+                children: [
+                  WorkerAvatar(b.worker!, radius: 24),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      b.categoryName ?? b.worker!.categories.firstOrNull ?? '',
+                      style: AppText.heading,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           Center(
             child: Text(
               l10n.ratingQuestion,
-              style: text.titleLarge,
+              style: AppText.screenTitle,
               textAlign: TextAlign.center,
             ),
           ),
@@ -243,28 +273,31 @@ class _State extends ConsumerState<RatingScreen> {
               _offered(scale).first.positive
                   ? l10n.ratingTagsGood
                   : l10n.ratingTagsBad,
-              style: text.titleSmall,
+              style: AppText.label,
             ),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: [
                 for (final t in _offered(scale))
-                  FilterChip(
+                  SnChip(
                     key: Key('rating_tag_${t.code}'),
-                    label: Text(t.label),
+                    label: t.label,
                     selected: _tags.contains(t.code),
-                    onSelected: _sending
+                    onTap: _sending
                         ? null
-                        : (v) => setState(() {
-                            v ? _tags.add(t.code) : _tags.remove(t.code);
+                        : () => setState(() {
+                            _tags.contains(t.code)
+                                ? _tags.remove(t.code)
+                                : _tags.add(t.code);
                           }),
                   ),
               ],
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
-          Text(l10n.ratingReviewLabel, style: text.titleSmall),
+          Text(l10n.ratingReviewLabel, style: AppText.label),
           const SizedBox(height: AppSpacing.sm),
           TextField(
             key: const Key('rating_comment_field'),
@@ -274,13 +307,13 @@ class _State extends ConsumerState<RatingScreen> {
             maxLines: 5,
             decoration: InputDecoration(hintText: l10n.ratingReviewHint),
           ),
-          Text(l10n.ratingReviewNote, style: text.bodySmall),
+          Text(l10n.ratingReviewNote, style: AppText.meta),
           if (_error != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
               _error!,
               key: const Key('rating_error'),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: AppText.body.copyWith(color: AppColors.danger),
             ),
           ],
           const SizedBox(height: AppSpacing.lg),
@@ -295,6 +328,7 @@ class _State extends ConsumerState<RatingScreen> {
           SnButton(
             key: const Key('rating_submit_btn'),
             label: l10n.ratingSubmit,
+            variant: SnButtonVariant.deep,
             isLoading: _sending,
             onPressed: _score == null ? null : _submit,
           ),
@@ -337,13 +371,18 @@ class _Message extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: AppColors.teal),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: AppColors.tealWash,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.teal, width: 2),
+              ),
+              child: Icon(icon, size: 40, color: AppColors.teal),
             ),
+            const SizedBox(height: AppSpacing.md),
+            Text(title, style: AppText.title, textAlign: TextAlign.center),
             if (score != null)
               Text(
                 l10n.ratingStarLabel(score!, scale),
@@ -357,6 +396,7 @@ class _Message extends StatelessWidget {
             SnButton(
               key: const Key('rating_done_btn'),
               label: l10n.ratingDone,
+              variant: SnButtonVariant.deep,
               onPressed: onDone,
             ),
           ],
