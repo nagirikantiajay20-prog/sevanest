@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/localization/time_format.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/support/domain/support.dart';
@@ -205,24 +206,26 @@ class _State extends ConsumerState<TicketDetailScreen>
     final msgs = ref.watch(ticketMessagesProvider(_id));
     final t = ticket.value;
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.support),
-        ),
-        title: Text(t == null ? '' : '#${t.reference}'),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: t == null ? '' : '#${t.reference}',
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.support),
+          ),
+          Expanded(
+            child: t == null
+                ? (ticket.hasError
+                      ? _LoadError(
+                          gone: ticket.error is NotFoundFailure,
+                          onRetry: _reload,
+                        )
+                      : const _Skeleton())
+                : _content(l10n, t, msgs),
+          ),
+        ],
       ),
-      body: t == null
-          ? (ticket.hasError
-                ? _LoadError(
-                    gone: ticket.error is NotFoundFailure,
-                    onRetry: _reload,
-                  )
-                : const _Skeleton())
-          : _content(l10n, t, msgs),
     );
   }
 

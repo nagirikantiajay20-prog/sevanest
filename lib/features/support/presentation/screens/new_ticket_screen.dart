@@ -9,6 +9,7 @@ import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
@@ -239,16 +240,18 @@ class _State extends ConsumerState<NewTicketScreen> {
         if (!didPop) _confirmLeave();
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            key: const Key('app_back_btn'),
-            tooltip: l10n.back,
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          title: Text(l10n.tkNewTitle),
+        backgroundColor: AppColors.canvasCool,
+        body: Column(
+          children: [
+            SnHeader(
+              title: l10n.tkNewTitle,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(
+              child: created != null ? _Created(ticket: created) : _form(l10n),
+            ),
+          ],
         ),
-        body: created != null ? _Created(ticket: created) : _form(l10n),
       ),
     );
   }
