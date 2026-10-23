@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
@@ -265,42 +266,53 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
         if (!didPop) _confirmLeave();
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            key: const Key('app_back_btn'),
-            tooltip: l10n.back,
-            icon: const Icon(Icons.chevron_left, size: 32),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          title: Text(l10n.repRequestTitle),
+        backgroundColor: AppColors.canvasCool,
+        body: Column(
+          children: [
+            SnHeader(
+              title: l10n.repRequestTitle,
+              onBack: () => Navigator.of(context).maybePop(),
+            ),
+            Expanded(
+              child: created != null
+                  ? _Received(
+                      replacement: created,
+                      onTrack: () => context.pushReplacement(
+                        Routes.path(Routes.replacementDetail, {
+                          'id': created.id,
+                        }),
+                      ),
+                      onBack: () => context.go(
+                        Routes.path(Routes.bookingDetail, {'id': _id}),
+                      ),
+                    )
+                  : booking == null
+                  ? _NotEligible(onSupport: _openSupport)
+                  : AsyncValueView<Booking>(
+                      value: booking,
+                      onRetry: () => ref.invalidate(bookingProvider(_id)),
+                      data: (b) {
+                        if (b.status == BookingStatus.replacementRequested) {
+                          _redirectToOpen();
+                          if (!_locked) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                        }
+                        if (_locked ||
+                            !b.actions.contains(BookingAction.replace)) {
+                          return _NotEligible(
+                            booking: b,
+                            onSupport: _openSupport,
+                          );
+                        }
+                        return _form(l10n, b);
+                      },
+                    ),
+            ),
+          ],
         ),
-        body: created != null
-            ? _Received(
-                replacement: created,
-                onTrack: () => context.pushReplacement(
-                  Routes.path(Routes.replacementDetail, {'id': created.id}),
-                ),
-                onBack: () =>
-                    context.go(Routes.path(Routes.bookingDetail, {'id': _id})),
-              )
-            : booking == null
-            ? _NotEligible(onSupport: _openSupport)
-            : AsyncValueView<Booking>(
-                value: booking,
-                onRetry: () => ref.invalidate(bookingProvider(_id)),
-                data: (b) {
-                  if (b.status == BookingStatus.replacementRequested) {
-                    _redirectToOpen();
-                    if (!_locked) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  }
-                  if (_locked || !b.actions.contains(BookingAction.replace)) {
-                    return _NotEligible(booking: b, onSupport: _openSupport);
-                  }
-                  return _form(l10n, b);
-                },
-              ),
       ),
     );
   }
@@ -538,6 +550,7 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
                     ),
                   SnButton(
                     key: const Key('replacement_submit_btn'),
+                    variant: SnButtonVariant.deep,
                     label: _failed ? l10n.repTryAgain : l10n.repSubmit,
                     isLoading: _sending,
                     loadingLabel: l10n.repSubmitting,
@@ -829,6 +842,7 @@ class _Received extends ConsumerWidget {
             ),
             SnButton(
               key: const Key('replacement_track_btn'),
+              variant: SnButtonVariant.deep,
               label: l10n.repTrack,
               onPressed: onTrack,
             ),

@@ -11,6 +11,7 @@ import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_badge.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
@@ -248,21 +249,23 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     // "Alternatives ready" and similar arrive as notifications: read the request again.
     ref.listen(notificationTickProvider, (_, _) => _reload());
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          key: const Key('app_back_btn'),
-          tooltip: l10n.back,
-          icon: const Icon(Icons.chevron_left, size: 32),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.bookings),
-        ),
-        title: Text(l10n.repStatusTitle),
+      backgroundColor: AppColors.canvasCool,
+      body: Column(
+        children: [
+          SnHeader(
+            title: l10n.repStatusTitle,
+            onBack: () =>
+                context.canPop() ? context.pop() : context.go(Routes.bookings),
+          ),
+          Expanded(
+            child: value.hasValue
+                ? _content(l10n, value.requireValue, stale: value.hasError)
+                : value.hasError
+                ? _LoadError(onRetry: _refresh)
+                : const SnSkeletonList(count: 3),
+          ),
+        ],
       ),
-      body: value.hasValue
-          ? _content(l10n, value.requireValue, stale: value.hasError)
-          : value.hasError
-          ? _LoadError(onRetry: _refresh)
-          : const SnSkeletonList(count: 3),
     );
   }
 
@@ -642,7 +645,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
       String key,
       String label,
       VoidCallback? onTap, {
-      SnButtonVariant variant = SnButtonVariant.primary,
+      SnButtonVariant variant = SnButtonVariant.deep,
       bool loading = false,
     }) => SnButton(
       key: Key(key),

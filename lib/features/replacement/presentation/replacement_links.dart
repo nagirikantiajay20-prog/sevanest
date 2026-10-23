@@ -42,7 +42,7 @@ class ReplacementLinks extends ConsumerWidget {
             child: SnButton(
               key: const Key('booking_replacement_btn'),
               label: l10n.repViewRequest,
-              variant: SnButtonVariant.primary,
+              variant: SnButtonVariant.deep,
               onPressed: () => context.push(
                 Routes.path(Routes.replacementDetail, {'id': open.id}),
               ),
