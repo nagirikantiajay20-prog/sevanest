@@ -293,9 +293,9 @@ class _State extends ConsumerState<InterviewRequestScreen> {
               onBack: () => Navigator.of(context).maybePop(),
             ),
             Expanded(child: _form(context, l10n, worker, slots, date, locale)),
-            _bottomBar(l10n),
           ],
         ),
+        bottomNavigationBar: _bottomBar(l10n),
       ),
     );
   }

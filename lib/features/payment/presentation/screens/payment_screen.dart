@@ -5,11 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_card.dart';
+import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
 import 'package:sevanest_customer/features/payment/presentation/payment_labels.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
@@ -307,18 +310,29 @@ class _State extends ConsumerState<PaymentScreen> {
     required List<Widget> buttons,
     Widget? extra,
   }) {
-    final text = Theme.of(context).textTheme;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon, size: 64, color: color),
+            Center(
+              child: Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color, width: 2),
+                ),
+                child: Icon(icon, size: 44, color: color),
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
-            Text(title, style: text.headlineSmall, textAlign: TextAlign.center),
+            Text(title, style: AppText.title, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.sm),
-            Text(body, textAlign: TextAlign.center),
+            Text(body, style: AppText.bodyLarge, textAlign: TextAlign.center),
             ?extra,
             const SizedBox(height: AppSpacing.lg),
             for (final b in buttons) ...[
@@ -335,12 +349,12 @@ class _State extends ConsumerState<PaymentScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
     final p = _p;
 
     SnButton viewBooking() => SnButton(
       key: const Key('payment_view_booking_btn'),
       label: l10n.payViewBooking,
+      variant: SnButtonVariant.deep,
       onPressed: _toBooking,
     );
 
@@ -383,16 +397,21 @@ class _State extends ConsumerState<PaymentScreen> {
             ? null
             : Padding(
                 padding: const EdgeInsets.only(top: AppSpacing.md),
-                child: Column(
-                  children: [
-                    Text(
-                      paymentAmount(p),
-                      key: const Key('payment_success_amount'),
-                      style: text.headlineMedium,
-                    ),
-                    if (p.receiptNumber != null)
-                      Text(l10n.payReceiptNumber(p.receiptNumber!)),
-                  ],
+                child: SnCard(
+                  child: Column(
+                    children: [
+                      Text(
+                        paymentAmount(p),
+                        key: const Key('payment_success_amount'),
+                        style: AppText.title,
+                      ),
+                      if (p.receiptNumber != null)
+                        Text(
+                          l10n.payReceiptNumber(p.receiptNumber!),
+                          style: AppText.body,
+                        ),
+                    ],
+                  ),
                 ),
               ),
         buttons: [
@@ -419,7 +438,7 @@ class _State extends ConsumerState<PaymentScreen> {
             l10n.payFailedDebitNote,
             key: const Key('payment_debit_note'),
             textAlign: TextAlign.center,
-            style: text.bodySmall,
+            style: AppText.meta,
           ),
         ),
         buttons: [
@@ -489,15 +508,25 @@ class _State extends ConsumerState<PaymentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.payHeading, style: text.headlineSmall),
+            Text(l10n.payHeading, style: AppText.title),
             const SizedBox(height: AppSpacing.xs),
-            Text(l10n.paySub),
+            Text(l10n.paySub, style: AppText.bodyLarge),
             const SizedBox(height: AppSpacing.lg),
-            Text(l10n.payAmountLabel, style: text.bodySmall),
-            Text(
-              p == null ? '' : paymentAmount(p),
-              key: const Key('payment_amount'),
-              style: text.displaySmall,
+            SnCard(
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.payAmountLabel, style: AppText.meta),
+                    Text(
+                      p == null ? '' : paymentAmount(p),
+                      key: const Key('payment_amount'),
+                      style: AppText.display,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -511,26 +540,31 @@ class _State extends ConsumerState<PaymentScreen> {
         if (!didPop) unawaited(_back());
       },
       child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            key: const Key('app_back_btn'),
-            tooltip: l10n.back,
-            icon: const Icon(Icons.chevron_left, size: 32),
-            onPressed: _back,
-          ),
-          title: Text(l10n.payTitle),
+        backgroundColor: AppColors.canvasCool,
+        body: Column(
+          children: [
+            SnHeader(title: l10n.payTitle, onBack: _back),
+            Expanded(child: body),
+          ],
         ),
-        body: body,
         bottomNavigationBar: canPay && p != null
-            ? SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: SnButton(
-                    key: const Key('payment_pay_btn'),
-                    label: l10n.payButton(paymentAmount(p)),
-                    loadingLabel: l10n.payButtonBusy,
-                    isLoading: _phase == _Phase.paying,
-                    onPressed: _phase == _Phase.ready ? _pay : null,
+            ? DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: AppColors.surface,
+                  boxShadow: AppShadows.floating,
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: SnButton(
+                      key: const Key('payment_pay_btn'),
+                      label: l10n.payButton(paymentAmount(p)),
+                      loadingLabel: l10n.payButtonBusy,
+                      isLoading: _phase == _Phase.paying,
+                      variant: SnButtonVariant.deep,
+                      onPressed: _phase == _Phase.ready ? _pay : null,
+                    ),
                   ),
                 ),
               )

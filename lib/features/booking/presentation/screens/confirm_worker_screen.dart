@@ -187,9 +187,9 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
                 context.canPop() ? context.pop() : context.go(Routes.bookings),
           ),
           Expanded(child: _content(l10n, text, locale, value, quote)),
-          _bottomBar(l10n, value, quote),
         ],
       ),
+      bottomNavigationBar: _bottomBar(l10n, value, quote),
     );
   }
 
