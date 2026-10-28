@@ -393,7 +393,7 @@ void main() {
         overrides: [
           bookingRepositoryProvider.overrideWithValue(
             BookingRepositoryMock(
-              () => const MockApiState(),
+              () => const MockApiState(returningUser: true),
               now: () => testNow,
             ),
           ),

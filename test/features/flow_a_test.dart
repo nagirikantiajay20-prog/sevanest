@@ -1,4 +1,4 @@
-// AGENTS §68 Flow A (AUTH-17): launch -> login -> OTP -> profile setup -> first address -> Home,
+// AGENTS §68 Flow A (AUTH-17): launch -> login -> OTP -> profile setup (with home address) -> Home,
 // in one run on the real app + router with fake backends.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,30 +59,12 @@ void main() {
       'p@example.com',
     );
     await t.pump();
+
+    // Home address (typed here, saved with the profile), then Home
+    await addHomeAddress(t);
     await t.tap(find.byKey(const Key('profile_continue_btn')));
     await t.pumpAndSettle();
     expect(profiles.createCalls, 1);
-
-    // First address, then Home
-    expect(find.byKey(const Key('address_skip_btn')), findsOneWidget);
-    await t.ensureVisible(find.byKey(const Key('address_line1_field')));
-    await t.enterText(find.byKey(const Key('address_line1_field')), 'Flat 7B');
-    await t.ensureVisible(find.byKey(const Key('address_line2_field')));
-    await t.enterText(
-      find.byKey(const Key('address_line2_field')),
-      'Lake View Apartments',
-    );
-    await t.ensureVisible(find.byKey(const Key('address_area_field')));
-    await t.tap(find.byKey(const Key('address_area_field')));
-    await t.pumpAndSettle();
-    await t.tap(find.byKey(const Key('area_option_Madhapur')));
-    await t.pumpAndSettle();
-    await t.ensureVisible(find.byKey(const Key('address_pincode_field')));
-    await t.enterText(find.byKey(const Key('address_pincode_field')), '500081');
-    await t.pump();
-    await t.ensureVisible(find.byKey(const Key('address_save_btn')));
-    await t.tap(find.byKey(const Key('address_save_btn')));
-    await t.pumpAndSettle();
     expect(addresses.createCalls, 1);
     expect(find.byKey(const Key('nav_home')), findsOneWidget);
   });

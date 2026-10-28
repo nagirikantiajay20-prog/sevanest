@@ -159,12 +159,12 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     bookings = BookingRepositoryMock(
-      () => const MockApiState(),
+      () => const MockApiState(returningUser: true),
       now: () => testNow,
     );
     repo = _Repo(
       PaymentRepositoryMock(
-        () => const MockApiState(),
+        () => const MockApiState(returningUser: true),
         isPayable: bookings.isPayable,
         onPaid: bookings.markPaid,
         now: () => testNow,

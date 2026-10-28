@@ -125,7 +125,7 @@ void main() {
     test('seeds the active booking only, and honours the empty mode', () async {
       final now = DateTime(2026, 10, 9, 10);
       final repo = AttendanceRepositoryMock(
-        () => const MockApiState(),
+        () => const MockApiState(returningUser: true),
         now: () => now,
       );
       final p = await repo.page('bk_2048');
@@ -255,7 +255,9 @@ void main() {
     test(
       'once per booking, scale enforced, same key answers the same',
       () async {
-        final repo = RatingRepositoryMock(() => const MockApiState());
+        final repo = RatingRepositoryMock(
+          () => const MockApiState(returningUser: true),
+        );
         final a = await repo.submit('b1', score: 4, idempotencyKey: 'k1');
         expect(
           (await repo.submit('b1', score: 4, idempotencyKey: 'k1')).id,

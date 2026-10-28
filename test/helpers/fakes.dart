@@ -8,20 +8,26 @@ import 'package:sevanest_customer/app/session_reset_host.dart';
 import 'package:sevanest_customer/app/theme/app_theme.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
+    show splashChoiceProvider, splashHoldProvider;
+import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_photo_providers.dart';
+import 'package:sevanest_customer/features/favourites/domain/favourites.dart';
+import 'package:sevanest_customer/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
-import 'package:sevanest_customer/features/service_discovery/data/catalog_repository_mock.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/schedule_repository.dart';
@@ -32,6 +38,7 @@ import 'package:sevanest_customer/features/support/domain/support.dart';
 import 'package:sevanest_customer/features/support/presentation/providers/support_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
+import 'favourites_repository_mock.dart';
 import 'notification_fakes.dart';
 import 'support_fakes.dart';
 
@@ -143,13 +150,20 @@ Widget testRootApp({
   SupportRepository? support,
   SafetyRepository? safety,
   PushService? push,
+  bool splashChoice = false,
   List<Override> overrides = const [],
 }) => SessionResetHost(
   overrides: [
-    appConfigProvider.overrideWithValue(AppConfig.dev),
+    splashHoldProvider.overrideWithValue(Duration.zero),
+    splashChoiceProvider.overrideWithValue(splashChoice),
+    appConfigProvider.overrideWithValue(AppConfig.mock),
+    mockApiProvider.overrideWith(SeededMockApi.new),
     sessionStoreProvider.overrideWithValue(store),
     authRepositoryProvider.overrideWithValue(repo),
     homeRepositoryProvider.overrideWithValue(home ?? FakeHomeRepository()),
+    customerPhotoRepositoryProvider.overrideWithValue(
+      FakeCustomerPhotoRepository(),
+    ),
     catalogRepositoryProvider.overrideWithValue(
       catalog ?? FakeCatalogRepository(),
     ),
@@ -252,6 +266,20 @@ class FakeAddressRepository implements AddressRepository {
   Object? failNext;
   Object? failList;
   Object? failAreas;
+
+  PickedPhoto? uploadedPhoto;
+  int removePhotoCalls = 0;
+  Object? failPhoto;
+
+  @override
+  Future<void> uploadPhoto(String id, PickedPhoto photo) async {
+    final f = failPhoto;
+    if (f != null) throw f;
+    uploadedPhoto = photo;
+  }
+
+  @override
+  Future<void> removePhoto(String id) async => removePhotoCalls++;
 
   /// What `resolveServiceArea` answers (null = no area matches).
   ServiceArea? resolved;
@@ -387,10 +415,62 @@ class FakeHomeRepository implements HomeRepository {
   }
 }
 
+const _everyEngagement = [
+  EngagementOption(EngagementType.fullTime),
+  EngagementOption(EngagementType.partTime),
+  EngagementOption(EngagementType.daily),
+  EngagementOption(EngagementType.hourly),
+  EngagementOption(EngagementType.liveIn),
+];
+
+/// Flow-test catalogue: every engagement for most services, Driver without Live-in. Independent of
+/// the seeded mock catalogue, which follows the client's category table.
+const flowCatalogue = [
+  ServiceCategory(
+    id: 'maid',
+    name: 'Maid',
+    description: 'Cleaning and chores',
+    icon: Icons.cleaning_services_outlined,
+    popular: true,
+    engagements: _everyEngagement,
+  ),
+  ServiceCategory(
+    id: 'cook',
+    name: 'Cook',
+    description: 'Meals and everyday cooking',
+    icon: Icons.soup_kitchen_outlined,
+    popular: true,
+    engagements: _everyEngagement,
+  ),
+  ServiceCategory(
+    id: 'driver',
+    name: 'Driver',
+    description: 'Car, school runs, errands',
+    icon: Icons.directions_car_outlined,
+    engagements: [
+      EngagementOption(EngagementType.fullTime),
+      EngagementOption(EngagementType.partTime),
+      EngagementOption(EngagementType.daily),
+      EngagementOption(EngagementType.hourly),
+      EngagementOption(
+        EngagementType.liveIn,
+        unavailableReason: 'Not available for drivers',
+      ),
+    ],
+  ),
+  ServiceCategory(
+    id: 'nanny',
+    name: 'Nanny',
+    description: 'Childcare at home',
+    icon: Icons.child_care_outlined,
+    engagements: _everyEngagement,
+  ),
+];
+
 /// Instant catalogue for widget tests; [gate] holds the response, [failNext] throws once.
 class FakeCatalogRepository implements CatalogRepository {
   FakeCatalogRepository([List<ServiceCategory>? seed])
-    : items = seed ?? CatalogRepositoryMock.categories_;
+    : items = seed ?? flowCatalogue;
   List<ServiceCategory> items;
   Object? failNext;
   Future<void>? gate;
@@ -475,3 +555,73 @@ class FakeGuidanceRepository implements GuidanceRepository {
         );
   }
 }
+
+/// Profile setup: opens the "Add your home address" card, fills the sheet and saves it (nothing is
+/// sent to the backend until Continue).
+Future<void> addHomeAddress(WidgetTester t) async {
+  Future<void> enter(String key, String text) async {
+    await t.ensureVisible(find.byKey(Key(key)));
+    await t.enterText(find.byKey(Key(key)), text);
+    await t.pump();
+  }
+
+  await t.ensureVisible(find.byKey(const Key('profile_address_card')));
+  await t.tap(find.byKey(const Key('profile_address_card')));
+  await t.pumpAndSettle();
+  await enter('address_line1_field', 'Flat 7B');
+  await enter('address_line2_field', 'Lake View Apartments');
+  await t.ensureVisible(find.byKey(const Key('address_area_field')));
+  await t.tap(find.byKey(const Key('address_area_field')));
+  await t.pumpAndSettle();
+  await t.tap(find.byKey(const Key('area_option_Madhapur')));
+  await t.pumpAndSettle();
+  await enter('address_pincode_field', '500081');
+  await t.ensureVisible(find.byKey(const Key('address_save_btn')));
+  await t.tap(find.byKey(const Key('address_save_btn')));
+  await t.pumpAndSettle();
+}
+
+/// Instant, empty shortlist so Home's hearts never leave a mock-latency timer pending.
+class FakeFavouritesRepository implements FavouritesRepository {
+  final _ids = <String>{};
+
+  @override
+  Future<FavouritesPage> list({String? cursor}) async =>
+      FavouritesPage([for (final id in _ids) FavouriteEntry(id, null)], null);
+
+  @override
+  Future<Set<String>> ids() async => {..._ids};
+
+  @override
+  Future<void> add(String workerId) async => _ids.add(workerId);
+
+  @override
+  Future<void> remove(String workerId) async => _ids.remove(workerId);
+}
+
+/// Instant in-memory photo backend for widget tests (never shipped).
+class FakeCustomerPhotoRepository implements CustomerPhotoRepository {
+  ProfilePhoto? stored;
+  int uploads = 0;
+
+  @override
+  Future<ProfilePhoto?> current() async => stored;
+
+  @override
+  Future<void> upload(PickedPhoto photo) async {
+    uploads++;
+    stored = ProfilePhoto(bytes: photo.bytes);
+  }
+}
+
+/// Test default: the seeded mock repositories behave like a returning customer (the app itself
+/// defaults to a new one and never ships these records).
+class SeededMockApi extends MockApiNotifier {
+  @override
+  MockApiState build() => const MockApiState(returningUser: true);
+}
+
+/// Seeded in-memory shortlist for tests that open the shortlist without their own fake.
+Override mockFavouritesOverride() => favouritesRepositoryProvider.overrideWith(
+  (ref) => FavouritesRepositoryMock(() => ref.read(mockApiProvider)),
+);

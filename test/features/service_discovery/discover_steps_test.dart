@@ -295,6 +295,37 @@ void main() {
       expect(nextEnabled(t), isTrue);
     });
 
+    testWidgets('a stale engagement the service does not offer is dropped', (
+      t,
+    ) async {
+      await launch(
+        t,
+        setup: (c) => c.items = const [
+          ServiceCategory(
+            id: 'cook',
+            name: 'Cook',
+            description: 'x',
+            icon: Icons.soup_kitchen,
+            engagements: [
+              EngagementOption(EngagementType.daily),
+              EngagementOption(EngagementType.hourly),
+            ],
+          ),
+        ],
+      );
+      await toEngagement(t);
+      container
+          .read(requirementDraftProvider.notifier)
+          .setEngagement(EngagementType.partTime);
+      await t.pumpAndSettle();
+      expect(container.read(requirementDraftProvider).engagement, isNull);
+      expect(
+        find.byKey(const Key('discover_engagement_partTime')),
+        findsNothing,
+      );
+      expect(nextEnabled(t), isFalse);
+    });
+
     testWidgets('DISC-03 changing the service clears the engagement', (
       t,
     ) async {

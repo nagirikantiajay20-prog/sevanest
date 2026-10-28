@@ -2,11 +2,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
-import 'package:sevanest_customer/features/home/data/home_repository_mock.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_format.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations_en.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../helpers/home_repository_mock.dart';
 
 void main() {
   final l10n = AppLocalizationsEn();
@@ -96,7 +97,7 @@ void main() {
         HomeRepositoryMock(s, now: () => now);
 
     test('returning vs new user seeds', () async {
-      var s = const MockApiState();
+      var s = const MockApiState(returningUser: true);
       final r = repo(() => s);
       expect((await r.fetch()).activeBooking?.reference, 'SN-2048');
       s = const MockApiState(returningUser: false);
@@ -125,7 +126,7 @@ void main() {
 
     test('offline with nothing cached falls back to the seed', () async {
       final d = await repo(
-        () => const MockApiState(mode: MockMode.offline),
+        () => const MockApiState(mode: MockMode.offline, returningUser: true),
       ).fetch();
       expect(d.fromCache, isTrue);
       expect(d.activeBooking, isNotNull);
@@ -136,7 +137,7 @@ void main() {
       await r.fetch();
       await HomeRepositoryMock.clearCache();
       final d = await repo(
-        () => const MockApiState(mode: MockMode.offline),
+        () => const MockApiState(mode: MockMode.offline, returningUser: true),
       ).fetch();
       expect(
         d.activeBooking,

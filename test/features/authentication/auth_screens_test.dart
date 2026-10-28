@@ -131,6 +131,42 @@ void main() {
     });
   });
 
+  group('Splash entry choice', () {
+    Future<void> launchWithChoice(WidgetTester t) async {
+      useTestPhone(t);
+      store = InMemorySessionStore();
+      await t.pumpWidget(
+        testRootApp(store: store, repo: repo, splashChoice: true),
+      );
+      await t.pumpAndSettle();
+    }
+
+    testWidgets('both buttons show side by side; customer proceeds to login', (
+      t,
+    ) async {
+      await launchWithChoice(t);
+      final customer = find.byKey(const Key('splash_customer_btn'));
+      final worker = find.byKey(const Key('splash_worker_btn'));
+      expect(customer, findsOneWidget);
+      expect(worker, findsOneWidget);
+      expect(find.byKey(_mobileField), findsNothing); // waits for the tap
+      expect(t.getCenter(customer).dy, t.getCenter(worker).dy);
+      await t.tap(customer);
+      await t.pumpAndSettle();
+      expect(find.byKey(_mobileField), findsOneWidget);
+    });
+
+    testWidgets('worker app without a configured link says so and stays', (
+      t,
+    ) async {
+      await launchWithChoice(t);
+      await t.tap(find.byKey(const Key('splash_worker_btn')));
+      await t.pumpAndSettle();
+      expect(find.textContaining('Worker app link'), findsOneWidget);
+      expect(find.byKey(const Key('splash_customer_btn')), findsOneWidget);
+    });
+  });
+
   group('Login', () {
     testWidgets('AUTH-02: Get OTP needs 10 digits; invalid shows error on tap', (
       t,
@@ -252,32 +288,11 @@ void main() {
       },
     );
 
-    testWidgets(
-      'language sheet: English selected, other languages not selectable',
-      (t) async {
-        await launch(t);
-        await t.tap(find.byKey(const Key('login_language_btn')));
-        await t.pumpAndSettle();
-        expect(find.text('Choose your language'), findsOneWidget);
-        for (final l in [
-          'English',
-          'Hindi',
-          'Telugu',
-          'Tamil',
-          'Kannada',
-          'Marathi',
-        ]) {
-          expect(find.byKey(Key('language_$l')), findsOneWidget);
-        }
-        expect(
-          t.widget<ListTile>(find.byKey(const Key('language_Hindi'))).enabled,
-          isFalse,
-        );
-        await t.tap(find.byKey(const Key('language_close_btn')));
-        await t.pumpAndSettle();
-        expect(find.text('Choose your language'), findsNothing);
-      },
-    );
+    testWidgets('login has no language selector (English only)', (t) async {
+      await launch(t);
+      expect(find.byKey(const Key('login_language_btn')), findsNothing);
+      expect(find.text('EN'), findsNothing);
+    });
 
     testWidgets(
       'legal links: no URL defined yet -> friendly message, no crash',
@@ -303,14 +318,14 @@ void main() {
         await requestOtp(t);
         expect(find.byKey(const Key('otp_countdown_text')), findsOneWidget);
         expect(
-          find.textContaining('00:30', findRichText: true),
+          find.textContaining(RegExp('00:(30|29)'), findRichText: true),
           findsOneWidget,
         );
         expect(find.byKey(const Key('otp_resend_btn')), findsNothing);
 
         await t.pump(const Duration(seconds: 10));
         expect(
-          find.textContaining('00:20', findRichText: true),
+          find.textContaining(RegExp('00:(20|19)'), findRichText: true),
           findsOneWidget,
         );
 

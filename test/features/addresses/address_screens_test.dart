@@ -1,4 +1,6 @@
 // WIDGET tests: real app + router + address screens, with an in-memory fake repository (no network).
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +10,8 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_list_screen.dart';
+import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart';
+import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -382,47 +386,28 @@ void main() {
       },
     );
 
-    testWidgets('ADDR-01 first-time save goes to Home', (t) async {
-      await launch(t, complete: false);
-      await t.enterText(
-        find.byKey(const Key('profile_name_field')),
-        'Priya Sharma',
-      );
-      await t.enterText(
-        find.byKey(const Key('profile_email_field')),
-        'p@example.com',
-      );
-      await t.pump();
-      await t.tap(find.byKey(const Key('profile_continue_btn')));
-      await t.pumpAndSettle();
-      await fillValid(t);
-      await tapKey(t, 'address_save_btn');
+    testWidgets(
+      'ADDR-01 profile setup saves the home address and goes to Home',
+      (t) async {
+        await launch(t, complete: false);
+        await t.enterText(
+          find.byKey(const Key('profile_name_field')),
+          'Priya Sharma',
+        );
+        await t.enterText(
+          find.byKey(const Key('profile_email_field')),
+          'p@example.com',
+        );
+        await t.pump();
+        await addHomeAddress(t);
+        await t.tap(find.byKey(const Key('profile_continue_btn')));
+        await t.pumpAndSettle();
 
-      expect(addresses.createCalls, 1);
-      expect(addresses.lastInput!.isDefault, isTrue);
-      expect(find.byKey(const Key('nav_home')), findsOneWidget);
-    });
-
-    testWidgets('ADDR-02 Skip goes to Home without creating an address', (
-      t,
-    ) async {
-      await launch(t, complete: false);
-      await t.enterText(
-        find.byKey(const Key('profile_name_field')),
-        'Priya Sharma',
-      );
-      await t.enterText(
-        find.byKey(const Key('profile_email_field')),
-        'p@example.com',
-      );
-      await t.pump();
-      await t.tap(find.byKey(const Key('profile_continue_btn')));
-      await t.pumpAndSettle();
-      await tapKey(t, 'address_skip_btn');
-
-      expect(addresses.createCalls, 0);
-      expect(find.byKey(const Key('nav_home')), findsOneWidget);
-    });
+        expect(addresses.createCalls, 1);
+        expect(addresses.lastInput!.isDefault, isTrue);
+        expect(find.byKey(const Key('nav_home')), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'ADDR-04 backend rejects the area -> inline message, Save re-enabled, retry works',
@@ -604,5 +589,101 @@ void main() {
       await t.pumpAndSettle();
       expect(find.byKey(const Key('address_delete_btn')), findsOneWidget);
     });
+  });
+
+  group('Home photo', () {
+    const withPhoto = Address(
+      id: 'h1',
+      line: 'Flat 402, Sai Residency',
+      area: 'Madhapur',
+      city: 'Hyderabad',
+      pincode: '500081',
+      isDefault: true,
+      photoUrl: 'https://example.test/home.jpg',
+    );
+
+    testWidgets(
+      'reopened address shows its photo; Remove then save deletes it',
+      (t) async {
+        addresses.items = [withPhoto];
+        await launch(t);
+        await openList(t);
+        await t.tap(find.byKey(const Key('address_card_h1')));
+        await t.pumpAndSettle();
+        await t.ensureVisible(find.byKey(const Key('home_photo_preview')));
+        expect(find.byKey(const Key('home_photo_preview')), findsOneWidget);
+
+        await tapKey(t, 'home_photo_remove');
+        expect(find.byKey(const Key('home_photo_add')), findsOneWidget);
+        await tapKey(t, 'address_save_btn');
+        expect(addresses.removePhotoCalls, 1);
+      },
+    );
+
+    testWidgets(
+      'no photo: the upload tile is offered and saving is unaffected',
+      (t) async {
+        addresses.items = [_home];
+        await launch(t);
+        await openList(t);
+        await t.tap(find.byKey(const Key('address_card_h1')));
+        await t.pumpAndSettle();
+        await t.ensureVisible(find.byKey(const Key('home_photo_add')));
+        expect(find.text('Upload Home Photo'), findsOneWidget);
+        await enter(t, 'address_pincode_field', '500082');
+        await tapKey(t, 'address_save_btn');
+        expect(addresses.removePhotoCalls, 0);
+        expect(addresses.uploadedPhoto, isNull);
+      },
+    );
+
+    test('only JPEG and PNG are accepted', () {
+      expect(
+        isSupportedPhoto(Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0])),
+        isTrue,
+      );
+      expect(
+        isSupportedPhoto(Uint8List.fromList([0x89, 0x50, 0x4E, 0x47])),
+        isTrue,
+      );
+      expect(
+        isSupportedPhoto(Uint8List.fromList([0x47, 0x49, 0x46, 0x38])),
+        isFalse,
+      );
+      expect(isSupportedPhoto(Uint8List(0)), isFalse);
+    });
+
+    test(
+      'a failed photo upload still saves the address and is reported',
+      () async {
+        addresses.failPhoto = const NetworkFailure();
+        final c = ProviderContainer(
+          overrides: [addressRepositoryProvider.overrideWithValue(addresses)],
+        );
+        addTearDown(c.dispose);
+        const input = AddressInput(
+          line: 'Flat 1',
+          area: 'Madhapur',
+          city: 'Hyderabad',
+          pincode: '500081',
+        );
+        final n = c.read(addressFormProvider.notifier);
+        final saved = await n.save(
+          input: input,
+          photo: PickedPhoto(
+            Uint8List.fromList([0xFF, 0xD8, 0xFF]),
+            'image/jpeg',
+          ),
+        );
+        expect(saved, isNotNull);
+        expect(n.photoFailure, isA<NetworkFailure>());
+
+        addresses.failPhoto = null;
+        final photo = PickedPhoto(Uint8List.fromList([1, 2, 3]), 'image/png');
+        await n.save(input: input, photo: photo);
+        expect(n.photoFailure, isNull);
+        expect(addresses.uploadedPhoto, same(photo));
+      },
+    );
   });
 }

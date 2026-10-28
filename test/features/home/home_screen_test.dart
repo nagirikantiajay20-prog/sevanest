@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
-import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
+import 'package:sevanest_customer/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/screens/home_screen.dart';
@@ -66,6 +66,9 @@ void main() {
         home: home,
         overrides: [
           addressRepositoryProvider.overrideWithValue(addresses),
+          favouritesRepositoryProvider.overrideWithValue(
+            FakeFavouritesRepository(),
+          ),
           customerProfileRepositoryProvider.overrideWithValue(
             FakeProfileRepository(
               const CustomerProfile(
@@ -259,6 +262,9 @@ void main() {
             addressRepositoryProvider.overrideWithValue(
               FakeAddressRepository(const [_addr]),
             ),
+            favouritesRepositoryProvider.overrideWithValue(
+              FakeFavouritesRepository(),
+            ),
             customerProfileRepositoryProvider.overrideWithValue(
               FakeProfileRepository(),
             ),
@@ -284,6 +290,9 @@ void main() {
           overrides: [
             addressRepositoryProvider.overrideWithValue(
               FakeAddressRepository(const [_addr]),
+            ),
+            favouritesRepositoryProvider.overrideWithValue(
+              FakeFavouritesRepository(),
             ),
             customerProfileRepositoryProvider.overrideWithValue(
               FakeProfileRepository(),
@@ -338,28 +347,6 @@ void main() {
       await t.binding.handlePopRoute();
       await t.pumpAndSettle();
       expect(find.byKey(const Key('home_find_worker_btn')), findsOneWidget);
-    });
-  });
-
-  group('dev menu', () {
-    testWidgets('long-press greeting flips the mock API behaviour', (t) async {
-      final c = await launch(t);
-      await t.longPress(find.byKey(const Key('home_greeting')));
-      await t.pumpAndSettle();
-      await t.tap(find.byKey(const Key('dev_mode_offline')));
-      await t.pump();
-      expect(c.read(mockApiProvider).mode, MockMode.offline);
-      await t.tap(find.byKey(const Key('dev_mode_loading')));
-      await t.pump();
-      expect(c.read(mockApiProvider).mode, MockMode.loading);
-      await t.tap(find.byKey(const Key('dev_user_new')));
-      await t.pump();
-      expect(c.read(mockApiProvider).returningUser, isFalse);
-      // Tests run as the dev flavor: mocks by default, the menu can switch to the live backend.
-      expect(c.read(mockApiProvider).live, isFalse);
-      await t.tap(find.byKey(const Key('dev_live_on')));
-      await t.pump();
-      expect(c.read(mockApiProvider).live, isTrue);
     });
   });
 }

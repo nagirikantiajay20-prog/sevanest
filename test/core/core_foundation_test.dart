@@ -15,8 +15,9 @@ DioException _http(int status, [Map<String, dynamic>? body]) {
 
 void main() {
   group('AppConfig', () {
-    test('only dev may use mocks', () {
-      expect(AppConfig.dev.useMocks, isTrue);
+    test('no shipped flavor uses mocks (only the test config)', () {
+      expect(AppConfig.mock.useMocks, isTrue);
+      expect(AppConfig.dev.useMocks, isFalse);
       expect(AppConfig.stg.useMocks, isFalse);
       expect(AppConfig.prod.useMocks, isFalse);
     });

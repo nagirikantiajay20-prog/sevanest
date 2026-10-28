@@ -349,7 +349,7 @@ void main() {
       'one open request per booking; the same key returns the first',
       () async {
         final repo = ReplacementRepositoryMock(
-          () => const MockApiState(),
+          () => const MockApiState(returningUser: true),
           autoApprove: false,
         );
         final a = await repo.create(
@@ -375,7 +375,7 @@ void main() {
       'approve attaches alternatives, select completes, withdraw cancels',
       () async {
         final repo = ReplacementRepositoryMock(
-          () => const MockApiState(),
+          () => const MockApiState(returningUser: true),
           autoApprove: false,
         );
         final a = await repo.create(

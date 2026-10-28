@@ -25,7 +25,7 @@ void main() {
     store = InMemorySessionStore();
     container = ProviderContainer(
       overrides: [
-        appConfigProvider.overrideWithValue(AppConfig.dev),
+        appConfigProvider.overrideWithValue(AppConfig.mock),
         sessionStoreProvider.overrideWithValue(store),
         authRepositoryProvider.overrideWithValue(repo),
       ],

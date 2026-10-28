@@ -44,7 +44,7 @@ void main() {
     return InterviewRepositoryRemote(
       dio,
       BookingRepositoryRemote(dio),
-      WorkerSearchRepositoryMock(() => const MockApiState()),
+      WorkerSearchRepositoryMock(() => const MockApiState(returningUser: true)),
       areaIdFor: (d) async => 'a1',
     );
   }

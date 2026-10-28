@@ -121,6 +121,8 @@ void main() {
       overrides: [bookingRepositoryProvider.overrideWithValue(s)],
     );
     env.stepsOneToThree(EngagementType.fullTime);
+    // Tall enough that worker-name cards don't push later ones out of the lazy list.
+    t.view.physicalSize = const Size(1170, 3600);
     await env.go(route);
     await settle(t);
     return env;
@@ -142,6 +144,10 @@ void main() {
       expect(env.where, '/bookings');
       expect(find.byKey(const Key('booking_card_bk_2048')), findsOneWidget);
       expect(find.byKey(const Key('booking_card_iv_301')), findsOneWidget);
+      expect(
+        find.byKey(const Key('booking_card_worker_bk_2048')),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('booking_card_bk_1900')), findsNothing);
       await tapKey(t, 'bookings_tab_past');
       expect(find.byKey(const Key('booking_card_bk_1900')), findsOneWidget);
@@ -276,6 +282,37 @@ void main() {
       expect(find.text('Request received'), findsOneWidget);
       expect(find.text('Updated'), findsWidgets);
       expect(find.byIcon(Icons.check_circle), findsWidgets);
+    });
+
+    testWidgets('deployed timeline {from,to,at}; scheduled shows the time and '
+        'only a reschedule button', (t) async {
+      final spy = _Spy()
+        ..forced = Booking.fromJson({
+          'id': 'bk_x',
+          'status': 'INTERVIEW_TRIAL_SCHEDULED',
+          'workerId': 'w1',
+          'scheduleType': 'INTERVIEW',
+          'scheduledAt': '2026-11-03T10:00:00',
+          'timeline': [
+            {'from': null, 'to': 'NEW_REQUEST', 'at': '2026-10-01T10:00:00'},
+            {
+              'from': 'NEW_REQUEST',
+              'to': 'MATCHED',
+              'at': '2026-10-02T10:00:00',
+            },
+            {
+              'from': 'MATCHED',
+              'to': 'INTERVIEW_TRIAL_SCHEDULED',
+              'at': '2026-10-03T10:00:00',
+            },
+          ],
+        });
+      await open(t, route: '/bookings/bk_x', spy: spy);
+      expect(find.text('Updated'), findsNothing);
+      expect(find.text('Request received'), findsOneWidget);
+      expect(find.byKey(const Key('booking_schedule_btn')), findsNothing);
+      expect(find.byKey(const Key('booking_interview_btn')), findsOneWidget);
+      expect(find.byKey(const Key('booking_reschedule_btn')), findsOneWidget);
     });
 
     testWidgets('no backend events: the happy path with the current step', (

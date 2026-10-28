@@ -97,6 +97,34 @@ void main() {
       })!;
       expect(pending.verified, isFalse);
     });
+
+    test('card name, initials and verified flag (D-91)', () {
+      final w = WorkerSummary.fromJson({
+        'workerId': 'w1',
+        'name': 'Lakshmi D.',
+        'initials': 'LD',
+        'verified': true,
+        'categories': [
+          {'code': 'COOK', 'name': 'Cook'},
+        ],
+      })!;
+      expect(w.name, 'Lakshmi D.');
+      expect(w.initials, 'LD');
+      expect(w.verified, isTrue);
+      expect(w.title, 'Lakshmi D.');
+      expect(w.categoryChips, ['Cook']);
+      final anon = WorkerSummary.fromJson({
+        'workerId': 'w2',
+        'name': null,
+        'categories': [
+          {'code': 'COOK', 'name': 'Cook'},
+          {'code': 'MAID', 'name': 'Maid'},
+        ],
+      })!;
+      expect(anon.name, isNull);
+      expect(anon.title, 'Cook');
+      expect(anon.categoryChips, ['Maid']);
+    });
   });
 
   group('WorkerSearchRepositoryRemote', () {
@@ -230,7 +258,7 @@ void main() {
         find.byKey(const Key('results_load_more_retry_btn')),
         findsOneWidget,
       );
-      mock(env).set(const MockApiState());
+      mock(env).set(const MockApiState(returningUser: true));
       await t.tap(find.byKey(const Key('results_load_more_retry_btn')));
       await settle(t);
       expect(
@@ -250,7 +278,7 @@ void main() {
       expect(find.text('No matching workers found'), findsOneWidget);
       expect(find.byKey(const Key('results_summary_chip')), findsWidgets);
 
-      mock(env).set(const MockApiState());
+      mock(env).set(const MockApiState(returningUser: true));
       await t.tap(find.byKey(const Key('results_retry_btn')));
       await settle(t);
       expect(find.byKey(const Key('worker_card_cook-1')), findsOneWidget);
@@ -279,7 +307,7 @@ void main() {
       await env.go('/workers');
       await settle(t);
       expect(find.byKey(const Key('error_retry_btn')), findsOneWidget);
-      mock(env).set(const MockApiState());
+      mock(env).set(const MockApiState(returningUser: true));
       await t.tap(find.byKey(const Key('error_retry_btn')));
       await settle(t);
       expect(find.byKey(const Key('worker_card_cook-1')), findsOneWidget);

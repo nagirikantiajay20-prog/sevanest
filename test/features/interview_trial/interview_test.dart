@@ -42,7 +42,9 @@ class _Spy implements InterviewRepository {
           () => MockApiState(returningUser: returning),
           now: () => testNow,
         ),
-        WorkerSearchRepositoryMock(() => const MockApiState()),
+        WorkerSearchRepositoryMock(
+          () => const MockApiState(returningUser: true),
+        ),
         areaIdFor: (d) async => d.address!.area,
         now: () => testNow,
       );
@@ -61,6 +63,10 @@ class _Spy implements InterviewRepository {
   bool loseAnswer = false;
   Completer<void>? gate;
   Interview? forced;
+
+  @override
+  Future<String?> interviewIdFor(String bookingId, {bool openOnly = false}) =>
+      inner.interviewIdFor(bookingId, openOnly: openOnly);
 
   @override
   Future<Interview> create(

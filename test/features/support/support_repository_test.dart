@@ -397,7 +397,9 @@ void main() {
 
   group('mock repositories (dev toggle)', () {
     test('a ticket is created once per key and stays open', () async {
-      final r = SupportRepositoryMock(() => const MockApiState());
+      final r = SupportRepositoryMock(
+        () => const MockApiState(returningUser: true),
+      );
       final a = await r.create(
         categoryId: 'c2',
         description: 'Charged twice for a booking',
@@ -415,7 +417,9 @@ void main() {
     });
 
     test('posting to a closed ticket answers TICKET_CLOSED', () async {
-      final r = SupportRepositoryMock(() => const MockApiState());
+      final r = SupportRepositoryMock(
+        () => const MockApiState(returningUser: true),
+      );
       final t = await r.create(
         categoryId: 'c1',
         description: 'Something is wrong here',
@@ -431,7 +435,9 @@ void main() {
     });
 
     test('block is harmless to repeat and can be lifted', () async {
-      final r = SafetyRepositoryMock(() => const MockApiState());
+      final r = SafetyRepositoryMock(
+        () => const MockApiState(returningUser: true),
+      );
       final a = await r.block(workerId: 'w1', idempotencyKey: 'k');
       final b = await r.block(workerId: 'w1', idempotencyKey: 'k');
       expect(a.id, b.id);

@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
-import 'package:sevanest_customer/features/favourites/data/favourites_repository_mock.dart';
 import 'package:sevanest_customer/features/favourites/domain/favourites.dart';
 import 'package:sevanest_customer/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
@@ -19,6 +18,7 @@ import 'package:sevanest_customer/features/worker_search/presentation/widgets/wo
 
 import '../../helpers/discover_harness.dart';
 import '../../helpers/fakes.dart';
+import '../../helpers/favourites_repository_mock.dart';
 
 /// pumpAndSettle ignores the mock's latency timer, so wait it out explicitly.
 Future<void> settle(WidgetTester t) async {
@@ -222,10 +222,10 @@ void main() {
       final spy = _SpyFavourites(returning: false);
       final env = await open(t, spy: spy);
       await openResults(env, t);
-      await tapKey(t, 'worker_card_fav_btn_cook-3');
+      await tapKey(t, 'worker_card_fav_btn_cook-2');
       GoRouter.of(t.element(find.byType(Scaffold).first)).go('/favourites');
       await settle(t);
-      expect(find.byKey(const Key('worker_card_cook-3')), findsOneWidget);
+      expect(find.byKey(const Key('worker_card_cook-2')), findsOneWidget);
     });
 
     testWidgets('FAV-05 remove hides the card; Undo brings it back via PUT', (

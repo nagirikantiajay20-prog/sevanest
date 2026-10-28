@@ -31,6 +31,8 @@ void main() {
 
   Future<void> launch(WidgetTester t, {required bool complete}) async {
     useTestPhone(t);
+    // Tall enough that the photo above the form does not push Save out of the built range.
+    t.view.physicalSize = const Size(1170, 3400);
     auth.onProfile = () async => complete;
     await t.pumpWidget(
       testRootApp(
@@ -113,7 +115,7 @@ void main() {
     );
 
     testWidgets(
-      'PROF-03 Continue creates the profile once and goes to the first-time address form; system back does nothing',
+      'PROF-03 Continue creates the profile and the home address once, then goes to Home; system back does nothing',
       (t) async {
         await launch(t, complete: false);
         await t.binding.handlePopRoute();
@@ -123,14 +125,61 @@ void main() {
         await t.enterText(find.byKey(_name), 'Priya Sharma');
         await t.enterText(find.byKey(_email), 'priya@example.com');
         await t.pump();
+        await addHomeAddress(t);
+        expect(find.text('Home \u00b7 Madhapur'), findsOneWidget);
         await t.tap(find.byKey(_continue));
         await t.pumpAndSettle();
 
         expect(profiles.createCalls, 1);
         expect(profiles.stored!.name, 'Priya Sharma');
         expect(profiles.stored!.preferredLanguage, 'en');
-        expect(find.byKey(const Key('address_save_btn')), findsOneWidget);
-        expect(find.byKey(const Key('address_skip_btn')), findsOneWidget);
+        expect(addresses.createCalls, 1);
+        expect(addresses.lastInput!.area, 'Madhapur');
+        expect(addresses.lastInput!.isDefault, isTrue);
+        expect(find.byKey(const Key('nav_home')), findsOneWidget);
+        expect(find.byKey(_continue), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'Continue without a home address shows the error and sends nothing',
+      (t) async {
+        await launch(t, complete: false);
+        await t.enterText(find.byKey(_name), 'Priya Sharma');
+        await t.enterText(find.byKey(_email), 'priya@example.com');
+        await t.pump();
+        await t.tap(find.byKey(_continue));
+        await t.pumpAndSettle();
+
+        expect(find.byKey(const Key('profile_address_error')), findsOneWidget);
+        expect(profiles.createCalls, 0);
+        expect(addresses.createCalls, 0);
+
+        await addHomeAddress(t);
+        expect(find.byKey(const Key('profile_address_error')), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'address failure after the profile is saved: retry does not create the profile again',
+      (t) async {
+        addresses.failNext = const NetworkFailure();
+        await launch(t, complete: false);
+        await t.enterText(find.byKey(_name), 'Priya Sharma');
+        await t.enterText(find.byKey(_email), 'priya@example.com');
+        await t.pump();
+        await addHomeAddress(t);
+        await t.tap(find.byKey(_continue));
+        await t.pumpAndSettle();
+        expect(profiles.createCalls, 1);
+        expect(find.byKey(const Key('profile_error_banner')), findsOneWidget);
+        expect(find.byKey(_continue), findsOneWidget);
+
+        await t.tap(find.byKey(_continue));
+        await t.pumpAndSettle();
+        expect(profiles.createCalls, 1);
+        expect(addresses.createCalls, 2); // the failed try and the retry
+        expect(find.byKey(const Key('nav_home')), findsOneWidget);
       },
     );
 
@@ -142,6 +191,7 @@ void main() {
       await t.enterText(find.byKey(_name), 'Priya Sharma');
       await t.enterText(find.byKey(_email), 'priya@example.com');
       await t.pump();
+      await addHomeAddress(t);
       await t.tap(find.byKey(_continue));
       await t.pumpAndSettle();
 
@@ -158,6 +208,7 @@ void main() {
       await t.enterText(find.byKey(_name), 'Priya Sharma');
       await t.enterText(find.byKey(_email), 'priya@example.com');
       await t.pump();
+      await addHomeAddress(t);
       await t.tap(find.byKey(_continue));
       await t.pumpAndSettle();
 
@@ -167,7 +218,7 @@ void main() {
       await t.tap(find.byKey(_continue));
       await t.pumpAndSettle();
       expect(profiles.createCalls, 2);
-      expect(find.byKey(const Key('address_save_btn')), findsOneWidget);
+      expect(find.byKey(const Key('nav_home')), findsOneWidget);
     });
 
     testWidgets('double tap while saving sends one request', (t) async {
@@ -177,6 +228,7 @@ void main() {
       await t.enterText(find.byKey(_name), 'Priya Sharma');
       await t.enterText(find.byKey(_email), 'priya@example.com');
       await t.pump();
+      await addHomeAddress(t);
       await t.tap(find.byKey(_continue));
       await t.pump();
       await t.tap(find.byKey(_continue), warnIfMissed: false);
@@ -195,6 +247,7 @@ void main() {
       await t.enterText(find.byKey(_name), 'Priya Sharma');
       await t.enterText(find.byKey(_email), 'priya@example.com');
       await t.pump();
+      await addHomeAddress(t);
       await t.tap(find.byKey(_continue));
       await t.pumpAndSettle();
       expect(find.byKey(const Key('nav_home')), findsOneWidget);

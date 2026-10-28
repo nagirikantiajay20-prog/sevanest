@@ -202,7 +202,7 @@ void main() {
   group('mock notification repository', () {
     test('three unread, then reading one and all', () async {
       final r = NotificationRepositoryMock(
-        () => const MockApiState(),
+        () => const MockApiState(returningUser: true),
         now: () => DateTime(2026, 10, 9, 10),
       );
       expect(await r.unreadCount(), 3);

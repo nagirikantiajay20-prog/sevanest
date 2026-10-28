@@ -9,7 +9,6 @@ import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/features/addresses/data/address_repository_remote.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
-import 'package:sevanest_customer/features/favourites/data/favourites_repository_mock.dart';
 import 'package:sevanest_customer/features/favourites/data/favourites_repository_remote.dart';
 import 'package:sevanest_customer/features/favourites/presentation/providers/favourites_providers.dart';
 import 'package:sevanest_customer/features/home/data/home_repository_remote.dart';
@@ -39,7 +38,7 @@ ProviderContainer _container(AppEnv env, {bool? live}) {
   final c = ProviderContainer(
     overrides: [
       appConfigProvider.overrideWithValue(switch (env) {
-        AppEnv.dev => AppConfig.dev,
+        AppEnv.dev => AppConfig.mock,
         AppEnv.stg => AppConfig.stg,
         AppEnv.prod => AppConfig.prod,
       }),
@@ -239,7 +238,7 @@ void main() {
       );
       expect(
         mock.read(favouritesRepositoryProvider),
-        isA<FavouritesRepositoryMock>(),
+        isA<FavouritesRepositoryRemote>(),
       );
     });
 
@@ -256,7 +255,38 @@ void main() {
       expect(list.map((c) => c.id), ['HOUSE_MAID', 'COOK']);
       expect(list.first.name, 'House maid');
       expect(list.first.engagements.every((e) => e.available), isTrue);
-      expect(list.first.engagements.map((e) => e.type), EngagementType.values);
+      expect(list.first.engagements.map((e) => e.type), [
+        EngagementType.partTime,
+        EngagementType.fullTime,
+        EngagementType.liveIn,
+      ]);
+      expect(list.last.engagements.map((e) => e.type), [
+        EngagementType.partTime,
+        EngagementType.monthly,
+      ]);
+    });
+
+    test('engagements follow the client table per service', () {
+      List<EngagementType>? t(String c, String n) => defaultEngagements(c, n);
+      expect(t('BABYSITTER', 'Babysitter'), [
+        EngagementType.hourly,
+        EngagementType.fullTime,
+      ]);
+      expect(t('ELDERLY_CARE_HELPER', 'Elderly Care Helper'), [
+        EngagementType.shift,
+        EngagementType.fullTime,
+      ]);
+      expect(t('CLEANING_HELPER', 'Cleaning Helper'), [
+        EngagementType.oneTime,
+        EngagementType.hourly,
+      ]);
+      expect(t('DRIVER', 'Driver'), [
+        EngagementType.hourly,
+        EngagementType.daily,
+        EngagementType.monthly,
+      ]);
+      expect(EngagementType.fromCode('MONTHLY'), EngagementType.monthly);
+      expect(t('GARDENER', 'Gardener'), isNull);
     });
   });
 }

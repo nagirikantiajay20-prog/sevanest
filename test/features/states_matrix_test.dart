@@ -8,6 +8,7 @@ import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 import '../helpers/discover_harness.dart';
+import '../helpers/fakes.dart';
 
 const _routes = [
   '/bookings',
@@ -27,7 +28,11 @@ void main() {
   for (final mode in [MockMode.loading, MockMode.error, MockMode.offline]) {
     for (final route in _routes) {
       testWidgets('${mode.name}: $route', (t) async {
-        final env = await launchDiscover(t, height: 1400);
+        final env = await launchDiscover(
+          t,
+          height: 1400,
+          overrides: [mockFavouritesOverride()],
+        );
         env.container
             .read(mockApiProvider.notifier)
             .set(env.container.read(mockApiProvider).copyWith(mode: mode));

@@ -139,6 +139,80 @@ void main() {
       expect(h.shortlist.single.service, 'Full-time');
     });
 
+    test('shows worker names from the 2026-10-26 backend', () async {
+      final repo = HomeRepositoryRemote(
+        dio(
+          (o) async => jsonBody(
+            '{"activeBooking":{"id":"bk-123456","status":"ACTIVE",'
+            '"category":{"code":"COOK","name":"Cook"},"engagement":"PART_TIME",'
+            '"worker":{"displayName":"Ramesh K.","name":"Ramesh K.","initials":"RK","verified":true,"photo":null}},'
+            '"activeBookingsTotal":2,'
+            '"upcomingInterview":{"id":"iv1","bookingId":"bk-other","type":"INTERVIEW","status":"CONFIRMED",'
+            '"scheduledAt":"2026-11-03T04:30:00Z",'
+            '"worker":{"displayName":"Meena P.","name":"Meena P.","initials":"MP","verified":true,"photo":null}},'
+            '"unreadNotifications":0,'
+            '"shortlistPreview":[{"workerId":"w1","available":true,'
+            '"worker":{"workerId":"w1","name":"Lakshmi D.","initials":"LD","verified":true,'
+            '"categories":[{"code":"COOK","name":"Cook"}]}}],'
+            '"shortlistTotal":1}',
+            200,
+          ),
+        ),
+      );
+      final h = await repo.fetch();
+      expect(h.activeBooking!.workerName, 'Ramesh K.');
+      expect(h.activeBooking!.initials, 'RK');
+      expect(h.activeBooking!.verified, isTrue);
+      expect(h.upcomingInterview!.workerName, 'Meena P.');
+      final s = h.shortlist.single;
+      expect(s.name, 'Lakshmi D.');
+      expect(s.category, 'Cook');
+      expect(s.verified, isTrue);
+    });
+
+    test('no verified flag on the booking worker means no badge', () async {
+      final repo = HomeRepositoryRemote(
+        dio(
+          (o) async => jsonBody(
+            '{"activeBooking":{"id":"bk-1","status":"ACTIVE","category":{"name":"Cook"},'
+            '"worker":{"displayName":"Ramesh K.","verified":false}},'
+            '"upcomingInterview":null,"unreadNotifications":0,"shortlistPreview":[]}',
+            200,
+          ),
+        ),
+      );
+      expect((await repo.fetch()).activeBooking!.verified, isFalse);
+    });
+
+    test(
+      'sends If-None-Match after the first load and reuses the body on 304',
+      () async {
+        var calls = 0;
+        final repo = HomeRepositoryRemote(
+          dio((o) async {
+            calls++;
+            if (calls == 1) {
+              return ResponseBody.fromString(
+                '{"activeBooking":null,"upcomingInterview":null,"unreadNotifications":4,"shortlistPreview":[]}',
+                200,
+                headers: {
+                  Headers.contentTypeHeader: ['application/json'],
+                  'etag': ['W/"abc"'],
+                },
+              );
+            }
+            return ResponseBody.fromString('', 304);
+          }),
+        );
+        final first = await repo.fetch();
+        expect(seen.single.headers.containsKey('If-None-Match'), isFalse);
+        final second = await repo.fetch();
+        expect(seen.last.headers['If-None-Match'], 'W/"abc"');
+        expect(second.unreadCount, 4);
+        expect(identical(second, first), isTrue);
+      },
+    );
+
     test('a new customer gets the empty view', () async {
       final repo = HomeRepositoryRemote(
         dio(
