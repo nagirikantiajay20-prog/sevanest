@@ -2,10 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
+import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 
 class AddressRepositoryRemote implements AddressRepository {
-  AddressRepositoryRemote(this._dio);
+  AddressRepositoryRemote(this._dio, {Dio? uploader})
+    : _uploader = uploader ?? Dio();
   final Dio _dio;
+
+  /// The upload link is pre-signed: it must not carry our bearer token or base URL.
+  final Dio _uploader;
 
   static const _base = '/customers/me/addresses';
 
@@ -45,6 +50,52 @@ class AddressRepositoryRemote implements AddressRepository {
   @override
   Future<void> setDefault(String id) async {
     await guarded(() => _dio.put<dynamic>(_path(id, '/default')));
+  }
+
+  @override
+  Future<void> uploadPhoto(String id, PickedPhoto photo) async {
+    final ask = await guarded(
+      () => _dio.post<dynamic>(
+        _path(id, '/photo'),
+        data: {
+          'contentType': photo.contentType,
+          'sizeBytes': photo.bytes.length,
+        },
+      ),
+    );
+    final d = ask.data is Map<String, dynamic>
+        ? ask.data as Map<String, dynamic>
+        : const <String, dynamic>{};
+    final photoId = d['photoId'];
+    final url = d['url'];
+    if (photoId is! String || url is! String) throw const ServerFailure();
+    await guarded(
+      () => _uploader.put<dynamic>(
+        url,
+        data: Stream.value(photo.bytes),
+        options: Options(
+          method: (d['method'] as String?) ?? 'PUT',
+          headers: {
+            Headers.contentTypeHeader: photo.contentType,
+            Headers.contentLengthHeader: photo.bytes.length,
+          },
+        ),
+      ),
+    );
+    await guarded(
+      () => _dio.post<dynamic>(
+        _path(id, '/photo/${Uri.encodeComponent(photoId)}/confirm'),
+      ),
+    );
+  }
+
+  @override
+  Future<void> removePhoto(String id) async {
+    try {
+      await guarded(() => _dio.delete<dynamic>(_path(id, '/photo')));
+    } on NotFoundFailure {
+      // already gone
+    }
   }
 
   @override
@@ -139,5 +190,6 @@ Address? parseAddress(Object? body) {
     latitude: n('latitude'),
     longitude: n('longitude'),
     isDefault: body['isDefault'] == true,
+    photoUrl: _nullIfBlank(body['photoUrl'] as String?),
   );
 }

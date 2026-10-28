@@ -1,12 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
+import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:sevanest_customer/features/customer_profile/data/customer_profile_repository_demo.dart';
 import 'package:sevanest_customer/features/customer_profile/data/customer_profile_repository_remote.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/shared/utils/submit_state.dart';
 
+/// Kept on the device while the demo login is active (dev flavor); otherwise the backend.
 final customerProfileRepositoryProvider = Provider<CustomerProfileRepository>(
-  (ref) => CustomerProfileRepositoryRemote(ref.watch(dioProvider)),
+  (ref) => ref.watch(demoLoginProvider)
+      ? CustomerProfileRepositoryDemo()
+      : CustomerProfileRepositoryRemote(ref.watch(dioProvider)),
 );
 
 /// Languages the design lists. Only codes the backend allows are selectable (`GET /app-config` ->

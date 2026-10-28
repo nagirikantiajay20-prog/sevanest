@@ -12,6 +12,7 @@ import 'package:sevanest_customer/features/customer_profile/domain/customer_prof
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/account_deletion_screen.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/widgets/profile_photo_avatar.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -23,10 +24,7 @@ String maskMobile(String? mobile) {
   return '+91 ${'•' * 6}${digits.substring(digits.length - 4)}';
 }
 
-String _initials(String name) {
-  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
-  return parts.take(2).map((p) => p[0].toUpperCase()).join();
-}
+String _initials(String name) => profileInitials(name);
 
 /// Screen 33. Every row is a plain push / tab switch to a screen another module owns; Log out
 /// resets the whole app. Delete account stays hidden until the policy exists (OPEN_QUESTIONS #18).
@@ -332,12 +330,9 @@ class _Header extends StatelessWidget {
           if (p != null)
             Row(
               children: [
-                CircleAvatar(
+                ProfilePhotoAvatar(
                   key: const Key('account_avatar'),
-                  radius: 28,
-                  backgroundColor: AppColors.tileWell,
-                  foregroundColor: AppColors.teal,
-                  child: Text(_initials(p.name)),
+                  initials: _initials(p.name),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(

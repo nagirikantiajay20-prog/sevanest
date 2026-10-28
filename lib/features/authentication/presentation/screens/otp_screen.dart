@@ -105,6 +105,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
               height: 380,
               child: SnPhotoBackdrop(
                 asset: AppPhotos.room,
+                washAtEdge: 0.05,
+                leftWash: 0.85,
                 alignment: Alignment.topCenter,
               ),
             ),
@@ -118,13 +120,13 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AuthBackButton(onPressed: _leave),
-                          const SizedBox(height: AppSpacing.md),
                           Row(
                             children: [
+                              AuthBackButton(onPressed: _leave),
+                              const SizedBox(width: AppSpacing.s12),
                               Image.asset(
                                 'assets/branding/logo_mark.png',
-                                height: 44,
+                                height: 48,
                                 excludeFromSemantics: true,
                               ),
                               const SizedBox(width: AppSpacing.s12),
@@ -132,18 +134,32 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      l10n.appName,
+                                    Text.rich(
+                                      const TextSpan(
+                                        text: 'Seva',
+                                        children: [
+                                          TextSpan(
+                                            text: 'Nest',
+                                            style: TextStyle(
+                                              color: AppColors.teal,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      semanticsLabel: l10n.appName,
                                       overflow: TextOverflow.ellipsis,
-                                      style: AppText.screenTitle,
+                                      style: AppText.screenTitle.copyWith(
+                                        fontSize: 24,
+                                      ),
                                     ),
                                     Text(
                                       l10n.brandCaption,
                                       overflow: TextOverflow.ellipsis,
                                       style: AppText.body.copyWith(
-                                        fontSize: 10,
-                                        letterSpacing: 1.2,
-                                        color: AppColors.slate400,
+                                        fontSize: 12,
+                                        letterSpacing: 1.6,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.slate600,
                                       ),
                                     ),
                                   ],
@@ -222,9 +238,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
-                                      Icons.lock_outline,
+                                      Icons.shield_outlined,
                                       size: 20,
-                                      color: AppColors.teal,
+                                      color: AppColors.slate,
                                     ),
                                     const SizedBox(width: AppSpacing.sm),
                                     Expanded(
@@ -232,6 +248,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                                         l10n.otpFooter(
                                           (otp.expiresInSeconds / 60).ceil(),
                                         ),
+                                        textAlign: TextAlign.center,
                                         style: AppText.body,
                                       ),
                                     ),
@@ -240,6 +257,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                               ],
                             ),
                           ),
+                          if (otp.demoOtp != null) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            _DemoOtpCard(code: otp.demoOtp!),
+                          ],
+                          const Expanded(child: ServiceMotif()),
                         ],
                       ),
                     ),
@@ -255,6 +277,66 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   static String _spaced(String d) =>
       d.length > 5 ? '${d.substring(0, 5)} ${d.substring(5)}' : d;
+}
+
+/// Test mode: the generated code, with a copy button (the backend does not send SMS).
+class _DemoOtpCard extends StatelessWidget {
+  const _DemoOtpCard({required this.code});
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      key: const Key('otp_demo_card'),
+      padding: const EdgeInsets.all(AppSpacing.s12),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        border: Border.all(color: AppColors.hairline),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            margin: const EdgeInsets.only(right: AppSpacing.s12),
+            decoration: BoxDecoration(
+              color: AppColors.tealMist,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: const Icon(Icons.mail_outline, color: AppColors.teal),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.demoOtpLabel, style: AppText.body),
+                Text(
+                  code,
+                  key: const Key('otp_demo_code'),
+                  style: AppText.title.copyWith(letterSpacing: 4),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            key: const Key('otp_demo_copy_btn'),
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final copied = l10n.demoOtpCopied;
+              await Clipboard.setData(ClipboardData(text: code));
+              messenger
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(copied)));
+            },
+            icon: const Icon(Icons.copy_rounded, size: 18),
+            label: Text(l10n.demoOtpCopy),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _VerifyButton extends StatelessWidget {
@@ -288,6 +370,7 @@ class _VerifyButton extends StatelessWidget {
       label: l10n.verifyContinue,
       loadingLabel: l10n.verifying,
       isLoading: loading,
+      icon: Icons.arrow_forward,
       onPressed: onPressed,
     );
   }

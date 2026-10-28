@@ -1,15 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
+import 'package:sevanest_customer/features/addresses/data/address_repository_demo.dart';
 import 'package:sevanest_customer/features/addresses/data/address_repository_remote.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
+import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/shared/utils/submit_state.dart';
 
 /// Hyderabad is the launch market (AGENTS header); the form pre-fills it, the user can change it.
 const defaultCity = 'Hyderabad';
 
+/// Kept on the device while the demo login is active (dev flavor); otherwise the backend.
 final addressRepositoryProvider = Provider<AddressRepository>(
-  (ref) => AddressRepositoryRemote(ref.watch(dioProvider)),
+  (ref) => ref.watch(demoLoginProvider)
+      ? AddressRepositoryDemo()
+      : AddressRepositoryRemote(ref.watch(dioProvider)),
 );
 
 /// `GET /customers/me/addresses`. Auto-disposed so addresses never outlive the session.
@@ -69,13 +75,19 @@ class AddressFormController extends Notifier<SubmitState> {
 
   AddressRepository get _repo => ref.read(addressRepositoryProvider);
 
+  /// Set when the address saved but its photo did not; the form tells the customer.
+  AppFailure? photoFailure;
+
   /// [id] null = create. For an edit, [makeDefault] triggers `PUT .../default` after the `PATCH`.
   Future<Address?> save({
     required AddressInput input,
     String? id,
     bool makeDefault = false,
+    PickedPhoto? photo,
+    bool removePhoto = false,
   }) async {
     if (state.busy) return null;
+    photoFailure = null;
     state = const SubmitState(busy: true);
     try {
       final Address saved;
@@ -84,6 +96,16 @@ class AddressFormController extends Notifier<SubmitState> {
       } else {
         saved = await _repo.update(id, input);
         if (makeDefault) await _repo.setDefault(id);
+      }
+      // The address is saved either way; a photo problem is reported, not fatal.
+      try {
+        if (photo != null) {
+          await _repo.uploadPhoto(saved.id, photo);
+        } else if (removePhoto) {
+          await _repo.removePhoto(saved.id);
+        }
+      } on AppFailure catch (f) {
+        photoFailure = f;
       }
       ref.invalidate(addressesProvider);
       state = const SubmitState();

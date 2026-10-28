@@ -14,6 +14,8 @@ import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart';
+import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/utils/validators.dart';
 
@@ -87,9 +89,22 @@ class AddressFormScreen extends ConsumerWidget {
 Future<Address?> showAddAddressSheet(
   BuildContext context, {
   AddressInput? prefill,
+}) => _showAddressSheet<Address>(context, prefill: prefill);
+
+/// The same sheet for profile setup, where the profile does not exist yet: nothing is saved, the
+/// typed address comes back as an [AddressInput] for the caller to save once the profile exists.
+Future<AddressInput?> showCollectAddressSheet(
+  BuildContext context, {
+  AddressInput? initial,
+}) => _showAddressSheet<AddressInput>(context, prefill: initial, collect: true);
+
+Future<T?> _showAddressSheet<T>(
+  BuildContext context, {
+  AddressInput? prefill,
+  bool collect = false,
 }) {
   final l10n = AppLocalizations.of(context);
-  return showModalBottomSheet<Address>(
+  return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -116,6 +131,7 @@ Future<Address?> showAddAddressSheet(
                 firstTime: false,
                 prefill: prefill,
                 inSheet: true,
+                collect: collect,
               ),
             ),
           ],
@@ -131,8 +147,12 @@ class _AddressForm extends ConsumerStatefulWidget {
     this.initial,
     this.prefill,
     this.inSheet = false,
+    this.collect = false,
   });
   final bool inSheet;
+
+  /// Profile setup: return the typed [AddressInput] instead of saving it.
+  final bool collect;
   final AddressInput? prefill;
   final Address? initial;
   final bool firstTime;
@@ -143,8 +163,16 @@ class _AddressForm extends ConsumerStatefulWidget {
 
 class _AddressFormState extends ConsumerState<_AddressForm> {
   late final _label = TextEditingController(text: widget.initial?.label ?? '');
-  late final _house = TextEditingController(text: _parts(widget.initial).$1);
-  late final _street = TextEditingController(text: _parts(widget.initial).$2);
+  late final _house = TextEditingController(
+    text: widget.initial == null
+        ? (widget.prefill?.line ?? '')
+        : _parts(widget.initial).$1,
+  );
+  late final _street = TextEditingController(
+    text: widget.initial == null
+        ? (widget.prefill?.line2 ?? '')
+        : _parts(widget.initial).$2,
+  );
   late final _area = TextEditingController(
     text: widget.initial?.area ?? widget.prefill?.area ?? '',
   );
@@ -154,12 +182,16 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   late final _pincode = TextEditingController(
     text: widget.initial?.pincode ?? widget.prefill?.pincode ?? '',
   );
-  late bool _default = widget.initial?.isDefault ?? false;
+  late bool _default = widget.initial?.isDefault ?? widget.collect;
   late double? _lat = widget.prefill?.latitude;
   late double? _lng = widget.prefill?.longitude;
   bool _locating = false;
   bool _locationOff = false;
   bool _defaultTouched = false;
+
+  /// A photo chosen in this session (uploaded on save) / the saved one removed by the customer.
+  PickedPhoto? _photo;
+  bool _photoRemoved = false;
 
   Address? get _initial => widget.initial;
   bool get _isEdit => _initial != null;
@@ -180,7 +212,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   void initState() {
     super.initState();
     // First address ever: pre-select "default" (user can still switch it off).
-    if (!_isEdit) {
+    if (!_isEdit && !widget.collect) {
       ref.read(addressesProvider.future).then((list) {
         if (mounted && list.isEmpty && !_defaultTouched) {
           setState(() => _default = true);
@@ -208,7 +240,8 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
             _pincode,
           ].any((c) => c.text.isNotEmpty) ||
           _city.text != defaultCity ||
-          _defaultTouched;
+          _defaultTouched ||
+          _photo != null;
     }
     final (house, street) = _parts(a);
     return _house.text.trim() != house ||
@@ -217,7 +250,9 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
         _area.text.trim() != a.area ||
         _city.text.trim() != a.city ||
         _pincode.text.trim() != a.pincode ||
-        _default != a.isDefault;
+        _default != a.isDefault ||
+        _photo != null ||
+        _photoRemoved;
   }
 
   bool get _valid =>
@@ -283,13 +318,32 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
 
   Future<void> _save() async {
     if (!_valid) return;
+    if (widget.collect) {
+      Navigator.of(context).pop(
+        AddressInput(
+          line: _house.text.trim(),
+          line2: _street.text.trim(),
+          label: _label.text,
+          area: _area.text,
+          city: _city.text,
+          pincode: _pincode.text,
+          isDefault: true,
+          latitude: _lat,
+          longitude: _lng,
+        ),
+      );
+      return;
+    }
     final messenger = ScaffoldMessenger.of(context);
     final savedText = AppLocalizations.of(context).addressSaved;
+    final photoFailedText = AppLocalizations.of(context).homePhotoUploadFailed;
     final saved = await ref
         .read(addressFormProvider.notifier)
         .save(
           id: _initial?.id,
           makeDefault: _isEdit && _default && !_initial!.isDefault,
+          photo: _photo,
+          removePhoto: _photoRemoved && _photo == null,
           input: AddressInput(
             line: _house.text.trim(),
             line2: _street.text.trim(),
@@ -304,9 +358,13 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
           ),
         );
     if (saved == null || !mounted) return;
+    final photoFailed =
+        ref.read(addressFormProvider.notifier).photoFailure != null;
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(savedText)));
+      ..showSnackBar(
+        SnackBar(content: Text(photoFailed ? photoFailedText : savedText)),
+      );
     if (widget.inSheet) {
       Navigator.of(context).pop(saved);
     } else if (widget.firstTime) {
@@ -525,6 +583,22 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                     onChanged: (_) => setState(() {}),
                   ),
                   const SizedBox(height: AppSpacing.md),
+                  if (!widget.collect) ...[
+                    HomePhotoField(
+                      photo: _photo,
+                      url: _photoRemoved ? null : _initial?.photoUrl,
+                      enabled: !form.busy,
+                      onPicked: (p) => setState(() {
+                        _photo = p;
+                        _photoRemoved = false;
+                      }),
+                      onRemoved: () => setState(() {
+                        _photo = null;
+                        _photoRemoved = true;
+                      }),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
                   SwitchListTile(
                     key: const Key('address_default_switch'),
                     contentPadding: EdgeInsets.zero,

@@ -10,6 +10,7 @@ import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/widgets/language_chips.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/widgets/profile_photo_avatar.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/utils/validators.dart';
 
@@ -163,6 +164,13 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
+          Center(
+            child: ProfilePhotoAvatar(
+              radius: 48,
+              initials: profileInitials(p.name),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           LabeledField(
             name: 'profile_name_field',
             label: l10n.fullNameLabel,

@@ -5,9 +5,13 @@ class OtpChallenge {
   const OtpChallenge({
     this.expiresInSeconds = 300,
     this.resendAfterSeconds = 30,
+    this.otp,
   });
   final int expiresInSeconds;
   final int resendAfterSeconds;
+
+  /// Only the dev-flavor local repository sets this (shown on screen); the real backend never does.
+  final String? otp;
 }
 
 abstract interface class AuthRepository {

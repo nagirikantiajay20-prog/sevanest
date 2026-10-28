@@ -1,3 +1,5 @@
+import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
+
 /// Saved address (OpenAPI `CreateAddressDto`). [label], [line2] and [state] are optional.
 class Address {
   const Address({
@@ -12,6 +14,7 @@ class Address {
     this.latitude,
     this.longitude,
     this.isDefault = false,
+    this.photoUrl,
   });
 
   final String id;
@@ -31,6 +34,9 @@ class Address {
   final double? latitude;
   final double? longitude;
   final bool isDefault;
+
+  /// Short-lived link to the home photo, when one was uploaded.
+  final String? photoUrl;
 
   /// House and street on one line.
   String get fullLine =>
@@ -97,6 +103,13 @@ abstract interface class AddressRepository {
 
   /// `GET /service-areas?city=` (enabled areas).
   Future<List<ServiceArea>> serviceAreas({String? city});
+
+  /// Home photo of an address: `POST .../{id}/photo` (pre-signed `PUT` link), upload, then
+  /// `POST .../photo/{photoId}/confirm`. Assumed contract, mirrors `/customers/me/photo`.
+  Future<void> uploadPhoto(String id, PickedPhoto photo);
+
+  /// `DELETE /customers/me/addresses/{id}/photo`.
+  Future<void> removePhoto(String id);
 
   /// `GET /locations/service-area`: the enabled area for a device position and / or a geocoded
   /// name. Null when none matches (the customer picks the area).

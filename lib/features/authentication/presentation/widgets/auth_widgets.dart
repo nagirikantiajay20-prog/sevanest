@@ -331,3 +331,60 @@ String mmss(int seconds) {
   final s = (seconds % 60).toString().padLeft(2, '0');
   return '$m:$s';
 }
+
+/// Fills the leftover height under the auth forms with a quiet row of home-service icons that
+/// rise in one after another (runs once, so idle tests settle). Scales down instead of
+/// overflowing when the keyboard takes the space.
+class ServiceMotif extends StatelessWidget {
+  const ServiceMotif({super.key});
+
+  static const _icons = [
+    Icons.cleaning_services_outlined,
+    Icons.restaurant_outlined,
+    Icons.child_care_outlined,
+    Icons.directions_car_outlined,
+    Icons.elderly_outlined,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (var i = 0; i < _icons.length; i++)
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: 1),
+                    duration: Duration(milliseconds: 500 + 120 * i),
+                    curve: Curves.easeOutBack,
+                    builder: (context, v, child) => Opacity(
+                      opacity: v.clamp(0, 1),
+                      child: Transform.translate(
+                        offset: Offset(0, 14 * (1 - v)),
+                        child: child,
+                      ),
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        color: AppColors.tileWell,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(_icons[i], color: AppColors.teal, size: 26),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

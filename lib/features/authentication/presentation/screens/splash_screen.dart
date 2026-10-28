@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
+import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
+import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_card.dart';
 import 'package:sevanest_customer/core/widgets/sn_photo.dart';
@@ -13,6 +15,7 @@ import 'package:sevanest_customer/features/authentication/presentation/providers
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Shown as "slow" after this long (design: "Still loading. Your connection seems slow.").
 const splashSlowAfter = Duration(seconds: 4);
@@ -20,7 +23,17 @@ const splashSlowAfter = Duration(seconds: 4);
 /// Give up and offer retry after this long (modules/01_authentication.md: >8 s).
 const splashTimeout = Duration(seconds: 8);
 
-enum _Splash { loading, slow, failed }
+/// Minimum time the branded splash stays up, so it never flashes past on a fast start.
+const splashMinHold = Duration(milliseconds: 1800);
+
+/// Overridden to [Duration.zero] in tests.
+final splashHoldProvider = Provider<Duration>((_) => splashMinHold);
+
+/// Whether the customer / worker choice is shown after the splash. Tests that only need to get
+/// past the splash override it to false, which proceeds as a customer straight away.
+final splashChoiceProvider = Provider<bool>((_) => true);
+
+enum _Splash { loading, slow, choose, failed }
 
 /// Restores the stored session, validates it with `GET /customers/me`, then lets the router
 /// redirect (login / profile setup / home). Never leaves the user on a blank screen.
@@ -35,6 +48,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   _Splash _state = _Splash.loading;
   Timer? _slowTimer;
   bool _running = false;
+
+  /// What "Proceed with Customer App" does once the session check is done (restore or sign out).
+  Future<void> Function()? _enter;
+  bool _entering = false;
 
   @override
   void initState() {
@@ -58,20 +75,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         setState(() => _state = _Splash.slow);
       }
     });
+    // The router leaves the splash as soon as authProvider resolves, so resolve it last:
+    // check the session and profile first, hold the branded screen, then navigate once.
+    final hold = Future<void>.delayed(ref.read(splashHoldProvider));
     try {
-      final auth = ref.read(authProvider.notifier);
-      await auth.restore();
-      if (!mounted || ref.read(authProvider) != AuthStatus.authenticated) {
-        return;
+      if (await ref.read(sessionStoreProvider).read() != null) {
+        final complete = await ref
+            .read(authRepositoryProvider)
+            .profileComplete()
+            .timeout(splashTimeout);
+        if (!mounted) return;
+        ref.read(profileCompleteProvider.notifier).set(complete);
       }
-      final complete = await ref
-          .read(authRepositoryProvider)
-          .profileComplete()
-          .timeout(splashTimeout);
-      if (!mounted) return;
-      ref.read(profileCompleteProvider.notifier).set(complete);
+      await hold;
+      _offerChoice(ref.read(authProvider.notifier).restore);
     } on UnauthorizedFailure {
-      if (mounted) await ref.read(authProvider.notifier).signOut();
+      await hold;
+      _offerChoice(ref.read(authProvider.notifier).signOut);
     } on Object {
       // Network, timeout, 5xx...: keep the session, let the user retry or sign in again.
       if (mounted) setState(() => _state = _Splash.failed);
@@ -79,6 +99,48 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       _slowTimer?.cancel();
       _running = false;
     }
+  }
+
+  void _offerChoice(Future<void> Function() enter) {
+    if (!mounted) return;
+    _enter = enter;
+    if (!ref.read(splashChoiceProvider)) {
+      unawaited(_proceedCustomer());
+      return;
+    }
+    setState(() => _state = _Splash.choose);
+  }
+
+  Future<void> _proceedCustomer() async {
+    if (_entering) return;
+    _entering = true;
+    try {
+      await _enter?.call();
+    } finally {
+      _entering = false;
+    }
+  }
+
+  /// The worker app is a separate application: open its configured link, never a made-up one.
+  Future<void> _openWorkerApp() async {
+    final url = ref.read(appConfigProvider).workerAppUrl;
+    final uri = url.isEmpty ? null : Uri.tryParse(url);
+    var opened = false;
+    if (uri != null) {
+      try {
+        opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } on Object {
+        // falls through to the message below
+      }
+    }
+    if (opened || !mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).workerAppUnavailable),
+        ),
+      );
   }
 
   Future<void> _signInAgain() => ref.read(authProvider.notifier).signOut();
@@ -126,13 +188,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                           const SizedBox(height: AppSpacing.xl),
                           const _Brand(),
                           const SizedBox(height: AppSpacing.lg),
-                          Text(
-                            l10n.splashTagline,
-                            textAlign: TextAlign.center,
-                            style: AppText.display,
+                          _Reveal(
+                            delay: 350,
+                            child: Text(
+                              l10n.splashTagline,
+                              textAlign: TextAlign.center,
+                              style: AppText.display,
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.lg),
-                          const _TrustRow(),
+                          const _Reveal(delay: 650, child: _TrustRow()),
                           const Spacer(),
                           if (failed) ...[
                             _FailedCard(
@@ -145,7 +210,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                               icon: Icons.headset_mic_outlined,
                               onTap: () => openSupport(context, ref),
                             ),
-                          ] else
+                          ] else if (_state == _Splash.choose)
+                            _EntryButtons(
+                              onCustomer: _proceedCustomer,
+                              onWorker: _openWorkerApp,
+                            )
+                          else
                             _Progress(slow: _state == _Splash.slow),
                           const SizedBox(height: AppSpacing.md),
                           if (version != null)
@@ -170,6 +240,88 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 }
 
+/// Fade + rise-in, started [delay] ms after the screen appears.
+class _Reveal extends StatelessWidget {
+  const _Reveal({required this.delay, required this.child});
+  final int delay;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    const total = 700;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: total + delay),
+      curve: Interval(delay / (total + delay), 1, curve: Curves.easeOutCubic),
+      builder: (context, v, c) => Opacity(
+        opacity: v,
+        child: Transform.translate(offset: Offset(0, 16 * (1 - v)), child: c),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Soft teal glow that breathes behind the logo.
+class _Halo extends StatefulWidget {
+  const _Halo({required this.child});
+  final Widget child;
+
+  @override
+  State<_Halo> createState() => _HaloState();
+}
+
+class _HaloState extends State<_Halo> with SingleTickerProviderStateMixin {
+  late final _c =
+      AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 2200),
+      )..repeat(
+        reverse: true,
+        count: 4,
+      ); // settles, so idle tests and the failed card are not animating forever
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _c,
+    builder: (context, child) => DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.teal.withValues(alpha: 0.10 + 0.12 * _c.value),
+            blurRadius: 40 + 24 * _c.value,
+            spreadRadius: 4 + 8 * _c.value,
+          ),
+        ],
+      ),
+      child: child,
+    ),
+    child: widget.child,
+  );
+}
+
+class _Caption extends StatelessWidget {
+  const _Caption();
+
+  @override
+  Widget build(BuildContext context) => Text(
+    AppLocalizations.of(context).brandCaption,
+    style: AppText.body.copyWith(
+      fontSize: 12,
+      letterSpacing: 2,
+      fontWeight: FontWeight.w600,
+      color: AppColors.slate600,
+    ),
+  );
+}
+
 class _Brand extends StatelessWidget {
   const _Brand();
 
@@ -179,32 +331,83 @@ class _Brand extends StatelessWidget {
     return Semantics(
       label: l10n.appName,
       child: ExcludeSemantics(
-        child: Column(
-          children: [
-            Image.asset('assets/branding/logo_mark.png', height: 120),
-            const SizedBox(height: AppSpacing.sm),
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Seva',
-                    style: TextStyle(color: AppColors.brandInk),
-                  ),
-                  TextSpan(
-                    text: 'Nest',
-                    style: TextStyle(color: AppColors.teal),
-                  ),
-                ],
-                style: TextStyle(
-                  fontFamily: AppFonts.heading,
-                  fontSize: 36,
-                  height: 1.1,
-                  fontWeight: FontWeight.w700,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeOutCubic,
+          builder: (context, v, child) => Opacity(
+            opacity: v,
+            child: Transform.scale(scale: 0.88 + 0.12 * v, child: child),
+          ),
+          child: const Column(
+            children: [
+              _Halo(
+                child: Image(
+                  image: AssetImage('assets/branding/logo_mark.png'),
+                  height: 120,
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: AppSpacing.sm),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Seva',
+                      style: TextStyle(color: AppColors.brandInk),
+                    ),
+                    TextSpan(
+                      text: 'Nest',
+                      style: TextStyle(color: AppColors.teal),
+                    ),
+                  ],
+                  style: TextStyle(
+                    fontFamily: AppFonts.heading,
+                    fontSize: 36,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSpacing.xs),
+              _Caption(),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// Two equal, side-by-side entry points once the session check is done.
+class _EntryButtons extends StatelessWidget {
+  const _EntryButtons({required this.onCustomer, required this.onWorker});
+  final VoidCallback onCustomer;
+  final VoidCallback onWorker;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: SnButton(
+              key: const Key('splash_customer_btn'),
+              label: l10n.proceedCustomerApp,
+              onPressed: onCustomer,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.s12),
+          Expanded(
+            child: SnButton(
+              key: const Key('splash_worker_btn'),
+              label: l10n.moveToWorkerApp,
+              variant: SnButtonVariant.secondary,
+              onPressed: onWorker,
+            ),
+          ),
+        ],
       ),
     );
   }

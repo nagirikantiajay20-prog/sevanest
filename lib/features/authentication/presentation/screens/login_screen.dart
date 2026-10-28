@@ -117,15 +117,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref.read(otpControllerProvider.notifier).requestOtp(_digits);
   }
 
-  Future<void> _chooseLanguage() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (_) => const _LanguageSheet(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -159,16 +150,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         child: Stack(
           children: [
-            const Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              height: 380,
-              child: SnPhotoBackdrop(
-                asset: AppPhotos.room,
-                alignment: Alignment.topCenter,
-              ),
-            ),
             SafeArea(
               bottom: false,
               child: CustomScrollView(
@@ -177,72 +158,88 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     hasScrollBody: false,
                     child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg,
-                            AppSpacing.md,
-                            AppSpacing.lg,
-                            0,
-                          ),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/branding/logo_mark.png',
-                                height: 44,
-                                excludeFromSemantics: true,
-                              ),
-                              const SizedBox(width: AppSpacing.s12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.appName,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppText.screenTitle,
-                                    ),
-                                    Text(
-                                      l10n.brandCaption,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppText.body.copyWith(
-                                        fontSize: 10,
-                                        letterSpacing: 1.2,
-                                        color: AppColors.slate400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              _LanguageChip(onTap: _chooseLanguage),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Positioned.fill(
+                              // Extends under the sheet's rounded corners (design 02).
+                              bottom: -32,
+                              child: _HeroPhoto(),
+                            ),
+                            Column(
                               children: [
-                                Semantics(
-                                  header: true,
-                                  child: Text(
-                                    l10n.loginHeadline,
-                                    style: AppText.display.copyWith(
-                                      fontSize: 32,
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    AppSpacing.lg,
+                                    AppSpacing.md,
+                                    AppSpacing.lg,
+                                    0,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Image.asset(
+                                        'assets/branding/logo_mark.png',
+                                        height: 48,
+                                        excludeFromSemantics: true,
+                                      ),
+                                      const SizedBox(width: AppSpacing.s12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              l10n.appName,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: AppText.screenTitle,
+                                            ),
+                                            Text(
+                                              l10n.brandCaption,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: AppText.body.copyWith(
+                                                fontSize: 12,
+                                                letterSpacing: 1.4,
+                                                fontWeight: FontWeight.w600,
+                                                color: AppColors.slate700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(AppSpacing.lg),
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Semantics(
+                                          header: true,
+                                          child: Text(
+                                            l10n.loginHeadline,
+                                            style: AppText.display.copyWith(
+                                              fontSize: 32,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.s12),
+                                        Text(
+                                          l10n.loginSubhead,
+                                          style: AppText.bodyLarge,
+                                        ),
+                                        const SizedBox(height: AppSpacing.md),
+                                        const _HeroTrust(),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: AppSpacing.s12),
-                                Text(
-                                  l10n.loginSubhead,
-                                  style: AppText.bodyLarge,
-                                ),
-                                const SizedBox(height: AppSpacing.md),
-                                const _HeroTrust(),
                               ],
                             ),
-                          ),
+                          ],
                         ),
                         Expanded(
                           child: AuthSheet(
@@ -287,10 +284,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   onPressed: ready ? _submit : null,
                                 ),
                                 const SizedBox(height: AppSpacing.md),
-                                const _PrivacyNote(),
-                                const SizedBox(height: AppSpacing.md),
                                 _LegalText(terms: _terms, privacy: _privacy),
-                                const SizedBox(height: AppSpacing.md),
+                                const Expanded(child: ServiceMotif()),
                               ],
                             ),
                           ),
@@ -336,7 +331,7 @@ class _MobileField extends StatelessWidget {
       fontWeight: FontWeight.w500,
     );
     return Container(
-      height: 56,
+      height: 48,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -518,30 +513,33 @@ class _HeroTrust extends StatelessWidget {
   }
 }
 
-class _PrivacyNote extends StatelessWidget {
-  const _PrivacyNote();
+/// Room photo behind the header and headline: cover-fit to the width, centred, washed from the
+/// left so the text stays readable and the sofa shows on the right (design 02). Decorative.
+class _HeroPhoto extends StatelessWidget {
+  const _HeroPhoto();
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s12),
-      decoration: BoxDecoration(
-        color: AppColors.tealMist,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.tileLine),
-      ),
-      child: Row(
+    return ExcludeSemantics(
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          const Icon(Icons.lock_outline, color: AppColors.teal, size: 22),
-          const SizedBox(width: AppSpacing.s12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.privateTitle, style: AppText.card),
-                Text(l10n.privateBody, style: AppText.body),
-              ],
+          Image.asset(
+            AppPhotos.room,
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.ivory.withValues(alpha: 0.97),
+                  AppColors.ivory.withValues(alpha: 0.9),
+                  AppColors.ivory.withValues(alpha: 0.25),
+                ],
+                stops: const [0, 0.6, 1],
+              ),
             ),
           ),
         ],
@@ -593,114 +591,6 @@ class _LegalText extends StatelessWidget {
       ),
       key: const Key('login_legal_text'),
       textAlign: TextAlign.center,
-    );
-  }
-}
-
-class _LanguageChip extends StatelessWidget {
-  const _LanguageChip({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: AppLocalizations.of(context).languageButtonLabel,
-      child: InkWell(
-        key: const Key('login_language_btn'),
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: kMinTapTarget),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-            border: Border.all(color: AppColors.hairline),
-            boxShadow: AppShadows.card,
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.language_rounded, color: AppColors.brandInk, size: 20),
-              SizedBox(width: AppSpacing.xs),
-              Text('EN', style: AppText.card),
-              Icon(Icons.expand_more_rounded, color: AppColors.brandInk),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// V1 ships English only (OPEN_QUESTIONS #16; `GET /app-config` lists `languages: ["en"]`).
-/// The design's other languages are shown but not selectable until translations exist.
-class _LanguageSheet extends StatelessWidget {
-  const _LanguageSheet();
-
-  static const _languages = [
-    ('English', 'English', true),
-    ('हिन्दी', 'Hindi', false),
-    ('తెలుగు', 'Telugu', false),
-    ('தமிழ்', 'Tamil', false),
-    ('ಕನ್ನಡ', 'Kannada', false),
-    ('मराठी', 'Marathi', false),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.sm,
-          AppSpacing.lg,
-          AppSpacing.md,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(child: SnGrabber()),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(l10n.chooseLanguage, style: AppText.screenTitle),
-                ),
-                IconButton(
-                  key: const Key('language_close_btn'),
-                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
-            Text(l10n.chooseLanguageHint, style: AppText.bodyLarge),
-            const SizedBox(height: AppSpacing.sm),
-            for (final (native, english, enabled) in _languages)
-              ListTile(
-                key: Key('language_$english'),
-                contentPadding: EdgeInsets.zero,
-                enabled: enabled,
-                onTap: enabled ? () => Navigator.of(context).pop() : null,
-                title: Text(
-                  native,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(english),
-                trailing: Icon(
-                  enabled
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  color: enabled ? AppColors.teal : AppColors.slate,
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

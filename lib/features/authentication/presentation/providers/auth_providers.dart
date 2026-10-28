@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/session_reset_host.dart';
 import 'package:sevanest_customer/core/analytics/telemetry.dart';
+import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/storage/device_id_store.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
+import 'package:sevanest_customer/features/authentication/data/auth_repository_demo.dart';
 import 'package:sevanest_customer/features/authentication/data/auth_repository_remote.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
@@ -21,11 +23,20 @@ const lockFallbackSeconds = 300;
 /// How long the "Verified" state stays visible before the router moves on.
 const verifiedHold = Duration(milliseconds: 700);
 
+/// Dev flavor (mocks on): local on-screen OTP. stg / prod: the deployed backend.
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepositoryRemote(
-    ref.watch(dioProvider),
-    ref.watch(deviceIdStoreProvider),
-  ),
+  (ref) => ref.watch(appConfigProvider).useMocks
+      ? AuthRepositoryDemo()
+      : AuthRepositoryRemote(
+          ref.watch(dioProvider),
+          ref.watch(deviceIdStoreProvider),
+        ),
+);
+
+/// True while the local demo login is in use (dev flavor): profile and addresses are then kept on
+/// the device too, because the backend would answer 401 to the placeholder token.
+final demoLoginProvider = Provider<bool>(
+  (ref) => ref.watch(authRepositoryProvider) is AuthRepositoryDemo,
 );
 
 /// Drops the device push token (best effort, while the session is still valid), then
@@ -65,6 +76,7 @@ class OtpState {
     this.mobile = '',
     this.secondsLeft = 0,
     this.expiresInSeconds = 300,
+    this.demoOtp,
     this.failure,
   });
 
@@ -78,6 +90,9 @@ class OtpState {
 
   /// OTP validity from the server, for the footer copy.
   final int expiresInSeconds;
+
+  /// Dev flavor only: the generated code to show on screen.
+  final String? demoOtp;
 
   /// Set for request failures and non-OTP verify failures; cleared on every other transition.
   final AppFailure? failure;
@@ -95,12 +110,14 @@ class OtpState {
     String? mobile,
     int? secondsLeft,
     int? expiresInSeconds,
+    String? demoOtp,
     AppFailure? failure,
   }) => OtpState(
     phase: phase ?? this.phase,
     mobile: mobile ?? this.mobile,
     secondsLeft: secondsLeft ?? this.secondsLeft,
     expiresInSeconds: expiresInSeconds ?? this.expiresInSeconds,
+    demoOtp: demoOtp ?? this.demoOtp,
     failure: failure,
   );
 }
@@ -136,6 +153,7 @@ class OtpController extends Notifier<OtpState> {
       state = state.copyWith(
         phase: OtpPhase.sent,
         expiresInSeconds: c.expiresInSeconds,
+        demoOtp: c.otp,
       );
       _startCountdown(c.resendAfterSeconds);
     } on RateLimitedFailure catch (f) {
