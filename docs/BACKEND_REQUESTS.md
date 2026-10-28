@@ -406,3 +406,24 @@ Numbers match our message.
 - **Bookings search**, **budget guidance** ("typical for a part-time cook"): not served.
 - **Worker detail**: worker display name, distance, About text, price/month, jobs done, repeat-customer %, per-check verification list, and `canRequestInterview` / `verification: PENDING` on `GET /search/workers/{id}` are not served (UI reads them when present, else hides). Customer photo endpoint, worker total count / price / distance on search, address serviceability flag, `BookingQuote` endpoint and `/workers/{id}/reviews` also still needed.
 - **BookingQuote**: `POST /bookings/quote` (fee, taxes, total, expiry) is not served. The Confirm booking screen uses `bookingQuote()` in `lib/features/booking/domain/booking_quote.dart`, a marked mock (fee Rs 500, 18% tax) unless `GET /fees/booking` returns a fee. Replace that one function when the endpoint exists.
+
+## Backend reply 2026-10-26: worker names, Home, Shortlist (built in the app)
+
+- **Names (D-91, Q-130):** cards (search, detail, shortlist, Home) carry `name` ("Lakshmi D."), `initials`, `verified`. The app shows `name` as the heading and the category as a chip; with no name it falls back to the category. Needs client sign-off (Q-130).
+- **Bookings / Home:** `worker.name` and a real `worker.verified` are read; the Home booking badge shows only when `verified` is true. `upcomingInterview.worker` supplies the interview name.
+- **Home ETag:** the app sends `If-None-Match` with the last validator and reuses its in-memory body on 304 (`HomeRepositoryRemote`).
+- **Not used:** `activeBookingsTotal` (Home already has "View all" -> Bookings), pricing (blocked, Q-39/Q-131: the price line stays hidden), `/customers/me/activity` (not added).
+
+## Engagement + categories 2026-10-26 (client "Initial Service Categories" table)
+
+- **Engagement types:** the app now carries all seven from the OpenAPI enum (`FULL_TIME PART_TIME LIVE_IN DAILY HOURLY SHIFT ONE_TIME`). `/service-categories` `allowedEngagements` drives step 2; empty = every type.
+- **Monthly:** the client table lists "Monthly" (Driver, Cook) but the backend has no MONTHLY engagement, only a `MONTH` budget period. The app does not offer it. Question for the client/backend: is Monthly a separate engagement, or part-time/full-time billed monthly?
+- **ONE_TIME budget:** the app prices ONE_TIME jobs per hour (hourly timing, no start-date step). `/reference-data` lists a `ONE_TIME` budget period; the app has only hourly/monthly, so a real one-time amount needs a design.
+- **Seed codes:** the mock catalogue uses ids `maid driver cook babysitter elderly cleaner`; the live ones are backend codes (`HOUSE_MAID`...).
+
+- **Resolved 2026-11-13:** backend added `MONTHLY` and filled `allowedEngagements` per category; the app now offers Monthly (Driver, Cook). Open on backend: several engagements per worker (Q-132).
+
+## Address home photo (2026-10-27)
+
+- The deployed OpenAPI has no address photo: `AddressResponse` has no photo field and the only photo routes are `/workers/me/photo`. The app is built on an **assumed** contract that mirrors `/customers/me/photo`: `POST /customers/me/addresses/{id}/photo {contentType,sizeBytes}` -> `{photoId,url,method}`, `PUT` bytes to `url`, `POST .../photo/{photoId}/confirm`, `DELETE .../photo`, and a short-lived `photoUrl` on `AddressResponse`. Until the backend ships these, saving a photo returns an error and the app says the address saved but the photo did not; nothing is stored locally.
+- Limits enforced client-side: JPEG or PNG, 5 MB.

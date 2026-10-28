@@ -51,3 +51,4 @@ android/key.properties
 *.keystore
 build/symbols/
 .env*
+splash_redesign_standalone/
