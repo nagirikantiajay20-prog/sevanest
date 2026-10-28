@@ -1,18 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
-import 'package:sevanest_customer/features/favourites/data/favourites_repository_mock.dart';
 import 'package:sevanest_customer/features/favourites/data/favourites_repository_remote.dart';
 import 'package:sevanest_customer/features/favourites/domain/favourites.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
 
-/// Live backend in stg / prod (and in dev when switched on); in-memory mock otherwise.
-final favouritesRepositoryProvider = Provider<FavouritesRepository>((ref) {
-  final live = ref.watch(mockApiProvider.select((s) => s.live));
-  return live
-      ? FavouritesRepositoryRemote(ref.watch(dioProvider))
-      : FavouritesRepositoryMock(() => ref.read(mockApiProvider));
-});
+/// The customer's own shortlist from the backend (tests override with a fake).
+final favouritesRepositoryProvider = Provider<FavouritesRepository>(
+  (ref) => FavouritesRepositoryRemote(ref.watch(dioProvider)),
+);
 
 /// Which workers are shortlisted, plus the ones with a request in flight.
 class FavouriteState {

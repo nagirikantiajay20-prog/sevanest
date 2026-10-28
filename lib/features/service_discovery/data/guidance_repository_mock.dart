@@ -7,7 +7,9 @@ const _base = {
   'cook': (6000, 10000, 100, 200),
   'maid': (4000, 7000, 80, 150),
   'driver': (7000, 11000, 150, 300),
-  'nanny': (8000, 13000, 150, 250),
+  'babysitter': (8000, 13000, 150, 250),
+  'elderly': (9000, 14000, 150, 300),
+  'cleaner': (3000, 6000, 80, 150),
 };
 
 class GuidanceRepositoryMock implements GuidanceRepository {
@@ -19,11 +21,12 @@ class GuidanceRepositoryMock implements GuidanceRepository {
   @override
   Future<Guidance> guidance(GuidanceQuery q) => mockCall(_state(), () {
     final b = _base[q.serviceId] ?? _base['cook']!;
-    final hourly = q.engagement == EngagementType.hourly;
+    final hourly = budgetPeriodFor(q.engagement) == BudgetPeriod.hourly;
     final scale = switch (q.engagement) {
       EngagementType.fullTime => 1.7,
       EngagementType.daily => 1.1,
       EngagementType.liveIn => 1.9,
+      EngagementType.shift => 1.5,
       _ => 1.0,
     };
     return hourly

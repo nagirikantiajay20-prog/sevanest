@@ -2,8 +2,11 @@ import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart
 
 enum BudgetPeriod { monthly, hourly }
 
+// ponytail: one-time jobs are priced per hour; the backend's ONE_TIME period needs its own design.
 BudgetPeriod budgetPeriodFor(EngagementType e) =>
-    e == EngagementType.hourly ? BudgetPeriod.hourly : BudgetPeriod.monthly;
+    e == EngagementType.hourly || e == EngagementType.oneTime
+    ? BudgetPeriod.hourly
+    : BudgetPeriod.monthly;
 
 /// Slider / "Any budget" ceiling in rupees ("₹40k+" monthly, "₹1k+" hourly).
 int budgetCeiling(BudgetPeriod p) => p == BudgetPeriod.hourly ? 1000 : 40000;

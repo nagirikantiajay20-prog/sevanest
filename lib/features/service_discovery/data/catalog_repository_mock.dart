@@ -2,15 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 
-const _all = [
-  EngagementOption(EngagementType.fullTime),
-  EngagementOption(EngagementType.partTime),
-  EngagementOption(EngagementType.daily),
-  EngagementOption(EngagementType.hourly),
-  EngagementOption(EngagementType.liveIn),
-];
-
-/// Seeded catalogue behind the mock-API toggle. Driver cannot be live-in (design 07).
+/// Seeded catalogue behind the mock-API toggle: the client's "Initial Service Categories" table.
+/// Monthly (Driver, Cook) is an engagement type since the backend added MONTHLY.
 class CatalogRepositoryMock implements CatalogRepository {
   CatalogRepositoryMock(this._state);
   final MockApiState Function() _state;
@@ -18,42 +11,67 @@ class CatalogRepositoryMock implements CatalogRepository {
   static const categories_ = [
     ServiceCategory(
       id: 'maid',
-      name: 'Maid',
-      description: 'Cleaning and chores',
+      name: 'House Maid',
+      description: 'Cleaning, utensils, basic household support',
       icon: Icons.cleaning_services_outlined,
       popular: true,
-      engagements: _all,
-    ),
-    ServiceCategory(
-      id: 'cook',
-      name: 'Cook',
-      description: 'Meals and everyday cooking',
-      icon: Icons.soup_kitchen_outlined,
-      popular: true,
-      engagements: _all,
+      engagements: [
+        EngagementOption(EngagementType.partTime),
+        EngagementOption(EngagementType.fullTime),
+        EngagementOption(EngagementType.liveIn),
+      ],
     ),
     ServiceCategory(
       id: 'driver',
       name: 'Driver',
-      description: 'Car, school runs, errands',
+      description: 'Personal or family driver, temporary driver',
       icon: Icons.directions_car_outlined,
       engagements: [
-        EngagementOption(EngagementType.fullTime),
-        EngagementOption(EngagementType.partTime),
-        EngagementOption(EngagementType.daily),
         EngagementOption(EngagementType.hourly),
-        EngagementOption(
-          EngagementType.liveIn,
-          unavailableReason: 'Not available for drivers',
-        ),
+        EngagementOption(EngagementType.daily),
+        EngagementOption(EngagementType.monthly),
       ],
     ),
     ServiceCategory(
-      id: 'nanny',
-      name: 'Nanny',
-      description: 'Childcare at home',
+      id: 'cook',
+      name: 'Cook',
+      description: 'Breakfast, lunch and dinner preparation',
+      icon: Icons.soup_kitchen_outlined,
+      popular: true,
+      engagements: [
+        EngagementOption(EngagementType.partTime),
+        EngagementOption(EngagementType.monthly),
+      ],
+    ),
+    ServiceCategory(
+      id: 'babysitter',
+      name: 'Babysitter',
+      description: 'Child supervision and basic care',
       icon: Icons.child_care_outlined,
-      engagements: _all,
+      engagements: [
+        EngagementOption(EngagementType.hourly),
+        EngagementOption(EngagementType.fullTime),
+      ],
+    ),
+    ServiceCategory(
+      id: 'elderly',
+      name: 'Elderly Care Helper',
+      description: 'Non-clinical assistance and companionship',
+      icon: Icons.volunteer_activism_outlined,
+      engagements: [
+        EngagementOption(EngagementType.shift),
+        EngagementOption(EngagementType.fullTime),
+      ],
+    ),
+    ServiceCategory(
+      id: 'cleaner',
+      name: 'Cleaning Helper',
+      description: 'Deep or basic cleaning assistance',
+      icon: Icons.auto_awesome_outlined,
+      engagements: [
+        EngagementOption(EngagementType.oneTime),
+        EngagementOption(EngagementType.hourly),
+      ],
     ),
   ];
 

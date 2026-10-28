@@ -116,6 +116,27 @@ class InterviewRepositoryRemote extends InterviewRepositoryOverBookings {
     ], page * pageSize < total ? '${page + 1}' : null);
   }
 
+  /// `GET /bookings/{id}/interviews` (oldest first, a bare list).
+  @override
+  Future<String?> interviewIdFor(
+    String bookingId, {
+    bool openOnly = false,
+  }) async {
+    final res = await guarded(
+      () => _dio.get<dynamic>(
+        '/bookings/${Uri.encodeComponent(bookingId)}/interviews',
+      ),
+    );
+    final all = [for (final m in listOf(res.data)) ?Interview.fromJson(m)];
+    bool open(Interview i) =>
+        i.status == InterviewStatus.requested ||
+        i.status == InterviewStatus.scheduled ||
+        i.status == InterviewStatus.rescheduleProposed;
+    final pick =
+        all.where(open).lastOrNull ?? (openOnly ? null : all.lastOrNull);
+    return pick?.id;
+  }
+
   @override
   Future<Interview> get(String id, {CancelToken? cancel}) async {
     final res = await guarded(

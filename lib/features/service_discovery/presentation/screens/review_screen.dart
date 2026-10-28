@@ -148,7 +148,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                         Text(
                           r.label.toUpperCase(),
                           style: AppText.body.copyWith(
-                            fontSize: 11,
+                            fontSize: 12,
                             letterSpacing: 0.8,
                             color: AppColors.slate400,
                           ),

@@ -11,10 +11,12 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
 
   static const pageSize = 20;
   static const _categoryNames = {
-    'maid': 'Maid',
+    'maid': 'House Maid',
     'cook': 'Cook',
     'driver': 'Driver',
-    'nanny': 'Nanny',
+    'babysitter': 'Babysitter',
+    'elderly': 'Elderly Care Helper',
+    'cleaner': 'Cleaning Helper',
   };
   static const _langs = [
     ['te', 'hi'],
@@ -23,11 +25,25 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
     ['ta', 'te', 'en'],
   ];
 
+  // Display names as the backend sends them: first name and last initial (D-91).
+  static const _names = [
+    ['Lakshmi', 'D'],
+    ['Ramesh', 'K'],
+    ['Meena', 'P'],
+    ['Sunita', 'R'],
+    ['Anita', 'S'],
+    ['Kavitha', 'M'],
+  ];
+
   /// 45 per category so a second and third page exist.
   static List<WorkerSummary> _seed(String category) => [
     for (var i = 0; i < 45; i++)
       WorkerSummary(
         id: '$category-${i + 1}',
+        name:
+            '${_names[i % _names.length][0]} ${_names[(i ~/ 2) % _names.length][1]}.',
+        initials:
+            '${_names[i % _names.length][0][0]}${_names[(i ~/ 2) % _names.length][1]}',
         experienceMonths: i % 7 == 0 ? null : 6 + i * 3,
         categories: [_categoryNames[category] ?? category],
         languages: _langs[i % _langs.length],

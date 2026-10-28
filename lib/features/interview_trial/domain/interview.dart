@@ -259,6 +259,12 @@ abstract interface class InterviewRepository {
   });
 
   Future<InterviewPage> list({String? cursor});
+
+  /// The interview id to open or reschedule for a booking. The booking and interview ids differ
+  /// on the live backend, so a booking screen must resolve it. [openOnly]: only one still open
+  /// (requested, scheduled or reschedule proposed). Null when there is none.
+  Future<String?> interviewIdFor(String bookingId, {bool openOnly = false});
+
   Future<Interview> get(String id, {CancelToken? cancel});
   Future<Interview> cancel(String id, {String? reason});
 

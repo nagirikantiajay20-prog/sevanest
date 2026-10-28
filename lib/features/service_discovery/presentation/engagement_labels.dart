@@ -43,4 +43,22 @@ EngagementLabels engagementLabels(AppLocalizations l, EngagementType t) =>
         l.engLiveInMeta,
         Icons.home_work_outlined,
       ),
+      EngagementType.shift => EngagementLabels(
+        l.engShift,
+        l.engShiftDesc,
+        l.engShiftMeta,
+        Icons.nights_stay_outlined,
+      ),
+      EngagementType.oneTime => EngagementLabels(
+        l.engOneTime,
+        l.engOneTimeDesc,
+        l.engOneTimeMeta,
+        Icons.event_available_outlined,
+      ),
+      EngagementType.monthly => EngagementLabels(
+        l.engMonthly,
+        l.engMonthlyDesc,
+        l.engMonthlyMeta,
+        Icons.date_range_outlined,
+      ),
     };

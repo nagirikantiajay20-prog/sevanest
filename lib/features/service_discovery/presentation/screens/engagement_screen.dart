@@ -48,8 +48,16 @@ class _EngagementScreenState extends ConsumerState<EngagementScreen> {
       }
     }
 
-    // A single supported option is preselected (DISC-05).
     final available = category?.engagements.where((e) => e.available).toList();
+    // An engagement the service doesn't offer (stale draft) is dropped, never kept as a combo.
+    if (available != null &&
+        draft.engagement != null &&
+        !available.any((o) => o.type == draft.engagement)) {
+      Future.microtask(
+        () => ref.read(requirementDraftProvider.notifier).clearEngagement(),
+      );
+    }
+    // A single supported option is preselected (DISC-05).
     if (available != null &&
         available.length == 1 &&
         draft.engagement == null) {
@@ -77,7 +85,6 @@ class _EngagementScreenState extends ConsumerState<EngagementScreen> {
       content = Column(
         children: [
           for (final o in category.engagements) ...[
-            const Divider(height: 1, color: AppColors.hairline),
             _EngagementCard(
               option: o,
               selected: draft.engagement == o.type,
@@ -85,8 +92,8 @@ class _EngagementScreenState extends ConsumerState<EngagementScreen> {
                   .read(requirementDraftProvider.notifier)
                   .setEngagement(o.type),
             ),
+            const SizedBox(height: AppSpacing.s12),
           ],
-          const Divider(height: 1, color: AppColors.hairline),
         ],
       );
     }
@@ -144,44 +151,57 @@ class _EngagementCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final labels = engagementLabels(l10n, option.type);
     final enabled = option.available;
+    final tint = selected ? AppColors.tealMist : AppColors.surface;
     return Opacity(
       opacity: enabled ? 1 : .55,
       child: Semantics(
         selected: selected,
         enabled: enabled,
         inMutuallyExclusiveGroup: true,
-        child: InkWell(
-          key: Key('discover_engagement_${option.type.name}'),
-          onTap: enabled ? onTap : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(labels.name, style: AppText.heading),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(labels.description, style: AppText.bodyLarge),
-                      const SizedBox(height: AppSpacing.sm),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.s12,
-                          vertical: AppSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.tealWash,
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+        child: Material(
+          color: tint,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            side: BorderSide(
+              color: selected ? AppColors.teal : AppColors.hairline,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: InkWell(
+            key: Key('discover_engagement_${option.type.name}'),
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            onTap: enabled ? onTap : null,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.tealWash
+                          : AppColors.canvasCool,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Icon(labels.icon, color: AppColors.teal),
+                  ),
+                  const SizedBox(width: AppSpacing.s12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(labels.name, style: AppText.heading),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(labels.description, style: AppText.bodyLarge),
+                        const SizedBox(height: AppSpacing.s12),
+                        Row(
                           children: [
                             Icon(
                               enabled ? Icons.schedule : Icons.lock_outline,
                               size: 14,
-                              color: AppColors.teal,
+                              color: AppColors.slate,
                             ),
                             const SizedBox(width: AppSpacing.xs),
                             Flexible(
@@ -194,29 +214,23 @@ class _EngagementCard extends StatelessWidget {
                                       ),
                                 style: AppText.label.copyWith(
                                   fontSize: 12,
-                                  color: AppColors.teal,
+                                  color: AppColors.slate,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                selected
-                    ? const Icon(
-                        Icons.check_circle,
-                        color: AppColors.teal,
-                        size: 28,
-                      )
-                    : const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.slate300,
-                        size: 28,
-                      ),
-              ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Icon(
+                    selected ? Icons.check_circle : Icons.circle_outlined,
+                    color: selected ? AppColors.teal : AppColors.slate300,
+                    size: 28,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -234,8 +248,13 @@ class _EngagementSkeleton extends StatelessWidget {
     child: Column(
       children: [
         for (var i = 0; i < 4; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+          Container(
+            margin: const EdgeInsets.only(bottom: AppSpacing.s12),
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: AppColors.hairline),
+            ),
             child: Row(
               children: [
                 Expanded(

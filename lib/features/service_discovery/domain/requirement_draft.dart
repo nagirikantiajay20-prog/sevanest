@@ -36,7 +36,7 @@ class RequirementDraft {
       engagement == null ? null : timingVariantFor(engagement!);
 
   /// Hourly has no separate start-date step: its date is chosen on Timing.
-  bool get skipsStartDateStep => engagement == EngagementType.hourly;
+  bool get skipsStartDateStep => variant == TimingVariant.hourly;
 
   /// A new service invalidates everything that depended on it (engagement, timing, budget).
   RequirementDraft withService(String id) =>

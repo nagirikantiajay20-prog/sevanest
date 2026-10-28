@@ -150,8 +150,9 @@ class _InterviewTile extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  worker?.categories.firstOrNull ??
-                      interviewTypeName(l10n, iv.type),
+                  worker == null || worker.title.isEmpty
+                      ? interviewTypeName(l10n, iv.type)
+                      : worker.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppText.heading,

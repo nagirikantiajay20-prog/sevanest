@@ -112,11 +112,14 @@ class AvailabilityWindow {
   final String end;
 }
 
-/// A search result card (Swagger `WorkerCard`). The backend sends no name, contact or address, and
-/// only verified workers, so there is nothing KYC-like to leak. Every optional field is nullable.
+/// A search result card (Swagger `WorkerCard`). The backend sends a display name ("Lakshmi D.":
+/// first name and last initial, D-91) but no surname, contact or address, and only verified
+/// workers, so there is nothing KYC-like to leak. Every optional field is nullable.
 class WorkerSummary {
   const WorkerSummary({
     required this.id,
+    this.name,
+    this.initials,
     this.experienceMonths,
     this.categories = const [],
     this.languages = const [],
@@ -132,6 +135,10 @@ class WorkerSummary {
   });
 
   final String id;
+
+  /// First name and last initial; null when the worker's profile has no name.
+  final String? name;
+  final String? initials;
   final int? experienceMonths;
   final List<String> categories;
   final List<String> languages;
@@ -155,6 +162,14 @@ class WorkerSummary {
 
   bool get hasRating => ratingAverage != null && ratingCount > 0;
 
+  /// The card's heading: the name, else the first category (older backends send no name).
+  String get title => name ?? categories.firstOrNull ?? '';
+
+  /// Categories to list as chips: all of them once the name is the heading, else all but the one
+  /// that is.
+  List<String> get categoryChips =>
+      name == null ? categories.skip(1).toList() : categories;
+
   /// Null when the card is unusable (no id).
   static WorkerSummary? fromJson(Object? j) {
     if (j is! Map) return null;
@@ -169,8 +184,11 @@ class WorkerSummary {
     final rating = j['rating'];
     final photo = j['photo'];
     final exp = j['experienceMonths'];
+    String? text(Object? v) => v is String && v.trim().isNotEmpty ? v : null;
     return WorkerSummary(
       id: id,
+      name: text(j['name']),
+      initials: text(j['initials']),
       experienceMonths: exp is num ? exp.toInt() : null,
       categories: names(j['categories'], 'name'),
       languages: j['languages'] is List
@@ -197,7 +215,7 @@ class WorkerSummary {
           ? photo['url'] as String
           : null,
       // Badge only from the backend status (AGENTS §27).
-      verified: j['verification'] == 'VERIFIED',
+      verified: j['verification'] == 'VERIFIED' || j['verified'] == true,
       engagement: _engagementFromCode(j['engagementPreference']),
       verificationPending: j['verification'] == 'PENDING',
       canRequestInterview: j['canRequestInterview'] != false,
@@ -205,14 +223,7 @@ class WorkerSummary {
   }
 }
 
-EngagementType? _engagementFromCode(Object? c) => switch (c) {
-  'FULL_TIME' => EngagementType.fullTime,
-  'PART_TIME' => EngagementType.partTime,
-  'DAILY' => EngagementType.daily,
-  'HOURLY' => EngagementType.hourly,
-  'LIVE_IN' => EngagementType.liveIn,
-  _ => null,
-};
+EngagementType? _engagementFromCode(Object? c) => EngagementType.fromCode(c);
 
 /// One page plus the cursor of the next (null = end).
 class WorkerPage {

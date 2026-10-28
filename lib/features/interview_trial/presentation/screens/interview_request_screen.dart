@@ -16,6 +16,7 @@ import 'package:sevanest_customer/core/widgets/sn_card.dart';
 import 'package:sevanest_customer/core/widgets/sn_chip.dart';
 import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
@@ -133,7 +134,14 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         );
       }
       if (!_isReschedule) telemetry.event(TelemetryEvent.interviewRequest);
-      _done(result.id, messenger, router, sent: !_isReschedule, l10n: l10n);
+      _done(
+        result.id,
+        messenger,
+        router,
+        sent: !_isReschedule,
+        l10n: l10n,
+        bookingId: result.bookingId,
+      );
     } on ConflictFailure catch (e) {
       if (e.code == 'DUPLICATE_BOOKING') {
         // Already requested: not a slot problem, so keep the choices and just say so.
@@ -198,10 +206,15 @@ class _State extends ConsumerState<InterviewRequestScreen> {
     GoRouter router, {
     required bool sent,
     required AppLocalizations l10n,
+    String? bookingId,
   }) {
+    // The booking holds the status and time: drop its cached copies too.
+    final booking = bookingId == null || bookingId.isEmpty ? id : bookingId;
     ref
       ..invalidate(interviewListProvider)
       ..invalidate(interviewProvider(id))
+      ..invalidate(bookingProvider(booking))
+      ..invalidate(bookingListProvider)
       ..invalidate(homeProvider);
     messenger
       ..hideCurrentSnackBar()
@@ -388,7 +401,7 @@ class _State extends ConsumerState<InterviewRequestScreen> {
                 key: const Key('interview_worker_mini'),
                 leading: WorkerAvatar(w),
                 title: Text(
-                  w.categories.firstOrNull ?? '',
+                  w.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

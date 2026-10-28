@@ -131,6 +131,13 @@ class InterviewRepositoryOverBookings implements InterviewRepository {
         _ => false,
       };
 
+  /// Here an interview is a state of its booking, so the ids are the same.
+  @override
+  Future<String?> interviewIdFor(
+    String bookingId, {
+    bool openOnly = false,
+  }) async => bookingId;
+
   @override
   Future<Interview> get(String id, {CancelToken? cancel}) async =>
       _toInterview(await bookings.get(id, cancel: cancel));

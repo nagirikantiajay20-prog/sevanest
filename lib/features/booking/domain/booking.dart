@@ -119,6 +119,7 @@ class WorkerIdentity {
     this.initials,
     this.photoUrl,
     this.cacheKey,
+    this.verified = false,
   });
 
   final String displayName;
@@ -126,13 +127,17 @@ class WorkerIdentity {
   final String? photoUrl;
   final String? cacheKey;
 
+  /// The backend's real flag (false for a blacklisted worker); the badge shows only when true.
+  final bool verified;
+
   static WorkerIdentity? fromJson(Object? j) {
     if (j is! Map) return null;
-    final name = _s(j['displayName']);
+    final name = _s(j['displayName']) ?? _s(j['name']);
     if (name == null) return null;
     final photo = j['photo'];
     return WorkerIdentity(
       displayName: name,
+      verified: j['verified'] == true,
       initials: _s(j['initials']),
       photoUrl: photo is Map ? _s(photo['url']) : null,
       cacheKey: photo is Map ? _s(photo['cacheKey']) : null,
@@ -275,7 +280,10 @@ List<BookingTimelineEntry> _timeline(Object? raw) => [
     for (final e in raw)
       if (e is Map)
         BookingTimelineEntry(
-          bookingStatusFrom(e['status'] ?? e['toStatus'] ?? e['type']),
+          // The deployed `TimelineEntry` is `{from, to, by, note, at}`: the stage reached is `to`.
+          bookingStatusFrom(
+            e['to'] ?? e['status'] ?? e['toStatus'] ?? e['type'],
+          ),
           _date(e['at'] ?? e['createdAt'] ?? e['occurredAt']),
           _s(e['note'] ?? e['reason']),
         ),
@@ -293,14 +301,7 @@ DateTime? _date(Object? v, {bool dateOnly = false}) {
   return dateOnly ? DateTime(local.year, local.month, local.day) : local;
 }
 
-EngagementType? _engagement(Object? c) => switch (c) {
-  'FULL_TIME' => EngagementType.fullTime,
-  'PART_TIME' => EngagementType.partTime,
-  'DAILY' => EngagementType.daily,
-  'HOURLY' => EngagementType.hourly,
-  'LIVE_IN' => EngagementType.liveIn,
-  _ => null,
-};
+EngagementType? _engagement(Object? c) => EngagementType.fromCode(c);
 
 /// `POST /bookings` body (Swagger `CreateBookingDto`). Money is sent in paise.
 class BookingRequest {

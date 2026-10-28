@@ -6,13 +6,14 @@ import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
-import 'package:sevanest_customer/core/mock/dev_menu.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
+import 'package:sevanest_customer/features/home/presentation/home_promo_carousel.dart';
+import 'package:sevanest_customer/features/home/presentation/home_shortlist.dart';
 import 'package:sevanest_customer/features/home/presentation/home_widgets.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
@@ -60,6 +61,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _startWithService(String id) {
     ref.read(requirementDraftProvider.notifier).startWithService(id);
     context.push(Routes.discoverEngagement);
+  }
+
+  /// Promo CTA: start with the matching service when the catalogue has one, else the full flow.
+  void _promoCta(String? serviceId) {
+    final has =
+        ref.read(categoriesProvider).value?.any((c) => c.id == serviceId) ??
+        false;
+    if (has) {
+      _startWithService(serviceId!);
+    } else {
+      _startHire();
+    }
   }
 
   /// Re-open the requirement builder where it was left, with Back walking through earlier steps.
@@ -141,7 +154,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ctaEnabled: !loading && !offline,
               onAddress: () => _pickAddress(list),
               onBell: () => context.push(Routes.notifications),
-              onTitleLongPress: () => showDevMenu(context, ref),
               onFind: _startHire,
             ),
             Padding(
@@ -172,6 +184,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const AddAddressBanner(),
                     const SizedBox(height: AppSpacing.md),
                   ],
+                  PromoCarousel(onCta: _promoCta),
+                  const SizedBox(height: AppSpacing.lg),
                   if (categories.isNotEmpty) ...[
                     _ExploreServices(
                       categories: categories.take(_maxServiceTiles).toList(),
@@ -226,7 +240,6 @@ class _Header extends StatelessWidget {
     required this.ctaEnabled,
     required this.onAddress,
     required this.onBell,
-    required this.onTitleLongPress,
     required this.onFind,
   });
 
@@ -237,7 +250,6 @@ class _Header extends StatelessWidget {
   final bool ctaEnabled;
   final VoidCallback onAddress;
   final VoidCallback onBell;
-  final VoidCallback onTitleLongPress;
   final VoidCallback onFind;
 
   @override
@@ -254,12 +266,27 @@ class _Header extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          const Positioned.fill(
-            child: SnPhotoBackdrop(
-              asset: AppPhotos.room,
-              fadeTo: AppColors.ivory,
-              washAtEdge: 0.9,
-              alignment: Alignment.topRight,
+          Positioned(
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: MediaQuery.sizeOf(context).width * 0.55,
+            child: ExcludeSemantics(
+              child: ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (r) => const LinearGradient(
+                  // Photo only fades in behind the right edge, never under the headline text.
+                  colors: [Colors.transparent, Color(0x99000000)],
+                  stops: [0.25, 1],
+                ).createShader(r),
+                child: Image.asset(
+                  AppPhotos.room,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.centerRight,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
             ),
           ),
           Padding(
@@ -382,15 +409,12 @@ class _Header extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                GestureDetector(
+                Text(
+                  greeting,
                   key: const Key('home_greeting'),
-                  onLongPress: onTitleLongPress,
-                  child: Text(
-                    greeting,
-                    style: AppText.bodyLarge.copyWith(
-                      fontSize: 17,
-                      color: AppColors.brandInk,
-                    ),
+                  style: AppText.bodyLarge.copyWith(
+                    fontSize: 17,
+                    color: AppColors.brandInk,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
@@ -402,7 +426,12 @@ class _Header extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(l10n.homeSubtitle, style: AppText.bodyLarge),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.7,
+                  ),
+                  child: Text(l10n.homeSubtitle, style: AppText.bodyLarge),
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 _FindCta(enabled: ctaEnabled, onTap: onFind),
               ],
@@ -535,11 +564,11 @@ class _ExploreServices extends StatelessWidget {
                       child: Column(
                         children: [
                           Container(
-                            width: 56,
-                            height: 56,
+                            width: w,
+                            height: w * 0.9,
                             decoration: BoxDecoration(
                               color: AppColors.tileWell,
-                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: AppColors.tileLine),
                             ),
                             clipBehavior: Clip.antiAlias,

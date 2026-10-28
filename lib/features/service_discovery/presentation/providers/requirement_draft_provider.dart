@@ -33,6 +33,12 @@ class RequirementDraftNotifier extends Notifier<RequirementDraft> {
     if (state.serviceId != id) _set(state.withService(id));
   }
 
+  /// Drops an engagement the chosen service doesn't offer (stale resumed draft).
+  void clearEngagement() {
+    final id = state.serviceId;
+    if (id != null && state.engagement != null) _set(state.withService(id));
+  }
+
   /// A different engagement drops timing it can't use and any budget priced for the old one.
   void setEngagement(EngagementType t) => _set(state.withEngagement(t));
 

@@ -540,7 +540,7 @@ class _AddressRow extends StatelessWidget {
                               ),
                               child: Text(
                                 l10n.defaultTag,
-                                style: AppText.body.copyWith(fontSize: 11),
+                                style: AppText.body.copyWith(fontSize: 12),
                               ),
                             ),
                         ],

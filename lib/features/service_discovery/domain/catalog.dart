@@ -1,6 +1,23 @@
 import 'package:flutter/material.dart';
 
-enum EngagementType { fullTime, partTime, daily, hourly, liveIn }
+/// Backend vocabulary (`/reference-data` engagements): FULL_TIME PART_TIME LIVE_IN DAILY HOURLY
+/// SHIFT ONE_TIME MONTHLY (MONTHLY added by the backend 2026-11-13).
+enum EngagementType {
+  fullTime('FULL_TIME'),
+  partTime('PART_TIME'),
+  daily('DAILY'),
+  hourly('HOURLY'),
+  liveIn('LIVE_IN'),
+  shift('SHIFT'),
+  oneTime('ONE_TIME'),
+  monthly('MONTHLY');
+
+  const EngagementType(this.code);
+  final String code;
+
+  static EngagementType? fromCode(Object? c) =>
+      values.where((e) => e.code == c).firstOrNull;
+}
 
 /// One engagement option of a service. [unavailableReason] non-null = shown disabled with that reason.
 class EngagementOption {

@@ -10,8 +10,11 @@ enum TimingVariant { partTime, daily, hourly, fullTime }
 TimingVariant timingVariantFor(EngagementType e) => switch (e) {
   EngagementType.partTime => TimingVariant.partTime,
   EngagementType.daily => TimingVariant.daily,
-  EngagementType.hourly => TimingVariant.hourly,
-  EngagementType.fullTime || EngagementType.liveIn => TimingVariant.fullTime,
+  EngagementType.hourly || EngagementType.oneTime => TimingVariant.hourly,
+  EngagementType.fullTime ||
+  EngagementType.monthly ||
+  EngagementType.liveIn ||
+  EngagementType.shift => TimingVariant.fullTime,
 };
 
 /// Whether a variant asks for days of the week. Hourly is a single dated visit instead.

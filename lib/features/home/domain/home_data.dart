@@ -86,22 +86,46 @@ class ShortlistPreview {
     required this.workerId,
     required this.name,
     required this.service,
+    this.category,
+    this.photoUrl,
+    this.ratingAverage,
+    this.experienceMonths,
+    this.verified = false,
   });
 
   final String workerId;
+
+  /// Display name ("Lakshmi D."), or the category when the backend sent none.
   final String name;
   final String service;
+
+  /// The worker's first category; picks the fallback picture when there is no photo.
+  final String? category;
+
+  /// Short-lived link: shown, never persisted in the offline cache.
+  final String? photoUrl;
+  final double? ratingAverage;
+  final int? experienceMonths;
+  final bool verified;
 
   Map<String, Object?> toJson() => {
     'workerId': workerId,
     'name': name,
     'service': service,
+    'category': category,
+    'ratingAverage': ratingAverage,
+    'experienceMonths': experienceMonths,
+    'verified': verified,
   };
 
   factory ShortlistPreview.fromJson(Map<String, dynamic> j) => ShortlistPreview(
     workerId: j['workerId'] as String,
     name: j['name'] as String,
     service: j['service'] as String,
+    category: j['category'] as String?,
+    ratingAverage: (j['ratingAverage'] as num?)?.toDouble(),
+    experienceMonths: (j['experienceMonths'] as num?)?.toInt(),
+    verified: j['verified'] as bool? ?? false,
   );
 }
 

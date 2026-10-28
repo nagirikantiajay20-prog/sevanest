@@ -268,16 +268,16 @@ class SelectionChip extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppText.card,
+              style: AppText.card.copyWith(fontSize: 14),
             ),
           ),
-          const Text(' · ', style: AppText.body),
+          const Text('·', style: AppText.body),
           TextButton(
             key: changeKey,
             onPressed: onChange,
             style: TextButton.styleFrom(
               minimumSize: const Size(kMinTapTarget, kMinTapTarget),
-              padding: const EdgeInsets.only(right: AppSpacing.s12),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
               foregroundColor: AppColors.teal,
             ),
             child: Text(

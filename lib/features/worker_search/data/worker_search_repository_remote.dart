@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
@@ -46,7 +47,15 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
       ),
     );
     final body = res.data;
-    final items = [for (final m in listOf(body)) ?WorkerSummary.fromJson(m)];
+    final raw = listOf(body);
+    final items = [for (final m in raw) ?WorkerSummary.fromJson(m)];
+    if (kDebugMode) {
+      // Debug builds only; no tokens or personal data (worker cards are anonymous).
+      debugPrint(
+        '[search] ${res.requestOptions.uri} -> ${res.statusCode} '
+        'raw=${raw.length} parsed=${items.length} meta=${body is Map ? body['meta'] : null}',
+      );
+    }
     final meta = body is Map ? body['meta'] : null;
     final total = meta is Map && meta['total'] is num
         ? (meta['total'] as num).toInt()
@@ -71,10 +80,4 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
 String _day(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-String engagementCode(EngagementType t) => switch (t) {
-  EngagementType.fullTime => 'FULL_TIME',
-  EngagementType.partTime => 'PART_TIME',
-  EngagementType.daily => 'DAILY',
-  EngagementType.hourly => 'HOURLY',
-  EngagementType.liveIn => 'LIVE_IN',
-};
+String engagementCode(EngagementType t) => t.code;

@@ -241,7 +241,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.only(
           top: AppSpacing.md,
-          bottom: AppSpacing.lg,
+          bottom: AppSpacing.xl,
         ),
         children: [
           const FlowChips(showTiming: true),
@@ -294,39 +294,53 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
               onUse: _useRange,
               onRetry: () => ref.invalidate(guidanceProvider(query!)),
             ),
-          const SizedBox(height: AppSpacing.lg),
-          _Readout(budget: budget, flexible: flexible),
-          const SizedBox(height: AppSpacing.sm),
-          _RangeBar(
-            key: const Key('discover_budget_slider'),
-            period: period,
-            values: range,
-            enabled: true,
-            onChanged: (v) => _sliderChanged(v, period),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: _AmountField(
-                  fieldKey: const Key('discover_budget_min_field'),
-                  label: l10n.budgetMinField,
-                  controller: _min,
-                  error: issue == BudgetIssue.minAboveMax,
-                  onChanged: (_) => _typed(),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: AppColors.hairline),
+              boxShadow: AppShadows.card,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Readout(budget: budget, flexible: flexible),
+                const SizedBox(height: AppSpacing.s12),
+                _RangeBar(
+                  key: const Key('discover_budget_slider'),
+                  period: period,
+                  values: range,
+                  enabled: true,
+                  onChanged: (v) => _sliderChanged(v, period),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _AmountField(
-                  fieldKey: const Key('discover_budget_max_field'),
-                  label: l10n.budgetMaxField,
-                  controller: _max,
-                  error: issue == BudgetIssue.minAboveMax,
-                  onChanged: (_) => _typed(),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _AmountField(
+                        fieldKey: const Key('discover_budget_min_field'),
+                        label: l10n.budgetMinField,
+                        controller: _min,
+                        error: issue == BudgetIssue.minAboveMax,
+                        onChanged: (_) => _typed(),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: _AmountField(
+                        fieldKey: const Key('discover_budget_max_field'),
+                        label: l10n.budgetMaxField,
+                        controller: _max,
+                        error: issue == BudgetIssue.minAboveMax,
+                        onChanged: (_) => _typed(),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           if (!flexible && issue != null && budget != null) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -680,27 +694,8 @@ class _RangeBar extends StatelessWidget {
     final ticks = period == BudgetPeriod.hourly
         ? ['₹0', '₹250', '₹500', '₹750', '₹1k+']
         : ['₹0', '₹10k', '₹20k', '₹30k', '₹40k+'];
-    final mid = ((values.start + values.end) / 2) / ceiling; // 0..1
     return Column(
       children: [
-        Align(
-          alignment: Alignment(mid * 2 - 1, 0),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.navy,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '${formatRupees(values.start.round())}–${formatRupees(values.end.round())}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: AppColors.tealDeep,

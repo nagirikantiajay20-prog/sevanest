@@ -7,28 +7,50 @@ import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 
 /// `GET /customers/me/home`: `{activeBooking, upcomingInterview, unreadNotifications,
-/// shortlistPreview[5], shortlistTotal}` in one call. The backend sends no worker names, so the
-/// service stands in for the name. Sections the backend leaves null are hidden by Home.
+/// shortlistPreview[5], shortlistTotal}` in one call. Workers carry a display name ("Lakshmi D.");
+/// the service stands in only when a name is missing. Sections the backend leaves null are hidden
+/// by Home.
+///
+/// Home sends `ETag` + `Cache-Control: private, no-cache`. The last body and validator are kept in
+/// memory and re-sent as `If-None-Match`; a 304 reuses that body. The validator also changes when
+/// the signed photo links are about to expire, so a 304 never returns dead links.
 class HomeRepositoryRemote implements HomeRepository {
-  const HomeRepositoryRemote(this._dio);
+  HomeRepositoryRemote(this._dio);
   final Dio _dio;
+
+  String? _etag;
+  HomeData? _last;
 
   @override
   Future<HomeData> fetch() async {
-    final res = await guarded(() => _dio.get<dynamic>('/customers/me/home'));
+    final last = _last;
+    final etag = _etag;
+    final res = await guarded(
+      () => _dio.get<dynamic>(
+        '/customers/me/home',
+        options: Options(
+          headers: {if (last != null && etag != null) 'If-None-Match': etag},
+          validateStatus: (s) => s != null && (s == 304 || s < 300),
+        ),
+      ),
+    );
+    if (res.statusCode == 304 && last != null) return last;
     final j = res.data is Map<String, dynamic>
         ? res.data as Map<String, dynamic>
         : const <String, dynamic>{};
     final booking = Booking.fromJson(j['activeBooking']);
     final interview = Interview.fromJson(j['upcomingInterview']);
     final unread = j['unreadNotifications'];
-    return HomeData(
+    final data = HomeData(
       activeBooking: booking == null ? null : _summary(booking),
       upcomingInterview: interview == null || interview.date == null
           ? null
           : _upcoming(
               interview,
               booking?.id == interview.bookingId ? booking : null,
+              WorkerIdentity.fromJson(
+                (j['upcomingInterview'] as Map)['worker'],
+              ),
             ),
       shortlist: [
         if (j['shortlistPreview'] is List)
@@ -38,6 +60,9 @@ class HomeRepositoryRemote implements HomeRepository {
       ],
       unreadCount: unread is num ? unread.toInt() : 0,
     );
+    _last = data;
+    _etag = res.headers.value('etag');
+    return data;
   }
 
   static ActiveBookingSummary _summary(Booking b) {
@@ -45,7 +70,8 @@ class HomeRepositoryRemote implements HomeRepository {
     return ActiveBookingSummary(
       id: b.id,
       reference: b.reference,
-      workerName: service,
+      workerName: b.identity?.displayName ?? service,
+      verified: b.identity?.verified ?? false,
       service: service,
       engagement: b.engagement == null ? '' : _engagement(b.engagement!),
       startLabel: b.startDate == null ? '' : _from(b.startDate!),
@@ -59,13 +85,21 @@ class HomeRepositoryRemote implements HomeRepository {
     );
   }
 
-  static UpcomingInterview _upcoming(Interview i, Booking? b) {
+  static UpcomingInterview _upcoming(
+    Interview i,
+    Booking? b,
+    WorkerIdentity? worker,
+  ) {
     final d = i.date!;
     final m = i.slotMinutes ?? 0;
     final at = DateTime(d.year, d.month, d.day, m ~/ 60, m % 60);
     return UpcomingInterview(
       id: i.id,
-      workerName: b?.categoryName ?? 'the worker',
+      workerName:
+          worker?.displayName ??
+          b?.identity?.displayName ??
+          b?.categoryName ??
+          'the worker',
       startsAt: at,
       isTrialVisit: i.type == InterviewType.trial,
     );
@@ -76,8 +110,13 @@ class HomeRepositoryRemote implements HomeRepository {
     final category = w.categories.firstOrNull ?? 'Worker';
     return ShortlistPreview(
       workerId: w.id,
-      name: category,
+      name: w.name ?? category,
+      category: w.categories.firstOrNull,
       service: w.engagement == null ? '' : _engagement(w.engagement!),
+      photoUrl: w.photoUrl,
+      ratingAverage: w.hasRating ? w.ratingAverage : null,
+      experienceMonths: w.experienceMonths,
+      verified: w.verified,
     );
   }
 
@@ -87,6 +126,9 @@ class HomeRepositoryRemote implements HomeRepository {
     EngagementType.daily => 'Daily',
     EngagementType.hourly => 'Hourly',
     EngagementType.liveIn => 'Live-in',
+    EngagementType.shift => 'Shift',
+    EngagementType.oneTime => 'One-time',
+    EngagementType.monthly => 'Monthly',
   };
 
   static const _months = [

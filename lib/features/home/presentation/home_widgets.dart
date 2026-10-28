@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_format.dart';
@@ -389,7 +390,9 @@ class _BookingTile extends StatelessWidget {
                       textAlign: TextAlign.end,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: text.bodySmall?.copyWith(color: Colors.white70),
+                      style: text.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: .9),
+                      ),
                     ),
                   ),
                 ],
@@ -443,9 +446,13 @@ class _BookingTile extends StatelessWidget {
                           ],
                         ),
                         Text(
-                          '${booking.service} · ${booking.engagement} · ${booking.startLabel}',
+                          [
+                            booking.service,
+                            booking.engagement,
+                            booking.startLabel,
+                          ].where((e) => e.trim().isNotEmpty).join(' · '),
                           style: text.bodyMedium?.copyWith(
-                            color: Colors.white70,
+                            color: Colors.white.withValues(alpha: .9),
                           ),
                         ),
                       ],
@@ -533,7 +540,7 @@ class _StageNode extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: isCurrent ? 1 : .7),
+            color: Colors.white.withValues(alpha: isCurrent ? 1 : .88),
             fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w400,
           ),
         ),
@@ -660,59 +667,6 @@ class _InterviewTile extends StatelessWidget {
   }
 }
 
-class ShortlistPreviewCard extends StatelessWidget {
-  const ShortlistPreviewCard({required this.workers, super.key});
-  final List<ShortlistPreview> workers;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return HomeCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.homeShortlistTitle,
-                  style: text.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              TextButton(
-                key: const Key('home_view_favs_btn'),
-                onPressed: () => context.go(Routes.favourites),
-                child: Text(l10n.homeViewShortlist),
-              ),
-            ],
-          ),
-          for (final w in workers)
-            ListTile(
-              key: Key('home_fav_worker_${w.workerId}'),
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor: AppColors.tealSoftAlt,
-                child: Text(
-                  w.name.isEmpty ? '?' : w.name[0],
-                  style: const TextStyle(color: AppColors.teal),
-                ),
-              ),
-              title: Text(w.name),
-              subtitle: Text(w.service),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(
-                Routes.path(Routes.workerDetail, {'id': w.workerId}),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 class SupportShortcut extends StatelessWidget {
   const SupportShortcut({super.key});
 
@@ -724,8 +678,8 @@ class SupportShortcut extends StatelessWidget {
         key: const Key('home_support_btn'),
         contentPadding: EdgeInsets.zero,
         leading: const Icon(Icons.support_agent, color: AppColors.teal),
-        title: Text(l10n.homeSupportShortcut),
-        subtitle: Text(l10n.homeSupportShortcutBody),
+        title: Text(l10n.homeSupportShortcut, style: AppText.card),
+        subtitle: Text(l10n.homeSupportShortcutBody, style: AppText.body),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push(Routes.support),
       ),

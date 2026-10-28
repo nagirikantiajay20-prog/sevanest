@@ -12,6 +12,7 @@ import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/core/widgets/sn_card.dart';
 import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/interview_labels.dart';
@@ -50,6 +51,12 @@ class _State extends ConsumerState<InterviewDetailScreen> {
       ref
         ..invalidate(interviewProvider(widget.interviewId))
         ..invalidate(interviewListProvider)
+        ..invalidate(
+          bookingProvider(
+            updated.bookingId.isEmpty ? updated.id : updated.bookingId,
+          ),
+        )
+        ..invalidate(bookingListProvider)
         ..invalidate(homeProvider);
       messenger
         ..hideCurrentSnackBar()

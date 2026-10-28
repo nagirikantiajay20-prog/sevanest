@@ -15,7 +15,8 @@ String experienceLabel(AppLocalizations l, int? months) {
       : l.workerExperienceMonths(months);
 }
 
-/// Rounded tile: the short-lived photo link when there is one, else the category initial.
+/// Rounded tile: the short-lived photo link when there is one, else the worker's initials (the
+/// category initial when the card has no name).
 /// [verified] adds the teal tick (only from the backend verification status).
 class WorkerAvatar extends StatelessWidget {
   const WorkerAvatar(
@@ -30,7 +31,7 @@ class WorkerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = worker.categories.isEmpty ? '' : worker.categories.first;
+    final title = worker.title;
     final size = radius * 2;
     return ExcludeSemantics(
       child: SizedBox(
@@ -56,9 +57,10 @@ class WorkerAvatar extends StatelessWidget {
               child: worker.photoUrl != null
                   ? null
                   : Text(
-                      title.isEmpty
-                          ? '?'
-                          : title.characters.first.toUpperCase(),
+                      worker.initials ??
+                          (title.isEmpty
+                              ? '?'
+                              : title.characters.first.toUpperCase()),
                       style: AppText.heading.copyWith(color: AppColors.teal),
                     ),
             ),
@@ -117,8 +119,8 @@ class RatingLabel extends ConsumerWidget {
   }
 }
 
-/// Result / shortlist card. The backend sends no name, so the title is the category. Optional
-/// rows disappear when their data is missing. [trailing] is the heart.
+/// Result / shortlist card. The title is the worker's display name, or the category when the
+/// backend sent none. Optional rows disappear when their data is missing. [trailing] is the heart.
 class WorkerCard extends StatelessWidget {
   const WorkerCard({
     required this.worker,
@@ -136,9 +138,9 @@ class WorkerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final title = worker.categories.isEmpty ? '' : worker.categories.first;
+    final title = worker.title;
     final window = worker.availability.firstOrNull;
-    final chips = worker.categories.skip(1).toList();
+    final chips = worker.categoryChips;
     final shown = chips.take(_maxChips).toList();
     Widget pill(String label) => Container(
       padding: const EdgeInsets.symmetric(
@@ -199,11 +201,15 @@ class WorkerCard extends StatelessWidget {
                       ),
                     if (window != null)
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.circle,
-                            size: 8,
-                            color: AppColors.success,
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6),
+                            child: Icon(
+                              Icons.circle,
+                              size: 8,
+                              color: AppColors.success,
+                            ),
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Flexible(

@@ -274,14 +274,14 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final title = worker.categories.isEmpty ? '' : worker.categories.first;
+    final title = worker.title;
     final reviewsAsync = ref.watch(workerReviewsProvider(worker.id));
     final preview = reviewsAsync.value?.items.take(2).toList() ?? const [];
     final months = worker.experienceMonths;
     final scaleMax = ref.watch(ratingScaleMaxProvider).value ?? 5;
 
     final hasBadge = worker.verified || worker.verificationPending;
-    final skills = worker.categories.length > 1
+    final skills = worker.categories.length > 1 || worker.name != null
         ? worker.categories
         : const <String>[];
 
@@ -307,6 +307,14 @@ class _Body extends ConsumerWidget {
               WorkerAvatar(worker, radius: 48, verified: worker.verified),
               const SizedBox(height: AppSpacing.s12),
               Text(title, style: AppText.title, textAlign: TextAlign.center),
+              if (worker.name != null && worker.categories.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  worker.categories.first,
+                  style: AppText.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
+              ],
               if (worker.areas.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(

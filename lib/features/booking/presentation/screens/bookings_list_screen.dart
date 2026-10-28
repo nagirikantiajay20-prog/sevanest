@@ -154,6 +154,12 @@ class _BookingCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final b = booking;
     final next = b.scheduledAt ?? b.startDate;
+    final workerName = b.identity?.displayName ?? b.worker?.name;
+    final service =
+        b.categoryName ??
+        b.worker?.categories.firstOrNull ??
+        b.categoryCode ??
+        '';
     return SnCard(
       key: Key('booking_card_${b.id}'),
       onTap: () =>
@@ -187,14 +193,23 @@ class _BookingCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (workerName != null)
+                      Text(
+                        workerName,
+                        key: Key('booking_card_worker_${b.id}'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.heading,
+                      ),
+                    // No worker yet (new request): the service leads instead of a blank title.
                     Text(
-                      b.categoryName ??
-                          b.worker?.categories.firstOrNull ??
-                          b.categoryCode ??
-                          '',
+                      service,
+                      key: Key('booking_card_service_${b.id}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppText.heading,
+                      style: workerName == null
+                          ? AppText.heading
+                          : AppText.body,
                     ),
                     if (next != null)
                       Text(formatDate(next, locale), style: AppText.body),
