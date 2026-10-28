@@ -220,6 +220,90 @@ abstract class AppLocalizations {
   /// **'Getting things ready...'**
   String get splashLoading;
 
+  /// No description provided for @proceedCustomerApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed with Customer App'**
+  String get proceedCustomerApp;
+
+  /// No description provided for @moveToWorkerApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to Worker App'**
+  String get moveToWorkerApp;
+
+  /// No description provided for @workerAppUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The Worker app link is not set up yet. Please try again later.'**
+  String get workerAppUnavailable;
+
+  /// No description provided for @homePhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Home photo'**
+  String get homePhotoLabel;
+
+  /// No description provided for @homePhotoUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Home Photo'**
+  String get homePhotoUpload;
+
+  /// No description provided for @homePhotoHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Helps the worker find your home.'**
+  String get homePhotoHelp;
+
+  /// No description provided for @homePhotoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get homePhotoGallery;
+
+  /// No description provided for @homePhotoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get homePhotoCamera;
+
+  /// No description provided for @homePhotoReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get homePhotoReplace;
+
+  /// No description provided for @homePhotoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get homePhotoRemove;
+
+  /// No description provided for @homePhotoBadFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a JPG or PNG photo.'**
+  String get homePhotoBadFormat;
+
+  /// No description provided for @homePhotoTooBig.
+  ///
+  /// In en, this message translates to:
+  /// **'That photo is over 5 MB. Choose a smaller one.'**
+  String get homePhotoTooBig;
+
+  /// No description provided for @homePhotoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo or camera access is off. Allow it in Settings to add a photo.'**
+  String get homePhotoPermission;
+
+  /// No description provided for @homePhotoUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Address saved, but the home photo could not be uploaded. Edit the address to try again.'**
+  String get homePhotoUploadFailed;
+
   /// No description provided for @splashSlow.
   ///
   /// In en, this message translates to:
@@ -376,18 +460,6 @@ abstract class AppLocalizations {
   /// **'Dedicated support'**
   String get loginTrustSupport;
 
-  /// No description provided for @privateTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Your information stays private'**
-  String get privateTitle;
-
-  /// No description provided for @privateBody.
-  ///
-  /// In en, this message translates to:
-  /// **'We never share your number with anyone.'**
-  String get privateBody;
-
   /// No description provided for @legalPrefix.
   ///
   /// In en, this message translates to:
@@ -483,6 +555,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verifying...'**
   String get verifying;
+
+  /// No description provided for @demoOtpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your code (test mode)'**
+  String get demoOtpLabel;
+
+  /// No description provided for @demoOtpCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get demoOtpCopy;
+
+  /// No description provided for @demoOtpCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get demoOtpCopied;
 
   /// No description provided for @verifiedLabel.
   ///
@@ -688,6 +778,24 @@ abstract class AppLocalizations {
   /// **'Profile updated'**
   String get profileUpdated;
 
+  /// No description provided for @profilePhotoAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get profilePhotoAdd;
+
+  /// No description provided for @profilePhotoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get profilePhotoChange;
+
+  /// No description provided for @profilePhotoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo updated'**
+  String get profilePhotoUpdated;
+
   /// No description provided for @profileMobileLocked.
   ///
   /// In en, this message translates to:
@@ -826,6 +934,24 @@ abstract class AppLocalizations {
   /// **'Save address'**
   String get saveAddress;
 
+  /// No description provided for @profileAddAddressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your home address'**
+  String get profileAddAddressTitle;
+
+  /// No description provided for @profileAddAddressSub.
+  ///
+  /// In en, this message translates to:
+  /// **'So we can show workers near you.'**
+  String get profileAddAddressSub;
+
+  /// No description provided for @profileAddressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add your home address to continue.'**
+  String get profileAddressRequired;
+
   /// No description provided for @skipForNow.
   ///
   /// In en, this message translates to:
@@ -927,6 +1053,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Explore services'**
   String get homeExplore;
+
+  /// No description provided for @homePromoCleanEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional cleaning'**
+  String get homePromoCleanEyebrow;
+
+  /// No description provided for @homePromoCleanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A cleaner, happier home'**
+  String get homePromoCleanTitle;
+
+  /// No description provided for @homePromoCleanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional cleaners for a fresher, healthier home.'**
+  String get homePromoCleanBody;
+
+  /// No description provided for @homePromoCleanCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore cleaning'**
+  String get homePromoCleanCta;
+
+  /// No description provided for @homePromoMaidEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily home care'**
+  String get homePromoMaidEyebrow;
+
+  /// No description provided for @homePromoMaidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh rooms, every day'**
+  String get homePromoMaidTitle;
+
+  /// No description provided for @homePromoMaidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Trained maids for daily and weekly upkeep.'**
+  String get homePromoMaidBody;
+
+  /// No description provided for @homePromoMaidCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a maid'**
+  String get homePromoMaidCta;
+
+  /// No description provided for @homePromoPartEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible help'**
+  String get homePromoPartEyebrow;
+
+  /// No description provided for @homePromoPartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spotless, on your schedule'**
+  String get homePromoPartTitle;
+
+  /// No description provided for @homePromoPartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Part-time help when and where you need it.'**
+  String get homePromoPartBody;
+
+  /// No description provided for @homePromoPartCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find help'**
+  String get homePromoPartCta;
 
   /// No description provided for @homeSeeAll.
   ///
@@ -1137,6 +1335,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View shortlist'**
   String get homeViewShortlist;
+
+  /// No description provided for @homeShortlistExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'{years} yrs exp'**
+  String homeShortlistExperience(int years);
 
   /// No description provided for @homeViewAll.
   ///
@@ -1419,6 +1623,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stays on site'**
   String get engLiveInMeta;
+
+  /// No description provided for @engShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get engShift;
+
+  /// No description provided for @engShiftDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Covers a set shift, such as a day or night shift.'**
+  String get engShiftDesc;
+
+  /// No description provided for @engShiftMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed shift hours'**
+  String get engShiftMeta;
+
+  /// No description provided for @engOneTime.
+  ///
+  /// In en, this message translates to:
+  /// **'One-time'**
+  String get engOneTime;
+
+  /// No description provided for @engOneTimeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A single visit for one job, with no repeat.'**
+  String get engOneTimeDesc;
+
+  /// No description provided for @engOneTimeMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Single visit'**
+  String get engOneTimeMeta;
+
+  /// No description provided for @engMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get engMonthly;
+
+  /// No description provided for @engMonthlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Works for you every day and is paid once a month.'**
+  String get engMonthlyDesc;
+
+  /// No description provided for @engMonthlyMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly pay · Most days'**
+  String get engMonthlyMeta;
 
   /// No description provided for @locationTitle.
   ///

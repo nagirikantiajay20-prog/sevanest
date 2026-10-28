@@ -32,12 +32,24 @@ class SnBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.hairline)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppRadius.xl),
+        ),
+        border: const Border(top: BorderSide(color: AppColors.hairline)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.navy.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: NavigationBar(
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        height: 68,
         selectedIndex: selectedIndex,
         onDestinationSelected: onSelected,
         destinations: [

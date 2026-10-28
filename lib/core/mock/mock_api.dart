@@ -11,7 +11,7 @@ enum MockMode { normal, slow, error, offline, empty, loading }
 class MockApiState {
   const MockApiState({
     this.mode = MockMode.normal,
-    this.returningUser = true,
+    this.returningUser = false,
     this.live = false,
     this.forceUpdate = false,
     this.maintenance = false,
@@ -54,7 +54,7 @@ class MockApiState {
 class MockApiNotifier extends Notifier<MockApiState> {
   @override
   MockApiState build() =>
-      MockApiState(live: ref.read(appConfigProvider).env != AppEnv.dev);
+      MockApiState(live: !ref.read(appConfigProvider).useMocks);
 
   // ignore: use_setters_to_change_properties
   void set(MockApiState s) => state = s;

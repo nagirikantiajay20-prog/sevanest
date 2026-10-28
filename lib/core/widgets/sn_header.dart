@@ -78,7 +78,7 @@ class SnHeader extends StatelessWidget {
                         if (subtitle != null)
                           Text(
                             subtitle!,
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppText.meta,
                           ),

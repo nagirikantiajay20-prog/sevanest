@@ -74,6 +74,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashLoading => 'Getting things ready...';
 
   @override
+  String get proceedCustomerApp => 'Proceed with Customer App';
+
+  @override
+  String get moveToWorkerApp => 'Move to Worker App';
+
+  @override
+  String get workerAppUnavailable =>
+      'The Worker app link is not set up yet. Please try again later.';
+
+  @override
+  String get homePhotoLabel => 'Home photo';
+
+  @override
+  String get homePhotoUpload => 'Upload Home Photo';
+
+  @override
+  String get homePhotoHelp => 'Optional. Helps the worker find your home.';
+
+  @override
+  String get homePhotoGallery => 'Choose from gallery';
+
+  @override
+  String get homePhotoCamera => 'Take a photo';
+
+  @override
+  String get homePhotoReplace => 'Replace';
+
+  @override
+  String get homePhotoRemove => 'Remove';
+
+  @override
+  String get homePhotoBadFormat => 'Use a JPG or PNG photo.';
+
+  @override
+  String get homePhotoTooBig =>
+      'That photo is over 5 MB. Choose a smaller one.';
+
+  @override
+  String get homePhotoPermission =>
+      'Photo or camera access is off. Allow it in Settings to add a photo.';
+
+  @override
+  String get homePhotoUploadFailed =>
+      'Address saved, but the home photo could not be uploaded. Edit the address to try again.';
+
+  @override
   String get splashSlow => 'Still loading. Your connection seems slow.';
 
   @override
@@ -161,12 +207,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTrustSupport => 'Dedicated support';
 
   @override
-  String get privateTitle => 'Your information stays private';
-
-  @override
-  String get privateBody => 'We never share your number with anyone.';
-
-  @override
   String get legalPrefix => 'By continuing, you agree to our ';
 
   @override
@@ -217,6 +257,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verifying => 'Verifying...';
+
+  @override
+  String get demoOtpLabel => 'Your code (test mode)';
+
+  @override
+  String get demoOtpCopy => 'Copy code';
+
+  @override
+  String get demoOtpCopied => 'Code copied';
 
   @override
   String get verifiedLabel => 'Verified';
@@ -325,6 +374,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileUpdated => 'Profile updated';
 
   @override
+  String get profilePhotoAdd => 'Add a photo';
+
+  @override
+  String get profilePhotoChange => 'Change photo';
+
+  @override
+  String get profilePhotoUpdated => 'Photo updated';
+
+  @override
   String get profileMobileLocked =>
       'Your number is your login and can\'t be changed here.';
 
@@ -395,6 +453,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveAddress => 'Save address';
 
   @override
+  String get profileAddAddressTitle => 'Add your home address';
+
+  @override
+  String get profileAddAddressSub => 'So we can show workers near you.';
+
+  @override
+  String get profileAddressRequired =>
+      'Please add your home address to continue.';
+
+  @override
   String get skipForNow => 'Skip for now';
 
   @override
@@ -448,6 +516,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeExplore => 'Explore services';
+
+  @override
+  String get homePromoCleanEyebrow => 'Professional cleaning';
+
+  @override
+  String get homePromoCleanTitle => 'A cleaner, happier home';
+
+  @override
+  String get homePromoCleanBody =>
+      'Professional cleaners for a fresher, healthier home.';
+
+  @override
+  String get homePromoCleanCta => 'Explore cleaning';
+
+  @override
+  String get homePromoMaidEyebrow => 'Daily home care';
+
+  @override
+  String get homePromoMaidTitle => 'Fresh rooms, every day';
+
+  @override
+  String get homePromoMaidBody => 'Trained maids for daily and weekly upkeep.';
+
+  @override
+  String get homePromoMaidCta => 'Find a maid';
+
+  @override
+  String get homePromoPartEyebrow => 'Flexible help';
+
+  @override
+  String get homePromoPartTitle => 'Spotless, on your schedule';
+
+  @override
+  String get homePromoPartBody => 'Part-time help when and where you need it.';
+
+  @override
+  String get homePromoPartCta => 'Find help';
 
   @override
   String get homeSeeAll => 'See all';
@@ -580,6 +685,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeViewShortlist => 'View shortlist';
+
+  @override
+  String homeShortlistExperience(int years) {
+    return '$years yrs exp';
+  }
 
   @override
   String get homeViewAll => 'View all';
@@ -730,6 +840,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get engLiveInMeta => 'Stays on site';
+
+  @override
+  String get engShift => 'Shift';
+
+  @override
+  String get engShiftDesc =>
+      'Covers a set shift, such as a day or night shift.';
+
+  @override
+  String get engShiftMeta => 'Fixed shift hours';
+
+  @override
+  String get engOneTime => 'One-time';
+
+  @override
+  String get engOneTimeDesc => 'A single visit for one job, with no repeat.';
+
+  @override
+  String get engOneTimeMeta => 'Single visit';
+
+  @override
+  String get engMonthly => 'Monthly';
+
+  @override
+  String get engMonthlyDesc =>
+      'Works for you every day and is paid once a month.';
+
+  @override
+  String get engMonthlyMeta => 'Monthly pay · Most days';
 
   @override
   String get locationTitle => 'Location';

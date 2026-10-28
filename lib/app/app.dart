@@ -18,9 +18,14 @@ class SevaNestApp extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       theme: AppTheme.light,
       routerConfig: ref.watch(appRouterProvider),
-      builder: (context, child) => AppGateHost(
-        child: OfflineBannerHost(
-          child: PushHost(child: PaymentRecoveryHost(child: child!)),
+      locale: const Locale('en'), // V1 is English only
+      builder: (context, child) => MediaQuery.withClampedTextScaling(
+        // Large system fonts stay readable but can't push fixed-height layouts into overflow.
+        maxScaleFactor: 1.4,
+        child: AppGateHost(
+          child: OfflineBannerHost(
+            child: PushHost(child: PaymentRecoveryHost(child: child!)),
+          ),
         ),
       ),
       localizationsDelegates: const [

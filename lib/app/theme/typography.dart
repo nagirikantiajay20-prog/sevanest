@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 
-/// The only place fonts are chosen. The design uses Sitka Heading for headings and Inter for
-/// text; neither is bundled yet, so both fall back to the platform font. To adopt a font,
-/// add the asset in pubspec and set the family here: no screen changes.
+/// The only place fonts are chosen. The design uses Sitka Heading (a Windows font, not
+/// bundleable) for headings, so Source Serif 4 stands in; Inter is the text face.
 abstract final class AppFonts {
-  static const String? body = null; // design: Inter
-  static const String? heading = null; // design: Sitka Heading (serif)
+  static const String body = 'Inter';
+  static const String heading = 'SourceSerif4';
 }
 
 /// Text styles from the design scale (`--type-*`, `--text-*`). Colours come from the theme, so
@@ -74,7 +73,7 @@ abstract final class AppText {
   );
   static const micro = TextStyle(
     fontFamily: AppFonts.body,
-    fontSize: 11,
+    fontSize: 12,
     height: 1.3,
     color: AppColors.slate,
   );

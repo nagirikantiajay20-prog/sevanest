@@ -15,7 +15,9 @@ abstract final class AppColors {
   static const success = Color(0xFF16A34A);
   static const danger = Color(0xFFDC2626);
   static const ink = Color(0xFF0F172A);
-  static const slate = Color(0xFF64748B);
+  static const slate = Color(
+    0xFF475569,
+  ); // body/secondary text: 7.5:1 on white, AA on every tint
   static const fieldBg = Color(0xFFF8FAFC);
   static const hairline = Color(0xFFE2E8F0);
 
@@ -55,7 +57,9 @@ abstract final class AppColors {
   static const pillActive = Color(0xFFE2EEEC);
   static const canvasCool = Color(0xFFF7F8FB);
   static const slate300 = Color(0xFFCBD5E1);
-  static const slate400 = Color(0xFF94A3B8);
+  static const slate400 = Color(
+    0xFF64748B,
+  ); // hints, disabled text, chevrons: 4.8:1 on white
   static const slate600 = Color(0xFF475569);
   static const slate700 = Color(0xFF334155);
   static const like = Color(0xFFD6296A);

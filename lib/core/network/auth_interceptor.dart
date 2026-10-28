@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 
+/// Placeholder tokens of the dev-flavor local login (`AuthRepositoryDemo`). The backend cannot
+/// refresh them, so a 401 on one must not end the session.
+const demoTokenPrefix = 'demo-';
+
 const _retriedKey = 'auth_retried';
 const _authPathPrefix = '/auth/';
 // Endpoints that must NOT carry a bearer token. Everything else under /auth/ (logout,
@@ -61,6 +65,11 @@ class AuthInterceptor extends Interceptor {
     if (err.response?.statusCode != 401 ||
         _isAuthCall(req) ||
         req.extra[_retriedKey] == true) {
+      return handler.next(err);
+    }
+
+    final current = await store.read();
+    if (current != null && current.refresh.startsWith(demoTokenPrefix)) {
       return handler.next(err);
     }
 

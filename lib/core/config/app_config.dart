@@ -8,10 +8,18 @@ class AppConfig {
     required this.env,
     required this.apiBaseUrl,
     required this.useMocks,
+    this.workerAppUrl = const String.fromEnvironment('WORKER_APP_URL'),
   });
 
   // The deployed backend is the only host that exists today, so stg and prod use it too until real hosts are set up.
   static const dev = AppConfig(
+    env: AppEnv.dev,
+    apiBaseUrl: 'https://sevanest-backend.onrender.com/api/v1',
+    useMocks: false,
+  );
+
+  /// Automated tests only: seeded mock repositories and the local demo login. No flavor ships it.
+  static const mock = AppConfig(
     env: AppEnv.dev,
     apiBaseUrl: 'https://sevanest-backend.onrender.com/api/v1',
     useMocks: true,
@@ -30,8 +38,12 @@ class AppConfig {
   final AppEnv env;
   final String apiBaseUrl;
 
-  /// Mock repositories are allowed in dev only (AGENTS §63).
+  /// Mock repositories are for automated tests only ([mock]).
   final bool useMocks;
+
+  /// Deep link / store URL of the separate SevaNest Worker app (`--dart-define=WORKER_APP_URL=...`).
+  /// Empty until the worker app has one; the splash then says so instead of opening nothing.
+  final String workerAppUrl;
 
   bool get isProd => env == AppEnv.prod;
 }
