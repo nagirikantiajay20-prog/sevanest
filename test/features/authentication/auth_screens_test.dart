@@ -141,7 +141,7 @@ void main() {
       await t.pumpAndSettle();
     }
 
-    testWidgets('both buttons show side by side; customer proceeds to login', (
+    testWidgets('both buttons show stacked; customer proceeds to login', (
       t,
     ) async {
       await launchWithChoice(t);
@@ -150,7 +150,8 @@ void main() {
       expect(customer, findsOneWidget);
       expect(worker, findsOneWidget);
       expect(find.byKey(_mobileField), findsNothing); // waits for the tap
-      expect(t.getCenter(customer).dy, t.getCenter(worker).dy);
+      expect(t.getCenter(customer).dx, t.getCenter(worker).dx);
+      expect(t.getCenter(customer).dy, lessThan(t.getCenter(worker).dy));
       await t.tap(customer);
       await t.pumpAndSettle();
       expect(find.byKey(_mobileField), findsOneWidget);
@@ -318,14 +319,26 @@ void main() {
         await requestOtp(t);
         expect(find.byKey(const Key('otp_countdown_text')), findsOneWidget);
         expect(
-          find.textContaining(RegExp('00:(30|29)'), findRichText: true),
+          find.descendant(
+            of: find.byKey(const Key('otp_countdown_text')),
+            matching: find.textContaining(
+              RegExp('00:(30|29)'),
+              findRichText: true,
+            ),
+          ),
           findsOneWidget,
         );
         expect(find.byKey(const Key('otp_resend_btn')), findsNothing);
 
         await t.pump(const Duration(seconds: 10));
         expect(
-          find.textContaining(RegExp('00:(20|19)'), findRichText: true),
+          find.descendant(
+            of: find.byKey(const Key('otp_countdown_text')),
+            matching: find.textContaining(
+              RegExp('00:(20|19)'),
+              findRichText: true,
+            ),
+          ),
           findsOneWidget,
         );
 

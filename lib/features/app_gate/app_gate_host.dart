@@ -6,7 +6,6 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/features/app_gate/app_gate.dart';
-import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Runs the force-update / maintenance check on launch and on every resume, for signed-in and
@@ -229,13 +228,21 @@ class _MaintState extends ConsumerState<_MaintenanceScreen> {
   }
 }
 
-/// Plain branded cover while the first check runs (the real splash keeps booting underneath).
+/// Cover while the first check runs: the same logo image the splash opens with, so there is no
+/// separate screen in between (the real splash keeps booting underneath).
 class _Hold extends StatelessWidget {
   const _Hold();
 
   @override
   Widget build(BuildContext context) => const Scaffold(
     key: Key('gate_hold'),
-    body: AuthBackdrop(child: Center(child: LogoTile(size: 104))),
+    backgroundColor: Colors.white,
+    body: SizedBox.expand(
+      child: Image(
+        image: AssetImage('assets/splash/boot.jpg'),
+        fit: BoxFit.cover,
+        excludeFromSemantics: true,
+      ),
+    ),
   );
 }
