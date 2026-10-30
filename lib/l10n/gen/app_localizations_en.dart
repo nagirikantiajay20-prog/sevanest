@@ -87,10 +87,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homePhotoLabel => 'Home photo';
 
   @override
+  String get homePhotoRequired => 'Add a photo of your home to continue.';
+
+  @override
   String get homePhotoUpload => 'Upload Home Photo';
 
   @override
-  String get homePhotoHelp => 'Optional. Helps the worker find your home.';
+  String get homePhotoHelp => 'Helps the worker find your home.';
 
   @override
   String get homePhotoGallery => 'Choose from gallery';
@@ -902,6 +905,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationUseCurrent => 'Use my current location';
+
+  @override
+  String get setAsDefaultSub => 'Used first when you book a worker.';
+
+  @override
+  String get labelOptional => 'optional';
+
+  @override
+  String get addressLabelName => 'Label';
+
+  @override
+  String get addressLocating => 'Finding you...';
+
+  @override
+  String get addressLocatingSub => 'Checking GPS and your service area';
+
+  @override
+  String get addressLocationFound => 'Location found';
+
+  @override
+  String get addressLocationFoundSub =>
+      'Area, city and pincode filled in for you';
+
+  @override
+  String get addressLabelHome => 'Home';
+
+  @override
+  String get addressLabelParents => 'Parents\' home';
+
+  @override
+  String get addressLabelOffice => 'Office';
 
   @override
   String get locationUseCurrentSub => 'Uses GPS, only while you use the app';

@@ -94,6 +94,7 @@ void main() {
     await t.tap(find.byKey(const Key('area_option_Madhapur')));
     await t.pumpAndSettle();
     await enter(t, 'address_pincode_field', '500081');
+    await addHomePhoto(t);
   }
 
   setUp(() {
@@ -332,6 +333,9 @@ void main() {
           find.byKey(const Key('address_pincode_field_error')),
           findsNothing,
         );
+        // The home photo is mandatory too.
+        expect(fb(t, const Key('address_save_btn')).onPressed, isNull);
+        await addHomePhoto(t);
         expect(fb(t, const Key('address_save_btn')).onPressed, isNotNull);
       },
     );
@@ -492,6 +496,7 @@ void main() {
       await t.tap(find.byKey(const Key('address_card_o1')));
       await t.pumpAndSettle();
       await enter(t, 'address_pincode_field', '500033');
+      await addHomePhoto(t);
       await tapKey(t, 'address_default_switch');
       await tapKey(t, 'address_save_btn');
 
@@ -603,7 +608,7 @@ void main() {
     );
 
     testWidgets(
-      'reopened address shows its photo; Remove then save deletes it',
+      'reopened address shows its photo; Remove needs a replacement before saving',
       (t) async {
         addresses.items = [withPhoto];
         await launch(t);
@@ -615,13 +620,16 @@ void main() {
 
         await tapKey(t, 'home_photo_remove');
         expect(find.byKey(const Key('home_photo_add')), findsOneWidget);
+        expect(fb(t, const Key('address_save_btn')).onPressed, isNull);
+        await addHomePhoto(t);
         await tapKey(t, 'address_save_btn');
-        expect(addresses.removePhotoCalls, 1);
+        expect(addresses.uploadedPhoto, isNotNull);
+        expect(addresses.removePhotoCalls, 0);
       },
     );
 
     testWidgets(
-      'no photo: the upload tile is offered and saving is unaffected',
+      'no photo: the upload tile is offered, Save stays disabled until one is chosen',
       (t) async {
         addresses.items = [_home];
         await launch(t);
@@ -630,10 +638,12 @@ void main() {
         await t.pumpAndSettle();
         await t.ensureVisible(find.byKey(const Key('home_photo_add')));
         expect(find.text('Upload Home Photo'), findsOneWidget);
-        await enter(t, 'address_pincode_field', '500082');
+        expect(find.byKey(const Key('home_photo_required')), findsOneWidget);
+        expect(fb(t, const Key('address_save_btn')).onPressed, isNull);
+        await addHomePhoto(t);
+        expect(find.byKey(const Key('home_photo_required')), findsNothing);
         await tapKey(t, 'address_save_btn');
-        expect(addresses.removePhotoCalls, 0);
-        expect(addresses.uploadedPhoto, isNull);
+        expect(addresses.uploadedPhoto, isNotNull);
       },
     );
 

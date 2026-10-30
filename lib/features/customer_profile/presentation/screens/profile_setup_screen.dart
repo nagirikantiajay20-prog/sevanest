@@ -79,6 +79,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
 
   /// Home address typed on this screen; saved right after the profile (it needs the profile first).
   AddressInput? _address;
+  PickedPhoto? _homePhoto;
   bool _addressTouched = false;
   bool _profileSaved = false;
 
@@ -97,10 +98,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
   }
 
   Future<void> _pickAddress() async {
-    final picked = await showCollectAddressSheet(context, initial: _address);
+    final picked = await showCollectAddressSheet(
+      context,
+      initial: _address,
+      initialPhoto: _homePhoto,
+    );
     if (picked != null && mounted) {
       setState(() {
-        _address = picked;
+        _address = picked.input;
+        _homePhoto = picked.photo;
         _addressFailure = null;
       });
       WidgetsBinding.instance.addPostFrameCallback((_) => _celebrate());
@@ -158,8 +164,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       }
       _profileSaved = true;
     }
+    final Address created;
     try {
-      await ref.read(addressRepositoryProvider).create(address);
+      created = await ref.read(addressRepositoryProvider).create(address);
     } on AppFailure catch (f) {
       if (mounted) {
         setState(() {
@@ -168,6 +175,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
         });
       }
       return;
+    }
+    // Home photo: best effort too; it can be added again by editing the address.
+    final homePhoto = _homePhoto;
+    if (homePhoto != null) {
+      try {
+        await ref
+            .read(addressRepositoryProvider)
+            .uploadPhoto(created.id, homePhoto);
+      } on AppFailure {
+        // ignored on purpose
+      }
     }
     // The photo needs the profile to exist. Best effort: a failure must not block sign-up; the
     // photo can be added again from Account.

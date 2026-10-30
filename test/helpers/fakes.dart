@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:sevanest_customer/app/app.dart';
 import 'package:sevanest_customer/app/session_reset_host.dart';
 import 'package:sevanest_customer/app/theme/app_theme.dart';
@@ -13,6 +16,8 @@ import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
+import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart'
+    show debugPickHomePhoto;
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
@@ -558,6 +563,22 @@ class FakeGuidanceRepository implements GuidanceRepository {
 
 /// Profile setup: opens the "Add your home address" card, fills the sheet and saves it (nothing is
 /// sent to the backend until Continue).
+/// A valid 1x1 PNG, so the preview decodes.
+final _onePixelPng = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+);
+
+/// Picks a (fake) home photo through the Gallery option of the chooser sheet.
+Future<void> addHomePhoto(WidgetTester t) async {
+  debugPickHomePhoto = (_) async => XFile.fromData(_onePixelPng);
+  addTearDown(() => debugPickHomePhoto = null);
+  await t.ensureVisible(find.byKey(const Key('home_photo_add')));
+  await t.tap(find.byKey(const Key('home_photo_add')));
+  await t.pumpAndSettle();
+  await t.tap(find.byKey(const Key('home_photo_gallery_option')));
+  await t.pumpAndSettle();
+}
+
 Future<void> addHomeAddress(WidgetTester t) async {
   Future<void> enter(String key, String text) async {
     await t.ensureVisible(find.byKey(Key(key)));
@@ -576,6 +597,7 @@ Future<void> addHomeAddress(WidgetTester t) async {
   await t.tap(find.byKey(const Key('area_option_Madhapur')));
   await t.pumpAndSettle();
   await enter('address_pincode_field', '500081');
+  await addHomePhoto(t);
   await t.ensureVisible(find.byKey(const Key('address_save_btn')));
   await t.tap(find.byKey(const Key('address_save_btn')));
   await t.pumpAndSettle();

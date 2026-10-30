@@ -27,11 +27,20 @@ class LabeledField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.fill,
+    this.requiredMark = false,
+    this.optionalInline,
     super.key,
   });
 
-  /// Fill colour for screens that sit on a photo (the glass profile setup).
+  /// Fill colour for screens that sit on a photo: also switches to the glass look (15 px corners,
+  /// 1.5 px slate border, 16 px text).
   final Color? fill;
+
+  /// Red asterisk after the label.
+  final bool requiredMark;
+
+  /// Plain "(optional)"-style note after the label (the [optionalTag] pill is the older look).
+  final String? optionalInline;
   final String name;
   final String label;
   final TextEditingController? controller;
@@ -57,18 +66,43 @@ class LabeledField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasError = error != null;
+    final glass = fill != null;
     OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppRadius.field),
-      borderSide: BorderSide(color: c, width: w),
+      borderRadius: BorderRadius.circular(glass ? 15 : AppRadius.field),
+      borderSide: BorderSide(color: c, width: glass ? 1.5 : w),
     );
-    final idle = hasError ? AppColors.danger : AppColors.hairline;
+    final edge = glass ? const Color(0xFFCBD5E1) : AppColors.hairline;
+    final idle = hasError ? AppColors.danger : edge;
+    final labelStyle = AppText.label.copyWith(fontSize: glass ? 14.5 : 15);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Flexible(
-              child: Text(label, style: AppText.label.copyWith(fontSize: 15)),
+              child: requiredMark || optionalInline != null
+                  ? Text.rich(
+                      TextSpan(
+                        text: label,
+                        children: [
+                          if (requiredMark)
+                            const TextSpan(
+                              text: ' *',
+                              style: TextStyle(color: AppColors.danger),
+                            ),
+                          if (optionalInline != null)
+                            TextSpan(
+                              text: ' ($optionalInline)',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.slate700,
+                              ),
+                            ),
+                        ],
+                      ),
+                      style: labelStyle,
+                    )
+                  : Text(label, style: labelStyle),
             ),
             if (optionalTag != null) ...[
               const SizedBox(width: AppSpacing.sm),
@@ -108,7 +142,7 @@ class LabeledField extends StatelessWidget {
             hintText: hint,
             hintStyle: AppText.card.copyWith(
               fontWeight: FontWeight.w400,
-              color: AppColors.slate400,
+              color: glass ? const Color(0xFF64748B) : AppColors.slate400,
             ),
             counterText: '',
             prefixIcon: prefixIcon == null
@@ -117,13 +151,13 @@ class LabeledField extends StatelessWidget {
             suffixIcon: suffixIcon,
             filled: fill != null || !enabled || readOnly && onTap == null,
             fillColor: fill ?? AppColors.fieldBg,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.md,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: glass ? 14 : AppSpacing.md,
+              vertical: glass ? 15 : AppSpacing.md,
             ),
             border: border(idle),
             enabledBorder: border(idle),
-            disabledBorder: border(AppColors.hairline),
+            disabledBorder: border(edge),
             focusedBorder: border(
               hasError ? AppColors.danger : AppColors.teal,
               1.5,

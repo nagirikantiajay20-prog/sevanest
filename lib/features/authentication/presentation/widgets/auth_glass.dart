@@ -209,6 +209,7 @@ class AuthCta extends StatelessWidget {
     required this.onPressed,
     this.done = false,
     this.breathe = false,
+    this.showArrow = true,
     this.radius = 16,
     super.key,
   });
@@ -222,6 +223,9 @@ class AuthCta extends StatelessWidget {
   /// Finished successfully: teal, tick icon, not pressable.
   final bool done;
   final bool breathe;
+
+  /// Arrow after the label (off for a plain "Save").
+  final bool showArrow;
   final double radius;
 
   static const _idle = Color(0xFF8D9BB3);
@@ -330,7 +334,7 @@ class AuthCta extends StatelessWidget {
                         const SizedBox(width: 10),
                       ],
                       Text(loading ? loadingLabel : label),
-                      if (!loading && !done) ...[
+                      if (showArrow && !loading && !done) ...[
                         const SizedBox(width: 10),
                         const Icon(Icons.arrow_forward_rounded, size: 20),
                       ],

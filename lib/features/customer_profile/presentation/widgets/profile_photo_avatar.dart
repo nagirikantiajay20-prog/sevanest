@@ -12,6 +12,7 @@ import 'package:sevanest_customer/features/addresses/presentation/widgets/home_p
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_photo_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
+
 String profileInitials(String name) {
   final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
   return parts.take(2).map((p) => p[0].toUpperCase()).join();

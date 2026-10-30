@@ -244,6 +244,12 @@ abstract class AppLocalizations {
   /// **'Home photo'**
   String get homePhotoLabel;
 
+  /// No description provided for @homePhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo of your home to continue.'**
+  String get homePhotoRequired;
+
   /// No description provided for @homePhotoUpload.
   ///
   /// In en, this message translates to:
@@ -253,7 +259,7 @@ abstract class AppLocalizations {
   /// No description provided for @homePhotoHelp.
   ///
   /// In en, this message translates to:
-  /// **'Optional. Helps the worker find your home.'**
+  /// **'Helps the worker find your home.'**
   String get homePhotoHelp;
 
   /// No description provided for @homePhotoGallery.
@@ -1737,6 +1743,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use my current location'**
   String get locationUseCurrent;
+
+  /// No description provided for @setAsDefaultSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Used first when you book a worker.'**
+  String get setAsDefaultSub;
+
+  /// No description provided for @labelOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get labelOptional;
+
+  /// No description provided for @addressLabelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get addressLabelName;
+
+  /// No description provided for @addressLocating.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding you...'**
+  String get addressLocating;
+
+  /// No description provided for @addressLocatingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking GPS and your service area'**
+  String get addressLocatingSub;
+
+  /// No description provided for @addressLocationFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Location found'**
+  String get addressLocationFound;
+
+  /// No description provided for @addressLocationFoundSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Area, city and pincode filled in for you'**
+  String get addressLocationFoundSub;
+
+  /// No description provided for @addressLabelHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get addressLabelHome;
+
+  /// No description provided for @addressLabelParents.
+  ///
+  /// In en, this message translates to:
+  /// **'Parents\' home'**
+  String get addressLabelParents;
+
+  /// No description provided for @addressLabelOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Office'**
+  String get addressLabelOffice;
 
   /// No description provided for @locationUseCurrentSub.
   ///

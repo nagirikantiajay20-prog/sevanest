@@ -14,7 +14,12 @@ import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/addresses/presentation/widgets/address_form_widgets.dart';
 import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
+    show splashHoldProvider;
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/motion.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/utils/validators.dart';
@@ -92,15 +97,26 @@ Future<Address?> showAddAddressSheet(
 }) => _showAddressSheet<Address>(context, prefill: prefill);
 
 /// The same sheet for profile setup, where the profile does not exist yet: nothing is saved, the
-/// typed address comes back as an [AddressInput] for the caller to save once the profile exists.
-Future<AddressInput?> showCollectAddressSheet(
+/// typed address and its (mandatory) home photo come back for the caller to save once the profile
+/// exists.
+Future<CollectedAddress?> showCollectAddressSheet(
   BuildContext context, {
   AddressInput? initial,
-}) => _showAddressSheet<AddressInput>(context, prefill: initial, collect: true);
+  PickedPhoto? initialPhoto,
+}) => _showAddressSheet<CollectedAddress>(
+  context,
+  prefill: initial,
+  photo: initialPhoto,
+  collect: true,
+);
+
+/// What the profile-setup address sheet hands back.
+typedef CollectedAddress = ({AddressInput input, PickedPhoto photo});
 
 Future<T?> _showAddressSheet<T>(
   BuildContext context, {
   AddressInput? prefill,
+  PickedPhoto? photo,
   bool collect = false,
 }) {
   final l10n = AppLocalizations.of(context);
@@ -108,33 +124,22 @@ Future<T?> _showAddressSheet<T>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    barrierColor: const Color(0x610F2340),
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
       child: SizedBox(
         height: MediaQuery.sizeOf(ctx).height * 0.9,
-        child: Column(
-          children: [
-            ListTile(
-              title: Text(
-                l10n.addAddress,
-                style: Theme.of(ctx).textTheme.titleLarge,
-              ),
-              trailing: IconButton(
-                key: const Key('address_sheet_close_btn'),
-                tooltip: MaterialLocalizations.of(ctx).closeButtonLabel,
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(ctx).maybePop(),
-              ),
-            ),
-            Expanded(
-              child: _AddressForm(
-                firstTime: false,
-                prefill: prefill,
-                inSheet: true,
-                collect: collect,
-              ),
-            ),
-          ],
+        child: AddressSheetFrame(
+          title: l10n.addAddress,
+          child: _AddressForm(
+            firstTime: false,
+            prefill: prefill,
+            initialPhoto: photo,
+            inSheet: true,
+            collect: collect,
+          ),
         ),
       ),
     ),
@@ -146,6 +151,7 @@ class _AddressForm extends ConsumerStatefulWidget {
     required this.firstTime,
     this.initial,
     this.prefill,
+    this.initialPhoto,
     this.inSheet = false,
     this.collect = false,
   });
@@ -154,6 +160,9 @@ class _AddressForm extends ConsumerStatefulWidget {
   /// Profile setup: return the typed [AddressInput] instead of saving it.
   final bool collect;
   final AddressInput? prefill;
+
+  /// Photo chosen earlier in profile setup, kept when the sheet is reopened.
+  final PickedPhoto? initialPhoto;
   final Address? initial;
   final bool firstTime;
 
@@ -161,7 +170,15 @@ class _AddressForm extends ConsumerStatefulWidget {
   ConsumerState<_AddressForm> createState() => _AddressFormState();
 }
 
-class _AddressFormState extends ConsumerState<_AddressForm> {
+class _AddressFormState extends ConsumerState<_AddressForm>
+    with SingleTickerProviderStateMixin {
+  static final _fill = Colors.white.withValues(alpha: 0.8);
+  late final _clock = ScreenClock(
+    this,
+    motion: ref.read(splashHoldProvider) > Duration.zero,
+  );
+  bool _locationFound = false;
+  bool _areaOpen = false;
   late final _label = TextEditingController(text: widget.initial?.label ?? '');
   late final _house = TextEditingController(
     text: widget.initial == null
@@ -190,7 +207,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
   bool _defaultTouched = false;
 
   /// A photo chosen in this session (uploaded on save) / the saved one removed by the customer.
-  PickedPhoto? _photo;
+  late PickedPhoto? _photo = widget.initialPhoto;
   bool _photoRemoved = false;
 
   Address? get _initial => widget.initial;
@@ -223,6 +240,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
 
   @override
   void dispose() {
+    _clock.dispose();
     for (final c in [_label, _house, _street, _area, _city, _pincode]) {
       c.dispose();
     }
@@ -255,12 +273,19 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
         _photoRemoved;
   }
 
-  bool get _valid =>
+  /// The home photo is mandatory: a new pick, or the saved one not removed.
+  bool get _hasPhoto =>
+      _photo != null ||
+      (!_photoRemoved && (_initial?.photoUrl?.isNotEmpty ?? false));
+
+  bool get _fieldsValid =>
       _house.text.trim().isNotEmpty &&
       _street.text.trim().isNotEmpty &&
       _area.text.trim().isNotEmpty &&
       _city.text.trim().isNotEmpty &&
       isValidPincode(_pincode.text);
+
+  bool get _valid => _fieldsValid && _hasPhoto;
 
   void _leave() => widget.inSheet
       ? Navigator.of(context).pop()
@@ -288,6 +313,7 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
     setState(() {
       _locating = true;
       _locationOff = false;
+      _locationFound = false;
     });
     final res = await ref.read(locationServiceProvider).currentAddress();
     if (!mounted) return;
@@ -313,14 +339,15 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
       _pincode.text = found.pincode;
       _lat = found.latitude;
       _lng = found.longitude;
+      _locationFound = true;
     });
   }
 
   Future<void> _save() async {
     if (!_valid) return;
     if (widget.collect) {
-      Navigator.of(context).pop(
-        AddressInput(
+      Navigator.of(context).pop((
+        input: AddressInput(
           line: _house.text.trim(),
           line2: _street.text.trim(),
           label: _label.text,
@@ -331,7 +358,8 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
           latitude: _lat,
           longitude: _lng,
         ),
-      );
+        photo: _photo!,
+      ));
       return;
     }
     final messenger = ScaffoldMessenger.of(context);
@@ -403,49 +431,6 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
     }
   }
 
-  Future<void> _pickArea(List<ServiceArea> areas) async {
-    final l10n = AppLocalizations.of(context);
-    final picked = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (ctx) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(
-              l10n.chooseArea,
-              style: const TextStyle(
-                color: AppColors.ink,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          Flexible(
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                for (final a in areas)
-                  ListTile(
-                    key: Key('area_option_${a.name}'),
-                    title: Text(a.name),
-                    trailing: a.name == _area.text.trim()
-                        ? const Icon(Icons.check, color: AppColors.teal)
-                        : null,
-                    onTap: () => Navigator.of(ctx).pop(a.name),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-    if (picked != null) setState(() => _area.text = picked);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -484,18 +469,14 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!_isEdit) ...[
-                    OutlinedButton.icon(
-                      key: const Key('address_use_location_btn'),
-                      onPressed: form.busy || _locating
+                    AddressLocationCard(
+                      clock: _clock,
+                      locating: _locating,
+                      found: _locationFound,
+                      failed: _locationOff,
+                      onTap: form.busy || _locating
                           ? null
                           : _useCurrentLocation,
-                      icon: _locating
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.my_location),
-                      label: Text(l10n.locationUseCurrent),
                     ),
                     if (_locationOff)
                       Padding(
@@ -503,14 +484,29 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                         child: Text(
                           l10n.addressLocationFailed,
                           key: const Key('address_location_error'),
-                          style: const TextStyle(color: AppColors.danger),
+                          style: const TextStyle(
+                            color: Color(0xFFB91C1C),
+                            fontSize: 13,
+                            height: 1.45,
+                          ),
                         ),
                       ),
-                    const SizedBox(height: AppSpacing.lg),
+                    if (_locationFound) ...[
+                      const SizedBox(height: 12),
+                      AddressFoundMap(
+                        clock: _clock,
+                        caption:
+                            '${_area.text} \u00b7 ${_city.text} ${_pincode.text}',
+                      ),
+                    ],
+                    const SizedBox(height: 18),
                   ],
                   LabeledField(
+                    fill: _fill,
                     name: 'address_label_field',
-                    label: l10n.addressLabelLabel,
+                    label: l10n.addressLabelName,
+                    optionalInline: l10n.labelOptional,
+                    prefixIcon: Icons.home_outlined,
                     hint: l10n.addressLabelHint,
                     controller: _label,
                     enabled: !form.busy,
@@ -518,10 +514,20 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                     textInputAction: TextInputAction.next,
                     onChanged: (_) => setState(() {}),
                   ),
+                  const SizedBox(height: 10),
+                  AddressLabelChips(
+                    current: _label.text,
+                    onPick: form.busy
+                        ? null
+                        : (t) => setState(() => _label.text = t),
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   LabeledField(
+                    fill: _fill,
                     name: 'address_line1_field',
                     label: l10n.houseLabel,
+                    requiredMark: true,
+                    prefixIcon: Icons.apartment_outlined,
                     hint: l10n.houseHint,
                     controller: _house,
                     enabled: !form.busy,
@@ -531,8 +537,11 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   LabeledField(
+                    fill: _fill,
                     name: 'address_line2_field',
                     label: l10n.streetLabel,
+                    requiredMark: true,
+                    prefixIcon: Icons.location_on_outlined,
                     hint: l10n.streetHint,
                     controller: _street,
                     enabled: !form.busy,
@@ -541,50 +550,84 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   LabeledField(
+                    fill: _fill,
                     name: 'address_area_field',
                     label: l10n.areaLabel,
+                    requiredMark: true,
+                    prefixIcon: Icons.map_outlined,
                     hint: l10n.areaHint,
                     controller: _area,
                     enabled: !form.busy,
                     readOnly: picker,
-                    onTap: picker ? () => _pickArea(areaList) : null,
+                    onTap: picker
+                        ? () => setState(() => _areaOpen = !_areaOpen)
+                        : null,
                     suffixIcon: picker
-                        ? const Icon(Icons.expand_more_rounded)
+                        ? AnimatedRotation(
+                            turns: _areaOpen ? 0.5 : 0,
+                            duration: const Duration(milliseconds: 250),
+                            child: const Icon(Icons.expand_more_rounded),
+                          )
                         : null,
                     helper: areas.hasError ? l10n.areasUnavailable : null,
                     error: fieldErrors['area'],
                     textInputAction: TextInputAction.next,
                     onChanged: (_) => setState(() {}),
                   ),
+                  if (picker && _areaOpen)
+                    AddressAreaList(
+                      names: [for (final a in areaList) a.name],
+                      selected: _area.text.trim(),
+                      onPick: (n) => setState(() {
+                        _area.text = n;
+                        _areaOpen = false;
+                      }),
+                    ),
                   const SizedBox(height: AppSpacing.lg),
-                  LabeledField(
-                    name: 'address_city_field',
-                    label: l10n.cityLabel,
-                    controller: _city,
-                    enabled: !form.busy,
-                    textInputAction: TextInputAction.next,
-                    error: fieldErrors['city'],
-                    onChanged: (_) => setState(() {}),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: LabeledField(
+                          fill: _fill,
+                          name: 'address_city_field',
+                          label: l10n.cityLabel,
+                          requiredMark: true,
+                          controller: _city,
+                          enabled: !form.busy,
+                          textInputAction: TextInputAction.next,
+                          error: fieldErrors['city'],
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: LabeledField(
+                          fill: _fill,
+                          name: 'address_pincode_field',
+                          label: l10n.pincodeLabel,
+                          requiredMark: true,
+                          hint: l10n.pincodeHint,
+                          controller: _pincode,
+                          enabled: !form.busy,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          maxLength: 6,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          error: pincodeBad
+                              ? l10n.pincodeInvalid
+                              : fieldErrors['pincode'],
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  LabeledField(
-                    name: 'address_pincode_field',
-                    label: l10n.pincodeLabel,
-                    hint: l10n.pincodeHint,
-                    controller: _pincode,
-                    enabled: !form.busy,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    maxLength: 6,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    error: pincodeBad
-                        ? l10n.pincodeInvalid
-                        : fieldErrors['pincode'],
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  if (!widget.collect) ...[
+                  const SizedBox(height: 18),
+                  ...[
                     HomePhotoField(
+                      showRequired: _fieldsValid,
                       photo: _photo,
                       url: _photoRemoved ? null : _initial?.photoUrl,
                       enabled: !form.busy,
@@ -602,10 +645,25 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
                   SwitchListTile(
                     key: const Key('address_default_switch'),
                     contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.setAsDefault),
-                    subtitle: _initial?.isDefault ?? false
-                        ? Text(l10n.alreadyDefault)
-                        : null,
+                    activeTrackColor: AppColors.teal,
+                    inactiveTrackColor: const Color(0xFF94A3B8),
+                    thumbColor: const WidgetStatePropertyAll(Colors.white),
+                    trackOutlineColor: const WidgetStatePropertyAll(
+                      Colors.transparent,
+                    ),
+                    title: Text(
+                      l10n.setAsDefault,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: authNavy,
+                      ),
+                    ),
+                    subtitle: Text(
+                      _initial?.isDefault ?? false
+                          ? l10n.alreadyDefault
+                          : l10n.setAsDefaultSub,
+                    ),
                     value: _default,
                     // The API can't unset a default: another address must be made default instead.
                     onChanged: form.busy || (_initial?.isDefault ?? false)
@@ -641,35 +699,47 @@ class _AddressFormState extends ConsumerState<_AddressForm> {
               ),
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.md,
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.6),
+              border: Border(
+                top: BorderSide(color: authNavy.withValues(alpha: 0.08)),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SnButton(
-                    key: const Key('address_save_btn'),
-                    label: l10n.saveAddress,
-                    loadingLabel: l10n.saving,
-                    isLoading: form.busy,
-                    onPressed: _valid && !form.busy ? _save : null,
-                  ),
-                  if (widget.firstTime)
-                    SnButton(
-                      key: const Key('address_skip_btn'),
-                      label: l10n.skipForNow,
-                      variant: SnButtonVariant.text,
-                      onPressed: form.busy
-                          ? null
-                          : () => context.go(Routes.home),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.s12,
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AuthCta(
+                      key: const Key('address_save_btn'),
+                      clock: _clock,
+                      breathe: true,
+                      showArrow: false,
+                      radius: 17,
+                      label: l10n.saveAddress,
+                      loadingLabel: l10n.saving,
+                      loading: form.busy,
+                      onPressed: _valid && !form.busy ? _save : null,
                     ),
-                ],
+                    if (widget.firstTime)
+                      SnButton(
+                        key: const Key('address_skip_btn'),
+                        label: l10n.skipForNow,
+                        variant: SnButtonVariant.text,
+                        onPressed: form.busy
+                            ? null
+                            : () => context.go(Routes.home),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

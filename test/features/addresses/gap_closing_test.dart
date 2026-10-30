@@ -124,6 +124,7 @@ void main() {
       await t.enterText(find.byKey(const Key('address_line1_field')), '7B');
       await t.enterText(find.byKey(const Key('address_line2_field')), 'Lake');
       await t.pump();
+      await addHomePhoto(t);
       await t.ensureVisible(find.byKey(const Key('address_save_btn')));
       await t.tap(find.byKey(const Key('address_save_btn')));
       await settle(t);
