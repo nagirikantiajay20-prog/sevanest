@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,15 +10,45 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
+    show splashHoldProvider;
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_widgets.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/motion.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 enum _BoxStyle { normal, error, success, locked }
+
+const _slate700 = AppColors.slate700;
+
+/// Photo under a vertical wash, with a teal glow top-left and an amber one lower right.
+final _backdropStyle = RoomBackdropStyle(
+  alignment: const Alignment(0.24, -0.2),
+  zoomFrom: 1.06,
+  driftMs: 22000,
+  drift: const Offset(-6, -4),
+  glowTravel: const Offset(30, 40),
+  glowZoom: 0.12,
+  glowMs: 12000,
+  washes: [
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        AppColors.ivory.withValues(alpha: 0.9),
+        AppColors.ivory.withValues(alpha: 0.72),
+        AppColors.ivory.withValues(alpha: 0.82),
+      ],
+      stops: const [0, 0.45, 1],
+    ),
+  ],
+  glows: const [
+    AuthGlow(Color(0x520F766E), 260, top: -60, left: -80),
+    AuthGlow(Color(0x4DF59E0B), 260, top: 520, right: -90, delayMs: 6000),
+  ],
+);
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -24,12 +57,23 @@ class OtpScreen extends ConsumerStatefulWidget {
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends ConsumerState<OtpScreen> {
+class _OtpScreenState extends ConsumerState<OtpScreen>
+    with TickerProviderStateMixin {
   final _controller = TextEditingController();
   final _focus = FocusNode();
+  late final _clock = ScreenClock(
+    this,
+    motion: ref.read(splashHoldProvider) > Duration.zero,
+  );
+  late final AnimationController _shake = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 400),
+  );
 
   @override
   void dispose() {
+    _clock.dispose();
+    _shake.dispose();
     _controller.dispose();
     _focus.dispose();
     super.dispose();
@@ -55,6 +99,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     await notifier.requestOtp(mobile);
   }
 
+  static bool _isWrong(OtpPhase p) =>
+      p == OtpPhase.invalidOtp || p == OtpPhase.expired;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -69,6 +116,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text(l10n.otpSentAgain)));
       }
+      if (_isWrong(next.phase) && !_isWrong(prev?.phase ?? OtpPhase.idle)) {
+        _shake.forward(from: 0);
+      }
     });
 
     final style = switch (otp.phase) {
@@ -82,296 +132,596 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     final canSubmit =
         _controller.text.length == otpLength &&
         otp.canVerify &&
-        otp.phase != OtpPhase.invalidOtp &&
-        otp.phase != OtpPhase.expired;
+        !_isWrong(otp.phase);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.ivory,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.ivory, AppColors.surface],
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: RoomBackdrop(clock: _clock, style: _backdropStyle),
           ),
-        ),
-        child: Stack(
-          children: [
-            const Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              height: 380,
-              child: SnPhotoBackdrop(
-                asset: AppPhotos.room,
-                washAtEdge: 0.05,
-                leftWash: 0.85,
-                alignment: Alignment.topCenter,
-              ),
-            ),
-            SafeArea(
-              child: CustomScrollView(
-                slivers: [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, box) => SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: box.maxHeight),
+                  child: IntrinsicHeight(
                     child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              AuthBackButton(onPressed: _leave),
-                              const SizedBox(width: AppSpacing.s12),
-                              Image.asset(
-                                'assets/branding/logo_mark.png',
-                                height: 48,
-                                excludeFromSemantics: true,
-                              ),
-                              const SizedBox(width: AppSpacing.s12),
-                              Expanded(
+                          Rise(
+                            clock: _clock,
+                            start: 100,
+                            duration: 700,
+                            child: _Header(onBack: _leave),
+                          ),
+                          Rise(
+                            clock: _clock,
+                            start: 240,
+                            duration: 700,
+                            child: _Intro(
+                              clock: _clock,
+                              otp: otp,
+                              onChangeNumber: _leave,
+                            ),
+                          ),
+                          Rise(
+                            clock: _clock,
+                            start: 380,
+                            duration: 700,
+                            child: AuthGlass(
+                              radius: BorderRadius.circular(30),
+                              blur: 22,
+                              gradient: _glassGradient,
+                              border: _glassBorder,
+                              shadow: _glassShadow,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  18,
+                                  16,
+                                  14,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text.rich(
-                                      const TextSpan(
-                                        text: 'Seva',
-                                        children: [
-                                          TextSpan(
-                                            text: 'Nest',
-                                            style: TextStyle(
-                                              color: AppColors.teal,
+                                    AnimatedBuilder(
+                                      animation: _shake,
+                                      builder: (context, child) =>
+                                          Transform.translate(
+                                            offset: Offset(
+                                              _shakeOffset(_shake.value),
+                                              0,
+                                            ),
+                                            child: child,
+                                          ),
+                                      child: _OtpBoxes(
+                                        clock: _clock,
+                                        controller: _controller,
+                                        focusNode: _focus,
+                                        style: style,
+                                        enabled: otp.canVerify,
+                                        onChanged: (_) {
+                                          ref
+                                              .read(
+                                                otpControllerProvider.notifier,
+                                              )
+                                              .codeEdited();
+                                          setState(() {});
+                                        },
+                                        onSubmitted: _verify,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _Status(otp: otp, onResend: _resend),
+                                    const SizedBox(height: 4),
+                                    AuthCta(
+                                      key: const Key('otp_verify_btn'),
+                                      clock: _clock,
+                                      radius: 17,
+                                      label: isVerified
+                                          ? l10n.verifiedLabel
+                                          : l10n.verifyContinue,
+                                      loadingLabel: l10n.verifying,
+                                      loading: otp.phase == OtpPhase.verifying,
+                                      done: isVerified,
+                                      onPressed: canSubmit ? _verify : null,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.only(top: 1),
+                                          child: Icon(
+                                            Icons.shield_outlined,
+                                            size: 18,
+                                            color: _slate700,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            l10n.otpFooter(
+                                              (otp.expiresInSeconds / 60)
+                                                  .ceil(),
+                                            ),
+                                            style: AppText.body.copyWith(
+                                              fontSize: 12.5,
+                                              height: 1.45,
+                                              color: _slate700,
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                      semanticsLabel: l10n.appName,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppText.screenTitle.copyWith(
-                                        fontSize: 24,
-                                      ),
-                                    ),
-                                    Text(
-                                      l10n.brandCaption,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppText.body.copyWith(
-                                        fontSize: 12,
-                                        letterSpacing: 1.6,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.slate600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              l10n.otpTitle,
-                              style: AppText.display.copyWith(fontSize: 32),
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            l10n.otpEnterCode(otpLength),
-                            style: AppText.bodyLarge,
-                          ),
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  '+91 ${_spaced(otp.mobile)}',
-                                  key: const Key('otp_mobile_text'),
-                                  style: AppText.title.copyWith(
-                                    fontFamily: AppFonts.body,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                key: const Key('otp_change_number_btn'),
-                                tooltip: l10n.changeNumber,
-                                constraints: const BoxConstraints.tightFor(
-                                  width: kMinTapTarget,
-                                  height: kMinTapTarget,
-                                ),
-                                onPressed: _leave,
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  color: AppColors.slate,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          SnCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _OtpBoxes(
-                                  controller: _controller,
-                                  focusNode: _focus,
-                                  style: style,
-                                  enabled: otp.canVerify,
-                                  onChanged: (_) {
-                                    ref
-                                        .read(otpControllerProvider.notifier)
-                                        .codeEdited();
-                                    setState(() {});
-                                  },
-                                  onSubmitted: _verify,
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                _Status(otp: otp, onResend: _resend),
-                                const SizedBox(height: AppSpacing.md),
-                                _VerifyButton(
-                                  loading: otp.phase == OtpPhase.verifying,
-                                  verified: isVerified,
-                                  onPressed: canSubmit ? _verify : null,
-                                ),
-                                const SizedBox(height: AppSpacing.md),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Icon(
-                                      Icons.shield_outlined,
-                                      size: 20,
-                                      color: AppColors.slate,
-                                    ),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    Expanded(
-                                      child: Text(
-                                        l10n.otpFooter(
-                                          (otp.expiresInSeconds / 60).ceil(),
                                         ),
-                                        textAlign: TextAlign.center,
-                                        style: AppText.body,
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
-                          if (otp.demoOtp != null) ...[
-                            const SizedBox(height: AppSpacing.md),
-                            _DemoOtpCard(code: otp.demoOtp!),
-                          ],
-                          const Expanded(child: ServiceMotif()),
+                          if (otp.demoOtp != null)
+                            _DemoOtpCard(clock: _clock, code: otp.demoOtp!),
                         ],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static String _spaced(String d) =>
-      d.length > 5 ? '${d.substring(0, 5)} ${d.substring(5)}' : d;
-}
-
-/// Test mode: the generated code, with a copy button (the backend does not send SMS).
-class _DemoOtpCard extends StatelessWidget {
-  const _DemoOtpCard({required this.code});
-  final String code;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      key: const Key('otp_demo_card'),
-      padding: const EdgeInsets.all(AppSpacing.s12),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        border: Border.all(color: AppColors.hairline),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            margin: const EdgeInsets.only(right: AppSpacing.s12),
-            decoration: BoxDecoration(
-              color: AppColors.tealMist,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: const Icon(Icons.mail_outline, color: AppColors.teal),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.demoOtpLabel, style: AppText.body),
-                Text(
-                  code,
-                  key: const Key('otp_demo_code'),
-                  style: AppText.title.copyWith(letterSpacing: 4),
-                ),
-              ],
-            ),
-          ),
-          TextButton.icon(
-            key: const Key('otp_demo_copy_btn'),
-            onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              final copied = l10n.demoOtpCopied;
-              await Clipboard.setData(ClipboardData(text: code));
-              messenger
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(content: Text(copied)));
-            },
-            icon: const Icon(Icons.copy_rounded, size: 18),
-            label: Text(l10n.demoOtpCopy),
           ),
         ],
       ),
     );
   }
+
+  /// Horizontal shake: left, right, back (400 ms).
+  static double _shakeOffset(double t) => t < 0.2
+      ? -6 * t / 0.2
+      : t < 0.6
+      ? -6 + 12 * (t - 0.2) / 0.4
+      : 6 * (1 - (t - 0.6) / 0.4);
 }
 
-class _VerifyButton extends StatelessWidget {
-  const _VerifyButton({
-    required this.loading,
-    required this.verified,
-    required this.onPressed,
-  });
+const _glassGradient = LinearGradient(
+  begin: Alignment(-0.64, -0.77),
+  end: Alignment(0.64, 0.77),
+  colors: [Color(0x9EFFFFFF), Color(0x57FFFFFF)],
+);
+const _glassBorder = Border.fromBorderSide(
+  BorderSide(color: Color(0xD9FFFFFF)),
+);
+const _glassShadow = [
+  BoxShadow(color: Color(0x2E1B3354), blurRadius: 44, offset: Offset(0, 18)),
+];
 
-  final bool loading;
-  final bool verified;
-  final VoidCallback? onPressed;
+/// Back button, logo and wordmark.
+class _Header extends StatelessWidget {
+  const _Header({required this.onBack});
+  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (verified) {
-      return FilledButton.icon(
-        key: const Key('otp_verify_btn'),
-        onPressed: null,
-        style: FilledButton.styleFrom(
-          disabledBackgroundColor: AppColors.teal,
-          disabledForegroundColor: Colors.white,
+    return Row(
+      children: [
+        AuthGlass(
+          radius: BorderRadius.circular(22),
+          blur: 22,
+          gradient: _glassGradient,
+          border: _glassBorder,
+          shadow: _glassShadow,
+          child: IconButton(
+            key: const Key('app_back_btn'),
+            tooltip: l10n.back,
+            constraints: const BoxConstraints.tightFor(width: 44, height: 44),
+            padding: EdgeInsets.zero,
+            onPressed: onBack,
+            icon: const Icon(Icons.chevron_left_rounded, color: authNavy),
+          ),
         ),
-        icon: const Icon(Icons.check_rounded),
-        label: Text(l10n.verifiedLabel),
-      );
-    }
-    return SnButton(
-      key: const Key('otp_verify_btn'),
-      label: l10n.verifyContinue,
-      loadingLabel: l10n.verifying,
-      isLoading: loading,
-      icon: Icons.arrow_forward,
-      onPressed: onPressed,
+        const SizedBox(width: 12),
+        Image.asset(
+          'assets/login/logo.png',
+          height: 42,
+          excludeFromSemantics: true,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                const TextSpan(
+                  text: 'Seva',
+                  children: [
+                    TextSpan(
+                      text: 'Nest',
+                      style: TextStyle(color: AppColors.teal),
+                    ),
+                  ],
+                ),
+                semanticsLabel: l10n.appName,
+                overflow: TextOverflow.ellipsis,
+                style: authSerif(23, 1.1),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l10n.brandCaption,
+                overflow: TextOverflow.ellipsis,
+                style: AppText.body.copyWith(
+                  fontSize: 11,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.w600,
+                  color: _slate700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Resend countdown ring, title and the number the code went to.
+class _Intro extends StatelessWidget {
+  const _Intro({
+    required this.clock,
+    required this.otp,
+    required this.onChangeNumber,
+  });
+  final ScreenClock clock;
+  final OtpState otp;
+  final VoidCallback onChangeNumber;
+
+  static String _spaced(String d) =>
+      d.length > 5 ? '${d.substring(0, 5)} ${d.substring(5)}' : d;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Column(
+      children: [
+        _TimerRing(clock: clock, secondsLeft: otp.secondsLeft),
+        const SizedBox(height: 14),
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.otpTitle,
+            textAlign: TextAlign.center,
+            style: authSerif(32, 1.1),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l10n.otpEnterCode(otpLength),
+          textAlign: TextAlign.center,
+          style: AppText.body.copyWith(
+            fontSize: 15,
+            height: 1.4,
+            color: _slate700,
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                '+91 ${_spaced(otp.mobile)}',
+                key: const Key('otp_mobile_text'),
+                style: AppText.body.copyWith(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                  color: authNavy,
+                ),
+              ),
+            ),
+            IconButton(
+              key: const Key('otp_change_number_btn'),
+              tooltip: l10n.changeNumber,
+              constraints: const BoxConstraints.tightFor(
+                width: kMinTapTarget,
+                height: kMinTapTarget,
+              ),
+              onPressed: onChangeNumber,
+              icon: const Icon(
+                Icons.edit_outlined,
+                color: AppColors.slate600,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Draining ring around the time left to resend, with a pulsing glow and ping.
+class _TimerRing extends StatelessWidget {
+  const _TimerRing({required this.clock, required this.secondsLeft});
+  final ScreenClock clock;
+  final int secondsLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final time = mmss(secondsLeft);
+    final fraction = (secondsLeft / resendCooldownSeconds).clamp(0.0, 1.0);
+    return Semantics(
+      label: secondsLeft > 0 ? l10n.resendIn(time) : l10n.resendCode,
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: 128,
+          height: 128,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              ValueListenableBuilder<double>(
+                valueListenable: clock,
+                builder: (context, t, _) {
+                  final k = Curves.easeInOut.transform(pingPong(t, 2800));
+                  final ping = ((t / 2400) % 1);
+                  return Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Opacity(
+                        opacity: 0.55 + 0.45 * k,
+                        child: Transform.scale(
+                          scale: 1 + 0.14 * k,
+                          child: const SizedBox(
+                            width: 156,
+                            height: 156,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    Color(0x5C0F766E),
+                                    Color(0x000F766E),
+                                  ],
+                                  stops: [0, 0.68],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Opacity(
+                        opacity: 0.7 * (1 - Curves.easeOut.transform(ping)),
+                        child: Transform.scale(
+                          scale: 0.9 + 0.6 * Curves.easeOut.transform(ping),
+                          child: Container(
+                            width: 116,
+                            height: 116,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0x660F766E),
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              if (clock.animating)
+                // Glides between seconds; when frozen it just jumps (a glide would never settle).
+                TweenAnimationBuilder<double>(
+                  tween: Tween(end: fraction),
+                  duration: const Duration(seconds: 1),
+                  builder: (context, f, _) => CustomPaint(
+                    size: const Size.square(128),
+                    painter: _RingPainter(f),
+                  ),
+                )
+              else
+                CustomPaint(
+                  size: const Size.square(128),
+                  painter: _RingPainter(fraction),
+                ),
+              AuthGlass(
+                radius: BorderRadius.circular(46),
+                blur: 22,
+                gradient: _glassGradient,
+                border: _glassBorder,
+                shadow: _glassShadow,
+                child: SizedBox(
+                  width: 92,
+                  height: 92,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.mobile_friendly_rounded,
+                        color: AppColors.teal,
+                        size: 22,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        time,
+                        style: AppText.body.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                          color: authNavy,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  const _RingPainter(this.fraction);
+  final double fraction;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final arc = rect.deflate(7 / 2 + 8); // r = 56 on the 128 box
+    canvas.drawArc(
+      arc,
+      0,
+      2 * math.pi,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 7
+        ..color = const Color(0x1F1B3354),
+    );
+    canvas.drawArc(
+      arc,
+      -math.pi / 2,
+      2 * math.pi * fraction,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 7
+        ..strokeCap = StrokeCap.round
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.teal, Color(0xFF38BDF8)],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) => old.fraction != fraction;
+}
+
+/// Test mode: the generated code, with a copy button (the backend does not send SMS).
+class _DemoOtpCard extends StatelessWidget {
+  const _DemoOtpCard({required this.clock, required this.code});
+  final ValueListenable<double> clock;
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ValueListenableBuilder<double>(
+      valueListenable: clock,
+      // Drops in from above with a little overshoot once the rest has settled.
+      builder: (context, t, child) {
+        final p = seg(t, 900, 900, const Cubic(.3, 1.3, .5, 1));
+        return Opacity(
+          opacity: seg(t, 900, 540, Curves.easeOut),
+          child: Transform.translate(
+            offset: Offset(0, -46 * (1 - p)),
+            child: Transform.scale(scale: 0.96 + 0.04 * p, child: child),
+          ),
+        );
+      },
+      child: AuthGlass(
+        key: const Key('otp_demo_card'),
+        radius: BorderRadius.circular(22),
+        blur: 22,
+        gradient: _glassGradient,
+        border: _glassBorder,
+        shadow: _glassShadow,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(13),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x241B3354),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  'assets/login/logo.png',
+                  width: 36,
+                  excludeFromSemantics: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.demoOtpLabel,
+                      style: AppText.body.copyWith(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _slate700,
+                      ),
+                    ),
+                    Text(
+                      code,
+                      key: const Key('otp_demo_code'),
+                      style: AppText.body.copyWith(
+                        fontSize: 21,
+                        height: 1.2,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 4,
+                        color: authNavy,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton.icon(
+                key: const Key('otp_demo_copy_btn'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  backgroundColor: AppColors.teal.withValues(alpha: 0.12),
+                  foregroundColor: AppColors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  textStyle: AppText.body.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  final copied = l10n.demoOtpCopied;
+                  await Clipboard.setData(ClipboardData(text: code));
+                  messenger
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(SnackBar(content: Text(copied)));
+                },
+                icon: const Icon(Icons.copy_rounded, size: 17),
+                label: Text(l10n.demoOtpCopy),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -388,37 +738,38 @@ class _Status extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     if (otp.phase == OtpPhase.verified) {
-      return Row(
-        children: [
-          const Icon(Icons.check_circle, color: AppColors.success, size: 22),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            l10n.numberVerified,
-            key: const Key('otp_verified_text'),
-            style: const TextStyle(
-              color: AppColors.ink,
-              fontSize: 17,
-              fontWeight: FontWeight.w500,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: AppColors.success, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              l10n.numberVerified,
+              key: const Key('otp_verified_text'),
+              style: AppText.body.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ink,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
     if (otp.isLocked) {
-      return Padding(
-        padding: const EdgeInsets.only(top: AppSpacing.sm),
-        child: Consumer(
-          builder: (context, ref, _) => AuthNoticeCard(
-            key: const Key('otp_locked_card'),
-            icon: Icons.schedule_rounded,
-            title: l10n.tooManyAttempts,
-            message: l10n.tooManyWait((otp.secondsLeft / 60).ceil()),
-            action: AuthLink(
-              key: const Key('otp_support_link'),
-              label: l10n.contactSupport,
-              onTap: () => openSupport(context, ref),
-            ),
+      return Consumer(
+        builder: (context, ref, _) => AuthNoticeCard(
+          key: const Key('otp_locked_card'),
+          icon: Icons.schedule_rounded,
+          title: l10n.tooManyAttempts,
+          message: l10n.tooManyWait((otp.secondsLeft / 60).ceil()),
+          action: AuthLink(
+            key: const Key('otp_support_link'),
+            label: l10n.contactSupport,
+            onTap: () => openSupport(context, ref),
           ),
         ),
       );
@@ -440,8 +791,9 @@ class _Status extends StatelessWidget {
     final resendWidget = otp.secondsLeft > 0
         ? Text.rich(
             key: const Key('otp_countdown_text'),
+            textAlign: TextAlign.center,
             TextSpan(
-              style: const TextStyle(color: AppColors.slate, fontSize: 17),
+              style: AppText.body.copyWith(fontSize: 15, color: _slate700),
               children: [
                 TextSpan(text: countdown.substring(0, timeAt)),
                 TextSpan(
@@ -449,6 +801,7 @@ class _Status extends StatelessWidget {
                   style: const TextStyle(
                     color: AppColors.ink,
                     fontWeight: FontWeight.w700,
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
                 TextSpan(text: countdown.substring(timeAt + time.length)),
@@ -462,43 +815,49 @@ class _Status extends StatelessWidget {
             onTap: otp.canResend ? onResend : null,
           );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (error != null)
-          Semantics(
-            liveRegion: true,
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  color: AppColors.danger,
-                  size: 20,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    error,
-                    key: const Key('otp_error_text'),
-                    style: const TextStyle(
-                      color: AppColors.danger,
-                      fontSize: 16,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 46),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (error != null)
+            Semantics(
+              liveRegion: true,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: AppColors.danger,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      error,
+                      key: const Key('otp_error_text'),
+                      style: AppText.body.copyWith(
+                        fontSize: 14,
+                        color: const Color(0xFFB91C1C),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        const SizedBox(height: AppSpacing.sm),
-        resendWidget,
-        if (otp.secondsLeft == 0 && error == null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            l10n.otpDidntGet,
-            style: const TextStyle(color: AppColors.slate, fontSize: 16),
-          ),
+          if (error != null) const SizedBox(height: 4),
+          Center(child: resendWidget),
+          if (otp.secondsLeft == 0 && error == null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                l10n.otpDidntGet,
+                textAlign: TextAlign.center,
+                style: AppText.body.copyWith(fontSize: 14, color: _slate700),
+              ),
+            ),
         ],
-      ],
+      ),
     );
   }
 
@@ -514,6 +873,7 @@ class _Status extends StatelessWidget {
 /// platform keyboard all work.
 class _OtpBoxes extends StatelessWidget {
   const _OtpBoxes({
+    required this.clock,
     required this.controller,
     required this.focusNode,
     required this.style,
@@ -522,6 +882,7 @@ class _OtpBoxes extends StatelessWidget {
     required this.onSubmitted,
   });
 
+  final ValueListenable<double> clock;
   final TextEditingController controller;
   final FocusNode focusNode;
   final _BoxStyle style;
@@ -544,9 +905,10 @@ class _OtpBoxes extends StatelessWidget {
               return Row(
                 children: [
                   for (var i = 0; i < otpLength; i++) ...[
-                    if (i > 0) const SizedBox(width: AppSpacing.sm),
+                    if (i > 0) const SizedBox(width: 8),
                     Expanded(
                       child: _Box(
+                        clock: clock,
                         char: i < text.length ? text[i] : '',
                         focused:
                             enabled &&
@@ -596,8 +958,14 @@ class _OtpBoxes extends StatelessWidget {
 }
 
 class _Box extends StatelessWidget {
-  const _Box({required this.char, required this.focused, required this.style});
+  const _Box({
+    required this.clock,
+    required this.char,
+    required this.focused,
+    required this.style,
+  });
 
+  final ValueListenable<double> clock;
   final String char;
   final bool focused;
   final _BoxStyle style;
@@ -608,35 +976,66 @@ class _Box extends StatelessWidget {
       _BoxStyle.error => AppColors.danger,
       _BoxStyle.success => AppColors.success,
       _ when focused => AppColors.teal,
-      _ => AppColors.hairline,
+      _ => const Color(0xF2FFFFFF),
     };
     final fill = style == _BoxStyle.locked
-        ? AppColors.navyMist
-        : AppColors.surface;
+        ? const Color(0xB3E2E8F0)
+        : const Color(0x9EFFFFFF);
     return AspectRatio(
       aspectRatio: 48 / 56,
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: fill,
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          borderRadius: BorderRadius.circular(15),
           border: Border.all(color: border, width: focused ? 2 : 1.5),
           boxShadow: focused
               ? [
                   BoxShadow(
-                    color: AppColors.teal.withValues(alpha: 0.18),
+                    color: AppColors.teal.withValues(alpha: 0.2),
                     spreadRadius: 4,
                   ),
                 ]
               : null,
         ),
-        child: Text(
-          char,
-          style: const TextStyle(
-            color: AppColors.ink,
-            fontSize: 28,
-            fontWeight: FontWeight.w600,
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // A new digit pops in (keyed on the digit, so only a changed box replays).
+            TweenAnimationBuilder<double>(
+              key: ValueKey(char),
+              tween: Tween(begin: char.isEmpty ? 1 : 0, end: 1),
+              duration: const Duration(milliseconds: 350),
+              curve: const Cubic(.34, 1.56, .64, 1),
+              builder: (context, p, child) => Opacity(
+                opacity: p.clamp(0.0, 1.0),
+                child: Transform.scale(scale: 0.4 + 0.6 * p, child: child),
+              ),
+              child: Text(
+                char,
+                style: const TextStyle(
+                  color: AppColors.ink,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            if (focused && char.isEmpty)
+              ValueListenableBuilder<double>(
+                valueListenable: clock,
+                builder: (context, t, _) => Opacity(
+                  opacity: (t / 1000) % 1 < 0.5 ? 1 : 0,
+                  child: Container(
+                    width: 2,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppColors.teal,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
