@@ -5,30 +5,6 @@ import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// White sheet with a rounded top that fills the rest of the page.
-class AuthSheet extends StatelessWidget {
-  const AuthSheet({required this.child, super.key});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.md,
-      ),
-      child: child,
-    );
-  }
-}
-
 /// Amber-circle icon + title + message, shown for recoverable problems (design: warning cards).
 class AuthNoticeCard extends StatelessWidget {
   const AuthNoticeCard({

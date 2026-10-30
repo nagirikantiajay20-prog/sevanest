@@ -368,6 +368,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ageConfirm => 'By continuing you confirm you\'re 18 or older.';
 
   @override
+  String profileProgress(int percent) {
+    return 'Profile $percent% complete';
+  }
+
+  @override
+  String get profileHintName => 'Add your name to continue';
+
+  @override
+  String get profileHintAddress => 'Add your home address';
+
+  @override
+  String get profileHintEmail => 'Add an email for receipts';
+
+  @override
+  String get profileHintDone => 'All set. Tap Continue';
+
+  @override
   String get profileTitle => 'My profile';
 
   @override

@@ -77,6 +77,18 @@ void main() {
       expect(fb(t, _continue).onPressed, isNotNull);
     });
 
+    testWidgets('tapping the photo offers Gallery (and Camera when available)', (
+      t,
+    ) async {
+      await launch(t, complete: false);
+      await t.tap(find.byKey(const Key('profile_photo_btn')));
+      await t.pumpAndSettle();
+      expect(
+        find.byKey(const Key('profile_photo_gallery_option')),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('English is selectable; other languages are disabled', (
       t,
     ) async {

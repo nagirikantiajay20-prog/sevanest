@@ -6,26 +6,60 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
+import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
+import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart'
+    show isSupportedPhoto;
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_photo_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
-
 String profileInitials(String name) {
   final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
   return parts.take(2).map((p) => p[0].toUpperCase()).join();
 }
 
-/// Lets the user choose a photo from the gallery; null when they back out. Resized on the device
-/// so the upload stays small (the backend rejects files over its size limit).
-Future<PickedPhoto?> pickProfilePhoto() async {
-  final file = await ImagePicker().pickImage(
-    source: ImageSource.gallery,
+/// Asks Camera or Gallery, then returns the chosen photo (resized on the device so the upload
+/// stays small); null when they back out. Throws when the camera or photo access is denied.
+Future<PickedPhoto?> pickProfilePhoto(BuildContext context) async {
+  final l10n = AppLocalizations.of(context);
+  final picker = ImagePicker();
+  var camera = false;
+  try {
+    camera = picker.supportsImageSource(ImageSource.camera);
+  } on Object {
+    // no camera on this platform
+  }
+  final source = await showSnBottomSheet<ImageSource>(
+    context,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (camera)
+          ListTile(
+            key: const Key('profile_photo_camera_option'),
+            leading: const Icon(Icons.photo_camera_outlined),
+            title: Text(l10n.homePhotoCamera),
+            onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+          ),
+        ListTile(
+          key: const Key('profile_photo_gallery_option'),
+          leading: const Icon(Icons.photo_library_outlined),
+          title: Text(l10n.homePhotoGallery),
+          onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+        ),
+      ],
+    ),
+  );
+  if (source == null) return null;
+  final file = await picker.pickImage(
+    source: source,
     maxWidth: 1024,
     maxHeight: 1024,
     imageQuality: 85,
   );
   if (file == null) return null;
-  return PickedPhoto.fromBytes(await file.readAsBytes());
+  final bytes = await file.readAsBytes();
+  if (!isSupportedPhoto(bytes)) throw const FormatException('photo format');
+  return PickedPhoto.fromBytes(bytes);
 }
 
 /// Round profile photo with a camera badge; tapping it picks and uploads a new one.
@@ -60,8 +94,17 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
     final messenger = ScaffoldMessenger.of(context);
     final PickedPhoto? picked;
     try {
-      picked = await pickProfilePhoto();
+      picked = await pickProfilePhoto(context);
+    } on FormatException {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.homePhotoBadFormat)));
+      return;
     } on Object {
+      // Denied camera / photo permission surfaces as a platform exception.
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.homePhotoPermission)));
       return;
     }
     if (picked == null || !mounted) return;
@@ -117,18 +160,20 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
             children: [
               CircleAvatar(
                 radius: r,
-                backgroundColor: AppColors.tileWell,
+                backgroundColor: AppColors.tealWash,
                 foregroundColor: AppColors.teal,
                 foregroundImage: image,
                 // An expired link just leaves the initials showing.
                 onForegroundImageError: image == null ? null : (_, _) {},
-                child: Text(
-                  widget.initials,
-                  style: TextStyle(
-                    fontSize: r * 0.6,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                child: widget.initials.isEmpty
+                    ? Icon(Icons.person_outline, size: r * 1.1)
+                    : Text(
+                        widget.initials,
+                        style: TextStyle(
+                          fontSize: r * 0.6,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
               ),
               if (_busy)
                 SizedBox(

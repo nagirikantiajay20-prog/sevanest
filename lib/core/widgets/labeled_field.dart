@@ -26,9 +26,12 @@ class LabeledField extends StatelessWidget {
     this.onTap,
     this.onChanged,
     this.onSubmitted,
+    this.fill,
     super.key,
   });
 
+  /// Fill colour for screens that sit on a photo (the glass profile setup).
+  final Color? fill;
   final String name;
   final String label;
   final TextEditingController? controller;
@@ -112,8 +115,8 @@ class LabeledField extends StatelessWidget {
                 ? null
                 : Icon(prefixIcon, color: AppColors.slate),
             suffixIcon: suffixIcon,
-            filled: !enabled || readOnly && onTap == null,
-            fillColor: AppColors.fieldBg,
+            filled: fill != null || !enabled || readOnly && onTap == null,
+            fillColor: fill ?? AppColors.fieldBg,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: AppSpacing.md,

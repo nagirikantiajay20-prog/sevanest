@@ -766,6 +766,36 @@ abstract class AppLocalizations {
   /// **'By continuing you confirm you\'re 18 or older.'**
   String get ageConfirm;
 
+  /// No description provided for @profileProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile {percent}% complete'**
+  String profileProgress(int percent);
+
+  /// No description provided for @profileHintName.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your name to continue'**
+  String get profileHintName;
+
+  /// No description provided for @profileHintAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your home address'**
+  String get profileHintAddress;
+
+  /// No description provided for @profileHintEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an email for receipts'**
+  String get profileHintEmail;
+
+  /// No description provided for @profileHintDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All set. Tap Continue'**
+  String get profileHintDone;
+
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
