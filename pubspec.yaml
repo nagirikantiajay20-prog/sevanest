@@ -61,6 +61,8 @@ flutter:
   assets:
     - assets/branding/logo_full.png
     - assets/branding/logo_mark.png
+    - assets/splash/
+    - assets/login/
     - assets/images/
 
 flutter_launcher_icons:
