@@ -94,14 +94,14 @@ void main() {
       t,
     ) async {
       await launch(t, complete: false);
-      final hindi = t.widget<ChoiceChip>(
+      final hindi = t.widget<InkWell>(
         find.byKey(const Key('profile_language_chip_hi')),
       );
-      expect(hindi.onSelected, isNull);
-      final english = t.widget<ChoiceChip>(
+      expect(hindi.onTap, isNull);
+      final english = t.widget<InkWell>(
         find.byKey(const Key('profile_language_chip_en')),
       );
-      expect(english.selected, isTrue);
+      expect(english.onTap, isNotNull);
     });
 
     testWidgets(

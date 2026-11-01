@@ -23,6 +23,7 @@ class LanguageChips extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, box) {
         final w = (box.maxWidth - 2 * AppSpacing.sm) / 3;
+        if (threeColumns) return _grid(w);
         return Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
@@ -32,6 +33,94 @@ class LanguageChips extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  /// Design grid: 46 px pills, a highlight that glides to the selected one.
+  Widget _grid(double w) {
+    const h = 46.0;
+    const gap = 10.0;
+    final i = profileLanguages.indexWhere((l) => l.code == selected);
+    return SizedBox(
+      height: 2 * h + gap,
+      child: Stack(
+        children: [
+          if (i >= 0)
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeOutBack,
+              left: (i % 3) * (w + gap),
+              top: (i ~/ 3) * (h + gap),
+              width: w,
+              height: h,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE2EEEC),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: AppColors.teal, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.teal.withValues(alpha: 0.18),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          for (var n = 0; n < profileLanguages.length; n++)
+            Positioned(
+              left: (n % 3) * (w + gap),
+              top: (n ~/ 3) * (h + gap),
+              width: w,
+              height: h,
+              child: _gridChip(profileLanguages[n]),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gridChip(({String code, String label, bool enabled}) l) {
+    final on = selected == l.code;
+    return Semantics(
+      button: true,
+      selected: on,
+      child: InkWell(
+        key: Key('profile_language_chip_${l.code}'),
+        customBorder: const StadiumBorder(),
+        onTap: l.enabled && onSelected != null
+            ? () => onSelected!(l.code)
+            : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          alignment: Alignment.center,
+          decoration: ShapeDecoration(
+            color: on
+                ? Colors.transparent
+                : Colors.white.withValues(alpha: 0.72),
+            shape: StadiumBorder(
+              side: BorderSide(
+                color: on ? Colors.transparent : const Color(0xFFCBD5E1),
+                width: 1.5,
+              ),
+            ),
+          ),
+          child: Text(
+            l.label,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: on ? FontWeight.w700 : FontWeight.w500,
+              color: on
+                  ? AppColors.teal
+                  : l.enabled
+                  ? AppColors.navyDeep
+                  : AppColors.navyDeep.withValues(alpha: 0.55),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

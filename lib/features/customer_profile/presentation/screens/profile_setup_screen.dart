@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +29,7 @@ import 'package:sevanest_customer/shared/utils/validators.dart';
 
 /// Room photo under an ivory wash, with a teal glow top-right and an amber one lower left.
 final _backdropStyle = RoomBackdropStyle(
-  alignment: const Alignment(0.24, -0.2),
+  alignment: const Alignment(0.24, -0.4),
   zoomFrom: 1.06,
   driftMs: 22000,
   drift: const Offset(-6, -4),
@@ -38,9 +41,9 @@ final _backdropStyle = RoomBackdropStyle(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        AppColors.ivory.withValues(alpha: 0.74),
-        AppColors.ivory.withValues(alpha: 0.42),
-        AppColors.ivory.withValues(alpha: 0.8),
+        AppColors.ivory.withValues(alpha: 0.86),
+        AppColors.ivory.withValues(alpha: 0.66),
+        AppColors.ivory.withValues(alpha: 0.86),
       ],
       stops: const [0, 0.35, 1],
     ),
@@ -69,7 +72,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
   );
   late final _burst = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1600),
+    duration: const Duration(milliseconds: 1900),
   );
   final _addressKey = GlobalKey();
   Offset _burstOrigin = Offset.zero;
@@ -109,7 +112,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
         _homePhoto = picked.photo;
         _addressFailure = null;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) => _celebrate());
+      // Let the sheet finish closing so the card is where the burst should start.
+      Future<void>.delayed(const Duration(milliseconds: 250), _celebrate);
     }
   }
 
@@ -123,8 +127,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
         me is! RenderBox) {
       return;
     }
-    _burstOrigin = me.globalToLocal(
+    final at = me.globalToLocal(
       card.localToGlobal(card.size.center(Offset.zero)),
+    );
+    // Keep the burst on screen even when the card is scrolled to an edge.
+    final safe = MediaQuery.paddingOf(context);
+    final top = safe.top + 120;
+    final bottom = math.max(top, me.size.height - 200);
+    setState(
+      () => _burstOrigin = Offset(
+        at.dx.clamp(60.0, me.size.width - 60),
+        at.dy.clamp(top, bottom),
+      ),
     );
     _burst.forward(from: 0);
   }
@@ -302,15 +316,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                                   ],
                                 ),
                               ),
-                              ProfileAvatarHalo(
+                              _AvatarIn(
                                 clock: _clock,
-                                child: ProfilePhotoAvatar(
-                                  radius: 50,
-                                  initials: profileInitials(_name.text),
-                                  localBytes: _photo?.bytes,
-                                  onPicked: (p) {
-                                    if (!busy) setState(() => _photo = p);
-                                  },
+                                child: ProfileAvatarHalo(
+                                  clock: _clock,
+                                  child: ProfilePhotoAvatar(
+                                    radius: 50,
+                                    initials: profileInitials(_name.text),
+                                    localBytes: _photo?.bytes,
+                                    onPicked: (p) {
+                                      if (!busy) setState(() => _photo = p);
+                                    },
+                                  ),
                                 ),
                               ),
                             ],
@@ -330,21 +347,34 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                         ),
                         blur: 28,
                         gradient: const LinearGradient(
-                          begin: Alignment(-0.5, -1),
-                          end: Alignment(0.5, 1),
-                          colors: [Color(0xE6FFFFFF), Color(0xB8FFFFFF)],
+                          begin: Alignment(-0.34, -0.94),
+                          end: Alignment(0.34, 0.94),
+                          colors: [Color(0xCCFFFFFF), Color(0x8CFFFFFF)],
                         ),
-                        border: setupGlassBorder,
-                        shadow: setupGlassShadow,
+                        border: const Border(
+                          top: BorderSide(color: Color(0xF2FFFFFF)),
+                        ),
+                        shadow: const [
+                          BoxShadow(
+                            color: Color(0x331B3354),
+                            blurRadius: 44,
+                            offset: Offset(0, -16),
+                          ),
+                        ],
                         child: SizedBox(
                           width: double.infinity,
-                          child: _form(
-                            l10n,
-                            busy: busy,
-                            nameOk: nameOk,
-                            nameError: nameError,
-                            emailError: emailError,
-                            generalError: generalError,
+                          child: Stack(
+                            children: [
+                              _form(
+                                l10n,
+                                busy: busy,
+                                nameOk: nameOk,
+                                nameError: nameError,
+                                emailError: emailError,
+                                generalError: generalError,
+                              ),
+                              _sheetSweep(),
+                            ],
                           ),
                         ),
                       ),
@@ -361,6 +391,34 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       ),
     );
   }
+
+  /// 2 px white gleam gliding along the sheet's top edge.
+  Widget _sheetSweep() => Positioned(
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    child: IgnorePointer(
+      child: ValueListenableBuilder<double>(
+        valueListenable: _clock,
+        builder: (_, t, _) {
+          final p = ((t / 5500) % 1 - 0.2) / 0.6;
+          final k = Curves.easeInOut.transform(p.clamp(0.0, 1.0));
+          return FractionallySizedBox(
+            alignment: Alignment(-2 + 4 * k, 0),
+            widthFactor: 1,
+            child: const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0x00FFFFFF), Colors.white, Color(0x00FFFFFF)],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+  );
 
   Widget _form(
     AppLocalizations l10n, {
@@ -390,6 +448,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                   enabled: !busy,
                   fill: fill,
                   prefixIcon: Icons.person_outline,
+                  requiredMark: true,
                   suffixIcon: nameOk
                       ? const Icon(Icons.check_circle, color: Color(0xFF16A34A))
                       : null,
@@ -404,6 +463,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                   label: l10n.emailLabel,
                   hint: l10n.emailHint,
                   helper: l10n.emailHelp,
+                  optionalInline: l10n.repOptional,
                   error: emailError,
                   enabled: !busy,
                   fill: fill,
@@ -420,22 +480,31 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                   style: AppText.label.copyWith(fontSize: 15),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                LanguageChips(
-                  threeColumns: true,
-                  selected: _language,
-                  onSelected: busy
-                      ? null
-                      : (c) => setState(() => _language = c),
+                Rise(
+                  clock: _clock,
+                  start: 750,
+                  child: LanguageChips(
+                    threeColumns: true,
+                    selected: _language,
+                    onSelected: busy
+                        ? null
+                        : (c) => setState(() => _language = c),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(l10n.chooseLanguageHint, style: AppText.body),
                 const SizedBox(height: AppSpacing.lg),
-                KeyedSubtree(
-                  key: _addressKey,
-                  child: ProfileAddressCard(
-                    address: _address,
-                    showError: _addressTouched && _address == null,
-                    onTap: busy ? null : _pickAddress,
+                Rise(
+                  clock: _clock,
+                  start: 900,
+                  child: KeyedSubtree(
+                    key: _addressKey,
+                    child: ProfileAddressCard(
+                      clock: _clock,
+                      address: _address,
+                      showError: _addressTouched && _address == null,
+                      onTap: busy ? null : _pickAddress,
+                    ),
                   ),
                 ),
                 if (generalError != null) ...[
@@ -469,6 +538,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                     clock: _clock,
                     breathe: true,
                     radius: 17,
+                    height: 56,
                     label: l10n.continueLabel,
                     loadingLabel: l10n.saving,
                     loading: busy,
@@ -491,4 +561,27 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       ],
     );
   }
+}
+
+/// Avatar pops in with a small overshoot and tilt (design: avatarIn).
+class _AvatarIn extends StatelessWidget {
+  const _AvatarIn({required this.clock, required this.child});
+  final ValueListenable<double> clock;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<double>(
+    valueListenable: clock,
+    child: child,
+    builder: (_, t, c) {
+      final p = seg(t, 300, 800, Curves.easeOutBack);
+      return Opacity(
+        opacity: p.clamp(0.0, 1.0),
+        child: Transform.rotate(
+          angle: -0.21 * (1 - p),
+          child: Transform.scale(scale: 0.5 + 0.5 * p, child: c),
+        ),
+      );
+    },
+  );
 }

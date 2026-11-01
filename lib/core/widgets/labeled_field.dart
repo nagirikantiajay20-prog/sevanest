@@ -73,7 +73,7 @@ class LabeledField extends StatelessWidget {
     );
     final edge = glass ? const Color(0xFFCBD5E1) : AppColors.hairline;
     final idle = hasError ? AppColors.danger : edge;
-    final labelStyle = AppText.label.copyWith(fontSize: glass ? 14.5 : 15);
+    final labelStyle = AppText.label.copyWith(fontSize: 15);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -137,7 +137,11 @@ class LabeledField extends StatelessWidget {
           maxLength: maxLength,
           onChanged: onChanged,
           onSubmitted: onSubmitted,
-          style: AppText.card.copyWith(fontWeight: FontWeight.w500),
+          style: AppText.card.copyWith(
+            fontWeight: FontWeight.w500,
+            fontSize: glass ? 16 : null,
+            color: glass ? AppColors.navyDeep : null,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: AppText.card.copyWith(
@@ -197,7 +201,10 @@ class LabeledField extends StatelessWidget {
             padding: const EdgeInsets.only(top: AppSpacing.sm),
             child: Text(
               helper!,
-              style: const TextStyle(color: AppColors.slate, fontSize: 15),
+              style: TextStyle(
+                color: glass ? const Color(0xFF475569) : AppColors.slate,
+                fontSize: glass ? 13 : 15,
+              ),
             ),
           ),
       ],

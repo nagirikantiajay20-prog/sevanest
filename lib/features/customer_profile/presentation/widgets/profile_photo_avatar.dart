@@ -161,13 +161,15 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
             children: [
               CircleAvatar(
                 radius: r,
-                backgroundColor: AppColors.tealWash,
+                backgroundColor: r > 40
+                    ? const Color(0xFFE2EEEC)
+                    : AppColors.tealWash,
                 foregroundColor: AppColors.teal,
                 foregroundImage: image,
                 // An expired link just leaves the initials showing.
                 onForegroundImageError: image == null ? null : (_, _) {},
                 child: widget.initials.isEmpty
-                    ? Icon(Icons.person_outline, size: r * 1.1)
+                    ? Icon(Icons.person_outline, size: r > 40 ? 52 : r * 1.1)
                     : Text(
                         widget.initials,
                         style: TextStyle(
@@ -186,18 +188,33 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                   ),
                 ),
               Positioned(
-                right: 0,
-                bottom: 0,
+                right: r > 40 ? -4 : 0,
+                bottom: r > 40 ? 0 : 0,
                 child: Container(
-                  padding: const EdgeInsets.all(5),
+                  width: r > 40 ? 44 : null,
+                  height: r > 40 ? 44 : null,
+                  alignment: Alignment.center,
+                  padding: r > 40 ? null : const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     color: AppColors.teal,
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.surface, width: 2),
+                    border: Border.all(
+                      color: r > 40 ? Colors.white : AppColors.surface,
+                      width: r > 40 ? 3 : 2,
+                    ),
+                    boxShadow: r > 40
+                        ? [
+                            BoxShadow(
+                              color: AppColors.teal.withValues(alpha: 0.4),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Icon(
                     Icons.photo_camera_outlined,
-                    size: (r * 0.5).clamp(14, 20),
+                    size: r > 40 ? 19 : (r * 0.5).clamp(14, 20),
                     color: Colors.white,
                   ),
                 ),

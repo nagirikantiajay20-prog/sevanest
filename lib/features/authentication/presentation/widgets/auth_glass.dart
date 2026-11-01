@@ -211,6 +211,7 @@ class AuthCta extends StatelessWidget {
     this.breathe = false,
     this.showArrow = true,
     this.radius = 16,
+    this.height = 54,
     super.key,
   });
 
@@ -227,6 +228,7 @@ class AuthCta extends StatelessWidget {
   /// Arrow after the label (off for a plain "Save").
   final bool showArrow;
   final double radius;
+  final double height;
 
   static const _idle = Color(0xFF8D9BB3);
 
@@ -274,7 +276,7 @@ class AuthCta extends StatelessWidget {
                     : _idle,
                 foregroundColor: Colors.white,
                 disabledForegroundColor: Colors.white,
-                minimumSize: const Size.fromHeight(54),
+                minimumSize: Size.fromHeight(height),
                 padding: EdgeInsets.zero,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: shape),
