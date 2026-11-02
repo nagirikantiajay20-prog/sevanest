@@ -25,12 +25,15 @@ const workerLanguages = {
 String languageName(String code) => workerLanguages[code] ?? code;
 
 /// Result order (`sort` on `GET /search/workers`). The backend default is most experienced first,
-/// so that is "no choice" (null in [WorkerFilters.sort]).
+/// so [bestMatch] and [mostExperienced] send no `sort` (null [code]); only [highestRated] does.
+/// Null in [WorkerFilters.sort] is "no choice".
 enum WorkerSort {
-  highestRated('RATING_DESC');
+  bestMatch(null),
+  highestRated('RATING_DESC'),
+  mostExperienced(null);
 
   const WorkerSort(this.code);
-  final String code;
+  final String? code;
 }
 
 /// Optional narrowing on top of the requirement: what `GET /search/workers` supports. [minRating]
@@ -49,6 +52,14 @@ class WorkerFilters {
   final int? minExperienceMonths;
   final int? minRating;
   final WorkerSort? sort;
+
+  WorkerFilters copyWith({WorkerSort? sort}) => WorkerFilters(
+    availability: availability,
+    language: language,
+    minExperienceMonths: minExperienceMonths,
+    minRating: minRating,
+    sort: sort,
+  );
 
   /// How many filters are active (the badge on the Filter button).
   int get count => [
@@ -91,6 +102,15 @@ class WorkerQuery {
   /// Workers already booked around this date are left out (date only).
   final DateTime? startDate;
   final WorkerFilters filters;
+
+  /// The same requirement narrowed by other filters (the sheet's draft).
+  WorkerQuery withFilters(WorkerFilters f) => WorkerQuery(
+    category: category,
+    areaId: areaId,
+    engagement: engagement,
+    startDate: startDate,
+    filters: f,
+  );
 
   @override
   bool operator ==(Object other) =>
@@ -211,9 +231,11 @@ class WorkerSummary {
       ratingCount: rating is Map && rating['count'] is num
           ? (rating['count'] as num).toInt()
           : 0,
-      photoUrl: photo is Map && photo['url'] is String
-          ? photo['url'] as String
-          : null,
+      photoUrl:
+          text(j['photoUrl']) ??
+          (photo is Map && photo['url'] is String
+              ? photo['url'] as String
+              : null),
       // Badge only from the backend status (AGENTS §27).
       verified: j['verification'] == 'VERIFIED' || j['verified'] == true,
       engagement: _engagementFromCode(j['engagementPreference']),
@@ -239,6 +261,9 @@ abstract interface class WorkerSearchRepository {
     String? cursor,
     CancelToken? cancel,
   });
+
+  /// How many workers match [query] (`GET /search/workers/count`); page and sort do not matter.
+  Future<int> count(WorkerQuery query, {CancelToken? cancel});
 
   /// One worker's public card. Throws `NotFoundFailure` when the worker is gone or not visible.
   Future<WorkerSummary> detail(String id, {CancelToken? cancel});

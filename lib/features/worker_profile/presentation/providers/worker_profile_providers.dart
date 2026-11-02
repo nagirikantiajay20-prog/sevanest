@@ -35,12 +35,16 @@ class WorkerReviewsNotifier extends AsyncNotifier<PagedState<WorkerReview>> {
   WorkerReviewsNotifier(this.workerId);
   final String workerId;
 
+  /// Rating breakdown from the first page (null when the backend sent none).
+  ReviewSummary? summary;
+
   @override
   Future<PagedState<WorkerReview>> build() async {
     ref.watch(mockApiProvider);
     final page = await ref
         .read(workerReviewsRepositoryProvider)
         .reviews(workerId);
+    summary = page.summary;
     return const PagedState<WorkerReview>().appended(
       page.items,
       page.nextCursor,

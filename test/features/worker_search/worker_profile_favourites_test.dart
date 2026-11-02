@@ -147,6 +147,14 @@ void main() {
     }
 
     Future<void> tapKey(WidgetTester t, String key) async {
+      // Result cards are tall, so a lower one may not be built yet: scroll to it first.
+      if (find.byKey(Key(key)).evaluate().isEmpty) {
+        await t.scrollUntilVisible(
+          find.byKey(Key(key)),
+          300,
+          scrollable: find.byType(Scrollable).last,
+        );
+      }
       await t.ensureVisible(find.byKey(Key(key)));
       await t.pump();
       await t.tap(find.byKey(Key(key)));
@@ -191,7 +199,7 @@ void main() {
         await tapKey(t, 'worker_card_fav_btn_cook-1');
         expect(isFav(env, 'cook-1'), isFalse);
         expect(
-          find.text("Couldn't update shortlist. Try again."),
+          find.text("Couldn't update favourites. Try again."),
           findsOneWidget,
         );
         final btn = t.widget<IconButton>(
@@ -239,7 +247,7 @@ void main() {
       await tapKey(t, 'worker_card_fav_btn_cook-5');
       expect(spy.removed, ['cook-5']);
       expect(find.byKey(const Key('worker_card_cook-5')), findsNothing);
-      expect(find.text('Removed from shortlist'), findsOneWidget);
+      expect(find.text('Removed from favourites'), findsOneWidget);
 
       await tapKey(t, 'fav_undo_btn');
       expect(spy.added, ['cook-5']);
@@ -250,7 +258,7 @@ void main() {
     testWidgets('FAV-07 empty shortlist: CTA starts a search', (t) async {
       final env = await open(t, spy: _SpyFavourites(returning: false));
       await tapKey(t, 'nav_favourites');
-      expect(find.text('Your shortlist is empty'), findsOneWidget);
+      expect(find.text('No favourites yet'), findsOneWidget);
       await tapKey(t, 'favs_empty_find_btn');
       expect(env.where, '/discover/category');
     });
@@ -277,7 +285,8 @@ void main() {
         await tapKey(t, 'worker_card_cook-2');
         expect(env.where, '/workers/cook-2');
         expect(find.text('Verified'), findsOneWidget);
-        expect(find.text('Hindi, English'), findsOneWidget);
+        expect(find.text('Hindi'), findsOneWidget);
+        expect(find.text('English'), findsOneWidget);
         // Nothing KYC-like is ever in the model, so nothing like it can render.
         expect(
           find.textContaining(RegExp('aadhaar', caseSensitive: false)),

@@ -25,19 +25,25 @@ class WorkerReviewsRepositoryRemote implements WorkerReviewsRepository {
     final total = meta is Map && meta['total'] is num
         ? (meta['total'] as num).toInt()
         : 0;
-    return ReviewsPage([
-      for (final m in listOf(body))
-        if (m['score'] is num && DateTime.tryParse('${m['createdAt']}') != null)
-          WorkerReview(
-            reviewerFirstName: m['reviewerFirstName'] is String
-                ? m['reviewerFirstName'] as String
-                : '',
-            rating: (m['score'] as num).toDouble(),
-            date: DateTime.parse('${m['createdAt']}').toLocal(),
-            text: m['comment'] is String && (m['comment'] as String).isNotEmpty
-                ? m['comment'] as String
-                : null,
-          ),
-    ], page * pageSize < total ? '${page + 1}' : null);
+    return ReviewsPage(
+      [
+        for (final m in listOf(body))
+          if (m['score'] is num &&
+              DateTime.tryParse('${m['createdAt']}') != null)
+            WorkerReview(
+              reviewerFirstName: m['reviewerFirstName'] is String
+                  ? m['reviewerFirstName'] as String
+                  : '',
+              rating: (m['score'] as num).toDouble(),
+              date: DateTime.parse('${m['createdAt']}').toLocal(),
+              text:
+                  m['comment'] is String && (m['comment'] as String).isNotEmpty
+                  ? m['comment'] as String
+                  : null,
+            ),
+      ],
+      page * pageSize < total ? '${page + 1}' : null,
+      summary: ReviewSummary.fromJson(body is Map ? body['summary'] : null),
+    );
   }
 }

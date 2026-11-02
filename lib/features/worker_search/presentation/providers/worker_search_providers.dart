@@ -50,6 +50,16 @@ final workerQueryProvider = Provider.autoDispose<WorkerQuery?>((ref) {
   );
 });
 
+/// How many workers match a query, for the filter sheet's "Show N workers" and the results line.
+final workerCountProvider = FutureProvider.autoDispose.family<int, WorkerQuery>(
+  (ref, q) {
+    ref.watch(mockApiProvider);
+    final cancel = CancelToken();
+    ref.onDispose(cancel.cancel);
+    return ref.read(workerSearchRepositoryProvider).count(q, cancel: cancel);
+  },
+);
+
 /// `GET /reference-data` (only when live; empty otherwise or on any failure).
 final referenceDataProvider = FutureProvider<Map<String, Object?>>((ref) async {
   if (!ref.watch(mockApiProvider.select((s) => s.live))) return const {};

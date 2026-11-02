@@ -6,6 +6,7 @@ import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_remote.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/filter_sheet.dart';
 
 import '../../helpers/discover_harness.dart';
 import '../../helpers/fakes.dart';
@@ -117,7 +118,13 @@ void main() {
         isTrue,
       );
       expect(find.byKey(const Key('results_filter_badge')), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('results_filter_badge')),
+          matching: find.text('2'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('SRCH-09 Reset clears the chips; Apply drops the badge', (
@@ -156,7 +163,7 @@ void main() {
       await tapKey(t, 'filter_language_hi');
       await tapKey(t, 'filter_apply_btn');
       await tapKey(t, 'results_filter_btn');
-      final chip = t.widget<ChoiceChip>(
+      final chip = t.widget<FilterChoice>(
         find.byKey(const Key('filter_language_hi')),
       );
       expect(chip.selected, isTrue);

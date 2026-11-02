@@ -74,13 +74,8 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
   Future<WorkerSummary> detail(String id, {CancelToken? cancel}) =>
       mockCall(_state(), () => byId(id) ?? (throw const NotFoundFailure()));
 
-  @override
-  Future<WorkerPage> search(
-    WorkerQuery query, {
-    String? cursor,
-    CancelToken? cancel,
-  }) => mockCall(_state(), () {
-    if (_state().mode == MockMode.empty) return const WorkerPage([], null);
+  List<WorkerSummary> _matching(WorkerQuery query) {
+    if (_state().mode == MockMode.empty) return [];
     final f = query.filters;
     bool covers(WorkerSummary w) =>
         f.availability == null ||
@@ -89,7 +84,7 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
               a.start.compareTo(f.availability!.from) <= 0 &&
               a.end.compareTo(f.availability!.to) >= 0,
         );
-    final all = [
+    return [
       for (final w in _seed(query.category))
         if (covers(w) &&
             (f.language == null || w.languages.contains(f.language)) &&
@@ -98,7 +93,20 @@ class WorkerSearchRepositoryMock implements WorkerSearchRepository {
             (f.minRating == null || (w.ratingAverage ?? 0) >= f.minRating!))
           w,
     ];
-    if (f.sort == WorkerSort.highestRated) {
+  }
+
+  @override
+  Future<int> count(WorkerQuery query, {CancelToken? cancel}) =>
+      mockCall(_state(), () => _matching(query).length);
+
+  @override
+  Future<WorkerPage> search(
+    WorkerQuery query, {
+    String? cursor,
+    CancelToken? cancel,
+  }) => mockCall(_state(), () {
+    final all = _matching(query);
+    if (query.filters.sort == WorkerSort.highestRated) {
       all.sort(
         (a, b) => (b.ratingAverage ?? 0).compareTo(a.ratingAverage ?? 0),
       );

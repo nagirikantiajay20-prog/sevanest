@@ -27,22 +27,9 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
         queryParameters: {
           'page': page,
           'limit': pageSize,
-          'category': query.category,
-          'areaId': query.areaId,
-          if (query.engagement != null)
-            'engagement': engagementCode(query.engagement!),
-          if (query.filters.availability != null) ...{
-            'availableFrom': query.filters.availability!.from,
-            'availableTo': query.filters.availability!.to,
-          },
-          if (query.filters.language != null)
-            'language': query.filters.language,
-          if (query.filters.minExperienceMonths != null)
-            'minExperienceMonths': query.filters.minExperienceMonths,
-          if (query.filters.minRating != null)
-            'minRating': query.filters.minRating,
-          if (query.filters.sort != null) 'sort': query.filters.sort!.code,
-          if (query.startDate != null) 'startDate': _day(query.startDate!),
+          ..._params(query),
+          if (query.filters.sort?.code != null)
+            'sort': query.filters.sort!.code,
         },
       ),
     );
@@ -63,6 +50,22 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
     return WorkerPage(items, page * pageSize < total ? '${page + 1}' : null);
   }
 
+  /// `GET /search/workers/count`: the search's filters, answers `{total}` (equals the search's
+  /// `meta.total`; page, limit and sort are ignored).
+  @override
+  Future<int> count(WorkerQuery query, {CancelToken? cancel}) async {
+    final res = await guarded(
+      () => _dio.get<dynamic>(
+        '/search/workers/count',
+        cancelToken: cancel,
+        queryParameters: _params(query),
+      ),
+    );
+    final body = res.data;
+    final total = body is Map ? body['total'] : null;
+    return total is num ? total.toInt() : throw const NotFoundFailure();
+  }
+
   /// `GET /search/workers/{id}`: same allow-listed card; 404 `WORKER_NOT_FOUND` also covers a
   /// worker who is no longer visible.
   @override
@@ -76,6 +79,22 @@ class WorkerSearchRepositoryRemote implements WorkerSearchRepository {
     return WorkerSummary.fromJson(res.data) ?? (throw const NotFoundFailure());
   }
 }
+
+/// The requirement and filters shared by the search and its count.
+Map<String, Object?> _params(WorkerQuery query) => {
+  'category': query.category,
+  'areaId': query.areaId,
+  if (query.engagement != null) 'engagement': engagementCode(query.engagement!),
+  if (query.filters.availability != null) ...{
+    'availableFrom': query.filters.availability!.from,
+    'availableTo': query.filters.availability!.to,
+  },
+  if (query.filters.language != null) 'language': query.filters.language,
+  if (query.filters.minExperienceMonths != null)
+    'minExperienceMonths': query.filters.minExperienceMonths,
+  if (query.filters.minRating != null) 'minRating': query.filters.minRating,
+  if (query.startDate != null) 'startDate': _day(query.startDate!),
+};
 
 String _day(DateTime d) =>
     '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
