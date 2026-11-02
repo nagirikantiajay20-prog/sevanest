@@ -210,6 +210,7 @@ class AuthCta extends StatelessWidget {
     this.done = false,
     this.breathe = false,
     this.showArrow = true,
+    this.icon = Icons.arrow_forward_rounded,
     this.radius = 16,
     this.height = 54,
     super.key,
@@ -227,6 +228,9 @@ class AuthCta extends StatelessWidget {
 
   /// Arrow after the label (off for a plain "Save").
   final bool showArrow;
+
+  /// Replaces the arrow (Review: search).
+  final IconData icon;
   final double radius;
   final double height;
 
@@ -335,10 +339,16 @@ class AuthCta extends StatelessWidget {
                         const Icon(Icons.check_rounded, size: 20),
                         const SizedBox(width: 10),
                       ],
-                      Text(loading ? loadingLabel : label),
+                      Flexible(
+                        child: Text(
+                          loading ? loadingLabel : label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                       if (showArrow && !loading && !done) ...[
                         const SizedBox(width: 10),
-                        const Icon(Icons.arrow_forward_rounded, size: 20),
+                        Icon(icon, size: 20),
                       ],
                     ],
                   ),

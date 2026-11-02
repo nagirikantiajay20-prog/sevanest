@@ -46,27 +46,49 @@ class FavouriteButton extends ConsumerWidget {
     }
 
     if (showLabel) {
+      // Frosted pill of the profile's bottom bar; turns rose once shortlisted.
       return OutlinedButton.icon(
         key: Key(keyName),
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(0, kMinTapTarget),
+          minimumSize: const Size(0, 58),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          backgroundColor: isFav
+              ? const Color(0xFFFFE4EA)
+              : const Color(0xCCFFFFFF),
+          foregroundColor: isFav ? const Color(0xFF9F1239) : AppColors.navyDeep,
+          side: BorderSide(
+            color: isFav
+                ? const Color(0x80E11D48)
+                : AppColors.navyDeep.withValues(alpha: 0.22),
+            width: 1.5,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
         onPressed: s == null || busy ? null : tap,
         icon: Icon(
           isFav ? Icons.favorite : Icons.favorite_border,
-          color: isFav ? AppColors.danger : null,
+          color: isFav ? const Color(0xFFE11D48) : null,
         ),
         label: Text(isFav ? l10n.workerShortlisted : l10n.workerShortlist),
       );
     }
 
+    // Frosted round heart of the glass cards; rose and filled once saved.
     return IconButton(
       key: Key(keyName),
       tooltip: isFav ? l10n.favouriteRemove : l10n.favouriteAdd,
       isSelected: isFav,
       onPressed: s == null || busy ? null : tap,
-      icon: const Icon(Icons.favorite_border),
-      selectedIcon: const Icon(Icons.favorite, color: AppColors.danger),
+      style: IconButton.styleFrom(
+        minimumSize: const Size(44, 44),
+        backgroundColor: const Color(0xD9FFFFFF),
+        side: const BorderSide(color: Color(0xF2FFFFFF)),
+      ),
+      icon: const Icon(Icons.favorite_border, color: AppColors.navyDeep),
+      selectedIcon: const Icon(Icons.favorite, color: Color(0xFFE11D48)),
     );
   }
 }

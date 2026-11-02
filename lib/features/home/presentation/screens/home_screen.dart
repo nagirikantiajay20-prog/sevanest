@@ -5,19 +5,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/home/domain/home_data.dart';
+import 'package:sevanest_customer/features/home/presentation/home_attendance.dart';
+import 'package:sevanest_customer/features/home/presentation/home_book_again.dart';
+import 'package:sevanest_customer/features/home/presentation/home_hero.dart';
+import 'package:sevanest_customer/features/home/presentation/home_info_sections.dart';
 import 'package:sevanest_customer/features/home/presentation/home_promo_carousel.dart';
+import 'package:sevanest_customer/features/home/presentation/home_services_grid.dart';
 import 'package:sevanest_customer/features/home/presentation/home_shortlist.dart';
+import 'package:sevanest_customer/features/home/presentation/home_top_rated.dart';
 import 'package:sevanest_customer/features/home/presentation/home_widgets.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/payment/presentation/pending_payment_banner.dart';
-import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/discover_navigation.dart';
@@ -30,7 +33,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 /// Design shows eight service tiles; "See all" opens the full list.
 const _maxServiceTiles = 8;
 
-/// `/home` (screen 05): header, "Find a worker" CTA, service tiles, then Loading / Error / New user /
+/// `/home` (screen 05): photo hero with search, service mosaic, then Loading / Error / New user /
 /// Returning, each with an offline-cache banner. Sections are hidden when the backend sends nothing.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -133,74 +136,105 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final loading = !home.hasValue && !home.hasError;
     final offline = data?.fromCache ?? false;
     final categories = ref.watch(categoriesProvider).value ?? const [];
+    final returning = data != null && !data.isNewUser;
 
     return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            _Header(
-              addressTitle: active == null
-                  ? l10n.homeAddAddress
-                  : '${active.area}, ${active.city}',
-              addressLine: active?.line,
-              unread: ref.watch(unreadCountProvider),
-              greeting: name == null || name.isEmpty
-                  ? l10n.homeGreetingNoName
-                  : l10n.homeGreeting(name),
-              ctaEnabled: !loading && !offline,
-              onAddress: () => _pickAddress(list),
-              onBell: () => context.push(Routes.notifications),
-              onFind: _startHire,
+      backgroundColor: AppColors.ivory,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: HomeGlows()),
+          RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                HomeHero(
+                  addressTitle: active == null
+                      ? l10n.homeAddAddress
+                      : '${active.area}, ${active.city}',
+                  unread: ref.watch(unreadCountProvider),
+                  greeting: name == null || name.isEmpty
+                      ? l10n.homeGreetingNoName
+                      : l10n.homeGreeting(name),
+                  ctaEnabled: !loading && !offline,
+                  onAddress: () => _pickAddress(list),
+                  onBell: () => context.push(Routes.notifications),
+                  onFind: _startHire,
+                ),
+                Padding(
+                  // Bottom: clear of the floating nav pill (Scaffold extendBody).
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.md,
+                    AppSpacing.lg + MediaQuery.paddingOf(context).bottom,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (offline) ...[
+                        OfflineBanner(onRetry: _refresh),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+                      const PendingPaymentBanner(),
+                      if (resumeGap != null ||
+                          resumeDraft.serviceId != null) ...[
+                        HomeRise(
+                          delayMs: 160,
+                          child: ResumeCard(
+                            what: [
+                              ?ref.watch(selectedCategoryProvider)?.name,
+                              if (resumeDraft.engagement != null)
+                                engagementLabels(
+                                  l10n,
+                                  resumeDraft.engagement!,
+                                ).name,
+                            ].join(' · '),
+                            step: stepNumber(resumeTarget),
+                            onContinue: () => _resume(resumeTarget),
+                            onDiscard: () => ref
+                                .read(requirementDraftProvider.notifier)
+                                .reset(),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                      if (addresses.hasValue && list.isEmpty) ...[
+                        const HomeRise(delayMs: 240, child: AddAddressBanner()),
+                        const SizedBox(height: 24),
+                      ],
+                      if (categories.isNotEmpty) ...[
+                        HomeRise(
+                          delayMs: 320,
+                          child: HomeServicesGrid(
+                            categories: categories
+                                .take(_maxServiceTiles)
+                                .toList(),
+                            onTile: _startWithService,
+                            onSeeAll: _startHire,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                      if (returning) const HomeBookAgain(),
+                      ..._content(home, data, loading),
+                      if (data != null) HomeTopRated(workers: data.topRated),
+                      const HomeFeaturedHeading(),
+                      PromoCarousel(onCta: _promoCta),
+                      const SizedBox(height: 24),
+                      const WhyFamiliesBanner(),
+                      const SizedBox(height: 24),
+                      const HowItWorks(),
+                      const SizedBox(height: 24),
+                      const SupportShortcut(),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (offline) ...[
-                    OfflineBanner(onRetry: _refresh),
-                    const SizedBox(height: AppSpacing.md),
-                  ],
-                  const PendingPaymentBanner(),
-                  if (resumeGap != null || resumeDraft.serviceId != null) ...[
-                    ResumeCard(
-                      what: [
-                        ?ref.watch(selectedCategoryProvider)?.name,
-                        if (resumeDraft.engagement != null)
-                          engagementLabels(l10n, resumeDraft.engagement!).name,
-                      ].join(' · '),
-                      step: stepNumber(resumeTarget),
-                      onContinue: () => _resume(resumeTarget),
-                      onDiscard: () =>
-                          ref.read(requirementDraftProvider.notifier).reset(),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                  ],
-                  if (addresses.hasValue && list.isEmpty) ...[
-                    const AddAddressBanner(),
-                    const SizedBox(height: AppSpacing.md),
-                  ],
-                  PromoCarousel(onCta: _promoCta),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (categories.isNotEmpty) ...[
-                    _ExploreServices(
-                      categories: categories.take(_maxServiceTiles).toList(),
-                      onTile: _startWithService,
-                      onSeeAll: _startHire,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                  ..._content(home, data, loading),
-                  const SizedBox(height: AppSpacing.lg),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -210,396 +244,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     HomeData? data,
     bool loading,
   ) {
-    if (loading) return const [HomeSkeleton()];
-    if (data == null) return [HomeErrorCard(onRetry: _refresh)];
-    if (data.isNewUser) return [OnboardingCard(onFind: _startHire)];
+    if (loading) {
+      return const [HomeSkeleton(), SizedBox(height: 24)];
+    }
+    if (data == null) {
+      return [HomeErrorCard(onRetry: _refresh), const SizedBox(height: 24)];
+    }
+    if (data.isNewUser) {
+      return [OnboardingCard(onFind: _startHire), const SizedBox(height: 24)];
+    }
     return [
+      HomeAttendance(attendance: data.todayAttendance),
       if (data.activeBooking != null || data.upcomingInterview != null) ...[
         ActivityCard(
           booking: data.activeBooking,
           interview: data.upcomingInterview,
           now: DateTime.now(),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: 24),
       ],
       if (data.shortlist.isNotEmpty) ...[
         ShortlistPreviewCard(workers: data.shortlist),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: 24),
       ],
-      const SupportShortcut(),
     ];
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.addressTitle,
-    required this.addressLine,
-    required this.unread,
-    required this.greeting,
-    required this.ctaEnabled,
-    required this.onAddress,
-    required this.onBell,
-    required this.onFind,
-  });
-
-  final String addressTitle;
-  final String? addressLine;
-  final int unread;
-  final String greeting;
-  final bool ctaEnabled;
-  final VoidCallback onAddress;
-  final VoidCallback onBell;
-  final VoidCallback onFind;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final top = MediaQuery.paddingOf(context).top;
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.ivory, AppColors.canvasCool],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: 0,
-            right: 0,
-            bottom: 0,
-            width: MediaQuery.sizeOf(context).width * 0.55,
-            child: ExcludeSemantics(
-              child: ShaderMask(
-                blendMode: BlendMode.dstIn,
-                shaderCallback: (r) => const LinearGradient(
-                  // Photo only fades in behind the right edge, never under the headline text.
-                  colors: [Colors.transparent, Color(0x99000000)],
-                  stops: [0.25, 1],
-                ).createShader(r),
-                child: Image.asset(
-                  AppPhotos.room,
-                  fit: BoxFit.cover,
-                  alignment: Alignment.centerRight,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              top + AppSpacing.sm,
-              AppSpacing.md,
-              AppSpacing.md,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        key: const Key('home_address_chip'),
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        onTap: onAddress,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minHeight: kMinTapTarget,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.teal,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.location_on_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.s12),
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            addressTitle,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: AppText.card,
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.keyboard_arrow_down,
-                                          size: 20,
-                                          color: AppColors.brandInk,
-                                        ),
-                                      ],
-                                    ),
-                                    if (addressLine != null)
-                                      Text(
-                                        addressLine!,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppText.body.copyWith(
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Semantics(
-                      label: unread > 0
-                          ? l10n.homeNotificationsUnread(unread)
-                          : l10n.homeNotifications,
-                      button: true,
-                      child: Material(
-                        color: AppColors.surface,
-                        elevation: 1,
-                        shadowColor: AppColors.navy.withValues(alpha: 0.2),
-                        shape: const CircleBorder(
-                          side: BorderSide(color: AppColors.hairline),
-                        ),
-                        child: InkWell(
-                          key: const Key('home_bell_btn'),
-                          customBorder: const CircleBorder(),
-                          onTap: onBell,
-                          child: SizedBox(
-                            width: kMinTapTarget,
-                            height: kMinTapTarget,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.notifications_none,
-                                  color: AppColors.brandInk,
-                                ),
-                                if (unread > 0)
-                                  const Positioned(
-                                    top: 10,
-                                    right: 12,
-                                    child: CircleAvatar(
-                                      key: Key('home_bell_badge'),
-                                      radius: 5,
-                                      backgroundColor: AppColors.amber,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  greeting,
-                  key: const Key('home_greeting'),
-                  style: AppText.bodyLarge.copyWith(
-                    fontSize: 17,
-                    color: AppColors.brandInk,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Semantics(
-                  header: true,
-                  child: Text(
-                    l10n.homeHeadline,
-                    style: AppText.display.copyWith(fontSize: 32),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width * 0.7,
-                  ),
-                  child: Text(l10n.homeSubtitle, style: AppText.bodyLarge),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _FindCta(enabled: ctaEnabled, onTap: onFind),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FindCta extends StatelessWidget {
-  const _FindCta({required this.enabled, required this.onTap});
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Material(
-      color: AppColors.surface,
-      elevation: 2,
-      shadowColor: AppColors.navy.withValues(alpha: 0.15),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        side: const BorderSide(color: AppColors.hairline),
-      ),
-      child: InkWell(
-        key: const Key('home_find_worker_btn'),
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        onTap: enabled ? onTap : null,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 64),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm,
-              AppSpacing.sm,
-              AppSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.search,
-                  color: enabled ? AppColors.teal : AppColors.slate400,
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Text(
-                    l10n.homeFindWorkerCta,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.card,
-                  ),
-                ),
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: enabled ? AppColors.teal : AppColors.hairline,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: Icon(
-                    Icons.arrow_forward,
-                    color: enabled ? Colors.white : AppColors.slate400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// "Explore services": one tile per catalogue category (design 09-10, module 03 category row).
-class _ExploreServices extends StatelessWidget {
-  const _ExploreServices({
-    required this.categories,
-    required this.onTile,
-    required this.onSeeAll,
-  });
-
-  final List<ServiceCategory> categories;
-  final ValueChanged<String> onTile;
-  final VoidCallback onSeeAll;
-
-  static const _columns = 4;
-  static const _gap = AppSpacing.sm;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Semantics(
-                header: true,
-                child: Text(l10n.homeExplore, style: AppText.title),
-              ),
-            ),
-            TextButton.icon(
-              key: const Key('home_see_all_btn'),
-              onPressed: onSeeAll,
-              iconAlignment: IconAlignment.end,
-              icon: const Icon(Icons.arrow_forward, size: 18),
-              label: Text(l10n.homeSeeAll),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.s12),
-        LayoutBuilder(
-          builder: (context, box) {
-            final w = (box.maxWidth - _gap * (_columns - 1)) / _columns;
-            return Wrap(
-              spacing: _gap,
-              runSpacing: AppSpacing.md,
-              children: [
-                for (final c in categories)
-                  SizedBox(
-                    width: w,
-                    child: InkWell(
-                      key: Key('home_category_tile_${c.id}'),
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      onTap: () => onTile(c.id),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: w,
-                            height: w * 0.9,
-                            decoration: BoxDecoration(
-                              color: AppColors.tileWell,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.tileLine),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child:
-                                AppPhotos.forService('${c.id} ${c.name}') ==
-                                    null
-                                ? Icon(c.icon, color: AppColors.teal)
-                                : Image.asset(
-                                    AppPhotos.forService('${c.id} ${c.name}')!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) =>
-                                        Icon(c.icon, color: AppColors.teal),
-                                  ),
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            c.name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: AppText.card.copyWith(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
   }
 }

@@ -139,7 +139,7 @@ class WorkerIdentity {
       displayName: name,
       verified: j['verified'] == true,
       initials: _s(j['initials']),
-      photoUrl: photo is Map ? _s(photo['url']) : null,
+      photoUrl: _s(j['photoUrl']) ?? (photo is Map ? _s(photo['url']) : null),
       cacheKey: photo is Map ? _s(photo['cacheKey']) : null,
     );
   }

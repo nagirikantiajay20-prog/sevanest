@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
-import 'package:sevanest_customer/core/widgets/sn_photo.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 class _Promo {
-  const _Promo(
+  _Promo(
     this.serviceId,
     this.photo,
     this.eyebrow,
     this.title,
     this.body,
     this.cta,
+    this.focus,
   );
   final String? serviceId;
   final String photo;
@@ -19,6 +19,7 @@ class _Promo {
   final String title;
   final String body;
   final String cta;
+  final Alignment focus;
 }
 
 /// Swipeable promo banners under the search CTA (design 09: "Professional cleaning" + dots).
@@ -47,33 +48,63 @@ class _PromoCarouselState extends State<PromoCarousel> {
     final slides = [
       _Promo(
         'clean',
-        'assets/images/promo-cleaner.jpg',
+        'assets/home/cleaning.jpg',
         l10n.homePromoCleanEyebrow,
         l10n.homePromoCleanTitle,
         l10n.homePromoCleanBody,
         l10n.homePromoCleanCta,
+        const Alignment(0.3, -0.1),
       ),
       _Promo(
         'maid',
-        'assets/images/service-maid-bed.jpg',
+        'assets/home/daily_care.jpg',
         l10n.homePromoMaidEyebrow,
         l10n.homePromoMaidTitle,
         l10n.homePromoMaidBody,
         l10n.homePromoMaidCta,
+        const Alignment(0.0, 0.2),
       ),
       _Promo(
-        null,
-        AppPhotos.room,
-        l10n.homePromoPartEyebrow,
-        l10n.homePromoPartTitle,
-        l10n.homePromoPartBody,
-        l10n.homePromoPartCta,
+        'cook',
+        'assets/home/cook.jpg',
+        l10n.homePromoCookEyebrow,
+        l10n.homePromoCookTitle,
+        l10n.homePromoCookBody,
+        l10n.homePromoCookCta,
+        const Alignment(0.0, -0.2),
+      ),
+      _Promo(
+        'driver',
+        'assets/home/driver.jpg',
+        l10n.homePromoDriverEyebrow,
+        l10n.homePromoDriverTitle,
+        l10n.homePromoDriverBody,
+        l10n.homePromoDriverCta,
+        const Alignment(0.0, -0.1),
+      ),
+      _Promo(
+        'nanny',
+        'assets/home/babysitter.jpg',
+        l10n.homePromoBabyEyebrow,
+        l10n.homePromoBabyTitle,
+        l10n.homePromoBabyBody,
+        l10n.homePromoBabyCta,
+        const Alignment(0.0, -0.2),
+      ),
+      _Promo(
+        'elder',
+        'assets/home/elder.jpg',
+        l10n.homePromoElderEyebrow,
+        l10n.homePromoElderTitle,
+        l10n.homePromoElderBody,
+        l10n.homePromoElderCta,
+        const Alignment(0.0, -0.1),
       ),
     ];
     return Column(
       children: [
         SizedBox(
-          height: 210 * MediaQuery.textScalerOf(context).scale(1).clamp(1, 1.6),
+          height: 200 * MediaQuery.textScalerOf(context).scale(1).clamp(1, 1.4),
           child: PageView.builder(
             key: const Key('home_promo_carousel'),
             controller: _controller,
@@ -121,107 +152,133 @@ class _PromoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.tealMist,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: AppColors.tealLine),
-        boxShadow: [
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
           BoxShadow(
-            color: AppColors.navy.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Color(0x59000000),
+            blurRadius: 28,
+            offset: Offset(0, 12),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
+        borderRadius: BorderRadius.circular(28),
         child: Stack(
+          fit: StackFit.expand,
           children: [
-            Positioned(
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: 150,
-              child: ExcludeSemantics(
-                child: ShaderMask(
-                  blendMode: BlendMode.dstIn,
-                  shaderCallback: (r) => const LinearGradient(
-                    colors: [Colors.transparent, Colors.black],
-                    stops: [0.2, 0.7],
-                  ).createShader(r),
-                  child: Image.asset(
-                    promo.photo,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                    cacheWidth: 600,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                  ),
+            ExcludeSemantics(
+              child: Image.asset(
+                promo.photo,
+                fit: BoxFit.cover,
+                alignment: promo.focus,
+                cacheWidth: 800,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              ),
+            ),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xE608182B),
+                    Color(0x8008182B),
+                    Color(0x0D08182B),
+                  ],
+                  stops: [0, 0.55, 1],
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    promo.eyebrow.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppText.micro.copyWith(
-                      color: AppColors.teal,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  SizedBox(
-                    width: 190,
-                    child: Semantics(
-                      header: true,
-                      child: Text(
-                        promo.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.title.copyWith(fontSize: 20),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Expanded(
-                    child: SizedBox(
-                      width: 180,
-                      child: Text(
-                        promo.body,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 3,
-                        style: AppText.body.copyWith(fontSize: 13),
-                      ),
-                    ),
-                  ),
-                  FilledButton(
-                    onPressed: onCta,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.teal,
-                      minimumSize: const Size(0, 44),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.xl),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: 196,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Text(
-                            promo.cta,
-                            overflow: TextOverflow.ellipsis,
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.teal.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            child: Text(
+                              promo.eyebrow.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.7,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.arrow_forward, size: 16),
+                        const SizedBox(height: 8),
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            promo.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.title.copyWith(
+                              fontSize: 18,
+                              height: 1.2,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          promo.body,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            height: 1.4,
+                            color: Color(0xE6FFFFFF),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ],
+                    FilledButton(
+                      onPressed: onCta,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.actionDeepTeal,
+                        minimumSize: const Size(0, 44),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              promo.cta,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.arrow_forward, size: 16),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

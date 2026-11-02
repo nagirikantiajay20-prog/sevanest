@@ -9,22 +9,39 @@ import 'package:sevanest_customer/features/home/domain/home_data.dart';
 import 'package:sevanest_customer/features/home/presentation/home_format.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-const _cardRadius = AppRadius.xl;
-
-/// Light card shell used by onboarding, error and shortlist sections.
+/// Frosted white card shell used by the home sections (design `.g`).
 class HomeCard extends StatelessWidget {
-  const HomeCard({required this.child, super.key});
+  const HomeCard({
+    required this.child,
+    this.radius = 26,
+    this.padding = const EdgeInsets.all(14),
+    super.key,
+  });
   final Widget child;
+  final double radius;
+  final EdgeInsetsGeometry padding;
 
   @override
   // Material (not DecoratedBox) so ListTile ink inside the card stays visible.
-  Widget build(BuildContext context) => Material(
-    color: AppColors.surface,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(_cardRadius),
-      side: const BorderSide(color: AppColors.hairline),
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(radius),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.navyDeep.withValues(alpha: 0.1),
+          blurRadius: 24,
+          offset: const Offset(0, 8),
+        ),
+      ],
     ),
-    child: Padding(padding: const EdgeInsets.all(AppSpacing.md), child: child),
+    child: Material(
+      color: Colors.white.withValues(alpha: 0.74),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(radius),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.9)),
+      ),
+      child: Padding(padding: padding, child: child),
+    ),
   );
 }
 
@@ -266,7 +283,7 @@ class OnboardingCard extends StatelessWidget {
   }
 }
 
-/// "Your activity": active booking and upcoming interview inside one navy panel.
+/// "Your activity": active booking and upcoming interview in one frosted card.
 class ActivityCard extends StatelessWidget {
   const ActivityCard({
     required this.booking,
@@ -282,12 +299,7 @@ class ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.navy,
-        borderRadius: BorderRadius.circular(_cardRadius),
-      ),
+    return HomeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -296,15 +308,14 @@ class ActivityCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.homeActivity,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: AppText.title.copyWith(fontSize: 15),
                 ),
               ),
               TextButton(
                 key: const Key('home_view_bookings_btn'),
-                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF475569),
+                ),
                 onPressed: () => context.go(Routes.bookings),
                 child: Text(l10n.homeViewAll),
               ),
@@ -342,14 +353,14 @@ class _BookingTile extends StatelessWidget {
       (BookingStage.active, l10n.homeStageActive),
     ];
     return Material(
-      color: Colors.white.withValues(alpha: .08),
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         key: const Key('home_active_booking_card'),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         onTap: () => _open(context),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -391,7 +402,8 @@ class _BookingTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: .9),
+                        color: const Color(0xFF475569),
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -403,6 +415,12 @@ class _BookingTile extends StatelessWidget {
                   CircleAvatar(
                     radius: 28,
                     backgroundColor: AppColors.warnBg,
+                    foregroundImage: booking.photoUrl == null
+                        ? null
+                        : NetworkImage(booking.photoUrl!),
+                    onForegroundImageError: booking.photoUrl == null
+                        ? null
+                        : (_, _) {},
                     child: Text(
                       booking.initials,
                       style: const TextStyle(
@@ -423,8 +441,8 @@ class _BookingTile extends StatelessWidget {
                             Text(
                               booking.workerName,
                               style: text.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
+                                color: AppColors.ink,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                             if (booking.verified)
@@ -434,12 +452,15 @@ class _BookingTile extends StatelessWidget {
                                   const Icon(
                                     Icons.verified_user_outlined,
                                     size: 16,
-                                    color: Colors.white,
+                                    color: AppColors.teal,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     l10n.verified,
-                                    style: const TextStyle(color: Colors.white),
+                                    style: const TextStyle(
+                                      color: AppColors.teal,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -452,7 +473,7 @@ class _BookingTile extends StatelessWidget {
                             booking.startLabel,
                           ].where((e) => e.trim().isNotEmpty).join(' · '),
                           style: text.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: .9),
+                            color: const Color(0xFF475569),
                           ),
                         ),
                       ],
@@ -475,13 +496,20 @@ class _BookingTile extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
+              FilledButton(
                 key: const Key('home_view_booking_btn'),
                 onPressed: () => _open(context),
-                style: OutlinedButton.styleFrom(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.navyDeep,
                   foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(kMinTapTarget),
-                  side: const BorderSide(color: Colors.white38),
+                  minimumSize: const Size.fromHeight(46),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 child: Text(l10n.homeViewBooking),
               ),
@@ -510,38 +538,38 @@ class _StageNode extends StatelessWidget {
   Widget build(BuildContext context) {
     final done = index < current;
     final isCurrent = index == current;
-    Widget line(bool on) => Expanded(
-      child: Container(height: 3, color: on ? Colors.white : Colors.white24),
-    );
+    final ink = done
+        ? const Color(0xFF166534)
+        : isCurrent
+        ? AppColors.actionDeepTeal
+        : const Color(0xFF475569);
     return Column(
       children: [
-        Row(
-          children: [
-            index == 0 ? const Spacer() : line(index <= current),
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: done ? Colors.white : AppColors.navyDeep,
-                border: Border.all(
-                  color: done || isCurrent ? Colors.white : Colors.white38,
-                  width: isCurrent ? 3 : 2,
-                ),
-              ),
-              child: done
-                  ? const Icon(Icons.check, size: 14, color: AppColors.navy)
-                  : null,
-            ),
-            index == count - 1 ? const Spacer() : line(index < current),
-          ],
+        Container(
+          width: 26,
+          height: 26,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: done
+                ? const Color(0xFF16A34A)
+                : isCurrent
+                ? AppColors.teal
+                : const Color(0xFFE2E8F0),
+            border: isCurrent
+                ? Border.all(color: const Color(0xFFCCEFE9), width: 4)
+                : null,
+          ),
+          child: done
+              ? const Icon(Icons.check, size: 14, color: Colors.white)
+              : null,
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: 5),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: isCurrent ? 1 : .88),
-            fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w400,
+            fontSize: 11,
+            color: ink,
+            fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w700,
           ),
         ),
       ],
@@ -560,7 +588,7 @@ class _InterviewTile extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final mode = iv.isTrialVisit ? l10n.homeTrialVisit : l10n.homeVideoCall;
     return Material(
-      color: Colors.white.withValues(alpha: .9),
+      color: AppColors.tealWash,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         key: const Key('home_interview_card'),
@@ -702,51 +730,87 @@ class ResumeCard extends StatelessWidget {
   final VoidCallback onContinue;
   final VoidCallback onDiscard;
 
+  static const _steps = 6;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Container(
+    return KeyedSubtree(
       key: const Key('home_resume_card'),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.tealWash,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.teal.withValues(alpha: .3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.resumeTitle,
-            style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          Text(
-            l10n.resumeBody(what, step, 6),
-            style: text.bodyMedium?.copyWith(color: AppColors.slate),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: SnButton(
-                  key: const Key('home_resume_btn'),
-                  label: l10n.resumeContinue,
-                  onPressed: onContinue,
+      child: HomeCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.resumeTitle, style: AppText.title.copyWith(fontSize: 15)),
+            const SizedBox(height: 4),
+            Text(
+              l10n.resumeBody(what, step, _steps),
+              style: AppText.body.copyWith(
+                fontSize: 12,
+                color: const Color(0xFF475569),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TweenAnimationBuilder<double>(
+              tween: Tween(end: step / _steps),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOut,
+              builder: (_, v, _) => ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: v,
+                  minHeight: 6,
+                  color: AppColors.teal,
+                  backgroundColor: const Color(0xFFE2E8F0),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              TextButton(
-                key: const Key('home_resume_discard_btn'),
-                onPressed: onDiscard,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(kMinTapTarget, kMinTapTarget),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton(
+                    key: const Key('home_resume_btn'),
+                    onPressed: onContinue,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.actionDeepTeal,
+                      minimumSize: const Size(0, 46),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.resumeContinue,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        const Icon(Icons.arrow_forward, size: 16),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Text(l10n.resumeDiscard),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: AppSpacing.sm),
+                TextButton(
+                  key: const Key('home_resume_discard_btn'),
+                  onPressed: onDiscard,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(kMinTapTarget, kMinTapTarget),
+                  ),
+                  child: Text(l10n.resumeDiscard),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

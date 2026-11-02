@@ -7,7 +7,7 @@ import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
 
 /// `GET /customers/me/home`: `{activeBooking, upcomingInterview, unreadNotifications,
-/// shortlistPreview[5], shortlistTotal}` in one call. Workers carry a display name ("Lakshmi D.");
+/// shortlistPreview[5], shortlistTotal, topRated[6], todayAttendance}` in one call. Workers carry a display name ("Lakshmi D.");
 /// the service stands in only when a name is missing. Sections the backend leaves null are hidden
 /// by Home.
 ///
@@ -59,6 +59,11 @@ class HomeRepositoryRemote implements HomeRepository {
               ?_preview(WorkerSummary.fromJson(e['worker'])),
       ],
       unreadCount: unread is num ? unread.toInt() : 0,
+      topRated: [
+        if (j['topRated'] is List)
+          for (final t in j['topRated'] as List) ?TopRatedWorker.fromJson(t),
+      ],
+      todayAttendance: TodayAttendance.fromJson(j['todayAttendance']),
     );
     _last = data;
     _etag = res.headers.value('etag');
@@ -72,6 +77,7 @@ class HomeRepositoryRemote implements HomeRepository {
       reference: b.reference,
       workerName: b.identity?.displayName ?? service,
       verified: b.identity?.verified ?? false,
+      photoUrl: b.identity?.photoUrl,
       service: service,
       engagement: b.engagement == null ? '' : _engagement(b.engagement!),
       startLabel: b.startDate == null ? '' : _from(b.startDate!),

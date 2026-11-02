@@ -181,7 +181,6 @@ void main() {
       final c = await launch(t, data: const HomeData());
       expect(find.text('No bookings yet'), findsOneWidget);
       expect(find.text('Your activity'), findsNothing);
-      expect(find.byKey(const Key('home_support_btn')), findsNothing);
       await tapKey(t, 'home_onboarding_cta');
       expect(location(t), '/discover/category');
       expect(c.read(requirementDraftProvider).serviceId, isNull);

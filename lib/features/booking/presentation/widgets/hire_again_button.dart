@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
@@ -15,10 +16,14 @@ class HireAgainButton extends ConsumerStatefulWidget {
   const HireAgainButton({
     required this.bookingId,
     this.variant = SnButtonVariant.secondary,
+    this.compact = false,
     super.key,
   });
   final String bookingId;
   final SnButtonVariant variant;
+
+  /// Small deep-teal pill for the Home "Book again" cards.
+  final bool compact;
 
   @override
   ConsumerState<HireAgainButton> createState() => _State();
@@ -61,11 +66,36 @@ class _State extends ConsumerState<HireAgainButton> {
   }
 
   @override
-  Widget build(BuildContext context) => SnButton(
-    key: Key('hire_again_btn_${widget.bookingId}'),
-    label: AppLocalizations.of(context).bookingHireAgain,
-    variant: widget.variant,
-    isLoading: _busy,
-    onPressed: _go,
-  );
+  Widget build(BuildContext context) {
+    final label = AppLocalizations.of(context).bookingHireAgain;
+    if (widget.compact) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: FilledButton(
+          key: Key('hire_again_btn_${widget.bookingId}'),
+          onPressed: _busy ? null : _go,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.actionDeepTeal,
+            minimumSize: const Size(0, 44),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          child: Text(label),
+        ),
+      );
+    }
+    return SnButton(
+      key: Key('hire_again_btn_${widget.bookingId}'),
+      label: label,
+      variant: widget.variant,
+      isLoading: _busy,
+      onPressed: _go,
+    );
+  }
 }
