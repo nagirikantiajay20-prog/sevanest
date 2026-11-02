@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
-import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
-import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta, authSerif;
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/interview_labels.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_detail_parts.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_list_parts.dart'
+    show interviewStart;
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
-import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart'
+    show ratingText;
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// `/interviews/:id` (module 07, screen 7.2). Buttons come only from the backend's
 /// `allowedActions`.
@@ -74,12 +78,12 @@ class _State extends ConsumerState<InterviewDetailScreen> {
 
   Future<void> _cancel() async {
     final l10n = AppLocalizations.of(context);
-    final yes = await confirmDialog(
+    final yes = await showGlassConfirm(
       context,
       title: l10n.interviewCancelTitle,
       body: l10n.interviewCancelBody,
-      confirmLabel: l10n.interviewCancel,
-      cancelLabel: l10n.interviewCancelKeep,
+      confirmLabel: l10n.interviewCancelYes,
+      keepLabel: l10n.interviewCancelKeep,
       confirmKey: const Key('interview_cancel_confirm_btn'),
       destructive: true,
     );
@@ -102,94 +106,209 @@ class _State extends ConsumerState<InterviewDetailScreen> {
 
   Future<void> _decline() async {
     final l10n = AppLocalizations.of(context);
-    final yes = await confirmDialog(
+    final yes = await showGlassConfirm(
       context,
       title: l10n.interviewDeclineTitle,
       body: l10n.interviewDeclineBody,
       confirmLabel: l10n.interviewDeclineConfirm,
-      cancelLabel: l10n.cancel,
+      keepLabel: l10n.cancel,
       confirmKey: const Key('interview_decline_confirm_btn'),
     );
     if (!yes || !mounted) return;
     await _act((r) => r.decline(widget.interviewId), l10n.interviewDeclined);
   }
 
+  /// Opens a pre-filled calendar entry for the interview in the phone's calendar / browser.
+  Future<void> _addToCalendar(Interview iv, String workerName) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final start = interviewStart(iv);
+    if (start == null) return;
+    String stamp(DateTime d) => DateFormat("yyyyMMdd'T'HHmmss").format(d);
+    final end = start.add(
+      Duration(minutes: const InterviewSlot('00:00').minutes),
+    );
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        Uri.https('calendar.google.com', '/calendar/render', {
+          'action': 'TEMPLATE',
+          'text': l10n.interviewCalendarTitle(workerName),
+          'dates': '${stamp(start)}/${stamp(end)}',
+          if (iv.note != null && iv.note!.isNotEmpty) 'details': iv.note,
+        }),
+        mode: LaunchMode.externalApplication,
+      );
+    } on Object {
+      opened = false;
+    }
+    if (!opened) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.interviewCalendarFailed)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final value = ref.watch(interviewProvider(widget.interviewId));
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
-        children: [
-          SnHeader(
-            title: l10n.interviewDetailTitle,
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go(Routes.home),
+    final iv = value.value;
+    final primary = iv == null ? null : _primary(l10n, iv);
+    return FindGlassPage(
+      title: l10n.interviewDetailTitle,
+      backLabel: l10n.back,
+      onBack: () => context.canPop() ? context.pop() : context.go(Routes.home),
+      body: AsyncValueView<Interview>(
+        value: value,
+        onRetry: () => ref.invalidate(interviewProvider(widget.interviewId)),
+        data: (iv) => RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(interviewProvider(widget.interviewId));
+            try {
+              await ref.read(interviewProvider(widget.interviewId).future);
+            } on Object {
+              // shown by the view
+            }
+          },
+          child: _Body(
+            interview: iv,
+            busy: _busy,
+            primaryKey: primary?.key,
+            onCancel: _cancel,
+            onDecline: _decline,
+            onComplete: _complete,
+            onReschedule: () => _reschedule(iv),
+            onAnswer: _answer,
+            onCalendar: _addToCalendar,
           ),
-          Expanded(child: _content(value)),
-        ],
+        ),
       ),
+      bottom: primary == null
+          ? null
+          : _PrimaryBar(action: primary, busy: _busy),
     );
   }
 
-  Widget _content(AsyncValue<Interview> value) {
-    return AsyncValueView<Interview>(
-      value: value,
-      onRetry: () => ref.invalidate(interviewProvider(widget.interviewId)),
-      data: (iv) => RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(interviewProvider(widget.interviewId));
-          try {
-            await ref.read(interviewProvider(widget.interviewId).future);
-          } on Object {
-            // shown by the view
-          }
-        },
-        child: _Body(
-          interview: iv,
-          busy: _busy,
-          onCancel: _cancel,
-          onDecline: _decline,
-          onComplete: _complete,
-          onAnswer: _answer,
+  /// The one big button of the bottom bar: the decision in front of the customer, or the way
+  /// on after the request ended. Everything else sits in the body.
+  _Primary? _primary(AppLocalizations l10n, Interview iv) {
+    final a = iv.actions;
+    final ended =
+        iv.status == InterviewStatus.notAFit ||
+        iv.status == InterviewStatus.declined ||
+        iv.status == InterviewStatus.cancelled;
+    if (a.contains(InterviewAction.confirm)) {
+      return _Primary(
+        const Key('interview_confirm_worker_btn'),
+        l10n.interviewConfirmWorker,
+        () => context.push(
+          '${Routes.bookingConfirm}?interviewId=${Uri.encodeComponent(iv.bookingId.isEmpty ? iv.id : iv.bookingId)}',
         ),
-      ),
-    );
+      );
+    }
+    if (a.contains(InterviewAction.acceptProposal)) {
+      return _Primary(
+        const Key('interview_accept_proposal_btn'),
+        l10n.interviewAcceptProposal,
+        () => _answer(accept: true),
+      );
+    }
+    if (a.contains(InterviewAction.complete)) {
+      return _Primary(
+        const Key('interview_complete_btn'),
+        l10n.interviewComplete,
+        _complete,
+      );
+    }
+    if (a.contains(InterviewAction.reschedule)) {
+      return _Primary(
+        const Key('interview_reschedule_btn'),
+        iv.date == null ? l10n.interviewSchedule : l10n.interviewReschedule,
+        () => _reschedule(iv),
+      );
+    }
+    if (ended) {
+      return _Primary(
+        const Key('interview_find_another_btn'),
+        l10n.workerFindAnother,
+        () => context.go(Routes.workers),
+        icon: Icons.search_rounded,
+      );
+    }
+    return null;
   }
+
+  void _reschedule(Interview iv) => context.push(
+    '${Routes.interviewNew}?workerId=${Uri.encodeComponent(iv.workerId)}&rescheduleId=${Uri.encodeComponent(iv.id)}',
+  );
+}
+
+class _Primary {
+  const _Primary(this.key, this.label, this.onTap, {this.icon});
+  final Key key;
+  final String label;
+  final VoidCallback onTap;
+  final IconData? icon;
+}
+
+class _PrimaryBar extends StatelessWidget {
+  const _PrimaryBar({required this.action, required this.busy});
+  final _Primary action;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) => AuthCta(
+    key: action.key,
+    clock: DiscoverClock.of(context),
+    label: action.label,
+    loadingLabel: action.label,
+    loading: busy,
+    breathe: true,
+    icon: action.icon ?? Icons.arrow_forward_rounded,
+    radius: 18,
+    height: 58,
+    onPressed: action.onTap,
+  );
 }
 
 class _Body extends ConsumerWidget {
   const _Body({
     required this.interview,
     required this.busy,
+    required this.primaryKey,
     required this.onCancel,
     required this.onDecline,
     required this.onComplete,
+    required this.onReschedule,
     required this.onAnswer,
+    required this.onCalendar,
   });
 
   final Interview interview;
   final bool busy;
+
+  /// The bottom bar carries this action; the others are listed in the body.
+  final Key? primaryKey;
   final VoidCallback onCancel;
   final VoidCallback onDecline;
   final VoidCallback onComplete;
+  final VoidCallback onReschedule;
   final Future<void> Function({required bool accept}) onAnswer;
+  final Future<void> Function(Interview, String) onCalendar;
 
   /// Backend timeline when it sends one; otherwise a template from the status.
-  List<SnTimelineItem> _timeline(AppLocalizations l) {
+  List<TimelineStep> _timeline(
+    AppLocalizations l,
+    String? when,
+    String locale,
+  ) {
+    String? at(DateTime? d) =>
+        d == null ? null : DateFormat('EEE d MMM, h:mm a', locale).format(d);
     if (interview.timeline.isNotEmpty) {
       return [
         for (final e in interview.timeline)
-          SnTimelineItem(
-            title: e.title,
-            state: switch (e.state) {
-              TimelineState.done => SnTimelineState.done,
-              TimelineState.current => SnTimelineState.current,
-              TimelineState.failed => SnTimelineState.failed,
-              TimelineState.upcoming => SnTimelineState.upcoming,
-            },
-          ),
+          TimelineStep(e.title, e.state, at(e.at)),
       ];
     }
     final s = interview.status;
@@ -202,18 +321,34 @@ class _Body extends ConsumerWidget {
       InterviewStatus.confirmed || InterviewStatus.notAFit => 3,
       _ => 0,
     };
-    SnTimelineState at(int i) => ended && i == reached
-        ? SnTimelineState.failed
+    TimelineState state(int i) => ended && i == reached
+        ? TimelineState.failed
         : i < reached
-        ? SnTimelineState.done
+        ? TimelineState.done
         : i == reached
-        ? SnTimelineState.current
-        : SnTimelineState.upcoming;
+        ? TimelineState.current
+        : TimelineState.upcoming;
     return [
-      SnTimelineItem(title: l.interviewTlRequested, state: at(0)),
-      SnTimelineItem(title: l.interviewTlScheduled, state: at(1)),
-      SnTimelineItem(title: l.interviewTlCompleted, state: at(2)),
-      SnTimelineItem(title: l.interviewTlDecision, state: at(3)),
+      TimelineStep(
+        l.interviewTlRequested,
+        state(0),
+        reached == 0 && !ended ? l.interviewTlWaiting : null,
+      ),
+      TimelineStep(
+        l.interviewTlScheduled,
+        state(1),
+        reached >= 1 && !ended ? when : null,
+      ),
+      TimelineStep(
+        l.interviewTlCompleted,
+        state(2),
+        reached == 1 ? l.interviewTlAfter : null,
+      ),
+      TimelineStep(
+        l.interviewTlDecision,
+        state(3),
+        reached == 2 ? l.interviewTlDecisionHint : null,
+      ),
     ];
   }
 
@@ -223,8 +358,12 @@ class _Body extends ConsumerWidget {
     final locale = Localizations.localeOf(context).toString();
     final iv = interview;
     final when = interviewWhen(iv, locale);
+    final whenText = when == null
+        ? null
+        : l10n.interviewWhenValue(when.date, when.time);
     final worker =
         iv.worker ?? ref.watch(workerDetailProvider(iv.workerId)).value;
+    final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
     final req = iv.requirement;
     final category = ref
         .watch(categoriesProvider)
@@ -232,189 +371,198 @@ class _Body extends ConsumerWidget {
         ?.where((c) => c.id == req?.serviceId)
         .firstOrNull;
     final a = iv.actions;
-    final ended =
-        iv.status == InterviewStatus.notAFit ||
-        iv.status == InterviewStatus.declined;
+    final s = iv.status;
+    final name = worker == null || worker.title.isEmpty
+        ? interviewTypeName(l10n, iv.type)
+        : worker.title;
 
-    Widget row(String label, String value) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 110, child: Text(label, style: AppText.meta)),
-          Expanded(child: Text(value, style: AppText.bodyLarge)),
-        ],
+    final (head, tone, pct) = switch (s) {
+      InterviewStatus.requested || InterviewStatus.rescheduleProposed => (
+        l10n.interviewHeadWaiting(name),
+        HeroTone.waiting,
+        0.12,
       ),
-    );
+      InterviewStatus.scheduled => (
+        l10n.interviewHeadBooked,
+        HeroTone.ok,
+        0.45,
+      ),
+      InterviewStatus.completed => (l10n.interviewHeadDone, HeroTone.ok, 0.78),
+      InterviewStatus.confirmed => (name, HeroTone.ok, 1.0),
+      InterviewStatus.notAFit => (name, HeroTone.waiting, 0.78),
+      InterviewStatus.cancelled || InterviewStatus.declined => (
+        l10n.interviewHeadCancelled,
+        HeroTone.bad,
+        0.12,
+      ),
+      InterviewStatus.unknown => (name, HeroTone.waiting, 0.12),
+    };
+    final canCalendar =
+        interviewStart(iv) != null &&
+        (s == InterviewStatus.scheduled || s == InterviewStatus.completed);
+
+    void openWorker() =>
+        context.push(Routes.path(Routes.workerDetail, {'id': iv.workerId}));
+
+    final rows = <(String, String)>[
+      (l10n.interviewTypeRow, interviewTypeName(l10n, iv.type)),
+      if (whenText != null) (l10n.interviewWhenRow, whenText),
+      if (req != null)
+        (
+          l10n.interviewRequirementRow,
+          [
+            category?.name ?? req.serviceId,
+            if (req.engagement != null)
+              engagementLabels(l10n, req.engagement!).name,
+            req.address?.area,
+          ].whereType<String>().join(' · '),
+        ),
+      if (iv.note != null && iv.note!.isNotEmpty)
+        (l10n.interviewNoteLabel, iv.note!),
+    ];
 
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SnCard(
-            tinted: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SnBadge(
-                  key: const Key('interview_status_chip'),
-                  label: interviewStatusLabel(l10n, iv.status),
-                  tone: interviewStatusTone(iv.status),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  interviewStatusCopy(l10n, iv, locale),
-                  key: const Key('interview_status_copy'),
-                  style: AppText.card,
-                ),
-              ],
+          DiscoverRise(
+            delayMs: 0,
+            child: InterviewHero(
+              statusLabel: interviewStatusLabel(l10n, s),
+              headline: head,
+              copy: interviewStatusCopy(l10n, iv, locale),
+              progress: pct,
+              tone: tone,
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
-          if (worker != null)
-            WorkerCard(
+          const SizedBox(height: 14),
+          DiscoverRise(
+            delayMs: 80,
+            child: KeyedSubtree(
               key: const Key('interview_worker_card'),
-              worker: worker,
-              onTap: () => context.push(
-                Routes.path(Routes.workerDetail, {'id': iv.workerId}),
-              ),
-            )
-          else
-            SnCard(
-              key: const Key('interview_worker_card'),
-              onTap: () => context.push(
-                Routes.path(Routes.workerDetail, {'id': iv.workerId}),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.person_outline),
-                  const SizedBox(width: AppSpacing.md),
-                  Text(l10n.workerProfileTitle, style: AppText.card),
-                ],
-              ),
-            ),
-          const SizedBox(height: AppSpacing.md),
-          SnCard(
-            child: Column(
-              children: [
-                row(l10n.interviewTypeRow, interviewTypeName(l10n, iv.type)),
-                if (when != null)
-                  row(
-                    l10n.interviewWhenRow,
-                    l10n.interviewWhenValue(when.date, when.time),
-                  ),
-                if (req != null)
-                  row(
-                    l10n.interviewRequirementRow,
-                    [
-                      category?.name ?? req.serviceId,
-                      if (req.engagement != null)
-                        engagementLabels(l10n, req.engagement!).name,
-                      req.address?.area,
-                    ].whereType<String>().join(' · '),
-                  ),
-                if (iv.note != null && iv.note!.isNotEmpty)
-                  row(l10n.interviewNoteLabel, iv.note!),
-              ],
+              child: worker == null
+                  ? _ProfileLink(onTap: openWorker)
+                  : InterviewWorkerCard(
+                      title: worker.title,
+                      initials: worker.initials,
+                      photoUrl: worker.photoUrl,
+                      gradient: avatarGradientFor(worker.id),
+                      verified: worker.verified,
+                      rating: worker.hasRating
+                          ? ratingText(worker.ratingAverage!, scale)
+                          : null,
+                      onTap: openWorker,
+                    ),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(l10n.interviewProgress, style: AppText.heading),
-          const SizedBox(height: AppSpacing.sm),
-          SnCard(child: SnTimeline(items: _timeline(l10n))),
-          const SizedBox(height: AppSpacing.md),
-          if (a.contains(InterviewAction.confirm))
-            SnButton(
-              key: const Key('interview_confirm_worker_btn'),
-              label: l10n.interviewConfirmWorker,
-              variant: SnButtonVariant.deep,
-              onPressed: busy
-                  ? null
-                  : () => context.push(
-                      '${Routes.bookingConfirm}?interviewId=${Uri.encodeComponent(iv.bookingId.isEmpty ? iv.id : iv.bookingId)}',
+          const SizedBox(height: 14),
+          DiscoverRise(
+            delayMs: 160,
+            child: InterviewInfoCard(
+              rows: rows,
+              calendarLabel: canCalendar ? l10n.interviewAddCalendar : null,
+              onCalendar: canCalendar ? () => onCalendar(iv, name) : null,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2, 22, 2, 10),
+            child: DiscoverRise(
+              delayMs: 220,
+              child: Semantics(
+                header: true,
+                child: Text(l10n.interviewProgress, style: authSerif(22, 1.2)),
+              ),
+            ),
+          ),
+          DiscoverRise(
+            delayMs: 260,
+            child: GlassTimeline(steps: _timeline(l10n, whenText, locale)),
+          ),
+          const SizedBox(height: 16),
+          DiscoverRise(
+            delayMs: 340,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final o in [
+                  (
+                    InterviewAction.acceptProposal,
+                    const Key('interview_accept_proposal_btn'),
+                    l10n.interviewAcceptProposal,
+                    () => onAnswer(accept: true),
+                  ),
+                  (
+                    InterviewAction.rejectProposal,
+                    const Key('interview_reject_proposal_btn'),
+                    l10n.interviewKeepOriginal,
+                    () => onAnswer(accept: false),
+                  ),
+                  (
+                    InterviewAction.complete,
+                    const Key('interview_complete_btn'),
+                    l10n.interviewComplete,
+                    onComplete,
+                  ),
+                  (
+                    InterviewAction.reschedule,
+                    const Key('interview_reschedule_btn'),
+                    iv.date == null
+                        ? l10n.interviewSchedule
+                        : l10n.interviewReschedule,
+                    onReschedule,
+                  ),
+                  (
+                    InterviewAction.decline,
+                    const Key('interview_reject_worker_btn'),
+                    l10n.interviewDecline,
+                    onDecline,
+                  ),
+                ])
+                  if (a.contains(o.$1) && o.$2 != primaryKey) ...[
+                    OutlineAction(
+                      key: o.$2,
+                      label: o.$3,
+                      onPressed: busy ? null : o.$4,
                     ),
-            ),
-          if (a.contains(InterviewAction.acceptProposal)) ...[
-            SnButton(
-              key: const Key('interview_accept_proposal_btn'),
-              label: l10n.interviewAcceptProposal,
-              variant: SnButtonVariant.deep,
-              onPressed: busy ? null : () => onAnswer(accept: true),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          if (a.contains(InterviewAction.rejectProposal)) ...[
-            SnButton(
-              key: const Key('interview_reject_proposal_btn'),
-              label: l10n.interviewKeepOriginal,
-              variant: SnButtonVariant.secondary,
-              onPressed: busy ? null : () => onAnswer(accept: false),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          if (a.contains(InterviewAction.complete)) ...[
-            const SizedBox(height: AppSpacing.sm),
-            SnButton(
-              key: const Key('interview_complete_btn'),
-              label: l10n.interviewComplete,
-              variant: SnButtonVariant.secondary,
-              onPressed: busy ? null : onComplete,
-            ),
-          ],
-          if (a.contains(InterviewAction.reschedule)) ...[
-            const SizedBox(height: AppSpacing.sm),
-            SnButton(
-              key: const Key('interview_reschedule_btn'),
-              label: iv.date == null
-                  ? l10n.interviewSchedule
-                  : l10n.interviewReschedule,
-              variant: SnButtonVariant.secondary,
-              onPressed: busy
-                  ? null
-                  : () => context.push(
-                      '${Routes.interviewNew}?workerId=${Uri.encodeComponent(iv.workerId)}&rescheduleId=${Uri.encodeComponent(iv.id)}',
-                    ),
-            ),
-          ],
-          if (a.contains(InterviewAction.decline)) ...[
-            const SizedBox(height: AppSpacing.sm),
-            SnButton(
-              key: const Key('interview_reject_worker_btn'),
-              label: l10n.interviewDecline,
-              variant: SnButtonVariant.secondary,
-              onPressed: busy ? null : onDecline,
-            ),
-          ],
-          if (a.contains(InterviewAction.cancel)) ...[
-            const SizedBox(height: AppSpacing.sm),
-            SnButton(
-              key: const Key('interview_cancel_btn'),
-              label: l10n.interviewCancel,
-              variant: SnButtonVariant.text,
-              onPressed: busy ? null : onCancel,
-            ),
-          ],
-          if (ended) ...[
-            const SizedBox(height: AppSpacing.sm),
-            SnButton(
-              key: const Key('interview_find_another_btn'),
-              label: l10n.workerFindAnother,
-              onPressed: () => context.go(Routes.workers),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.sm),
-          SnButton(
-            key: const Key('interview_support_btn'),
-            label: l10n.interviewSupport,
-            variant: SnButtonVariant.text,
-            onPressed: () => context.push(
-              '${Routes.supportNew}?bookingId=${Uri.encodeComponent(iv.bookingId.isEmpty ? iv.id : iv.bookingId)}',
+                    const SizedBox(height: 10),
+                  ],
+                if (a.contains(InterviewAction.cancel))
+                  QuietAction(
+                    key: const Key('interview_cancel_btn'),
+                    label: l10n.interviewCancel,
+                    danger: true,
+                    onPressed: busy ? null : onCancel,
+                  ),
+                QuietAction(
+                  key: const Key('interview_support_btn'),
+                  label: l10n.interviewSupport,
+                  onPressed: () => context.push(
+                    '${Routes.supportNew}?bookingId=${Uri.encodeComponent(iv.bookingId.isEmpty ? iv.id : iv.bookingId)}',
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _ProfileLink extends StatelessWidget {
+  const _ProfileLink({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InterviewWorkerCard(
+    title: AppLocalizations.of(context).workerProfileTitle,
+    initials: null,
+    photoUrl: null,
+    gradient: const [Color(0xFF475569), Color(0xFF94A3B8)],
+    verified: false,
+    rating: null,
+    onTap: onTap,
+  );
 }

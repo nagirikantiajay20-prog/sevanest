@@ -396,16 +396,24 @@ void main() {
       await settle(t);
     }
 
-    /// Picks tomorrow (the picker's initial date) and a slot.
+    /// Picks tomorrow (second chip of the date strip) and a slot.
     Future<void> pickDateAndSlot(
       WidgetTester t, {
       String slot = '10:00',
     }) async {
-      await tapKey(t, 'interview_date_btn');
-      await t.tap(find.text('OK'));
-      await settle(t);
+      await tapKey(t, 'interview_date_1');
       await tapKey(t, 'interview_slot_$slot');
     }
+
+    /// Text inside the status chip (the progress bar repeats the stage names).
+    Finder chipText(String text) => find.descendant(
+      of: find.byKey(const Key('interview_status_chip')),
+      matching: find.text(text),
+    );
+
+    /// The "Request sent" card's button: opens the new request.
+    Future<void> viewRequest(WidgetTester t) =>
+        tapKey(t, 'interview_view_request_btn');
 
     bool submitEnabled(WidgetTester t) {
       final b = find.descendant(
@@ -421,22 +429,32 @@ void main() {
         (t) async {
           await open(t, route: newRoute);
           expect(submitEnabled(t), isFalse);
-          expect(find.text('Pick a date to see free times.'), findsOneWidget);
-          await tapKey(t, 'interview_date_btn');
-          await t.tap(find.text('OK'));
-          await settle(t);
+          expect(
+            find.text('Choose a date above to see the free times.'),
+            findsOneWidget,
+          );
+          await tapKey(t, 'interview_date_1');
           expect(submitEnabled(t), isFalse); // date alone is not enough
           await tapKey(t, 'interview_slot_10:00');
           expect(submitEnabled(t), isTrue);
         },
       );
 
-      testWidgets('INT-11 the date picker cannot go before today', (t) async {
+      testWidgets('INT-11 the date strip runs from today to 13 days on', (
+        t,
+      ) async {
         await open(t, route: newRoute);
-        await tapKey(t, 'interview_date_btn');
-        final p = t.widget<CalendarDatePicker>(find.byType(CalendarDatePicker));
-        expect(p.firstDate, DateTime(2026, 10, 9));
-        expect(p.lastDate, DateTime(2026, 10, 22));
+        // Today is 9 Oct 2026 in these tests: no earlier chip, 14 chips in all.
+        expect(find.text('Today'), findsOneWidget);
+        await t.scrollUntilVisible(
+          find.byKey(const Key('interview_date_13')),
+          200,
+          scrollable: find.byWidgetPredicate(
+            (w) => w is Scrollable && w.axis == Axis.horizontal,
+          ),
+        );
+        expect(find.byKey(const Key('interview_date_13')), findsOneWidget);
+        expect(find.byKey(const Key('interview_date_14')), findsNothing);
       });
 
       testWidgets(
@@ -447,6 +465,7 @@ void main() {
           await open(t, route: newRoute, push: push);
           await pickDateAndSlot(t);
           await tapKey(t, 'interview_submit_btn');
+          await viewRequest(t);
           expect(find.byKey(const Key('notif_prompt')), findsOneWidget);
           expect(push.requestCalls, 0);
           await tapKey(t, 'notif_prompt_allow_btn');
@@ -466,10 +485,14 @@ void main() {
         );
         await pickDateAndSlot(t);
         await tapKey(t, 'interview_submit_btn');
+        // The card confirms the request; View request opens it.
+        expect(find.text('Request sent'), findsOneWidget);
+        expect(env.where, '/interviews/new');
+        await viewRequest(t);
         expect(env.where, '/interviews/iv_401');
         expect(find.byKey(const Key('interview_status_chip')), findsOneWidget);
         // The booking was created and scheduled in one go.
-        expect(find.text('Scheduled'), findsOneWidget);
+        expect(chipText('Scheduled'), findsOneWidget);
         GoRouter.of(t.element(find.byType(Scaffold).first)).pop();
         await settle(t);
         expect(env.where, isNot(contains('/interviews/new')));
@@ -508,6 +531,7 @@ void main() {
           expect(submitEnabled(t), isFalse);
           await tapKey(t, 'interview_slot_16:00');
           await tapKey(t, 'interview_submit_btn');
+          await viewRequest(t);
           expect(env.where, startsWith('/interviews/iv_'));
         },
       );
@@ -533,6 +557,7 @@ void main() {
         await pickDateAndSlot(t);
         await tapKey(t, 'interview_submit_btn');
         expect(spy.createCalls, 1);
+        await viewRequest(t);
         expect(env.where, '/interviews/iv_401');
       });
 
@@ -584,7 +609,8 @@ void main() {
         await tapKey(t, 'interview_type_trial');
         await pickDateAndSlot(t);
         await tapKey(t, 'interview_submit_btn');
-        expect(find.text('Trial visit'), findsWidgets); // shown on the detail
+        await viewRequest(t);
+        expect(find.text('Trial'), findsWidgets); // shown on the detail
         expect(env.where, '/interviews/iv_401');
       });
     });
@@ -726,7 +752,7 @@ void main() {
         await pickDateAndSlot(t, slot: '12:00');
         await tapKey(t, 'interview_submit_btn');
         expect(env.where, '/interviews/iv_301');
-        expect(find.text('Scheduled'), findsOneWidget);
+        expect(chipText('Scheduled'), findsOneWidget);
       });
 
       testWidgets('unknown interview id shows the error with Retry', (t) async {
@@ -777,8 +803,9 @@ void main() {
       expect(env.where, '/interviews/new');
       await pickDateAndSlot(t);
       await tapKey(t, 'interview_submit_btn');
+      await viewRequest(t);
       expect(env.where, '/interviews/iv_401');
-      expect(find.text('Scheduled'), findsOneWidget);
+      expect(chipText('Scheduled'), findsOneWidget);
     });
   });
 }

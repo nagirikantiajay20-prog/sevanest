@@ -4,29 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_chip.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/interview_labels.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_request_parts.dart';
 import 'package:sevanest_customer/features/legal/legal_consent.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/push_prompt.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -57,13 +58,27 @@ class _State extends ConsumerState<InterviewRequestScreen> {
   bool _busy = false;
   String? _error;
 
+  /// The request that was just created: the "Request sent" card shows until View request.
+  String? _sentId;
+
   /// One key per form, reused by every retry, so a lost response can never become two requests.
   final String _key =
       'iv-${DateTime.now().microsecondsSinceEpoch}-${UniqueKey().hashCode}';
 
   bool get _isReschedule => widget.rescheduleId != null;
-  bool get _dirty => _date != null || _slot != null || _note.text.isNotEmpty;
+  bool get _dirty =>
+      _sentId == null &&
+      (_date != null ||
+          _slot != null ||
+          _note.text != ref.read(requirementNoteProvider));
   bool get _canSubmit => _date != null && _slot != null && !_busy;
+
+  @override
+  void initState() {
+    super.initState();
+    // The note typed on Review carries over to the first request.
+    if (!_isReschedule) _note.text = ref.read(requirementNoteProvider);
+  }
 
   @override
   void dispose() {
@@ -71,22 +86,11 @@ class _State extends ConsumerState<InterviewRequestScreen> {
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
-    final today = _today();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date ?? today.add(const Duration(days: 1)),
-      // Past dates cannot be picked.
-      firstDate: today,
-      lastDate: today.add(const Duration(days: interviewWindowDays - 1)),
-    );
-    if (picked == null || !mounted) return;
-    setState(() {
-      _date = DateTime(picked.year, picked.month, picked.day);
-      _slot = null;
-      _error = null;
-    });
-  }
+  void _pickDate(DateTime d) => setState(() {
+    _date = d;
+    _slot = null;
+    _error = null;
+  });
 
   DateTime _today() {
     final n = ref.read(nowProvider)();
@@ -216,33 +220,39 @@ class _State extends ConsumerState<InterviewRequestScreen> {
       ..invalidate(bookingProvider(booking))
       ..invalidate(bookingListProvider)
       ..invalidate(homeProvider);
+    if (!mounted) return;
+    // A new request is confirmed by the "Request sent" card; View request opens the detail.
+    if (sent) {
+      setState(() => _sentId = id);
+      return;
+    }
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(sent ? l10n.interviewSent : l10n.interviewRescheduled),
-        ),
-      );
-    if (!mounted) return;
-    if (sent) {
-      // Replace the form so Back cannot resubmit it.
-      final push = ref.read(pushControllerProvider);
-      router.pushReplacement(Routes.path(Routes.interviewDetail, {'id': id}));
-      // The first meaningful action: offer notifications once the detail is on screen (never at
-      // launch). The form is gone by then, so the navigator's context is used.
-      WidgetsBinding.instance
-        ..addPostFrameCallback((_) {
-          // The overlay sits below the navigator, so a dialog can find it.
-          final c =
-              router.routerDelegate.navigatorKey.currentState?.overlay?.context;
-          if (c != null && c.mounted) unawaited(askForPushAfterAction(c, push));
-        })
-        ..scheduleFrame();
-    } else if (router.canPop()) {
+      ..showSnackBar(SnackBar(content: Text(l10n.interviewRescheduled)));
+    if (router.canPop()) {
       router.pop();
     } else {
       router.go(Routes.path(Routes.interviewDetail, {'id': id}));
     }
+  }
+
+  /// Replaces the form with the detail so Back cannot resubmit it.
+  void _viewRequest() {
+    final id = _sentId;
+    if (id == null) return;
+    final router = GoRouter.of(context);
+    final push = ref.read(pushControllerProvider);
+    router.pushReplacement(Routes.path(Routes.interviewDetail, {'id': id}));
+    // The first meaningful action: offer notifications once the detail is on screen (never at
+    // launch). The form is gone by then, so the navigator's context is used.
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) {
+        // The overlay sits below the navigator, so a dialog can find it.
+        final c =
+            router.routerDelegate.navigatorKey.currentState?.overlay?.context;
+        if (c != null && c.mounted) unawaited(askForPushAfterAction(c, push));
+      })
+      ..scheduleFrame();
   }
 
   Future<void> _workerGone() async {
@@ -267,12 +277,12 @@ class _State extends ConsumerState<InterviewRequestScreen> {
 
   Future<void> _confirmLeave() async {
     final l10n = AppLocalizations.of(context);
-    final discard = await confirmDialog(
+    final discard = await showGlassConfirm(
       context,
       title: l10n.discardTitle,
       body: l10n.discardBody,
       confirmLabel: l10n.discard,
-      cancelLabel: l10n.keepEditing,
+      keepLabel: l10n.keepEditing,
       confirmKey: const Key('interview_discard_confirm_btn'),
     );
     if (discard && mounted) context.pop();
@@ -289,95 +299,55 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         : ref.watch(
             interviewSlotsProvider((workerId: widget.workerId, date: date)),
           );
+    final kind = interviewTypeName(l10n, _type).toLowerCase();
 
     return PopScope(
       canPop: !_dirty || _busy,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _confirmLeave();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.canvasCool,
-        body: Column(
-          children: [
-            SnHeader(
-              title: _isReschedule
-                  ? l10n.interviewRescheduleTitle
-                  : l10n.interviewRequestTitle,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Expanded(child: _form(context, l10n, worker, slots, date, locale)),
-          ],
+      child: FindGlassPage(
+        title: _isReschedule
+            ? l10n.interviewRescheduleTitle
+            : l10n.interviewRequestTitle,
+        backLabel: l10n.back,
+        onBack: () => Navigator.of(context).maybePop(),
+        body: _form(context, l10n, worker, slots, date),
+        bottom: RequestSubmitBar(
+          summary: date == null || _slot == null
+              ? null
+              : _summary(date, locale),
+          hint: date == null
+              ? l10n.interviewPickToContinue
+              : l10n.interviewNowPickTime,
+          label: _isReschedule
+              ? l10n.interviewSubmitReschedule
+              : l10n.interviewSubmit,
+          loadingLabel: l10n.interviewSubmitting,
+          loading: _busy,
+          onPressed: _canSubmit ? _submit : null,
         ),
-        bottomNavigationBar: _bottomBar(l10n),
+        overlay: _sentId == null
+            ? null
+            : InterviewSentOverlay(
+                workerName: worker.value?.title ?? '',
+                kind: kind,
+                when: _summary(date!, locale),
+                onView: _viewRequest,
+              ),
       ),
     );
   }
 
-  Widget _bottomBar(AppLocalizations l10n) => DecoratedBox(
-    decoration: const BoxDecoration(
-      color: AppColors.surface,
-      boxShadow: AppShadows.floating,
-    ),
-    child: SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_date == null || _slot == null) ...[
-              Text(l10n.interviewPickToContinue, style: AppText.body),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-            SnButton(
-              key: const Key('interview_submit_btn'),
-              label: _isReschedule
-                  ? l10n.interviewSubmitReschedule
-                  : l10n.interviewSubmit,
-              loadingLabel: l10n.interviewSubmitting,
-              isLoading: _busy,
-              variant: SnButtonVariant.deep,
-              onPressed: _canSubmit ? _submit : null,
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  Widget _typeCard(String key, String title, String hint, InterviewType t) {
-    final on = _type == t;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Semantics(
-        selected: on,
-        inMutuallyExclusiveGroup: true,
-        button: true,
-        child: SnCard(
-          key: Key(key),
-          tinted: on,
-          onTap: _busy ? null : () => setState(() => _type = t),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppText.card),
-                    Text(hint, style: AppText.body),
-                  ],
-                ),
-              ),
-              Icon(
-                on ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: on ? AppColors.teal : AppColors.slate400,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  /// "Thu, 29 Oct · 10 AM – 11 AM".
+  String _summary(DateTime date, String locale) {
+    final start = parseSlot(_slot) ?? 0;
+    final length = _slotLength[_slot] ?? const InterviewSlot('00:00').minutes;
+    return '${formatDate(date, locale)} · ${formatTimeSpan(start, start + length)}';
   }
+
+  /// Length of each loaded slot by id, for the summary line.
+  final _slotLength = <String, int>{};
 
   Widget _form(
     BuildContext context,
@@ -385,28 +355,34 @@ class _State extends ConsumerState<InterviewRequestScreen> {
     AsyncValue<WorkerSummary> worker,
     AsyncValue<List<InterviewSlot>>? slots,
     DateTime? date,
-    String locale,
   ) {
-    final text = Theme.of(context).textTheme;
+    var n = 0;
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           worker.when(
-            data: (w) => SnCard(
-              padding: EdgeInsets.zero,
-              child: ListTile(
-                key: const Key('interview_worker_mini'),
-                leading: WorkerAvatar(w),
-                title: Text(
-                  w.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(experienceLabel(l10n, w.experienceMonths)),
-                trailing: RatingLabel(w),
+            data: (w) => KeyedSubtree(
+              key: const Key('interview_worker_mini'),
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
+                  return RequestWorkerCard(
+                    title: w.title,
+                    initials: w.initials,
+                    photoUrl: w.photoUrl,
+                    gradient: avatarGradientFor(w.id),
+                    subtitle: [
+                      experienceLabel(l10n, w.experienceMonths),
+                      ?w.categories.firstOrNull,
+                    ].join(' · '),
+                    rating: w.hasRating
+                        ? ratingText(w.ratingAverage!, scale)
+                        : l10n.workerNew,
+                  );
+                },
               ),
             ),
             loading: () => const LinearProgressIndicator(),
@@ -424,103 +400,117 @@ class _State extends ConsumerState<InterviewRequestScreen> {
                         ref.invalidate(workerDetailProvider(widget.workerId)),
                   ),
           ),
-          if (!_isReschedule) ...[
-            const SizedBox(height: AppSpacing.lg),
-            Text(l10n.interviewTypeLabel, style: text.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            _typeCard(
-              'interview_type_interview',
-              l10n.interviewTypeInterview,
-              l10n.interviewTypeInterviewHint,
-              InterviewType.interview,
+          if (!_isReschedule)
+            RequestSection(
+              number: ++n,
+              title: l10n.interviewTypeLabel,
+              delayMs: 80,
+              child: Column(
+                children: [
+                  TypeOption(
+                    key: const Key('interview_type_interview'),
+                    title: l10n.interviewTypeInterview,
+                    hint: l10n.interviewTypeInterviewHint,
+                    selected: _type == InterviewType.interview,
+                    onTap: _busy
+                        ? null
+                        : () => setState(() => _type = InterviewType.interview),
+                  ),
+                  const SizedBox(height: 10),
+                  TypeOption(
+                    key: const Key('interview_type_trial'),
+                    title: l10n.interviewTypeTrial,
+                    hint: l10n.interviewTypeTrialHint,
+                    selected: _type == InterviewType.trial,
+                    onTap: _busy
+                        ? null
+                        : () => setState(() => _type = InterviewType.trial),
+                  ),
+                ],
+              ),
             ),
-            _typeCard(
-              'interview_type_trial',
-              l10n.interviewTypeTrial,
-              l10n.interviewTypeTrialHint,
-              InterviewType.trial,
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          Text(l10n.interviewDateLabel, style: text.titleSmall),
-          const SizedBox(height: AppSpacing.sm),
-          OutlinedButton.icon(
-            key: const Key('interview_date_btn'),
-            style: OutlinedButton.styleFrom(
-              alignment: Alignment.centerLeft,
-              backgroundColor: AppColors.surface,
-            ),
-            onPressed: _busy ? null : _pickDate,
-            icon: const Icon(Icons.calendar_today_outlined),
-            label: Text(
-              date == null
-                  ? l10n.interviewDateButton
-                  : formatDate(date, locale),
+          RequestSection(
+            number: ++n,
+            title: l10n.interviewDateLabel,
+            delayMs: 160,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DateStrip(
+                  today: _today(),
+                  days: interviewWindowDays,
+                  selected: date,
+                  onSelect: _busy ? null : _pickDate,
+                ),
+                Text(
+                  l10n.interviewDateHorizon(interviewWindowDays),
+                  style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(l10n.interviewSlotLabel, style: text.titleSmall),
-          const SizedBox(height: AppSpacing.sm),
-          if (slots == null)
-            Text(l10n.interviewPickDateFirst, style: text.bodyMedium)
-          else
-            slots.when(
-              loading: () => const LinearProgressIndicator(),
-              error: (e, _) => SnErrorState(
-                message: failureMessage(l10n, e),
-                onRetry: () => ref.invalidate(
-                  interviewSlotsProvider((
-                    workerId: widget.workerId,
-                    date: date!,
-                  )),
-                ),
-              ),
-              data: (list) => list.isEmpty
-                  ? Text(
-                      l10n.interviewNoSlots,
-                      key: const Key('interview_no_slots'),
-                    )
-                  : Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: [
-                        for (final s in list)
-                          SnChip(
-                            key: Key('interview_slot_${s.id}'),
-                            label: formatTimeSpan(s.startMinutes, s.endMinutes),
-                            selected: _slot == s.id,
-                            onTap: _busy
-                                ? null
-                                : () => setState(() {
-                                    _slot = _slot == s.id ? null : s.id;
-                                    _error = null;
-                                  }),
-                          ),
-                      ],
-                    ),
-            ),
-          if (!_isReschedule) ...[
-            const SizedBox(height: AppSpacing.lg),
-            TextField(
-              key: const Key('interview_note_field'),
-              controller: _note,
-              enabled: !_busy,
-              maxLength: 300,
-              maxLines: 3,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                labelText: l10n.interviewNoteLabel,
-                hintText: l10n.interviewNoteHint,
-                border: const OutlineInputBorder(),
+          RequestSection(
+            number: ++n,
+            title: l10n.interviewSlotLabel,
+            delayMs: 240,
+            child: _slots(l10n, slots, date),
+          ),
+          if (!_isReschedule)
+            RequestSection(
+              number: ++n,
+              title: l10n.interviewNoteTitle,
+              delayMs: 320,
+              child: RequestNoteField(
+                controller: _note,
+                enabled: !_busy,
+                label: l10n.interviewNoteLabel,
+                hint: l10n.interviewNoteHint,
+                onChanged: () => setState(() {}),
               ),
             ),
-          ],
           if (_error != null) ...[
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: 14),
             FormErrorBanner(_error!, key: const Key('interview_error')),
           ],
         ],
       ),
+    );
+  }
+
+  Widget _slots(
+    AppLocalizations l10n,
+    AsyncValue<List<InterviewSlot>>? slots,
+    DateTime? date,
+  ) {
+    if (slots == null) return SlotHint(l10n.interviewPickDateFirst);
+    return slots.when(
+      loading: () => const LinearProgressIndicator(),
+      error: (e, _) => SnErrorState(
+        message: failureMessage(l10n, e),
+        onRetry: () => ref.invalidate(
+          interviewSlotsProvider((workerId: widget.workerId, date: date!)),
+        ),
+      ),
+      data: (list) {
+        _slotLength
+          ..clear()
+          ..addEntries(list.map((s) => MapEntry(s.id, s.minutes)));
+        return list.isEmpty
+            ? SlotHint(
+                l10n.interviewNoSlots,
+                key: const Key('interview_no_slots'),
+              )
+            : SlotGrid(
+                slots: list,
+                selected: _slot,
+                onSelect: _busy
+                    ? null
+                    : (s) => setState(() {
+                        _slot = _slot == s.id ? null : s.id;
+                        _error = null;
+                      }),
+              );
+      },
     );
   }
 }
