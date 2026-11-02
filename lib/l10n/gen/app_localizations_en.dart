@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navBookings => 'Bookings';
 
   @override
-  String get navFavourites => 'Shortlist';
+  String get navFavourites => 'Favourites';
 
   @override
   String get navAccount => 'Account';
@@ -545,10 +545,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homePromoCleanBody =>
-      'Professional cleaners for a fresher, healthier home.';
+      'Deep or basic cleaning, done by trained helpers.';
 
   @override
-  String get homePromoCleanCta => 'Explore cleaning';
+  String get homePromoCleanCta => 'Cleaning helper';
 
   @override
   String get homePromoMaidEyebrow => 'Daily home care';
@@ -557,22 +557,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homePromoMaidTitle => 'Fresh rooms, every day';
 
   @override
-  String get homePromoMaidBody => 'Trained maids for daily and weekly upkeep.';
+  String get homePromoMaidBody =>
+      'Cleaning, utensils and basic household support.';
 
   @override
   String get homePromoMaidCta => 'Find a maid';
-
-  @override
-  String get homePromoPartEyebrow => 'Flexible help';
-
-  @override
-  String get homePromoPartTitle => 'Spotless, on your schedule';
-
-  @override
-  String get homePromoPartBody => 'Part-time help when and where you need it.';
-
-  @override
-  String get homePromoPartCta => 'Find help';
 
   @override
   String get homeSeeAll => 'See all';
@@ -721,6 +710,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSupportShortcutBody => 'Our support team is here for you.';
 
   @override
+  String get homeTopRated => 'Top rated near you';
+
+  @override
+  String homeTopRatedCount(int count) {
+    return '($count)';
+  }
+
+  @override
+  String homeTopRatedJobs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jobs done',
+      one: '1 job done',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeAttendanceTitle => 'Today\'s attendance';
+
+  @override
+  String homeAttendanceArrived(String time) {
+    return 'Arrived at $time';
+  }
+
+  @override
+  String get homeAttendanceNotArrived => 'Not arrived yet';
+
+  @override
+  String get homeAttendanceAbsent => 'Marked absent today';
+
+  @override
+  String get homeAttendanceLeave => 'On leave today';
+
+  @override
+  String get homeAttendanceException => 'Needs your attention';
+
+  @override
   String get devMenuTitle => 'Developer menu';
 
   @override
@@ -768,6 +796,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discoverChange => 'Change';
+
+  @override
+  String get discoverTypeCaption => 'Type';
 
   @override
   String get discoverLoadFailedBody => 'Check your connection and try again.';
@@ -1144,7 +1175,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timeSheetSub => 'In 15-minute steps';
 
   @override
-  String get timeSheetSet => 'Set time';
+  String get timeSheetSet => 'Done';
 
   @override
   String get timeSheetHour => 'Hour';
@@ -1405,13 +1436,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAvailability => 'Available';
 
   @override
-  String get filterMorning => 'Morning (6am-12pm)';
+  String get filterMorning => 'Morning';
 
   @override
-  String get filterAfternoon => 'Afternoon (12pm-5pm)';
+  String get filterAfternoon => 'Afternoon';
 
   @override
-  String get filterEvening => 'Evening (5pm-9pm)';
+  String get filterEvening => 'Evening';
 
   @override
   String get filterLanguage => 'Language';
@@ -1450,22 +1481,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get favouriteAdd => 'Add to shortlist';
+  String get favouriteAdd => 'Add to favourites';
 
   @override
-  String get favouriteRemove => 'Remove from shortlist';
+  String get favouriteRemove => 'Remove from favourites';
 
   @override
-  String get favouriteFailed => 'Couldn\'t update shortlist. Try again.';
+  String get favouriteFailed => 'Couldn\'t update favourites. Try again.';
 
   @override
-  String get favouriteRemoved => 'Removed from shortlist';
+  String get favouriteRemoved => 'Removed from favourites';
 
   @override
   String get favouriteUndo => 'Undo';
 
   @override
-  String get favsTitle => 'Shortlist';
+  String get favsTitle => 'Favourites';
 
   @override
   String get accountSectionActivity => 'My activity';
@@ -1480,8 +1511,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountEditProfile => 'Edit profile';
 
   @override
-  String get favsSubtitle =>
-      'Workers you saved. Request an interview when you are ready.';
+  String get favsSubtitle => 'Workers you have saved';
 
   @override
   String get favsFilterAll => 'All';
@@ -1490,16 +1520,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favsRequestInterview => 'Request interview';
 
   @override
-  String get favsEmptyTitle => 'Your shortlist is empty';
+  String get favsEmptyTitle => 'No favourites yet';
 
   @override
-  String get favsEmptyBody => 'Tap the heart on a worker to save them.';
+  String get favsEmptyBody =>
+      'Tap the heart on a worker to save them here, so you can come back to them later.';
 
   @override
   String get favsFindWorker => 'Find a worker';
 
   @override
-  String get workerUnavailableTag => 'Unavailable';
+  String get workerUnavailableTag => 'No longer available';
 
   @override
   String get workerUnavailableTitle => 'This worker is no longer available';
@@ -1527,7 +1558,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workerGotIt => 'Got it';
 
   @override
-  String get workerRequestInterview => 'Request interview or trial';
+  String get workerRequestInterview => 'Request interview';
 
   @override
   String get workerExperienceLabel => 'Experience';
@@ -1691,14 +1722,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewTypeInterview => 'Interview';
 
   @override
-  String get interviewTypeTrial => 'Trial visit';
+  String get interviewTypeTrial => 'Trial';
 
   @override
   String get interviewTypeInterviewHint =>
-      'A short chat to talk about the work.';
+      'Talk with the worker first to see if they suit you.';
 
   @override
-  String get interviewTypeTrialHint => 'Meet in person and see them work.';
+  String get interviewTypeTrialHint =>
+      'Try the worker for a short visit at your home.';
 
   @override
   String get interviewHeadline => 'Meet before you decide';
@@ -1707,16 +1739,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewPickToContinue => 'Pick a date and time to continue';
 
   @override
-  String get interviewDateLabel => 'Date';
+  String get interviewDateLabel => 'Pick a date';
 
   @override
   String get interviewDateButton => 'Choose a date';
 
   @override
-  String get interviewSlotLabel => 'Time';
+  String get interviewSlotLabel => 'Pick a time';
 
   @override
-  String get interviewPickDateFirst => 'Pick a date to see free times.';
+  String get interviewPickDateFirst =>
+      'Choose a date above to see the free times.';
 
   @override
   String get interviewNoSlots =>
@@ -1726,7 +1759,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewNoteLabel => 'Note for the worker (optional)';
 
   @override
-  String get interviewNoteHint => 'Anything the worker should know';
+  String get interviewNoteHint =>
+      'Anything the worker should know? (optional, up to 300 characters)';
 
   @override
   String get interviewSubmit => 'Send request';
@@ -1748,10 +1782,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'That time is no longer available. Pick another.';
 
   @override
-  String get interviewDetailTitle => 'Interview';
+  String get interviewDetailTitle => 'Interview request';
 
   @override
-  String get interviewsTitle => 'Interviews';
+  String get interviewsTitle => 'My interviews';
 
   @override
   String get interviewStatusRequested => 'Requested';
@@ -1831,16 +1865,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewProgress => 'Progress';
 
   @override
-  String get interviewCancel => 'Cancel request';
+  String get interviewCancel => 'Cancel interview';
 
   @override
-  String get interviewCancelTitle => 'Cancel this request?';
+  String get interviewCancelTitle => 'Cancel this interview?';
 
   @override
-  String get interviewCancelBody => 'The worker will be told.';
+  String get interviewCancelBody =>
+      'The worker will be told it is cancelled. You can search for another worker any time.';
 
   @override
-  String get interviewCancelKeep => 'Keep request';
+  String get interviewCancelKeep => 'Keep interview';
 
   @override
   String get interviewCancelled => 'Request cancelled';
@@ -1852,7 +1887,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewConfirmWorker => 'Confirm this worker';
 
   @override
-  String get interviewDecline => 'Not a fit';
+  String get interviewDecline => 'This worker is not a fit';
 
   @override
   String get interviewDeclineTitle => 'Not a fit?';
@@ -1887,7 +1922,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get interviewsEmptyBody =>
-      'Request an interview from a worker\'s profile.';
+      'Meet a worker before you decide. Find a worker and request an interview.';
 
   @override
   String get interviewsFind => 'Find a worker';
@@ -2170,7 +2205,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'You already have an open request with this worker.';
 
   @override
-  String get interviewComplete => 'Interview done';
+  String get interviewComplete => 'Mark as completed';
 
   @override
   String get interviewSchedule => 'Choose a time';
@@ -3715,4 +3750,420 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteFailed =>
       'Couldn\'t update your deletion request. Please try again.';
+
+  @override
+  String get homeDeliveringTo => 'DELIVERING TO';
+
+  @override
+  String get homeSearchHint => 'Search \'Cook\', \'House maid\'';
+
+  @override
+  String get homeHelpTitle => 'What kind of help do you need?';
+
+  @override
+  String get homeFeatured => 'Featured for your home';
+
+  @override
+  String get homeWhyTitle => 'Why families choose SevaNest';
+
+  @override
+  String get homeWhy1 => 'Verified professionals near you';
+
+  @override
+  String get homeWhy2 => 'Video interview before you hire';
+
+  @override
+  String get homeWhy3 => 'Replacement if it is not a fit';
+
+  @override
+  String get homeHowTitle => 'How SevaNest works';
+
+  @override
+  String get homeHow1Title => 'Choose a service';
+
+  @override
+  String get homeHow1Body => 'Pick the help you need and your schedule.';
+
+  @override
+  String get homeHow2Title => 'Meet your match';
+
+  @override
+  String get homeHow2Body => 'Interview by video call, then a trial visit.';
+
+  @override
+  String get homeHow3Title => 'Start with confidence';
+
+  @override
+  String get homeHow3Body => 'Track attendance and activity at home.';
+
+  @override
+  String get homeHow4Title => 'Pay securely';
+
+  @override
+  String get homeHow4Body => 'Rate your worker and get support anytime.';
+
+  @override
+  String get homePromoCookEyebrow => 'Home cooking';
+
+  @override
+  String get homePromoCookTitle => 'Meals made at home';
+
+  @override
+  String get homePromoCookBody => 'Breakfast, lunch and dinner preparation.';
+
+  @override
+  String get homePromoCookCta => 'Find a cook';
+
+  @override
+  String get homePromoDriverEyebrow => 'Driver';
+
+  @override
+  String get homePromoDriverTitle => 'Ready when you are';
+
+  @override
+  String get homePromoDriverBody =>
+      'Personal or family driver, temporary driver.';
+
+  @override
+  String get homePromoDriverCta => 'Find a driver';
+
+  @override
+  String get homePromoBabyEyebrow => 'Babysitter';
+
+  @override
+  String get homePromoBabyTitle => 'Gentle care for little ones';
+
+  @override
+  String get homePromoBabyBody => 'Child supervision and basic care.';
+
+  @override
+  String get homePromoBabyCta => 'Find a babysitter';
+
+  @override
+  String get homePromoElderEyebrow => 'Elderly care';
+
+  @override
+  String get homePromoElderTitle => 'Company and support';
+
+  @override
+  String get homePromoElderBody => 'Non-clinical assistance and companionship.';
+
+  @override
+  String get homePromoElderCta => 'Find a helper';
+
+  @override
+  String get homeBookAgain => 'Book again';
+
+  @override
+  String get timingSceneEmpty => 'Choose a time of day';
+
+  @override
+  String get startNotSelectedDays => 'Not in your selected days';
+
+  @override
+  String startCountdownTomorrow(String date) {
+    return 'Starts tomorrow · $date';
+  }
+
+  @override
+  String startCountdownDays(int n, String date) {
+    return 'Starts in $n days · $date';
+  }
+
+  @override
+  String get reviewSearching => 'Searching…';
+
+  @override
+  String get reviewSearchHint => 'Search to see who matches';
+
+  @override
+  String get reviewNoteLabel => 'Note for the worker';
+
+  @override
+  String get reviewNoteOptional => '(optional)';
+
+  @override
+  String get reviewNoteHint =>
+      'e.g. Pets at home, please bring your own gloves';
+
+  @override
+  String get reviewReassure =>
+      'You will see exact prices before you book. Nothing is charged now.';
+
+  @override
+  String get budgetTypicalBand => 'Typical range';
+
+  @override
+  String get locationAreaCaption => 'Area';
+
+  @override
+  String resultsMatchCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count workers match your requirement',
+      one: '1 worker matches your requirement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resultsSortBest => 'Best match';
+
+  @override
+  String get resultsSortRating => 'Rating';
+
+  @override
+  String get resultsSortExperience => 'Experience';
+
+  @override
+  String get resultsSortLabel => 'Sort workers';
+
+  @override
+  String get resultsViewProfile => 'View profile';
+
+  @override
+  String get resultsInterview => 'Interview';
+
+  @override
+  String resultsAreasNear(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Areas near you',
+      one: 'Area near you',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get resultsNotFit => 'Not the right fit?';
+
+  @override
+  String get resultsChangeRequirement => 'Change your requirement';
+
+  @override
+  String resultsShortlistCount(int count) {
+    return 'Shortlist, $count saved';
+  }
+
+  @override
+  String workerFitRating(String rating) {
+    return '$rating rated';
+  }
+
+  @override
+  String get filterShowAll => 'Show all workers';
+
+  @override
+  String get filterShowResults => 'Show workers';
+
+  @override
+  String filterShowCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count workers',
+      one: 'Show 1 worker',
+      zero: 'No workers match',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reviewsBreakdownRow(int score, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$score stars: $count reviews',
+      one: '$score stars: 1 review',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterAvailabilitySub => 'When the worker is free';
+
+  @override
+  String get filterLanguageSub => 'Languages the worker speaks';
+
+  @override
+  String get filterExperienceSub => 'Minimum years of work';
+
+  @override
+  String get filterRatingSub => 'Minimum customer rating';
+
+  @override
+  String get filterSortSub => 'How to order the results';
+
+  @override
+  String get filterSortBest => 'Best match';
+
+  @override
+  String get filterSortExperienced => 'Most experienced';
+
+  @override
+  String get reviewsPrivacy =>
+      'Only the reviewer\'s first name is shown. No contact details are ever shared.';
+
+  @override
+  String reviewsEmptyBody(String name) {
+    return '$name has not been reviewed yet. Reviews appear here after a completed booking.';
+  }
+
+  @override
+  String get reviewsBackToProfile => 'Back to profile';
+
+  @override
+  String get reviewsScrollMore => 'Scroll to load more reviews';
+
+  @override
+  String get reviewsAllLoaded => 'You\'ve seen all reviews';
+
+  @override
+  String get interviewsAll => 'All';
+
+  @override
+  String get interviewsUpcoming => 'Upcoming';
+
+  @override
+  String get interviewsPast => 'Past';
+
+  @override
+  String get interviewsAllTitle => 'All interviews';
+
+  @override
+  String get interviewNext => 'Next interview';
+
+  @override
+  String interviewNextSemantics(String name) {
+    return 'Next interview with $name, open details';
+  }
+
+  @override
+  String interviewCdDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String interviewCdHours(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'hours',
+      one: 'hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String interviewCdMins(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'mins',
+      one: 'min',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String interviewHeadWaiting(String name) {
+    return 'Waiting for $name';
+  }
+
+  @override
+  String get interviewHeadBooked => 'Interview booked';
+
+  @override
+  String get interviewHeadDone => 'How did it go?';
+
+  @override
+  String get interviewHeadCancelled => 'Interview cancelled';
+
+  @override
+  String get interviewPbDone => 'Done';
+
+  @override
+  String get interviewPbDecision => 'Decision';
+
+  @override
+  String get interviewTlWaiting => 'Waiting for the worker';
+
+  @override
+  String get interviewTlAfter => 'After the meeting';
+
+  @override
+  String get interviewTlDecisionHint => 'Confirm or look for someone else';
+
+  @override
+  String get interviewAddCalendar => 'Add to calendar';
+
+  @override
+  String interviewCalendarTitle(String name) {
+    return 'Interview with $name';
+  }
+
+  @override
+  String get interviewCalendarFailed => 'Couldn\'t open your calendar.';
+
+  @override
+  String get interviewCancelYes => 'Yes, cancel';
+
+  @override
+  String get interviewDateToday => 'Today';
+
+  @override
+  String interviewDateHorizon(int days) {
+    return 'You can book up to $days days ahead.';
+  }
+
+  @override
+  String get interviewMorning => 'Morning';
+
+  @override
+  String get interviewAfternoon => 'Afternoon & evening';
+
+  @override
+  String interviewSlotMeta(String period, int minutes) {
+    return '$period · $minutes min';
+  }
+
+  @override
+  String get interviewNoteTitle => 'Add a note';
+
+  @override
+  String get interviewNowPickTime => 'Now pick a time';
+
+  @override
+  String get interviewReadyToSend => 'Ready to send';
+
+  @override
+  String get interviewSentTitle => 'Request sent';
+
+  @override
+  String interviewSentBody(String name, String kind, String when) {
+    return 'We have asked $name for your $kind on $when. You will get a notification when they reply.';
+  }
+
+  @override
+  String get interviewViewRequest => 'View request';
+
+  @override
+  String get interviewTkWorker => 'Worker';
+
+  @override
+  String get interviewTkStatus => 'Status';
+
+  @override
+  String get interviewTkWaiting => 'Waiting for reply';
+
+  @override
+  String get interviewsTabEmpty => 'Nothing here yet';
 }

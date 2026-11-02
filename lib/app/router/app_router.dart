@@ -116,16 +116,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.bookings,
-                builder: (context, state) => const BookingsListScreen(),
+                path: Routes.favourites,
+                builder: (context, state) => const FavouritesScreen(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: Routes.favourites,
-                builder: (context, state) => const FavouritesScreen(),
+                path: Routes.bookings,
+                builder: (context, state) => const BookingsListScreen(),
               ),
             ],
           ),

@@ -4,7 +4,7 @@
   "appTagline": "Verified Help. Trusted Homes.",
   "navHome": "Home",
   "navBookings": "Bookings",
-  "navFavourites": "Shortlist",
+  "navFavourites": "Favourites",
   "navAccount": "Account",
   "retry": "Retry",
   "loading": "Loading",
@@ -163,7 +163,13 @@
   "preferredLanguage": "Preferred language",
   "ageConfirm": "By continuing you confirm you're 18 or older.",
   "profileProgress": "Profile {percent}% complete",
-  "@profileProgress": {"placeholders": {"percent": {"type": "int"}}},
+  "@profileProgress": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "profileHintName": "Add your name to continue",
   "profileHintAddress": "Add your home address",
   "profileHintEmail": "Add an email for receipts",
@@ -202,7 +208,7 @@
   "skipForNow": "Skip for now",
   "deleteAddress": "Delete address",
   "deleteConfirmTitle": "Delete this address?",
-  "deleteConfirmBody": "It will be removed from your saved addresses.",
+  "deleteConfirmBody": "We will schedule your account and data for deletion. You can cancel the request until it is processed.",
   "addressSaved": "Address saved",
   "addressDeleted": "Address deleted",
   "defaultUpdated": "Default address updated",
@@ -225,16 +231,12 @@
   "homeExplore": "Explore services",
   "homePromoCleanEyebrow": "Professional cleaning",
   "homePromoCleanTitle": "A cleaner, happier home",
-  "homePromoCleanBody": "Professional cleaners for a fresher, healthier home.",
-  "homePromoCleanCta": "Explore cleaning",
+  "homePromoCleanBody": "Deep or basic cleaning, done by trained helpers.",
+  "homePromoCleanCta": "Cleaning helper",
   "homePromoMaidEyebrow": "Daily home care",
   "homePromoMaidTitle": "Fresh rooms, every day",
-  "homePromoMaidBody": "Trained maids for daily and weekly upkeep.",
+  "homePromoMaidBody": "Cleaning, utensils and basic household support.",
   "homePromoMaidCta": "Find a maid",
-  "homePromoPartEyebrow": "Flexible help",
-  "homePromoPartTitle": "Spotless, on your schedule",
-  "homePromoPartBody": "Part-time help when and where you need it.",
-  "homePromoPartCta": "Find help",
   "homeSeeAll": "See all",
   "homeNotifications": "Notifications",
   "homeNotificationsUnread": "Notifications, {count} unread",
@@ -330,6 +332,36 @@
   "homeViewAll": "View all",
   "homeSupportShortcut": "Need help with something?",
   "homeSupportShortcutBody": "Our support team is here for you.",
+  "homeTopRated": "Top rated near you",
+  "homeTopRatedCount": "({count})",
+  "@homeTopRatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeTopRatedJobs": "{count, plural, =1{1 job done} other{{count} jobs done}}",
+  "@homeTopRatedJobs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeAttendanceTitle": "Today's attendance",
+  "homeAttendanceArrived": "Arrived at {time}",
+  "@homeAttendanceArrived": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAttendanceNotArrived": "Not arrived yet",
+  "homeAttendanceAbsent": "Marked absent today",
+  "homeAttendanceLeave": "On leave today",
+  "homeAttendanceException": "Needs your attention",
   "devMenuTitle": "Developer menu",
   "devMenuApiMode": "API behaviour",
   "devMenuUser": "Customer",
@@ -362,6 +394,7 @@
   "discoverDiscard": "Discard",
   "discoverKeepEditing": "Keep editing",
   "discoverChange": "Change",
+  "discoverTypeCaption": "Type",
   "discoverLoadFailedBody": "Check your connection and try again.",
   "serviceHeading": "What kind of help do you need?",
   "serviceSub": "Pick one. You can search again for other services anytime.",
@@ -552,7 +585,7 @@
   "timingErrDate": "Choose a date.",
   "timingEditSummary": "Edit times and days",
   "timeSheetSub": "In 15-minute steps",
-  "timeSheetSet": "Set time",
+  "timeSheetSet": "Done",
   "timeSheetHour": "Hour",
   "timeSheetMinute": "Minute",
   "timeSheetPeriod": "AM or PM",
@@ -765,9 +798,9 @@
   "filterTitle": "Filters",
   "filterButton": "Filter",
   "filterAvailability": "Available",
-  "filterMorning": "Morning (6am-12pm)",
-  "filterAfternoon": "Afternoon (12pm-5pm)",
-  "filterEvening": "Evening (5pm-9pm)",
+  "filterMorning": "Morning",
+  "filterAfternoon": "Afternoon",
+  "filterEvening": "Evening",
   "filterLanguage": "Language",
   "filterRating": "Rating",
   "filterRatingMin": "{min}+ rating",
@@ -799,23 +832,23 @@
       }
     }
   },
-  "favouriteAdd": "Add to shortlist",
-  "favouriteRemove": "Remove from shortlist",
-  "favouriteFailed": "Couldn't update shortlist. Try again.",
-  "favouriteRemoved": "Removed from shortlist",
+  "favouriteAdd": "Add to favourites",
+  "favouriteRemove": "Remove from favourites",
+  "favouriteFailed": "Couldn't update favourites. Try again.",
+  "favouriteRemoved": "Removed from favourites",
   "favouriteUndo": "Undo",
-  "favsTitle": "Shortlist",
+  "favsTitle": "Favourites",
   "accountSectionActivity": "My activity",
   "accountSectionDetails": "My details",
   "accountSectionHelp": "Help and legal",
   "accountEditProfile": "Edit profile",
-  "favsSubtitle": "Workers you saved. Request an interview when you are ready.",
+  "favsSubtitle": "Workers you have saved",
   "favsFilterAll": "All",
   "favsRequestInterview": "Request interview",
-  "favsEmptyTitle": "Your shortlist is empty",
-  "favsEmptyBody": "Tap the heart on a worker to save them.",
+  "favsEmptyTitle": "No favourites yet",
+  "favsEmptyBody": "Tap the heart on a worker to save them here, so you can come back to them later.",
   "favsFindWorker": "Find a worker",
-  "workerUnavailableTag": "Unavailable",
+  "workerUnavailableTag": "No longer available",
   "workerUnavailableTitle": "This worker is no longer available",
   "workerUnavailableBody": "Let's find another.",
   "workerFindAnother": "Find another worker",
@@ -824,7 +857,7 @@
   "workerVerifiedSheetTitle": "What verified means",
   "workerVerifiedSheetBody": "Verified workers have passed the identity and background checks SevaNest requires before they can appear in search. We never show ID documents or contact details.",
   "workerGotIt": "Got it",
-  "workerRequestInterview": "Request interview or trial",
+  "workerRequestInterview": "Request interview",
   "workerExperienceLabel": "Experience",
   "workerLanguagesLabel": "Languages",
   "workerAreasLabel": "Areas",
@@ -918,26 +951,26 @@
   "interviewRescheduleTitle": "Reschedule",
   "interviewTypeLabel": "What would you like?",
   "interviewTypeInterview": "Interview",
-  "interviewTypeTrial": "Trial visit",
-  "interviewTypeInterviewHint": "A short chat to talk about the work.",
-  "interviewTypeTrialHint": "Meet in person and see them work.",
+  "interviewTypeTrial": "Trial",
+  "interviewTypeInterviewHint": "Talk with the worker first to see if they suit you.",
+  "interviewTypeTrialHint": "Try the worker for a short visit at your home.",
   "interviewHeadline": "Meet before you decide",
   "interviewPickToContinue": "Pick a date and time to continue",
-  "interviewDateLabel": "Date",
+  "interviewDateLabel": "Pick a date",
   "interviewDateButton": "Choose a date",
-  "interviewSlotLabel": "Time",
-  "interviewPickDateFirst": "Pick a date to see free times.",
+  "interviewSlotLabel": "Pick a time",
+  "interviewPickDateFirst": "Choose a date above to see the free times.",
   "interviewNoSlots": "No times are free on this date. Try another day.",
   "interviewNoteLabel": "Note for the worker (optional)",
-  "interviewNoteHint": "Anything the worker should know",
+  "interviewNoteHint": "Anything the worker should know? (optional, up to 300 characters)",
   "interviewSubmit": "Send request",
   "interviewSubmitReschedule": "Confirm new time",
   "interviewSubmitting": "Sending...",
   "interviewSent": "Request sent",
   "interviewRescheduled": "Time changed",
   "interviewSlotTaken": "That time is no longer available. Pick another.",
-  "interviewDetailTitle": "Interview",
-  "interviewsTitle": "Interviews",
+  "interviewDetailTitle": "Interview request",
+  "interviewsTitle": "My interviews",
   "interviewStatusRequested": "Requested",
   "interviewStatusScheduled": "Scheduled",
   "interviewStatusProposed": "New time suggested",
@@ -973,14 +1006,14 @@
   "interviewTypeRow": "Type",
   "interviewRequirementRow": "Your requirement",
   "interviewProgress": "Progress",
-  "interviewCancel": "Cancel request",
-  "interviewCancelTitle": "Cancel this request?",
-  "interviewCancelBody": "The worker will be told.",
-  "interviewCancelKeep": "Keep request",
+  "interviewCancel": "Cancel interview",
+  "interviewCancelTitle": "Cancel this interview?",
+  "interviewCancelBody": "The worker will be told it is cancelled. You can search for another worker any time.",
+  "interviewCancelKeep": "Keep interview",
   "interviewCancelled": "Request cancelled",
   "interviewReschedule": "Reschedule",
   "interviewConfirmWorker": "Confirm this worker",
-  "interviewDecline": "Not a fit",
+  "interviewDecline": "This worker is not a fit",
   "interviewDeclineTitle": "Not a fit?",
   "interviewDeclineBody": "We'll close this request so you can look for another worker.",
   "interviewDeclineConfirm": "Yes, not a fit",
@@ -991,7 +1024,7 @@
   "interviewTlCompleted": "Interview completed",
   "interviewTlDecision": "Your decision",
   "interviewsEmptyTitle": "No interviews yet",
-  "interviewsEmptyBody": "Request an interview from a worker's profile.",
+  "interviewsEmptyBody": "Meet a worker before you decide. Find a worker and request an interview.",
   "interviewsFind": "Find a worker",
   "accountInterviews": "Interviews",
   "interviewCopyScheduled": "{kind} on {date}, {time}",
@@ -1126,7 +1159,7 @@
     }
   },
   "interviewDuplicate": "You already have an open request with this worker.",
-  "interviewComplete": "Interview done",
+  "interviewComplete": "Mark as completed",
   "interviewSchedule": "Choose a time",
   "bookingNextWhen": "{date}",
   "@bookingNextWhen": {
@@ -1304,7 +1337,13 @@
   "ratingTagPoorWork": "Poor quality work",
   "ratingTagUnreliable": "Unreliable",
   "ratingTagsLine": "Tags: {tags}",
-  "@ratingTagsLine": {"placeholders": {"tags": {"type": "String"}}},
+  "@ratingTagsLine": {
+    "placeholders": {
+      "tags": {
+        "type": "String"
+      }
+    }
+  },
   "ratingReviewLabel": "Write a review (optional)",
   "ratingReviewHint": "Tell others about your experience.",
   "ratingReviewNote": "Your review helps other families choose. Don't share phone numbers or personal details.",
@@ -1807,13 +1846,270 @@
   "legalConsentFailed": "Couldn't save your acceptance. Please try again.",
   "accountDelete": "Delete account",
   "deleteTitle": "Delete your account?",
-  "deleteConfirmBody": "We will schedule your account and data for deletion. You can cancel the request until it is processed.",
   "deleteConfirmButton": "Request deletion",
   "deleteStatusTitle": "Account deletion",
   "deleteStatusRequested": "Deletion requested on {date}. We'll let you know when it's done.",
-  "@deleteStatusRequested": {"placeholders": {"date": {"type": "String"}}},
+  "@deleteStatusRequested": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "deleteStatusNone": "No deletion request.",
   "deleteStatusCompleted": "Your account has been deleted.",
   "deleteCancelRequest": "Cancel request",
-  "deleteFailed": "Couldn't update your deletion request. Please try again."
+  "deleteFailed": "Couldn't update your deletion request. Please try again.",
+  "homeDeliveringTo": "DELIVERING TO",
+  "homeSearchHint": "Search 'Cook', 'House maid'",
+  "homeHelpTitle": "What kind of help do you need?",
+  "homeFeatured": "Featured for your home",
+  "homeWhyTitle": "Why families choose SevaNest",
+  "homeWhy1": "Verified professionals near you",
+  "homeWhy2": "Video interview before you hire",
+  "homeWhy3": "Replacement if it is not a fit",
+  "homeHowTitle": "How SevaNest works",
+  "homeHow1Title": "Choose a service",
+  "homeHow1Body": "Pick the help you need and your schedule.",
+  "homeHow2Title": "Meet your match",
+  "homeHow2Body": "Interview by video call, then a trial visit.",
+  "homeHow3Title": "Start with confidence",
+  "homeHow3Body": "Track attendance and activity at home.",
+  "homeHow4Title": "Pay securely",
+  "homeHow4Body": "Rate your worker and get support anytime.",
+  "homePromoCookEyebrow": "Home cooking",
+  "homePromoCookTitle": "Meals made at home",
+  "homePromoCookBody": "Breakfast, lunch and dinner preparation.",
+  "homePromoCookCta": "Find a cook",
+  "homePromoDriverEyebrow": "Driver",
+  "homePromoDriverTitle": "Ready when you are",
+  "homePromoDriverBody": "Personal or family driver, temporary driver.",
+  "homePromoDriverCta": "Find a driver",
+  "homePromoBabyEyebrow": "Babysitter",
+  "homePromoBabyTitle": "Gentle care for little ones",
+  "homePromoBabyBody": "Child supervision and basic care.",
+  "homePromoBabyCta": "Find a babysitter",
+  "homePromoElderEyebrow": "Elderly care",
+  "homePromoElderTitle": "Company and support",
+  "homePromoElderBody": "Non-clinical assistance and companionship.",
+  "homePromoElderCta": "Find a helper",
+  "homeBookAgain": "Book again",
+  "timingSceneEmpty": "Choose a time of day",
+  "startNotSelectedDays": "Not in your selected days",
+  "startCountdownTomorrow": "Starts tomorrow · {date}",
+  "@startCountdownTomorrow": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "startCountdownDays": "Starts in {n} days · {date}",
+  "@startCountdownDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewSearching": "Searching…",
+  "reviewSearchHint": "Search to see who matches",
+  "reviewNoteLabel": "Note for the worker",
+  "reviewNoteOptional": "(optional)",
+  "reviewNoteHint": "e.g. Pets at home, please bring your own gloves",
+  "reviewReassure": "You will see exact prices before you book. Nothing is charged now.",
+  "budgetTypicalBand": "Typical range",
+  "locationAreaCaption": "Area",
+  "resultsMatchCount": "{count, plural, =1{1 worker matches your requirement} other{{count} workers match your requirement}}",
+  "@resultsMatchCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resultsSortBest": "Best match",
+  "resultsSortRating": "Rating",
+  "resultsSortExperience": "Experience",
+  "resultsSortLabel": "Sort workers",
+  "resultsViewProfile": "View profile",
+  "resultsInterview": "Interview",
+  "resultsAreasNear": "{count, plural, =1{Area near you} other{Areas near you}}",
+  "@resultsAreasNear": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resultsNotFit": "Not the right fit?",
+  "resultsChangeRequirement": "Change your requirement",
+  "resultsShortlistCount": "Shortlist, {count} saved",
+  "@resultsShortlistCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "workerFitRating": "{rating} rated",
+  "@workerFitRating": {
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "filterShowAll": "Show all workers",
+  "filterShowResults": "Show workers",
+  "filterShowCount": "{count, plural, =0{No workers match} =1{Show 1 worker} other{Show {count} workers}}",
+  "@filterShowCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewsBreakdownRow": "{count, plural, =1{{score} stars: 1 review} other{{score} stars: {count} reviews}}",
+  "@reviewsBreakdownRow": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterAvailabilitySub": "When the worker is free",
+  "filterLanguageSub": "Languages the worker speaks",
+  "filterExperienceSub": "Minimum years of work",
+  "filterRatingSub": "Minimum customer rating",
+  "filterSortSub": "How to order the results",
+  "filterSortBest": "Best match",
+  "filterSortExperienced": "Most experienced",
+  "reviewsPrivacy": "Only the reviewer's first name is shown. No contact details are ever shared.",
+  "reviewsEmptyBody": "{name} has not been reviewed yet. Reviews appear here after a completed booking.",
+  "@reviewsEmptyBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewsBackToProfile": "Back to profile",
+  "reviewsScrollMore": "Scroll to load more reviews",
+  "reviewsAllLoaded": "You've seen all reviews",
+  "interviewsAll": "All",
+  "interviewsUpcoming": "Upcoming",
+  "interviewsPast": "Past",
+  "interviewsAllTitle": "All interviews",
+  "interviewNext": "Next interview",
+  "interviewNextSemantics": "Next interview with {name}, open details",
+  "@interviewNextSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewCdDays": "{n, plural, =1{day} other{days}}",
+  "@interviewCdDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "interviewCdHours": "{n, plural, =1{hour} other{hours}}",
+  "@interviewCdHours": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "interviewCdMins": "{n, plural, =1{min} other{mins}}",
+  "@interviewCdMins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "interviewHeadWaiting": "Waiting for {name}",
+  "@interviewHeadWaiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewHeadBooked": "Interview booked",
+  "interviewHeadDone": "How did it go?",
+  "interviewHeadCancelled": "Interview cancelled",
+  "interviewPbDone": "Done",
+  "interviewPbDecision": "Decision",
+  "interviewTlWaiting": "Waiting for the worker",
+  "interviewTlAfter": "After the meeting",
+  "interviewTlDecisionHint": "Confirm or look for someone else",
+  "interviewAddCalendar": "Add to calendar",
+  "interviewCalendarTitle": "Interview with {name}",
+  "@interviewCalendarTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewCalendarFailed": "Couldn't open your calendar.",
+  "interviewCancelYes": "Yes, cancel",
+  "interviewDateToday": "Today",
+  "interviewDateHorizon": "You can book up to {days} days ahead.",
+  "@interviewDateHorizon": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "interviewMorning": "Morning",
+  "interviewAfternoon": "Afternoon & evening",
+  "interviewSlotMeta": "{period} · {minutes} min",
+  "@interviewSlotMeta": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "interviewNoteTitle": "Add a note",
+  "interviewNowPickTime": "Now pick a time",
+  "interviewReadyToSend": "Ready to send",
+  "interviewSentTitle": "Request sent",
+  "interviewSentBody": "We have asked {name} for your {kind} on {when}. You will get a notification when they reply.",
+  "@interviewSentBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewViewRequest": "View request",
+  "interviewTkWorker": "Worker",
+  "interviewTkStatus": "Status",
+  "interviewTkWaiting": "Waiting for reply",
+  "interviewsTabEmpty": "Nothing here yet"
 }

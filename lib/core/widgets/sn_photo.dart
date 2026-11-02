@@ -7,13 +7,13 @@ abstract final class AppPhotos {
   static const splash = 'assets/images/splash-hero.jpg';
 
   static const _byService = {
-    'cook': 'assets/images/hero-helper.jpg',
-    'maid': 'assets/images/service-maid-bed.jpg',
-    'nanny': 'assets/images/service-nanny.jpg',
-    'baby': 'assets/images/service-nanny.jpg',
-    'driver': 'assets/images/service-driver.jpg',
-    'elder': 'assets/images/service-elder.jpg',
-    'clean': 'assets/images/promo-cleaner.jpg',
+    'cook': 'assets/home/cook.jpg',
+    'maid': 'assets/home/maid.jpg',
+    'nanny': 'assets/home/babysitter.jpg',
+    'baby': 'assets/home/babysitter.jpg',
+    'driver': 'assets/home/driver.jpg',
+    'elder': 'assets/home/elder.jpg',
+    'clean': 'assets/home/cleaning.jpg',
   };
 
   /// The tile photo for a catalogue category, matched on its name or id; null when the design

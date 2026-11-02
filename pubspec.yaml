@@ -64,6 +64,7 @@ flutter:
     - assets/splash/
     - assets/login/
     - assets/images/
+    - assets/home/
 
 flutter_launcher_icons:
   android: true

@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @navFavourites.
   ///
   /// In en, this message translates to:
-  /// **'Shortlist'**
+  /// **'Favourites'**
   String get navFavourites;
 
   /// No description provided for @navAccount.
@@ -1105,13 +1105,13 @@ abstract class AppLocalizations {
   /// No description provided for @homePromoCleanBody.
   ///
   /// In en, this message translates to:
-  /// **'Professional cleaners for a fresher, healthier home.'**
+  /// **'Deep or basic cleaning, done by trained helpers.'**
   String get homePromoCleanBody;
 
   /// No description provided for @homePromoCleanCta.
   ///
   /// In en, this message translates to:
-  /// **'Explore cleaning'**
+  /// **'Cleaning helper'**
   String get homePromoCleanCta;
 
   /// No description provided for @homePromoMaidEyebrow.
@@ -1129,7 +1129,7 @@ abstract class AppLocalizations {
   /// No description provided for @homePromoMaidBody.
   ///
   /// In en, this message translates to:
-  /// **'Trained maids for daily and weekly upkeep.'**
+  /// **'Cleaning, utensils and basic household support.'**
   String get homePromoMaidBody;
 
   /// No description provided for @homePromoMaidCta.
@@ -1137,30 +1137,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Find a maid'**
   String get homePromoMaidCta;
-
-  /// No description provided for @homePromoPartEyebrow.
-  ///
-  /// In en, this message translates to:
-  /// **'Flexible help'**
-  String get homePromoPartEyebrow;
-
-  /// No description provided for @homePromoPartTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Spotless, on your schedule'**
-  String get homePromoPartTitle;
-
-  /// No description provided for @homePromoPartBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Part-time help when and where you need it.'**
-  String get homePromoPartBody;
-
-  /// No description provided for @homePromoPartCta.
-  ///
-  /// In en, this message translates to:
-  /// **'Find help'**
-  String get homePromoPartCta;
 
   /// No description provided for @homeSeeAll.
   ///
@@ -1396,6 +1372,60 @@ abstract class AppLocalizations {
   /// **'Our support team is here for you.'**
   String get homeSupportShortcutBody;
 
+  /// No description provided for @homeTopRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Top rated near you'**
+  String get homeTopRated;
+
+  /// No description provided for @homeTopRatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'({count})'**
+  String homeTopRatedCount(int count);
+
+  /// No description provided for @homeTopRatedJobs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 job done} other{{count} jobs done}}'**
+  String homeTopRatedJobs(int count);
+
+  /// No description provided for @homeAttendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s attendance'**
+  String get homeAttendanceTitle;
+
+  /// No description provided for @homeAttendanceArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived at {time}'**
+  String homeAttendanceArrived(String time);
+
+  /// No description provided for @homeAttendanceNotArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Not arrived yet'**
+  String get homeAttendanceNotArrived;
+
+  /// No description provided for @homeAttendanceAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked absent today'**
+  String get homeAttendanceAbsent;
+
+  /// No description provided for @homeAttendanceLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'On leave today'**
+  String get homeAttendanceLeave;
+
+  /// No description provided for @homeAttendanceException.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs your attention'**
+  String get homeAttendanceException;
+
   /// No description provided for @devMenuTitle.
   ///
   /// In en, this message translates to:
@@ -1485,6 +1515,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change'**
   String get discoverChange;
+
+  /// No description provided for @discoverTypeCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get discoverTypeCaption;
 
   /// No description provided for @discoverLoadFailedBody.
   ///
@@ -2149,7 +2185,7 @@ abstract class AppLocalizations {
   /// No description provided for @timeSheetSet.
   ///
   /// In en, this message translates to:
-  /// **'Set time'**
+  /// **'Done'**
   String get timeSheetSet;
 
   /// No description provided for @timeSheetHour.
@@ -2593,19 +2629,19 @@ abstract class AppLocalizations {
   /// No description provided for @filterMorning.
   ///
   /// In en, this message translates to:
-  /// **'Morning (6am-12pm)'**
+  /// **'Morning'**
   String get filterMorning;
 
   /// No description provided for @filterAfternoon.
   ///
   /// In en, this message translates to:
-  /// **'Afternoon (12pm-5pm)'**
+  /// **'Afternoon'**
   String get filterAfternoon;
 
   /// No description provided for @filterEvening.
   ///
   /// In en, this message translates to:
-  /// **'Evening (5pm-9pm)'**
+  /// **'Evening'**
   String get filterEvening;
 
   /// No description provided for @filterLanguage.
@@ -2671,25 +2707,25 @@ abstract class AppLocalizations {
   /// No description provided for @favouriteAdd.
   ///
   /// In en, this message translates to:
-  /// **'Add to shortlist'**
+  /// **'Add to favourites'**
   String get favouriteAdd;
 
   /// No description provided for @favouriteRemove.
   ///
   /// In en, this message translates to:
-  /// **'Remove from shortlist'**
+  /// **'Remove from favourites'**
   String get favouriteRemove;
 
   /// No description provided for @favouriteFailed.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t update shortlist. Try again.'**
+  /// **'Couldn\'t update favourites. Try again.'**
   String get favouriteFailed;
 
   /// No description provided for @favouriteRemoved.
   ///
   /// In en, this message translates to:
-  /// **'Removed from shortlist'**
+  /// **'Removed from favourites'**
   String get favouriteRemoved;
 
   /// No description provided for @favouriteUndo.
@@ -2701,7 +2737,7 @@ abstract class AppLocalizations {
   /// No description provided for @favsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Shortlist'**
+  /// **'Favourites'**
   String get favsTitle;
 
   /// No description provided for @accountSectionActivity.
@@ -2731,7 +2767,7 @@ abstract class AppLocalizations {
   /// No description provided for @favsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Workers you saved. Request an interview when you are ready.'**
+  /// **'Workers you have saved'**
   String get favsSubtitle;
 
   /// No description provided for @favsFilterAll.
@@ -2749,13 +2785,13 @@ abstract class AppLocalizations {
   /// No description provided for @favsEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Your shortlist is empty'**
+  /// **'No favourites yet'**
   String get favsEmptyTitle;
 
   /// No description provided for @favsEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Tap the heart on a worker to save them.'**
+  /// **'Tap the heart on a worker to save them here, so you can come back to them later.'**
   String get favsEmptyBody;
 
   /// No description provided for @favsFindWorker.
@@ -2767,7 +2803,7 @@ abstract class AppLocalizations {
   /// No description provided for @workerUnavailableTag.
   ///
   /// In en, this message translates to:
-  /// **'Unavailable'**
+  /// **'No longer available'**
   String get workerUnavailableTag;
 
   /// No description provided for @workerUnavailableTitle.
@@ -2821,7 +2857,7 @@ abstract class AppLocalizations {
   /// No description provided for @workerRequestInterview.
   ///
   /// In en, this message translates to:
-  /// **'Request interview or trial'**
+  /// **'Request interview'**
   String get workerRequestInterview;
 
   /// No description provided for @workerExperienceLabel.
@@ -3115,19 +3151,19 @@ abstract class AppLocalizations {
   /// No description provided for @interviewTypeTrial.
   ///
   /// In en, this message translates to:
-  /// **'Trial visit'**
+  /// **'Trial'**
   String get interviewTypeTrial;
 
   /// No description provided for @interviewTypeInterviewHint.
   ///
   /// In en, this message translates to:
-  /// **'A short chat to talk about the work.'**
+  /// **'Talk with the worker first to see if they suit you.'**
   String get interviewTypeInterviewHint;
 
   /// No description provided for @interviewTypeTrialHint.
   ///
   /// In en, this message translates to:
-  /// **'Meet in person and see them work.'**
+  /// **'Try the worker for a short visit at your home.'**
   String get interviewTypeTrialHint;
 
   /// No description provided for @interviewHeadline.
@@ -3145,7 +3181,7 @@ abstract class AppLocalizations {
   /// No description provided for @interviewDateLabel.
   ///
   /// In en, this message translates to:
-  /// **'Date'**
+  /// **'Pick a date'**
   String get interviewDateLabel;
 
   /// No description provided for @interviewDateButton.
@@ -3157,13 +3193,13 @@ abstract class AppLocalizations {
   /// No description provided for @interviewSlotLabel.
   ///
   /// In en, this message translates to:
-  /// **'Time'**
+  /// **'Pick a time'**
   String get interviewSlotLabel;
 
   /// No description provided for @interviewPickDateFirst.
   ///
   /// In en, this message translates to:
-  /// **'Pick a date to see free times.'**
+  /// **'Choose a date above to see the free times.'**
   String get interviewPickDateFirst;
 
   /// No description provided for @interviewNoSlots.
@@ -3181,7 +3217,7 @@ abstract class AppLocalizations {
   /// No description provided for @interviewNoteHint.
   ///
   /// In en, this message translates to:
-  /// **'Anything the worker should know'**
+  /// **'Anything the worker should know? (optional, up to 300 characters)'**
   String get interviewNoteHint;
 
   /// No description provided for @interviewSubmit.
@@ -3223,13 +3259,13 @@ abstract class AppLocalizations {
   /// No description provided for @interviewDetailTitle.
   ///
   /// In en, this message translates to:
-  /// **'Interview'**
+  /// **'Interview request'**
   String get interviewDetailTitle;
 
   /// No description provided for @interviewsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Interviews'**
+  /// **'My interviews'**
   String get interviewsTitle;
 
   /// No description provided for @interviewStatusRequested.
@@ -3385,25 +3421,25 @@ abstract class AppLocalizations {
   /// No description provided for @interviewCancel.
   ///
   /// In en, this message translates to:
-  /// **'Cancel request'**
+  /// **'Cancel interview'**
   String get interviewCancel;
 
   /// No description provided for @interviewCancelTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cancel this request?'**
+  /// **'Cancel this interview?'**
   String get interviewCancelTitle;
 
   /// No description provided for @interviewCancelBody.
   ///
   /// In en, this message translates to:
-  /// **'The worker will be told.'**
+  /// **'The worker will be told it is cancelled. You can search for another worker any time.'**
   String get interviewCancelBody;
 
   /// No description provided for @interviewCancelKeep.
   ///
   /// In en, this message translates to:
-  /// **'Keep request'**
+  /// **'Keep interview'**
   String get interviewCancelKeep;
 
   /// No description provided for @interviewCancelled.
@@ -3427,7 +3463,7 @@ abstract class AppLocalizations {
   /// No description provided for @interviewDecline.
   ///
   /// In en, this message translates to:
-  /// **'Not a fit'**
+  /// **'This worker is not a fit'**
   String get interviewDecline;
 
   /// No description provided for @interviewDeclineTitle.
@@ -3493,7 +3529,7 @@ abstract class AppLocalizations {
   /// No description provided for @interviewsEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Request an interview from a worker\'s profile.'**
+  /// **'Meet a worker before you decide. Find a worker and request an interview.'**
   String get interviewsEmptyBody;
 
   /// No description provided for @interviewsFind.
@@ -4027,7 +4063,7 @@ abstract class AppLocalizations {
   /// No description provided for @interviewComplete.
   ///
   /// In en, this message translates to:
-  /// **'Interview done'**
+  /// **'Mark as completed'**
   String get interviewComplete;
 
   /// No description provided for @interviewSchedule.
@@ -6843,6 +6879,672 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t update your deletion request. Please try again.'**
   String get deleteFailed;
+
+  /// No description provided for @homeDeliveringTo.
+  ///
+  /// In en, this message translates to:
+  /// **'DELIVERING TO'**
+  String get homeDeliveringTo;
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search \'Cook\', \'House maid\''**
+  String get homeSearchHint;
+
+  /// No description provided for @homeHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What kind of help do you need?'**
+  String get homeHelpTitle;
+
+  /// No description provided for @homeFeatured.
+  ///
+  /// In en, this message translates to:
+  /// **'Featured for your home'**
+  String get homeFeatured;
+
+  /// No description provided for @homeWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why families choose SevaNest'**
+  String get homeWhyTitle;
+
+  /// No description provided for @homeWhy1.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified professionals near you'**
+  String get homeWhy1;
+
+  /// No description provided for @homeWhy2.
+  ///
+  /// In en, this message translates to:
+  /// **'Video interview before you hire'**
+  String get homeWhy2;
+
+  /// No description provided for @homeWhy3.
+  ///
+  /// In en, this message translates to:
+  /// **'Replacement if it is not a fit'**
+  String get homeWhy3;
+
+  /// No description provided for @homeHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How SevaNest works'**
+  String get homeHowTitle;
+
+  /// No description provided for @homeHow1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a service'**
+  String get homeHow1Title;
+
+  /// No description provided for @homeHow1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the help you need and your schedule.'**
+  String get homeHow1Body;
+
+  /// No description provided for @homeHow2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet your match'**
+  String get homeHow2Title;
+
+  /// No description provided for @homeHow2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview by video call, then a trial visit.'**
+  String get homeHow2Body;
+
+  /// No description provided for @homeHow3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with confidence'**
+  String get homeHow3Title;
+
+  /// No description provided for @homeHow3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Track attendance and activity at home.'**
+  String get homeHow3Body;
+
+  /// No description provided for @homeHow4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay securely'**
+  String get homeHow4Title;
+
+  /// No description provided for @homeHow4Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your worker and get support anytime.'**
+  String get homeHow4Body;
+
+  /// No description provided for @homePromoCookEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Home cooking'**
+  String get homePromoCookEyebrow;
+
+  /// No description provided for @homePromoCookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Meals made at home'**
+  String get homePromoCookTitle;
+
+  /// No description provided for @homePromoCookBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfast, lunch and dinner preparation.'**
+  String get homePromoCookBody;
+
+  /// No description provided for @homePromoCookCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a cook'**
+  String get homePromoCookCta;
+
+  /// No description provided for @homePromoDriverEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get homePromoDriverEyebrow;
+
+  /// No description provided for @homePromoDriverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready when you are'**
+  String get homePromoDriverTitle;
+
+  /// No description provided for @homePromoDriverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal or family driver, temporary driver.'**
+  String get homePromoDriverBody;
+
+  /// No description provided for @homePromoDriverCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a driver'**
+  String get homePromoDriverCta;
+
+  /// No description provided for @homePromoBabyEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Babysitter'**
+  String get homePromoBabyEyebrow;
+
+  /// No description provided for @homePromoBabyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle care for little ones'**
+  String get homePromoBabyTitle;
+
+  /// No description provided for @homePromoBabyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Child supervision and basic care.'**
+  String get homePromoBabyBody;
+
+  /// No description provided for @homePromoBabyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a babysitter'**
+  String get homePromoBabyCta;
+
+  /// No description provided for @homePromoElderEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Elderly care'**
+  String get homePromoElderEyebrow;
+
+  /// No description provided for @homePromoElderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Company and support'**
+  String get homePromoElderTitle;
+
+  /// No description provided for @homePromoElderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-clinical assistance and companionship.'**
+  String get homePromoElderBody;
+
+  /// No description provided for @homePromoElderCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a helper'**
+  String get homePromoElderCta;
+
+  /// No description provided for @homeBookAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Book again'**
+  String get homeBookAgain;
+
+  /// No description provided for @timingSceneEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time of day'**
+  String get timingSceneEmpty;
+
+  /// No description provided for @startNotSelectedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in your selected days'**
+  String get startNotSelectedDays;
+
+  /// No description provided for @startCountdownTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts tomorrow · {date}'**
+  String startCountdownTomorrow(String date);
+
+  /// No description provided for @startCountdownDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts in {n} days · {date}'**
+  String startCountdownDays(int n, String date);
+
+  /// No description provided for @reviewSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching…'**
+  String get reviewSearching;
+
+  /// No description provided for @reviewSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search to see who matches'**
+  String get reviewSearchHint;
+
+  /// No description provided for @reviewNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for the worker'**
+  String get reviewNoteLabel;
+
+  /// No description provided for @reviewNoteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get reviewNoteOptional;
+
+  /// No description provided for @reviewNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Pets at home, please bring your own gloves'**
+  String get reviewNoteHint;
+
+  /// No description provided for @reviewReassure.
+  ///
+  /// In en, this message translates to:
+  /// **'You will see exact prices before you book. Nothing is charged now.'**
+  String get reviewReassure;
+
+  /// No description provided for @budgetTypicalBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Typical range'**
+  String get budgetTypicalBand;
+
+  /// No description provided for @locationAreaCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get locationAreaCaption;
+
+  /// No description provided for @resultsMatchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 worker matches your requirement} other{{count} workers match your requirement}}'**
+  String resultsMatchCount(int count);
+
+  /// No description provided for @resultsSortBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best match'**
+  String get resultsSortBest;
+
+  /// No description provided for @resultsSortRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get resultsSortRating;
+
+  /// No description provided for @resultsSortExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Experience'**
+  String get resultsSortExperience;
+
+  /// No description provided for @resultsSortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort workers'**
+  String get resultsSortLabel;
+
+  /// No description provided for @resultsViewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get resultsViewProfile;
+
+  /// No description provided for @resultsInterview.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview'**
+  String get resultsInterview;
+
+  /// No description provided for @resultsAreasNear.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Area near you} other{Areas near you}}'**
+  String resultsAreasNear(int count);
+
+  /// No description provided for @resultsNotFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Not the right fit?'**
+  String get resultsNotFit;
+
+  /// No description provided for @resultsChangeRequirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your requirement'**
+  String get resultsChangeRequirement;
+
+  /// No description provided for @resultsShortlistCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortlist, {count} saved'**
+  String resultsShortlistCount(int count);
+
+  /// No description provided for @workerFitRating.
+  ///
+  /// In en, this message translates to:
+  /// **'{rating} rated'**
+  String workerFitRating(String rating);
+
+  /// No description provided for @filterShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all workers'**
+  String get filterShowAll;
+
+  /// No description provided for @filterShowResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Show workers'**
+  String get filterShowResults;
+
+  /// No description provided for @filterShowCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No workers match} =1{Show 1 worker} other{Show {count} workers}}'**
+  String filterShowCount(int count);
+
+  /// No description provided for @reviewsBreakdownRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{{score} stars: 1 review} other{{score} stars: {count} reviews}}'**
+  String reviewsBreakdownRow(int score, int count);
+
+  /// No description provided for @filterAvailabilitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'When the worker is free'**
+  String get filterAvailabilitySub;
+
+  /// No description provided for @filterLanguageSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages the worker speaks'**
+  String get filterLanguageSub;
+
+  /// No description provided for @filterExperienceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum years of work'**
+  String get filterExperienceSub;
+
+  /// No description provided for @filterRatingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum customer rating'**
+  String get filterRatingSub;
+
+  /// No description provided for @filterSortSub.
+  ///
+  /// In en, this message translates to:
+  /// **'How to order the results'**
+  String get filterSortSub;
+
+  /// No description provided for @filterSortBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best match'**
+  String get filterSortBest;
+
+  /// No description provided for @filterSortExperienced.
+  ///
+  /// In en, this message translates to:
+  /// **'Most experienced'**
+  String get filterSortExperienced;
+
+  /// No description provided for @reviewsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the reviewer\'s first name is shown. No contact details are ever shared.'**
+  String get reviewsPrivacy;
+
+  /// No description provided for @reviewsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has not been reviewed yet. Reviews appear here after a completed booking.'**
+  String reviewsEmptyBody(String name);
+
+  /// No description provided for @reviewsBackToProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to profile'**
+  String get reviewsBackToProfile;
+
+  /// No description provided for @reviewsScrollMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to load more reviews'**
+  String get reviewsScrollMore;
+
+  /// No description provided for @reviewsAllLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve seen all reviews'**
+  String get reviewsAllLoaded;
+
+  /// No description provided for @interviewsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get interviewsAll;
+
+  /// No description provided for @interviewsUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get interviewsUpcoming;
+
+  /// No description provided for @interviewsPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get interviewsPast;
+
+  /// No description provided for @interviewsAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All interviews'**
+  String get interviewsAllTitle;
+
+  /// No description provided for @interviewNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next interview'**
+  String get interviewNext;
+
+  /// No description provided for @interviewNextSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Next interview with {name}, open details'**
+  String interviewNextSemantics(String name);
+
+  /// No description provided for @interviewCdDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{day} other{days}}'**
+  String interviewCdDays(int n);
+
+  /// No description provided for @interviewCdHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{hour} other{hours}}'**
+  String interviewCdHours(int n);
+
+  /// No description provided for @interviewCdMins.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{min} other{mins}}'**
+  String interviewCdMins(int n);
+
+  /// No description provided for @interviewHeadWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name}'**
+  String interviewHeadWaiting(String name);
+
+  /// No description provided for @interviewHeadBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview booked'**
+  String get interviewHeadBooked;
+
+  /// No description provided for @interviewHeadDone.
+  ///
+  /// In en, this message translates to:
+  /// **'How did it go?'**
+  String get interviewHeadDone;
+
+  /// No description provided for @interviewHeadCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview cancelled'**
+  String get interviewHeadCancelled;
+
+  /// No description provided for @interviewPbDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get interviewPbDone;
+
+  /// No description provided for @interviewPbDecision.
+  ///
+  /// In en, this message translates to:
+  /// **'Decision'**
+  String get interviewPbDecision;
+
+  /// No description provided for @interviewTlWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the worker'**
+  String get interviewTlWaiting;
+
+  /// No description provided for @interviewTlAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After the meeting'**
+  String get interviewTlAfter;
+
+  /// No description provided for @interviewTlDecisionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm or look for someone else'**
+  String get interviewTlDecisionHint;
+
+  /// No description provided for @interviewAddCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to calendar'**
+  String get interviewAddCalendar;
+
+  /// No description provided for @interviewCalendarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Interview with {name}'**
+  String interviewCalendarTitle(String name);
+
+  /// No description provided for @interviewCalendarFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open your calendar.'**
+  String get interviewCalendarFailed;
+
+  /// No description provided for @interviewCancelYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, cancel'**
+  String get interviewCancelYes;
+
+  /// No description provided for @interviewDateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get interviewDateToday;
+
+  /// No description provided for @interviewDateHorizon.
+  ///
+  /// In en, this message translates to:
+  /// **'You can book up to {days} days ahead.'**
+  String interviewDateHorizon(int days);
+
+  /// No description provided for @interviewMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get interviewMorning;
+
+  /// No description provided for @interviewAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon & evening'**
+  String get interviewAfternoon;
+
+  /// No description provided for @interviewSlotMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{period} · {minutes} min'**
+  String interviewSlotMeta(String period, int minutes);
+
+  /// No description provided for @interviewNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note'**
+  String get interviewNoteTitle;
+
+  /// No description provided for @interviewNowPickTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Now pick a time'**
+  String get interviewNowPickTime;
+
+  /// No description provided for @interviewReadyToSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to send'**
+  String get interviewReadyToSend;
+
+  /// No description provided for @interviewSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get interviewSentTitle;
+
+  /// No description provided for @interviewSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We have asked {name} for your {kind} on {when}. You will get a notification when they reply.'**
+  String interviewSentBody(String name, String kind, String when);
+
+  /// No description provided for @interviewViewRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'View request'**
+  String get interviewViewRequest;
+
+  /// No description provided for @interviewTkWorker.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get interviewTkWorker;
+
+  /// No description provided for @interviewTkStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get interviewTkStatus;
+
+  /// No description provided for @interviewTkWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for reply'**
+  String get interviewTkWaiting;
+
+  /// No description provided for @interviewsTabEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here yet'**
+  String get interviewsTabEmpty;
 }
 
 class _AppLocalizationsDelegate

@@ -19,6 +19,8 @@ class MainShell extends StatelessWidget {
         if (!didPop) navigationShell.goBranch(0);
       },
       child: Scaffold(
+        // The pill floats over the page: no bar background behind it.
+        extendBody: true,
         body: navigationShell,
         bottomNavigationBar: SnBottomNav(
           selectedIndex: navigationShell.currentIndex,
@@ -30,20 +32,20 @@ class MainShell extends StatelessWidget {
             SnNavItem(
               key: const Key('nav_home'),
               icon: Icons.home_outlined,
-              selectedIcon: Icons.home,
+              selectedIcon: Icons.home_outlined,
               label: l10n.navHome,
-            ),
-            SnNavItem(
-              key: const Key('nav_bookings'),
-              icon: Icons.receipt_long_outlined,
-              selectedIcon: Icons.receipt_long,
-              label: l10n.navBookings,
             ),
             SnNavItem(
               key: const Key('nav_favourites'),
               icon: Icons.favorite_border,
               selectedIcon: Icons.favorite,
               label: l10n.navFavourites,
+            ),
+            SnNavItem(
+              key: const Key('nav_bookings'),
+              icon: Icons.calendar_today_outlined,
+              selectedIcon: Icons.calendar_today,
+              label: l10n.navBookings,
             ),
             SnNavItem(
               key: const Key('nav_account'),

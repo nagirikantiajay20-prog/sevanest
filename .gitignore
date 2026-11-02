@@ -53,3 +53,6 @@ build/symbols/
 .env*
 splash_redesign_standalone/
 21st/
+node_modules/
+package.json
+package-lock.json
