@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_calendar.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/choices_ticket.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_scaffold.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/widgets/flow_chips.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/start_date_widgets.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/ticket_cells.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// `/discover/start-date` (screen 10, step 5 of 6): first day of work.
@@ -64,18 +64,19 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
         onRetry: () => ref.invalidate(scheduleConfigProvider),
       );
     } else if (config == null) {
-      body = const _StartSkeleton();
+      body = const StartSkeleton();
     } else {
       final shortcuts = startDateShortcuts(now, config);
       final isShortcut = shortcuts.any((s) => s.date == selected);
       final last = lastStartDate(now, config);
+      final lead = selected?.difference(DateUtils.dateOnly(now)).inDays;
       body = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ShortcutGrid(
+          ShortcutGrid(
             cards: [
               for (final s in shortcuts)
-                _ShortcutCard(
+                ShortcutCard(
                   key: Key('discover_shortcut_${s.kind.name}'),
                   // ponytail: split "Tomorrow, Sat 10 Oct" at the comma; per-part strings when translating.
                   label: switch (s.kind) {
@@ -95,10 +96,10 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
                       .read(requirementDraftProvider.notifier)
                       .setStartDate(s.date),
                 ),
-              _ShortcutCard(
+              ShortcutCard(
                 key: const Key('discover_shortcut_other'),
                 label: l10n.startPickAnother,
-                trailing: Icons.chevron_right,
+                trailing: Icons.chevron_right_rounded,
                 selected: selected != null && !isShortcut,
                 onTap: () {
                   final ctx = _calendarKey.currentContext;
@@ -112,30 +113,53 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          KeyedSubtree(
-            key: _calendarKey,
-            child: SnCalendar(
-              firstDate: firstStartDate(now, config),
-              lastDate: last,
-              today: now,
-              selected: selected,
-              marked: usesDays && days.isNotEmpty
-                  ? (d) => !isOnSelectedDays(d, days)
-                  : null,
-              onSelect: (d) =>
-                  ref.read(requirementDraftProvider.notifier).setStartDate(d),
+          const SizedBox(height: 16),
+          DiscoverRise(
+            delayMs: 400,
+            child: KeyedSubtree(
+              key: _calendarKey,
+              child: GlassCalendar(
+                firstDate: firstStartDate(now, config),
+                lastDate: last,
+                today: now,
+                selected: selected,
+                marked: usesDays && days.isNotEmpty
+                    ? (d) => !isOnSelectedDays(d, days)
+                    : null,
+                onSelect: (d) =>
+                    ref.read(requirementDraftProvider.notifier).setStartDate(d),
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            l10n.startLimitNote(config.maxLeadDays, formatDate(last, locale)),
-            key: const Key('discover_limit_note'),
-            style: AppText.body,
+          const SizedBox(height: 10),
+          DiscoverRise(
+            delayMs: 460,
+            child: Text(
+              l10n.startLimitNote(config.maxLeadDays, formatDate(last, locale)),
+              key: const Key('discover_limit_note'),
+              style: AppText.body.copyWith(
+                fontSize: 13.5,
+                height: 1.4,
+                color: dsMuted,
+              ),
+            ),
           ),
+          if (selected != null && lead != null && lead > 0) ...[
+            const SizedBox(height: 12),
+            CountdownChip(
+              text: lead == 1
+                  ? l10n.startCountdownTomorrow(
+                      formatShortcutDate(selected, locale),
+                    )
+                  : l10n.startCountdownDays(
+                      lead,
+                      formatShortcutDate(selected, locale),
+                    ),
+            ),
+          ],
           if (outside) ...[
-            const SizedBox(height: AppSpacing.md),
-            _OutsideDaysWarning(
+            const SizedBox(height: 14),
+            OutsideDaysWarning(
               date: formatDate(selected, locale),
               days: formatDays(l10n, days, locale),
               onAdjust: () =>
@@ -160,227 +184,22 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
             )
           : null,
       body: ListView(
-        padding: const EdgeInsets.only(
-          top: AppSpacing.md,
-          bottom: AppSpacing.lg,
-        ),
+        padding: const EdgeInsets.only(top: 18, bottom: 24),
         children: [
-          const FlowChips(showTiming: true),
-          const SizedBox(height: AppSpacing.sm),
-          StepHeading(heading: l10n.startHeading, sub: l10n.startSub),
-          const SizedBox(height: AppSpacing.md),
+          DiscoverRise(
+            delayMs: 0,
+            child: ChoicesGrid(
+              cells: flowTicketCells(context, ref, timing: true),
+            ),
+          ),
+          const SizedBox(height: 16),
+          DiscoverRise(
+            delayMs: 80,
+            child: StepHeading(heading: l10n.startHeading, sub: l10n.startSub),
+          ),
+          const SizedBox(height: 16),
           body,
         ],
-      ),
-    );
-  }
-}
-
-class _OutsideDaysWarning extends StatelessWidget {
-  const _OutsideDaysWarning({
-    required this.date,
-    required this.days,
-    required this.onAdjust,
-  });
-
-  final String date;
-  final String days;
-  final VoidCallback onAdjust;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      key: const Key('discover_outside_days_warning'),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.warnBg,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.amber.withValues(alpha: .4)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.info_outline, color: AppColors.warn),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.startOutsideTitle(date), style: AppText.heading),
-                Text(l10n.startOutsideBody(days), style: AppText.bodyLarge),
-                const SizedBox(height: AppSpacing.sm),
-                SizedBox(
-                  width: 180,
-                  child: SnButton(
-                    key: const Key('discover_adjust_days_btn'),
-                    label: l10n.startAdjustDays,
-                    variant: SnButtonVariant.secondary,
-                    onPressed: onAdjust,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StartSkeleton extends StatelessWidget {
-  const _StartSkeleton();
-
-  Widget _pill(double w) => Container(
-    width: w,
-    height: 44,
-    decoration: BoxDecoration(
-      color: AppColors.hairline,
-      borderRadius: BorderRadius.circular(24),
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: AppLocalizations.of(context).loading,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [_pill(160), _pill(120), _pill(100)],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Material(
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            side: const BorderSide(color: AppColors.hairline),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              children: [
-                for (var r = 0; r < 5; r++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        for (var c = 0; c < 7; c++)
-                          const CircleAvatar(
-                            radius: 16,
-                            backgroundColor: AppColors.hairline,
-                          ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-/// Two cards per row, equal height (design: Tomorrow / In 3 days / Next Monday / Pick another).
-class _ShortcutGrid extends StatelessWidget {
-  const _ShortcutGrid({required this.cards});
-  final List<Widget> cards;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      for (var i = 0; i < cards.length; i += 2)
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: cards[i]),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: i + 1 < cards.length ? cards[i + 1] : const SizedBox(),
-                ),
-              ],
-            ),
-          ),
-        ),
-    ],
-  );
-}
-
-class _ShortcutCard extends StatelessWidget {
-  const _ShortcutCard({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    this.trailing,
-    super.key,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  final IconData? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final i = label.indexOf(', ');
-    final head = i < 0 ? null : label.substring(0, i);
-    final value = i < 0 ? label : label.substring(i + 2);
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: selected ? AppColors.tealMist : AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          side: BorderSide(
-            color: selected ? AppColors.teal : AppColors.hairline,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: kMinTapTarget + 16),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (head != null)
-                          Text(
-                            head,
-                            style: AppText.body.copyWith(fontSize: 13),
-                          ),
-                        Text(
-                          value,
-                          style: AppText.card.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (selected || trailing != null)
-                    Icon(
-                      selected ? Icons.check : trailing,
-                      color: selected ? AppColors.teal : AppColors.brandInk,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

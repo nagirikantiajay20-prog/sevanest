@@ -66,7 +66,7 @@ void main() {
     await env.tapKey('calendar_day_20261010');
     expect(picked(env), DateTime(2026, 10, 10));
     expect(find.text('Continue with Sat, 10 Oct'), findsOneWidget);
-    expect(find.byIcon(Icons.check), findsWidgets);
+    expect(find.byIcon(Icons.check_rounded), findsWidgets);
     expect(
       find.byKey(const Key('discover_outside_days_warning')),
       findsNothing,
@@ -87,7 +87,7 @@ void main() {
     await env.tapKey('calendar_day_20261014');
     final chip = find.byKey(const Key('discover_shortcut_other'));
     expect(
-      find.descendant(of: chip, matching: find.byIcon(Icons.check)),
+      find.descendant(of: chip, matching: find.byIcon(Icons.check_rounded)),
       findsOneWidget,
     );
   });

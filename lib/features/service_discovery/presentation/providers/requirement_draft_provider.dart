@@ -22,11 +22,16 @@ class RequirementDraftNotifier extends Notifier<RequirementDraft> {
   }
 
   /// "Hire help" / "Find a worker" and "discard": always starts clean.
-  void reset() => _set(const RequirementDraft());
+  void reset() {
+    ref.read(requirementNoteProvider.notifier).set('');
+    _set(const RequirementDraft());
+  }
 
   /// Category tile on Home: fresh draft with the service preset.
-  void startWithService(String serviceId) =>
-      _set(RequirementDraft(serviceId: serviceId));
+  void startWithService(String serviceId) {
+    ref.read(requirementNoteProvider.notifier).set('');
+    _set(RequirementDraft(serviceId: serviceId));
+  }
 
   /// Picking a different service clears everything that depended on it (DISC-03).
   void setService(String id) {
@@ -80,4 +85,17 @@ class RequirementDraftNotifier extends Notifier<RequirementDraft> {
 final requirementDraftProvider =
     NotifierProvider<RequirementDraftNotifier, RequirementDraft>(
       RequirementDraftNotifier.new,
+    );
+
+/// The optional "note for the worker" typed on Review; the interview request starts from it.
+class RequirementNoteNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void set(String note) => state = note;
+}
+
+final requirementNoteProvider =
+    NotifierProvider<RequirementNoteNotifier, String>(
+      RequirementNoteNotifier.new,
     );

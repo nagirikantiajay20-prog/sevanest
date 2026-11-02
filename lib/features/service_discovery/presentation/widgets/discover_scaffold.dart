@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,16 +6,20 @@ import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
+    show splashHoldProvider;
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/motion.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Steps in the requirement builder (design: "Step n of 6"); Review is the end, not a step.
 const kDiscoverSteps = 6;
 
-/// Shared chrome for every requirement-builder step: back, title, close (X), progress,
+/// Shared chrome for every requirement-builder step: back, title, close (X), progress nodes,
 /// scrollable body and the sticky Continue button (modules/04 "Shared chrome").
-class DiscoverScaffold extends ConsumerWidget {
+class DiscoverScaffold extends ConsumerStatefulWidget {
   const DiscoverScaffold({
     required this.step,
     required this.title,
@@ -27,6 +32,11 @@ class DiscoverScaffold extends ConsumerWidget {
     this.onSummaryTap,
     this.stepLabel,
     this.nextKey,
+    this.inlineSummary = false,
+    this.ctaWidth = 196,
+    this.searching = false,
+    this.searchingLabel,
+    this.ctaIcon = Icons.arrow_forward_rounded,
     super.key,
   });
 
@@ -52,41 +62,53 @@ class DiscoverScaffold extends ConsumerWidget {
   /// Key of the sticky button when a screen needs its own (Review: search).
   final Key? nextKey;
 
-  Future<bool> _confirmDiscard(BuildContext context) async {
+  /// Budget / Review: the summary sits left of a [ctaWidth]-wide button instead of above it.
+  final bool inlineSummary;
+  final double ctaWidth;
+
+  /// Review: the button shows a spinner and [searchingLabel] while the search starts.
+  final bool searching;
+  final String? searchingLabel;
+  final IconData ctaIcon;
+
+  @override
+  ConsumerState<DiscoverScaffold> createState() => _DiscoverScaffoldState();
+}
+
+class _DiscoverScaffoldState extends ConsumerState<DiscoverScaffold>
+    with SingleTickerProviderStateMixin {
+  late final _clock = ScreenClock(
+    this,
+    motion: ref.read(splashHoldProvider) > Duration.zero,
+  );
+
+  @override
+  void dispose() {
+    _clock.dispose();
+    super.dispose();
+  }
+
+  Future<bool> _confirmDiscard(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final yes = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.discoverDiscardTitle),
-        content: Text(l10n.discoverDiscardBody),
-        actions: [
-          TextButton(
-            key: const Key('discover_discard_cancel_btn'),
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.discoverKeepEditing),
-          ),
-          TextButton(
-            key: const Key('discover_discard_confirm_btn'),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.discoverDiscard),
-          ),
-        ],
-      ),
+    return showDiscoverDiscard(
+      context,
+      title: l10n.discoverDiscardTitle,
+      body: l10n.discoverDiscardBody,
+      keep: l10n.discoverKeepEditing,
+      discard: l10n.discoverDiscard,
     );
-    return yes ?? false;
   }
 
   void _leave(BuildContext context) =>
       context.canPop() ? context.pop() : context.go(Routes.home);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    final top = MediaQuery.paddingOf(context).top;
+    final w = widget;
 
     Future<void> back() async {
-      if (confirmBack && !ref.read(requirementDraftProvider).isEmpty) {
+      if (w.confirmBack && !ref.read(requirementDraftProvider).isEmpty) {
         if (!await _confirmDiscard(context) || !context.mounted) return;
         ref.read(requirementDraftProvider.notifier).reset();
       }
@@ -103,131 +125,178 @@ class DiscoverScaffold extends ConsumerWidget {
       context.go(Routes.home);
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: Column(
-        children: [
-          Container(
-            color: AppColors.surface,
-            padding: EdgeInsets.only(top: top),
-            child: Column(
+    return DiscoverClock(
+      clock: _clock,
+      child: Scaffold(
+        backgroundColor: AppColors.ivory,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: RoomBackdrop(clock: _clock, style: discoverBackdrop),
+            ),
+            Column(
               children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 64),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: AppSpacing.sm),
-                      Material(
-                        color: AppColors.surface,
-                        elevation: 1,
-                        shadowColor: AppColors.navy.withValues(alpha: 0.2),
-                        shape: const CircleBorder(
-                          side: BorderSide(color: AppColors.hairline),
-                        ),
-                        child: IconButton(
-                          key: const Key('app_back_btn'),
-                          tooltip: l10n.back,
-                          onPressed: back,
-                          icon: const Icon(
-                            Icons.chevron_left,
-                            color: AppColors.brandInk,
+                DiscoverHeader(
+                  clock: _clock,
+                  title: w.title,
+                  stepLabel:
+                      w.stepLabel ?? l10n.discoverStep(w.step, kDiscoverSteps),
+                  step: w.step,
+                  total: kDiscoverSteps,
+                  backLabel: l10n.back,
+                  closeLabel: l10n.discoverClose,
+                  onBack: back,
+                  onClose: close,
+                ),
+                Expanded(
+                  child: w.padBody
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              title,
-                              textAlign: TextAlign.center,
-                              style: AppText.card,
-                            ),
-                            Text(
-                              stepLabel ??
-                                  l10n.discoverStep(step, kDiscoverSteps),
-                              key: const Key('discover_progress_label'),
-                              style: AppText.body.copyWith(
-                                fontSize: 12,
-                                color: AppColors.slate400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        key: const Key('discover_close_btn'),
-                        tooltip: l10n.discoverClose,
-                        onPressed: close,
-                        icon: const Icon(
-                          Icons.close,
-                          size: 26,
-                          color: AppColors.brandInk,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                    ],
-                  ),
+                          child: w.body,
+                        )
+                      : w.body,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                  ),
-                  child: SnStepBar(step: step, total: kDiscoverSteps),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                const Divider(height: 1, color: AppColors.hairline),
-              ],
-            ),
-          ),
-          Expanded(
-            child: padBody
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                    ),
-                    child: body,
-                  )
-                : body,
-          ),
-          Container(
-            color: AppColors.surface,
-            padding: EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm + 4,
-              AppSpacing.md,
-              AppSpacing.md + MediaQuery.paddingOf(context).bottom,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (summary != null && summary!.isNotEmpty)
-                  InkWell(
-                    key: const Key('discover_summary'),
-                    onTap: onSummaryTap,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: Text(
-                        summary!,
-                        textAlign: TextAlign.center,
-                        style: text.bodyMedium?.copyWith(
-                          color: AppColors.slate,
-                        ),
-                      ),
-                    ),
-                  ),
-                SnButton(
-                  key: nextKey ?? const Key('discover_next_btn'),
-                  label: continueLabel ?? l10n.discoverContinue,
-                  onPressed: onContinue,
+                _Footer(
+                  clock: _clock,
+                  summary: w.summary,
+                  onSummaryTap: w.onSummaryTap,
+                  nextKey: w.nextKey ?? const Key('discover_next_btn'),
+                  label: w.continueLabel ?? l10n.discoverContinue,
+                  onContinue: w.onContinue,
+                  inline: w.inlineSummary,
+                  ctaWidth: w.ctaWidth,
+                  loading: w.searching,
+                  loadingLabel: w.searchingLabel,
+                  icon: w.ctaIcon,
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
+
+/// Frosted bottom bar holding the (optional) summary line and the Continue button.
+class _Footer extends StatelessWidget {
+  const _Footer({
+    required this.clock,
+    required this.summary,
+    required this.onSummaryTap,
+    required this.nextKey,
+    required this.label,
+    required this.onContinue,
+    required this.inline,
+    required this.ctaWidth,
+    required this.loading,
+    required this.loadingLabel,
+    required this.icon,
+  });
+
+  final bool inline;
+  final double ctaWidth;
+  final bool loading;
+  final String? loadingLabel;
+  final IconData icon;
+  final ValueListenable<double> clock;
+  final String? summary;
+  final VoidCallback? onSummaryTap;
+  final Key nextKey;
+  final String label;
+  final VoidCallback? onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthGlass(
+      radius: BorderRadius.zero,
+      blur: 26,
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xD1FFFFFF), Color(0x94FFFFFF)],
+      ),
+      border: const Border(top: BorderSide(color: Color(0xE6FFFFFF))),
+      shadow: [
+        BoxShadow(
+          color: dsNavy.withValues(alpha: 0.1),
+          blurRadius: 24,
+          offset: const Offset(0, -8),
+        ),
+      ],
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          14,
+          16,
+          12 + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: inline
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        summary ?? '',
+                        key: summary == null || summary!.isEmpty
+                            ? null
+                            : const Key('discover_summary'),
+                        style: AppText.body.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                          color: dsText,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(width: ctaWidth, child: _cta()),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (summary != null && summary!.isNotEmpty)
+                    InkWell(
+                      key: const Key('discover_summary'),
+                      onTap: onSummaryTap,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Text(
+                          summary!,
+                          textAlign: TextAlign.center,
+                          style: AppText.body.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: dsText,
+                          ),
+                        ),
+                      ),
+                    ),
+                  _cta(),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _cta() => AuthCta(
+    key: nextKey,
+    clock: clock,
+    label: label,
+    loadingLabel: loadingLabel ?? label,
+    loading: loading,
+    breathe: true,
+    icon: icon,
+    radius: 18,
+    height: 58,
+    onPressed: onContinue,
+  );
 }
 
 /// The "Cook  Change" chips under the progress bar (steps 2+).
@@ -304,11 +373,18 @@ class StepHeading extends StatelessWidget {
       children: [
         Semantics(
           header: true,
-          child: Text(heading, style: AppText.title.copyWith(fontSize: 26)),
+          child: Text(heading, style: authSerif(30, 1.15)),
         ),
         if (sub != null) ...[
           const SizedBox(height: AppSpacing.sm),
-          Text(sub!, style: AppText.bodyLarge),
+          Text(
+            sub!,
+            style: AppText.body.copyWith(
+              fontSize: 15,
+              height: 1.45,
+              color: dsText,
+            ),
+          ),
         ],
       ],
     );
@@ -331,43 +407,51 @@ class StepErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        side: const BorderSide(color: AppColors.hairline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            const SizedBox(height: AppSpacing.sm),
-            const CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.dangerBg,
-              child: Icon(Icons.wifi_off, color: AppColors.danger),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              body,
-              textAlign: TextAlign.center,
-              style: text.bodyMedium?.copyWith(color: AppColors.slate),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SnButton(
-              key: const Key('error_retry_btn'),
-              label: l10n.tryAgain,
-              icon: Icons.refresh,
-              onPressed: onRetry,
-            ),
-          ],
+    return DiscoverRise(
+      delayMs: 0,
+      child: DiscoverGlass(
+        radius: 26,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 26, 20, 26),
+          child: Column(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.dangerBg,
+                ),
+                child: const Icon(
+                  Icons.wifi_off_rounded,
+                  size: 26,
+                  color: AppColors.danger,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: authSerif(20, 1.25),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                body,
+                textAlign: TextAlign.center,
+                style: AppText.body.copyWith(fontSize: 14, color: dsText),
+              ),
+              const SizedBox(height: 18),
+              SnButton(
+                key: const Key('error_retry_btn'),
+                label: l10n.tryAgain,
+                icon: Icons.refresh,
+                onPressed: onRetry,
+              ),
+            ],
+          ),
         ),
       ),
     );

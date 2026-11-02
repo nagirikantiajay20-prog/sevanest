@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/core/widgets/sn_photo.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_scaffold.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -24,11 +26,19 @@ class ServiceScreen extends ConsumerStatefulWidget {
 
 class _ServiceScreenState extends ConsumerState<ServiceScreen> {
   final _search = TextEditingController();
+  final _focus = FocusNode();
   String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
     _search.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -56,12 +66,12 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
     } else if (list.isEmpty) {
       results = SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xl),
+          padding: const EdgeInsets.only(top: 40),
           child: Text(
             l10n.serviceEmptyTitle,
             key: const Key('discover_empty'),
             textAlign: TextAlign.center,
-            style: AppText.bodyLarge,
+            style: AppText.body.copyWith(fontSize: 15, color: dsText),
           ),
         ),
       );
@@ -79,9 +89,9 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
             )
           : SliverList.separated(
               itemCount: shown.length,
-              separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.hairline),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (_, i) => _ServiceRow(
+                index: i,
                 category: shown[i],
                 selected: shown[i].id == selectedId,
                 onTap: () => ref
@@ -109,40 +119,31 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.lg),
-              child: StepHeading(
-                heading: l10n.serviceHeading,
-                sub: l10n.serviceSub,
+              padding: const EdgeInsets.only(top: 22),
+              child: DiscoverRise(
+                delayMs: 0,
+                child: StepHeading(
+                  heading: l10n.serviceHeading,
+                  sub: l10n.serviceSub,
+                ),
               ),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: TextField(
-                key: const Key('discover_search_field'),
-                controller: _search,
-                onChanged: _setQuery,
-                textInputAction: TextInputAction.search,
-                decoration: InputDecoration(
-                  hintText: l10n.serviceSearchHint,
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: AppColors.brandInk,
-                  ),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  suffixIcon: _query.isEmpty
-                      ? null
-                      : IconButton(
-                          key: const Key('discover_search_clear'),
-                          tooltip: l10n.serviceClearSearch,
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
-                            _search.clear();
-                            _setQuery('');
-                          },
-                        ),
+              padding: const EdgeInsets.only(top: 16, bottom: 16),
+              child: DiscoverRise(
+                delayMs: 160,
+                child: _SearchField(
+                  controller: _search,
+                  focus: _focus,
+                  hint: l10n.serviceSearchHint,
+                  clearLabel: l10n.serviceClearSearch,
+                  onChanged: _setQuery,
+                  onClear: () {
+                    _search.clear();
+                    _setQuery('');
+                  },
                 ),
               ),
             ),
@@ -155,14 +156,107 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
   }
 }
 
-/// One service: icon well, name, description, optional "Popular" pill and a radio mark.
+/// Frosted search box; ringed in teal while focused.
+class _SearchField extends StatelessWidget {
+  const _SearchField({
+    required this.controller,
+    required this.focus,
+    required this.hint,
+    required this.clearLabel,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focus;
+  final String hint;
+  final String clearLabel;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = focus.hasFocus;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: on
+            ? [
+                BoxShadow(
+                  color: AppColors.teal.withValues(alpha: 0.18),
+                  spreadRadius: 4,
+                ),
+              ]
+            : null,
+      ),
+      child: DiscoverGlass(
+        radius: 18,
+        borderColor: on ? AppColors.teal : const Color(0xE6FFFFFF),
+        child: SizedBox(
+          height: 54,
+          child: Row(
+            children: [
+              const SizedBox(width: 16),
+              const Icon(Icons.search_rounded, size: 22, color: dsNavy),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  key: const Key('discover_search_field'),
+                  controller: controller,
+                  focusNode: focus,
+                  onChanged: onChanged,
+                  textInputAction: TextInputAction.search,
+                  style: AppText.body.copyWith(fontSize: 16, color: dsNavy),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: AppText.body.copyWith(
+                      fontSize: 16,
+                      color: const Color(0xFF64748B),
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              if (controller.text.isNotEmpty)
+                IconButton(
+                  key: const Key('discover_search_clear'),
+                  tooltip: clearLabel,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 44,
+                    height: 44,
+                  ),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    size: 20,
+                    color: dsMuted,
+                  ),
+                  onPressed: onClear,
+                )
+              else
+                const SizedBox(width: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One service: photo, serif name, description, optional "Popular" pill and a radio mark.
 class _ServiceRow extends StatelessWidget {
   const _ServiceRow({
+    required this.index,
     required this.category,
     required this.selected,
     required this.onTap,
   });
 
+  final int index;
   final ServiceCategory category;
   final bool selected;
   final VoidCallback onTap;
@@ -170,77 +264,120 @@ class _ServiceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Semantics(
-      selected: selected,
-      button: true,
-      label: category.name,
-      child: InkWell(
-        key: Key('discover_category_tile_${category.id}'),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 88),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: selected ? AppColors.tealWash : AppColors.canvasCool,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: Icon(category.icon, color: AppColors.teal),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(category.name, style: AppText.heading),
-                      Text(
-                        category.description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.bodyLarge,
-                      ),
-                      if (category.popular) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.tealWash,
-                            borderRadius: BorderRadius.circular(AppRadius.pill),
-                          ),
-                          child: Text(
-                            l10n.servicePopular,
-                            style: AppText.label.copyWith(
-                              fontSize: 12,
-                              color: AppColors.teal,
-                            ),
+    final photo = AppPhotos.forService('${category.id} ${category.name}');
+    const ms = Duration(milliseconds: 300);
+    return DiscoverRise(
+      delayMs: 200.0 + index * 70,
+      child: Semantics(
+        selected: selected,
+        inMutuallyExclusiveGroup: true,
+        button: true,
+        label: category.name,
+        child: AnimatedSlide(
+          duration: ms,
+          curve: Curves.easeOutBack,
+          offset: Offset(0, selected ? -3 / 92 : 0),
+          child: DiscoverGlass(
+            radius: 24,
+            borderColor: selected ? AppColors.teal : const Color(0xE6FFFFFF),
+            borderWidth: 2,
+            gradient: selected
+                ? const LinearGradient(
+                    begin: Alignment(-0.6, -1),
+                    end: Alignment(0.6, 1),
+                    colors: [Color(0xF2E2EEEC), Color(0xB3FFFFFF)],
+                  )
+                : null,
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                key: Key('discover_category_tile_${category.id}'),
+                onTap: onTap,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 92),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+                    child: Row(
+                      children: [
+                        _Thumb(
+                          photo: photo,
+                          icon: category.icon,
+                          zoom: selected,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(category.name, style: authSerif(19, 1.2)),
+                              const SizedBox(height: 2),
+                              Text(
+                                category.description,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppText.body.copyWith(
+                                  fontSize: 13.5,
+                                  height: 1.4,
+                                  color: dsText,
+                                ),
+                              ),
+                              if (category.popular) ...[
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE2EEEC),
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.pill,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    l10n.servicePopular,
+                                    style: AppText.label.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.teal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
+                        const SizedBox(width: 14),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: selected
+                                ? AppColors.teal
+                                : const Color(0xB3FFFFFF),
+                            border: Border.all(
+                              width: 2,
+                              color: selected
+                                  ? AppColors.teal
+                                  : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                          child: selected
+                              ? const Icon(
+                                  Icons.check_rounded,
+                                  key: Key('discover_category_check'),
+                                  size: 17,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                selected
-                    ? const Icon(
-                        Icons.check_circle,
-                        key: Key('discover_category_check'),
-                        color: AppColors.teal,
-                        size: 28,
-                      )
-                    : const Icon(
-                        Icons.circle_outlined,
-                        color: AppColors.slate300,
-                        size: 28,
-                      ),
-              ],
+              ),
             ),
           ),
         ),
@@ -249,48 +386,112 @@ class _ServiceRow extends StatelessWidget {
   }
 }
 
+/// 66px rounded photo (icon when the design has none for this service); zooms when [zoom].
+class _Thumb extends StatelessWidget {
+  const _Thumb({required this.photo, required this.icon, required this.zoom});
+  final String? photo;
+  final IconData icon;
+  final bool zoom;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 66,
+    height: 66,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(19),
+      boxShadow: [
+        BoxShadow(
+          color: dsNavy.withValues(alpha: 0.2),
+          blurRadius: 14,
+          offset: const Offset(0, 6),
+        ),
+      ],
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: photo == null
+        ? ColoredBox(
+            color: const Color(0xFFE2EEEC),
+            child: Icon(icon, color: AppColors.teal),
+          )
+        : AnimatedScale(
+            duration: const Duration(milliseconds: 500),
+            scale: zoom ? 1.14 : 1,
+            child: Image.asset(
+              photo!,
+              fit: BoxFit.cover,
+              cacheWidth: 200,
+              excludeFromSemantics: true,
+              errorBuilder: (_, _, _) => ColoredBox(
+                color: const Color(0xFFE2EEEC),
+                child: Icon(icon, color: AppColors.teal),
+              ),
+            ),
+          ),
+  );
+}
+
 class _ServiceSkeleton extends StatelessWidget {
   const _ServiceSkeleton();
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: AppLocalizations.of(context).loading,
-    child: Column(
-      children: [
-        for (var i = 0; i < 5; i++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.s12),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.hairline,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 14,
-                        width: 90,
-                        color: AppColors.hairline,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Container(height: 12, color: AppColors.hairline),
-                    ],
-                  ),
-                ),
-              ],
+  Widget build(BuildContext context) {
+    final clock = DiscoverClock.of(context);
+    return Semantics(
+      label: AppLocalizations.of(context).loading,
+      child: ValueListenableBuilder<double>(
+        valueListenable: clock,
+        builder: (context, t, _) {
+          final x = -1 + 2 * ((t / 1400) % 1);
+          Widget bar(double h, {double? w, double r = 10}) => Container(
+            height: h,
+            width: w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(r),
+              gradient: LinearGradient(
+                begin: Alignment(x - 1, 0),
+                end: Alignment(x + 1, 0),
+                colors: [
+                  dsNavy.withValues(alpha: 0.07),
+                  dsNavy.withValues(alpha: 0.15),
+                  dsNavy.withValues(alpha: 0.07),
+                ],
+              ),
             ),
-          ),
-      ],
-    ),
-  );
+          );
+          return Column(
+            children: [
+              for (var i = 0; i < 5; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: DiscoverGlass(
+                    radius: 24,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+                      child: Row(
+                        children: [
+                          bar(66, w: 66, r: 19),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                bar(16, w: 110),
+                                const SizedBox(height: 10),
+                                bar(12),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _NoResult extends StatelessWidget {
@@ -301,32 +502,69 @@ class _NoResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.md),
-      child: Column(
-        children: [
-          const Icon(Icons.search, size: 48, color: AppColors.slate400),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.serviceNoMatch(query.trim()),
-            key: const Key('discover_no_result'),
-            textAlign: TextAlign.center,
-            style: AppText.heading,
+    return DiscoverRise(
+      delayMs: 0,
+      child: DiscoverGlass(
+        radius: 26,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 26, 20, 26),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFE2EEEC),
+                  ),
+                  child: const Icon(
+                    Icons.search_rounded,
+                    size: 28,
+                    color: AppColors.teal,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    l10n.serviceNoMatch(query.trim()),
+                    key: const Key('discover_no_result'),
+                    textAlign: TextAlign.center,
+                    style: authSerif(20, 1.25),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.serviceNoMatchBody,
+                  textAlign: TextAlign.center,
+                  style: AppText.body.copyWith(fontSize: 14, color: dsText),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  key: const Key('discover_clear_search_btn'),
+                  onPressed: onClear,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    foregroundColor: dsNavy,
+                    backgroundColor: const Color(0xCCFFFFFF),
+                    side: const BorderSide(color: dsNavy, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    textStyle: AppText.body.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  child: Text(l10n.serviceClearSearch),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            l10n.serviceNoMatchBody,
-            textAlign: TextAlign.center,
-            style: AppText.bodyLarge,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SnButton(
-            key: const Key('discover_clear_search_btn'),
-            label: l10n.serviceClearSearch,
-            variant: SnButtonVariant.secondary,
-            onPressed: onClear,
-          ),
-        ],
+        ),
       ),
     );
   }

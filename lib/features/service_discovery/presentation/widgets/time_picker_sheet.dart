@@ -1,22 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show authSerif;
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// Bottom sheet with hour / minute / AM-PM wheels in 15-minute steps (design "Time picker sheet").
-/// Returns minutes since midnight, or null when cancelled.
+/// Frosted bottom sheet with hour / minute / AM-PM wheels in 15-minute steps (design: Find a
+/// Worker 4, time sheet). Returns minutes since midnight, or null when closed.
 Future<int?> showTimePickerSheet(
   BuildContext context, {
   required String title,
   required int initialMinutes,
 }) => showModalBottomSheet<int>(
   context: context,
-  showDragHandle: true,
   isScrollControlled: true,
-  shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-  ),
+  backgroundColor: Colors.transparent,
+  barrierColor: const Color(0x730F2340),
+  elevation: 0,
   builder: (_) => _TimeSheet(title: title, initialMinutes: initialMinutes),
 );
 
@@ -63,6 +65,9 @@ class _TimeSheetState extends State<_TimeSheet> {
         key: key,
         scrollController: controller,
         itemExtent: _itemExtent,
+        diameterRatio: 2.4,
+        useMagnifier: true,
+        magnification: 1.12,
         selectionOverlay: null,
         onSelectedItemChanged: onChanged,
         children: [
@@ -70,10 +75,10 @@ class _TimeSheetState extends State<_TimeSheet> {
             Center(
               child: Text(
                 i,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.ink,
+                style: AppText.body.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: dsNavy,
                 ),
               ),
             ),
@@ -85,92 +90,153 @@ class _TimeSheetState extends State<_TimeSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          0,
-          AppSpacing.lg,
-          AppSpacing.md + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.title,
-              key: const Key('time_sheet_title'),
-              style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            Text(
-              l10n.timeSheetSub,
-              style: text.bodyMedium?.copyWith(color: AppColors.slate),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              height: 190,
-              child: Stack(
-                alignment: Alignment.center,
+    return DiscoverGlass(
+      corners: const BorderRadius.vertical(top: Radius.circular(32)),
+      gradient: const LinearGradient(
+        begin: Alignment(-0.5, -1),
+        end: Alignment(0.5, 1),
+        colors: [Color(0xF2FFFFFF), Color(0xD6FFFFFF)],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            10,
+            20,
+            22 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: dsNavy.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  Container(
-                    height: _itemExtent,
-                    decoration: BoxDecoration(
-                      color: AppColors.tealWash,
-                      border: Border.all(color: AppColors.teal, width: 1.5),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        widget.title,
+                        key: const Key('time_sheet_title'),
+                        style: authSerif(24, 1.2),
+                      ),
                     ),
                   ),
-                  Row(
-                    children: [
-                      _wheel(
-                        key: const Key('time_picker_hour'),
-                        label: l10n.timeSheetHour,
-                        controller: _hourCtrl,
-                        items: [for (var h = 1; h <= 12; h++) '$h'],
-                        onChanged: (i) => _hour = i,
-                      ),
-                      _wheel(
-                        key: const Key('time_picker_minute'),
-                        label: l10n.timeSheetMinute,
-                        controller: _minuteCtrl,
-                        items: const ['00', '15', '30', '45'],
-                        onChanged: (i) => _minute = i,
-                      ),
-                      _wheel(
-                        key: const Key('time_picker_period'),
-                        label: l10n.timeSheetPeriod,
-                        controller: _periodCtrl,
-                        items: const ['AM', 'PM'],
-                        onChanged: (i) => _period = i,
-                      ),
-                    ],
+                  IconButton(
+                    key: const Key('time_picker_cancel_btn'),
+                    tooltip: l10n.cancel,
+                    onPressed: () => Navigator.of(context).pop(),
+                    constraints: const BoxConstraints.tightFor(
+                      width: 44,
+                      height: 44,
+                    ),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      size: 22,
+                      color: dsNavy,
+                    ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: SnButton(
-                    key: const Key('time_picker_cancel_btn'),
-                    label: l10n.cancel,
-                    variant: SnButtonVariant.secondary,
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 220,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      height: _itemExtent,
+                      decoration: BoxDecoration(
+                        color: AppColors.teal.withValues(alpha: 0.14),
+                        border: Border.all(
+                          color: AppColors.teal.withValues(alpha: 0.45),
+                          width: 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        _wheel(
+                          key: const Key('time_picker_hour'),
+                          label: l10n.timeSheetHour,
+                          controller: _hourCtrl,
+                          items: [for (var h = 1; h <= 12; h++) '$h'],
+                          onChanged: (i) => _hour = i,
+                        ),
+                        const SizedBox(width: 6),
+                        _wheel(
+                          key: const Key('time_picker_minute'),
+                          label: l10n.timeSheetMinute,
+                          controller: _minuteCtrl,
+                          items: const ['00', '15', '30', '45'],
+                          onChanged: (i) => _minute = i,
+                        ),
+                        const SizedBox(width: 6),
+                        _wheel(
+                          key: const Key('time_picker_period'),
+                          label: l10n.timeSheetPeriod,
+                          controller: _periodCtrl,
+                          items: const ['AM', 'PM'],
+                          onChanged: (i) => _period = i,
+                        ),
+                      ],
+                    ),
+                    // Fades the wheels toward the edges, like the design's dimmed rows.
+                    const Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Color(0xE6FFFFFF),
+                                Color(0x00FFFFFF),
+                                Color(0x00FFFFFF),
+                                Color(0xE6FFFFFF),
+                              ],
+                              stops: [0, 0.32, 0.68, 1],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: SnButton(
-                    key: const Key('time_picker_set_btn'),
-                    label: l10n.timeSheetSet,
-                    onPressed: () => Navigator.of(context).pop(_minutes),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: FilledButton(
+                  key: const Key('time_picker_set_btn'),
+                  onPressed: () => Navigator.of(context).pop(_minutes),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: dsNavy,
+                    elevation: 8,
+                    shadowColor: dsNavy.withValues(alpha: 0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    textStyle: AppText.body.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
+                  child: Text(l10n.timeSheetSet),
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

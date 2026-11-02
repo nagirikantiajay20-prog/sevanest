@@ -9,21 +9,15 @@ import 'package:sevanest_customer/features/service_discovery/domain/timing.dart'
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/widgets/choice_pill.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/choices_ticket.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/date_sheet.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_parts.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_scaffold.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/widgets/flow_chips.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/ticket_cells.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/time_picker_sheet.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/timing_widgets.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
-
-const _windowIcons = {
-  TimeWindow.earlyMorning: Icons.wb_twilight,
-  TimeWindow.morning: Icons.wb_sunny_outlined,
-  TimeWindow.afternoon: Icons.light_mode_outlined,
-  TimeWindow.evening: Icons.wb_twilight,
-  TimeWindow.night: Icons.nightlight_outlined,
-  TimeWindow.flexible: Icons.schedule,
-};
 
 /// `/discover/timing` (screen 09, step 4 of 6). The engagement picks the layout:
 /// Part-time / Daily / Hourly show a time-of-day window then exact hours; Full-time shows a shift.
@@ -138,7 +132,7 @@ class _TimingScreenState extends ConsumerState<TimingScreen> {
         onRetry: () => ref.invalidate(scheduleConfigProvider),
       );
     } else if (config == null || variant == null) {
-      body = const _TimingSkeleton();
+      body = const TimingSkeleton();
     } else {
       body = _Editors(
         key: _editorKey,
@@ -185,15 +179,21 @@ class _TimingScreenState extends ConsumerState<TimingScreen> {
             )
           : null,
       body: ListView(
-        padding: const EdgeInsets.only(
-          top: AppSpacing.md,
-          bottom: AppSpacing.lg,
-        ),
+        padding: const EdgeInsets.only(top: 18, bottom: 24),
         children: [
-          const FlowChips(),
-          const SizedBox(height: AppSpacing.sm),
-          StepHeading(heading: l10n.timingHeading, sub: l10n.timingSub),
-          const SizedBox(height: AppSpacing.md),
+          DiscoverRise(
+            delayMs: 0,
+            child: ChoicesTicket(cells: flowTicketCells(context, ref)),
+          ),
+          const SizedBox(height: 14),
+          DiscoverRise(
+            delayMs: 80,
+            child: StepHeading(
+              heading: l10n.timingHeading,
+              sub: l10n.timingSub,
+            ),
+          ),
+          const SizedBox(height: 18),
           body,
         ],
       ),
@@ -237,7 +237,6 @@ class _Editors extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final timeIssue = issues
         .where(
           (i) =>
@@ -251,512 +250,199 @@ class _Editors extends StatelessWidget {
     final dur = s != null && e != null
         ? durationMinutes(s, e, overnightOk: timing.window == TimeWindow.night)
         : 0;
-
-    Widget label(String t) => Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Text(t, style: AppText.heading),
-    );
+    final window = timing.window;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_hasWindow) ...[
-          label(l10n.timingWindowLabel),
-          for (var i = 0; i < TimeWindow.values.length; i += 2)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.s12),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final w in TimeWindow.values.skip(i).take(2)) ...[
-                      if (w != TimeWindow.values[i])
-                        const SizedBox(width: AppSpacing.s12),
-                      Expanded(
-                        child: _WindowCard(
-                          window: w,
-                          caption: windowCaption(l10n, w, config),
-                          selected: timing.window == w,
-                          onTap: () => onWindow(w),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-        if (variant == TimingVariant.hourly) ...[
-          label(l10n.timingDate),
-          _DateRow(date: date, locale: locale, onTap: onDate),
-          if (issues.contains(TimingIssue.dateMissing))
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: Text(
-                l10n.timingErrDate,
-                key: const Key('discover_date_hint'),
-                style: text.bodySmall?.copyWith(color: AppColors.slate),
-              ),
-            ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-        if (_showTimes) ...[
-          label(_hasWindow ? l10n.timingExactHours : l10n.timingShiftHours),
-          Row(
-            children: [
-              Expanded(
-                child: _TimeField(
-                  fieldKey: const Key('discover_time_start_btn'),
-                  label: l10n.timingStartTime,
-                  minutes: s,
-                  error: timeIssue != null,
-                  onTap: () => onTime(true),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _TimeField(
-                  fieldKey: const Key('discover_time_end_btn'),
-                  label: l10n.timingEndTime,
-                  minutes: e,
-                  error: timeIssue != null,
-                  onTap: () => onTime(false),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          if (timeIssue != null)
-            Row(
+        if (_hasWindow)
+          DiscoverRise(
+            delayMs: 200,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 18,
-                  color: AppColors.danger,
+                DiscoverLabel(l10n.timingWindowLabel),
+                SkyScene(
+                  window: window,
+                  slot: window == null ? null : config.windows[window],
+                  label: window == null
+                      ? l10n.timingSceneEmpty
+                      : '${windowName(l10n, window)} · ${windowCaption(l10n, window, config)}',
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    timingIssueMessage(l10n, timeIssue, variant, config),
-                    key: const Key('discover_timing_error'),
-                    style: text.bodyMedium?.copyWith(color: AppColors.danger),
-                  ),
-                ),
-              ],
-            )
-          else if (dur > 0)
-            Row(
-              children: [
-                const Icon(
-                  Icons.timer_outlined,
-                  size: 18,
-                  color: AppColors.teal,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  l10n.timingHoursPerDay(formatDuration(l10n, dur)),
-                  key: const Key('discover_duration'),
-                  style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          if (variant == TimingVariant.fullTime) ...[
-            const SizedBox(height: AppSpacing.md),
-            label(l10n.timingHoursPerDayLabel),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                for (final h in config.shiftHours)
-                  ChoicePill(
-                    key: Key('discover_hours_$h'),
-                    label: l10n.timingHoursChip(h),
-                    selected: dur == h * 60,
-                    onTap: () => onHours(h),
-                  ),
-              ],
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-        ],
-        if (variantUsesDays(variant)) ...[
-          label(l10n.timingDays),
-          _DaysPicker(days: timing.days, onChanged: onDays, locale: locale),
-          if (timing.days.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.sm),
-              child: Text(
-                l10n.timingErrDays,
-                key: const Key('discover_days_hint'),
-                style: text.bodySmall?.copyWith(color: AppColors.slate),
-              ),
-            ),
-        ],
-      ],
-    );
-  }
-}
-
-class _WindowCard extends StatelessWidget {
-  const _WindowCard({
-    required this.window,
-    required this.caption,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final TimeWindow window;
-  final String caption;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: selected ? AppColors.tealMist : AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          side: BorderSide(
-            color: selected ? AppColors.teal : AppColors.hairline,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: InkWell(
-          key: Key('discover_window_${window.name}'),
-          borderRadius: BorderRadius.circular(AppRadius.button),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.s12),
-            child: Row(
-              children: [
-                Icon(
-                  _windowIcons[window],
-                  size: 26,
-                  color: selected ? AppColors.teal : AppColors.slate400,
-                ),
-                const SizedBox(width: AppSpacing.s12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        windowName(l10n, window),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.card,
-                      ),
-                      Text(caption, style: AppText.body.copyWith(fontSize: 12)),
-                    ],
-                  ),
-                ),
-                if (selected)
-                  const Icon(Icons.check, size: 20, color: AppColors.teal),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TimeField extends StatelessWidget {
-  const _TimeField({
-    required this.fieldKey,
-    required this.label,
-    required this.minutes,
-    required this.error,
-    required this.onTap,
-  });
-
-  final Key fieldKey;
-  final String label;
-  final int? minutes;
-  final bool error;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppText.body.copyWith(fontSize: 12)),
-        const SizedBox(height: AppSpacing.xs),
-        Material(
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.field),
-            side: BorderSide(
-              color: error ? AppColors.danger : AppColors.hairline,
-              width: error ? 2 : 1,
-            ),
-          ),
-          child: InkWell(
-            key: fieldKey,
-            borderRadius: BorderRadius.circular(AppRadius.field),
-            onTap: onTap,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 56),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.schedule,
-                      color: error ? AppColors.danger : AppColors.teal,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        minutes == null
-                            ? l10n.timingPickTime
-                            : formatTime(minutes!),
-                        style: AppText.card.copyWith(
-                          color: minutes == null
-                              ? AppColors.slate400
-                              : AppColors.brandInk,
-                        ),
+                const SizedBox(height: 12),
+                for (var i = 0; i < TimeWindow.values.length; i += 2)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final w
+                              in TimeWindow.values.skip(i).take(2)) ...[
+                            if (w != TimeWindow.values[i])
+                              const SizedBox(width: 12),
+                            Expanded(
+                              child: WindowCard(
+                                window: w,
+                                caption: windowCaption(l10n, w, config),
+                                selected: timing.window == w,
+                                onTap: () => onWindow(w),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DateRow extends StatelessWidget {
-  const _DateRow({
-    required this.date,
-    required this.locale,
-    required this.onTap,
-  });
-  final DateTime? date;
-  final String locale;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Material(
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.field),
-        side: const BorderSide(color: AppColors.hairline),
-      ),
-      child: InkWell(
-        key: const Key('discover_date_btn'),
-        borderRadius: BorderRadius.circular(AppRadius.field),
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today_outlined,
-                  color: AppColors.teal,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    date == null
+        if (variant == TimingVariant.hourly)
+          DiscoverRise(
+            delayMs: 260,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DiscoverLabel(l10n.timingDate),
+                  DateField(
+                    text: date == null
                         ? l10n.timingChooseDate
                         : formatDate(date!, locale),
-                    style: AppText.card.copyWith(
-                      color: date == null
-                          ? AppColors.slate400
-                          : AppColors.brandInk,
-                    ),
+                    filled: date != null,
+                    onTap: onDate,
                   ),
-                ),
-                const Icon(Icons.chevron_right, color: AppColors.slate400),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DaysPicker extends StatelessWidget {
-  const _DaysPicker({
-    required this.days,
-    required this.onChanged,
-    required this.locale,
-  });
-
-  final Set<int> days;
-  final ValueChanged<Set<int>> onChanged;
-  final String locale;
-
-  static const _all = {1, 2, 3, 4, 5, 6, 7};
-  static const _weekdays = {1, 2, 3, 4, 5};
-  static const _weekends = {6, 7};
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    bool same(Set<int> a) => a.length == days.length && a.containsAll(days);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            ChoicePill(
-              key: const Key('discover_days_every'),
-              label: l10n.daysEvery,
-              selected: same(_all),
-              onTap: () => onChanged({..._all}),
-            ),
-            ChoicePill(
-              key: const Key('discover_days_weekdays'),
-              label: l10n.daysWeekdays,
-              selected: same(_weekdays),
-              onTap: () => onChanged({..._weekdays}),
-            ),
-            ChoicePill(
-              key: const Key('discover_days_weekends'),
-              label: l10n.daysWeekends,
-              selected: same(_weekends),
-              onTap: () => onChanged({..._weekends}),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (var d = 1; d <= 7; d++)
-              Semantics(
-                selected: days.contains(d),
-                button: true,
-                label: dayShort(d, locale),
-                excludeSemantics: true,
-                child: InkResponse(
-                  key: Key('discover_day_$d'),
-                  onTap: () => onChanged(
-                    days.contains(d) ? ({...days}..remove(d)) : {...days, d},
-                  ),
-                  child: Container(
-                    width: 44,
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      color: days.contains(d)
-                          ? AppColors.teal
-                          : AppColors.surface,
-                      border: Border.all(
-                        color: days.contains(d)
-                            ? AppColors.teal
-                            : AppColors.hairline,
-                      ),
-                    ),
-                    child: Text(
-                      dayShort(d, locale).substring(0, 1),
-                      style: AppText.card.copyWith(
-                        color: days.contains(d)
-                            ? Colors.white
-                            : AppColors.brandInk,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        if (days.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-            child: Text(
-              l10n.timingDaysSelected(days.length),
-              key: const Key('discover_days_count'),
-              style: AppText.body,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _TimingSkeleton extends StatelessWidget {
-  const _TimingSkeleton();
-
-  Widget _box({double? w, double h = 12}) => Container(
-    width: w,
-    height: h,
-    decoration: BoxDecoration(
-      color: AppColors.hairline,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: AppLocalizations.of(context).loading,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _box(w: 140, h: 14),
-        const SizedBox(height: AppSpacing.md),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: AppSpacing.md,
-          crossAxisSpacing: AppSpacing.md,
-          childAspectRatio: 2.2,
-          children: [
-            for (var i = 0; i < 6; i++)
-              Material(
-                color: AppColors.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.button),
-                  side: const BorderSide(color: AppColors.hairline),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 14,
-                        backgroundColor: AppColors.hairline,
-                      ),
-                      const SizedBox(width: AppSpacing.s12),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _box(w: 70),
-                            const SizedBox(height: AppSpacing.xs),
-                            _box(w: 50, h: 10),
-                          ],
+                  if (issues.contains(TimingIssue.dateMissing))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        l10n.timingErrDate,
+                        key: const Key('discover_date_hint'),
+                        style: AppText.body.copyWith(
+                          fontSize: 13,
+                          color: dsMuted,
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               ),
-          ],
-        ),
+            ),
+          ),
+        if (_showTimes)
+          DiscoverRise(
+            delayMs: 300,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DiscoverLabel(
+                    _hasWindow ? l10n.timingExactHours : l10n.timingShiftHours,
+                  ),
+                  DiscoverShake(
+                    on: timeIssue != null,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TimeField(
+                            fieldKey: const Key('discover_time_start_btn'),
+                            label: l10n.timingStartTime,
+                            minutes: s,
+                            error: timeIssue != null,
+                            onTap: () => onTime(true),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TimeField(
+                            fieldKey: const Key('discover_time_end_btn'),
+                            label: l10n.timingEndTime,
+                            minutes: e,
+                            error: timeIssue != null,
+                            onTap: () => onTime(false),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (timeIssue != null)
+                    DiscoverInlineError(
+                      timingIssueMessage(l10n, timeIssue, variant, config),
+                      fieldKey: const Key('discover_timing_error'),
+                    )
+                  else if (dur > 0)
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.timer_outlined,
+                          size: 18,
+                          color: AppColors.teal,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.timingHoursPerDay(formatDuration(l10n, dur)),
+                          key: const Key('discover_duration'),
+                          style: AppText.body.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: dsNavy,
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (variant == TimingVariant.fullTime) ...[
+                    const SizedBox(height: 16),
+                    DiscoverLabel(l10n.timingHoursPerDayLabel, size: 17),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final h in config.shiftHours)
+                          DiscoverPill(
+                            key: Key('discover_hours_$h'),
+                            label: l10n.timingHoursChip(h),
+                            selected: dur == h * 60,
+                            accent: AppColors.teal,
+                            selectedFill: const Color(0xFFE2EEEC),
+                            weight: FontWeight.w700,
+                            onTap: () => onHours(h),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        if (variantUsesDays(variant))
+          DiscoverRise(
+            delayMs: 340,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DiscoverLabel(l10n.timingDays),
+                  DaysPicker(
+                    days: timing.days,
+                    onChanged: onDays,
+                    locale: locale,
+                  ),
+                  if (timing.days.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: DiscoverInlineError(
+                        l10n.timingErrDays,
+                        fieldKey: const Key('discover_days_hint'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
       ],
-    ),
-  );
+    );
+  }
 }

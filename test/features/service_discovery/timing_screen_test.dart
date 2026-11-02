@@ -47,7 +47,13 @@ void main() {
       expect(find.text('Cook'), findsOneWidget);
       expect(find.text('Part-time'), findsOneWidget);
       expect(find.text('Madhapur'), findsOneWidget);
-      expect(find.text('Change'), findsNWidgets(3));
+      for (final k in [
+        'discover_change_service',
+        'discover_change_engagement',
+        'discover_change_address',
+      ]) {
+        expect(find.byKey(Key(k)), findsOneWidget);
+      }
     });
 
     testWidgets('Morning (filled): hours default, Mon-Sat, summary, Continue', (
@@ -128,7 +134,6 @@ void main() {
       await env.tapKey('discover_window_morning');
       await env.tapKey('discover_time_start_btn');
       expect(find.text('Start time'), findsWidgets);
-      expect(find.text('In 15-minute steps'), findsOneWidget);
       await env.tapKey('time_picker_cancel_btn');
       expect(find.byKey(const Key('time_picker_set_btn')), findsNothing);
       expect(

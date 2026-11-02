@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
@@ -7,7 +6,6 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
@@ -18,26 +16,16 @@ import 'package:sevanest_customer/features/service_discovery/presentation/engage
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/catalog_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/schedule_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/budget_widgets.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/choices_ticket.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_parts.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_scaffold.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/widgets/flow_chips.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/ticket_cells.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// Live Indian digit grouping while typing: "600000" -> "6,00,000". Digits only, at most 7.
-class RupeeInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    final capped = digits.length > 7 ? digits.substring(0, 7) : digits;
-    final text = capped.isEmpty ? '' : groupIndian(int.parse(capped));
-    return TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
-    );
-  }
-}
+export 'package:sevanest_customer/features/service_discovery/presentation/widgets/budget_widgets.dart'
+    show RupeeInputFormatter;
 
 int? _parse(String t) {
   final d = t.replaceAll(RegExp(r'[^0-9]'), '');
@@ -214,6 +202,9 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final lo = ((budget?.min ?? 0).clamp(0, ceiling)).toDouble();
     final hi = ((budget?.max ?? ceiling).clamp(0, ceiling)).toDouble();
     final range = RangeValues(lo <= hi ? lo : hi, lo <= hi ? hi : lo);
+    final typical = guidance == null
+        ? null
+        : (min: guidance.min, max: guidance.max);
 
     final summary = budget == null
         ? null
@@ -227,6 +218,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       step: 6,
       title: l10n.budgetTitle,
       summary: summary,
+      inlineSummary: true,
       continueLabel: l10n.budgetReview,
       onContinue: valid
           ? () => _continue(
@@ -239,169 +231,225 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
           : null,
       body: ListView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.only(
-          top: AppSpacing.md,
-          bottom: AppSpacing.xl,
-        ),
+        padding: const EdgeInsets.only(top: 18, bottom: 28),
         children: [
-          const FlowChips(showTiming: true),
-          const SizedBox(height: AppSpacing.sm),
-          StepHeading(heading: l10n.budgetHeading),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  period == BudgetPeriod.hourly
-                      ? l10n.budgetSubHourly
-                      : l10n.budgetSubMonthly,
-                  style: AppText.bodyLarge,
-                ),
+          DiscoverRise(
+            delayMs: 0,
+            child: ChoicesGrid(
+              cells: flowTicketCells(
+                context,
+                ref,
+                timing: true,
+                startDate: true,
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.tealWash,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Text(
-                  period == BudgetPeriod.hourly
-                      ? l10n.budgetPerHour
-                      : l10n.budgetPerMonth,
-                  key: const Key('discover_period_chip'),
-                  style: AppText.label.copyWith(
-                    fontSize: 12,
-                    color: AppColors.teal,
+            ),
+          ),
+          const SizedBox(height: 16),
+          DiscoverRise(
+            delayMs: 80,
+            child: StepHeading(heading: l10n.budgetHeading),
+          ),
+          const SizedBox(height: 8),
+          DiscoverRise(
+            delayMs: 140,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    period == BudgetPeriod.hourly
+                        ? l10n.budgetSubHourly
+                        : l10n.budgetSubMonthly,
+                    style: AppText.body.copyWith(
+                      fontSize: 15,
+                      height: 1.45,
+                      color: dsText,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE2EEEC),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  child: Text(
+                    period == BudgetPeriod.hourly
+                        ? l10n.budgetPerHour
+                        : l10n.budgetPerMonth,
+                    key: const Key('discover_period_chip'),
+                    style: AppText.body.copyWith(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.actionDeepTeal,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 16),
           // No published guidance (404) is not an error to show: the customer just types a range.
           if (guidanceAsync != null && guidanceAsync.error is! NotFoundFailure)
-            _GuidanceCard(
-              async: guidanceAsync,
-              engagementName: engagement == null
-                  ? ''
-                  : engagementLabels(l10n, engagement).name.toLowerCase(),
-              serviceName: category?.name.toLowerCase() ?? '',
-              onUse: _useRange,
-              onRetry: () => ref.invalidate(guidanceProvider(query!)),
-            ),
-          const SizedBox(height: AppSpacing.md),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.card),
-              border: Border.all(color: AppColors.hairline),
-              boxShadow: AppShadows.card,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Readout(budget: budget, flexible: flexible),
-                const SizedBox(height: AppSpacing.s12),
-                _RangeBar(
-                  key: const Key('discover_budget_slider'),
-                  period: period,
-                  values: range,
-                  enabled: true,
-                  onChanged: (v) => _sliderChanged(v, period),
+            DiscoverRise(
+              delayMs: 200,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: GuidanceCard(
+                  async: guidanceAsync,
+                  engagementName: engagement == null
+                      ? ''
+                      : engagementLabels(l10n, engagement).name.toLowerCase(),
+                  serviceName: category?.name.toLowerCase() ?? '',
+                  onUse: _useRange,
+                  onRetry: () => ref.invalidate(guidanceProvider(query!)),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
+              ),
+            ),
+          DiscoverRise(
+            delayMs: 280,
+            child: DiscoverGlass(
+              radius: 28,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: _AmountField(
-                        fieldKey: const Key('discover_budget_min_field'),
-                        label: l10n.budgetMinField,
-                        controller: _min,
-                        error: issue == BudgetIssue.minAboveMax,
-                        onChanged: (_) => _typed(),
+                    BudgetReadout(budget: budget, flexible: flexible),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 16, 14, 2),
+                      child: PriceHistogram(
+                        period: period,
+                        low: range.start,
+                        high: range.end,
+                        typical: typical ?? fallbackBudgetRange(period),
+                        showTypical: typical != null,
+                        flexible: flexible,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: _AmountField(
-                        fieldKey: const Key('discover_budget_max_field'),
-                        label: l10n.budgetMaxField,
-                        controller: _max,
-                        error: issue == BudgetIssue.minAboveMax,
-                        onChanged: (_) => _typed(),
+                    BudgetSlider(
+                      key: const Key('discover_budget_slider'),
+                      period: period,
+                      values: flexible
+                          ? RangeValues(0, ceiling.toDouble())
+                          : range,
+                      enabled: !flexible,
+                      typical: flexible ? null : typical,
+                      onChanged: (v) => _sliderChanged(v, period),
+                    ),
+                    if (typical != null && !flexible)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 16,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: AppColors.amber.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              l10n.budgetTypicalBand,
+                              style: AppText.body.copyWith(
+                                fontSize: 12.5,
+                                color: dsMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    DiscoverShake(
+                      on: issue == BudgetIssue.minAboveMax,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          for (final f in [
+                            (
+                              const Key('discover_budget_min_field'),
+                              l10n.budgetMinField,
+                              _min,
+                            ),
+                            (
+                              const Key('discover_budget_max_field'),
+                              l10n.budgetMaxField,
+                              _max,
+                            ),
+                          ])
+                            SizedBox(
+                              width: 124,
+                              child: AmountField(
+                                fieldKey: f.$1,
+                                label: f.$2,
+                                controller: f.$3,
+                                dim: flexible,
+                                error: !flexible && issue != null,
+                                onChanged: (_) => _typed(),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
           if (!flexible && issue != null && budget != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 18,
-                  color: AppColors.danger,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    switch (issue) {
-                      BudgetIssue.minAboveMax => l10n.budgetErrMinMax,
-                      BudgetIssue.tooHigh => l10n.budgetErrHigh,
-                      BudgetIssue.missing => l10n.budgetErrMissing,
-                    },
-                    key: const Key('discover_budget_error'),
-                    style: AppText.bodyLarge.copyWith(color: AppColors.danger),
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 12),
+            DiscoverInlineError(switch (issue) {
+              BudgetIssue.minAboveMax => l10n.budgetErrMinMax,
+              BudgetIssue.tooHigh => l10n.budgetErrHigh,
+              BudgetIssue.missing => l10n.budgetErrMissing,
+            }, fieldKey: const Key('discover_budget_error')),
           ],
           if (status == BudgetStatus.lowWarning) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Container(
+            const SizedBox(height: 12),
+            KeyedSubtree(
               key: const Key('discover_budget_low_warning'),
-              padding: const EdgeInsets.all(AppSpacing.sm + 4),
-              decoration: BoxDecoration(
-                color: AppColors.warnBg,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline, color: AppColors.warn),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: Text(l10n.budgetLow)),
-                ],
+              child: DiscoverWarn(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 1),
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 22,
+                        color: Color(0xFFB45309),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.budgetLow,
+                        style: AppText.body.copyWith(
+                          fontSize: 14,
+                          height: 1.45,
+                          color: const Color(0xFF92400E),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
-          const SizedBox(height: AppSpacing.md),
-          Material(
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              side: const BorderSide(color: AppColors.hairline),
-            ),
-            child: SwitchListTile(
-              key: const Key('discover_flexible_switch'),
+          const SizedBox(height: 14),
+          DiscoverRise(
+            delayMs: 340,
+            child: FlexibleCard(
               value: flexible,
               onChanged: engagement == null
                   ? null
                   : (v) => _toggleFlexible(v, period, guidance),
-              title: Text(
-                l10n.budgetFlexibleLabel,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              subtitle: Text(l10n.budgetFlexibleBody),
             ),
           ),
         ],
@@ -423,367 +471,4 @@ class RequirementDraftBundle {
   final RequirementDraft draft;
   final ScheduleConfig config;
   final bool requiresBudget;
-}
-
-class _GuidanceCard extends StatelessWidget {
-  const _GuidanceCard({
-    required this.async,
-    required this.engagementName,
-    required this.serviceName,
-    required this.onUse,
-    required this.onRetry,
-  });
-
-  final AsyncValue<Guidance> async;
-  final String engagementName;
-  final String serviceName;
-  final ValueChanged<Guidance> onUse;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final g = async.value;
-
-    if (g == null && async.hasError) {
-      return Material(
-        key: const Key('discover_guidance_error'),
-        color: AppColors.surface,
-        elevation: 2,
-        shadowColor: Colors.black12,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CircleAvatar(
-                backgroundColor: AppColors.dangerBg,
-                child: Icon(Icons.error_outline, color: AppColors.danger),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.guidanceErrTitle, style: AppText.heading),
-                    Text(l10n.guidanceErrBody, style: AppText.bodyLarge),
-                    const SizedBox(height: AppSpacing.sm),
-                    SizedBox(
-                      width: 160,
-                      child: SnButton(
-                        key: const Key('error_retry_btn'),
-                        label: l10n.tryAgain,
-                        icon: Icons.refresh,
-                        variant: SnButtonVariant.secondary,
-                        onPressed: onRetry,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    const tint = AppColors.tealWash;
-    final border = Border.all(color: AppColors.teal.withValues(alpha: .25));
-    if (g == null) {
-      return Semantics(
-        label: l10n.loading,
-        child: Container(
-          key: const Key('discover_guidance_loading'),
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: tint,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: border,
-          ),
-          child: Row(
-            children: [
-              const CircleAvatar(
-                radius: 18,
-                backgroundColor: AppColors.hairline,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final w in [180.0, 130.0, 100.0])
-                      Container(
-                        width: w,
-                        height: 12,
-                        margin: const EdgeInsets.symmetric(vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppColors.hairline,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final range = '${formatRupees(g.min)} – ${formatRupees(g.max)}';
-    return Container(
-      key: const Key('discover_guidance_card'),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.navy, AppColors.actionDeepTeal],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: const Icon(Icons.trending_up, color: Colors.white),
-              ),
-              const SizedBox(width: AppSpacing.s12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.guidanceTypical(engagementName, serviceName, g.city),
-                      style: AppText.body.copyWith(color: Colors.white70),
-                    ),
-                    Text(
-                      g.period == BudgetPeriod.hourly
-                          ? l10n.budgetRangePerHour(range)
-                          : l10n.budgetRangePerMonth(range),
-                      key: const Key('discover_guidance_range'),
-                      style: AppText.heading.copyWith(color: Colors.white),
-                    ),
-                    Text(
-                      g.basis,
-                      style: AppText.body.copyWith(
-                        fontSize: 12,
-                        color: Colors.white60,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          FilledButton(
-            key: const Key('discover_use_range_btn'),
-            onPressed: () => onUse(g),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.teal,
-              minimumSize: const Size.fromHeight(kMinTapTarget),
-            ),
-            child: Text(l10n.guidanceUse),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Readout extends StatelessWidget {
-  const _Readout({required this.budget, required this.flexible});
-  final Budget? budget;
-  final bool flexible;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    if (flexible) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.budgetAny,
-            key: const Key('discover_any_budget'),
-            style: AppText.title.copyWith(fontSize: 26),
-          ),
-          Text(l10n.budgetAnyBody, style: AppText.body),
-        ],
-      );
-    }
-    String v(int? x) => x == null ? '–' : formatRupees(x);
-    Widget col(String label, String value, Key k) => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppText.card.copyWith(fontSize: 14)),
-        // Scales down instead of overflowing at large text sizes or amounts like ₹4,00,000.
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            value,
-            key: k,
-            style: AppText.title.copyWith(fontSize: 26),
-          ),
-        ),
-      ],
-    );
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Flexible(
-          child: col(
-            l10n.budgetMinimum,
-            v(budget?.min),
-            const Key('discover_readout_min'),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: Text(
-            '–',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
-          ),
-        ),
-        Flexible(
-          child: col(
-            l10n.budgetMaximum,
-            v(budget?.max),
-            const Key('discover_readout_max'),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RangeBar extends StatelessWidget {
-  const _RangeBar({
-    required this.period,
-    required this.values,
-    required this.enabled,
-    required this.onChanged,
-    super.key,
-  });
-
-  final BudgetPeriod period;
-  final RangeValues values;
-  final bool enabled;
-  final ValueChanged<RangeValues> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final ceiling = budgetCeiling(period);
-    final step = period == BudgetPeriod.hourly ? 25 : 500;
-    final ticks = period == BudgetPeriod.hourly
-        ? ['₹0', '₹250', '₹500', '₹750', '₹1k+']
-        : ['₹0', '₹10k', '₹20k', '₹30k', '₹40k+'];
-    return Column(
-      children: [
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: AppColors.tealDeep,
-            inactiveTrackColor: AppColors.hairline,
-            thumbColor: AppColors.surface,
-            overlayColor: AppColors.teal.withValues(alpha: .12),
-            rangeThumbShape: const RoundRangeSliderThumbShape(
-              enabledThumbRadius: 12,
-            ),
-          ),
-          child: Semantics(
-            label: l10n.budgetSlider,
-            child: RangeSlider(
-              values: values,
-              max: ceiling.toDouble(),
-              divisions: ceiling ~/ step,
-              onChanged: enabled ? onChanged : null,
-            ),
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (final t in ticks)
-              Text(
-                t,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.slate400),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _AmountField extends StatelessWidget {
-  const _AmountField({
-    required this.fieldKey,
-    required this.label,
-    required this.controller,
-    required this.error,
-    required this.onChanged,
-  });
-
-  final Key fieldKey;
-  final String label;
-  final TextEditingController controller;
-  final bool error;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: AppText.card.copyWith(fontSize: 14)),
-        const SizedBox(height: 4),
-        TextField(
-          key: fieldKey,
-          controller: controller,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.done,
-          inputFormatters: [RupeeInputFormatter()],
-          onChanged: onChanged,
-          style: AppText.card,
-          decoration: InputDecoration(
-            prefixText: '₹ ',
-            filled: true,
-            fillColor: AppColors.surface,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(
-                color: error ? AppColors.danger : AppColors.hairline,
-                width: error ? 2 : 1,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              borderSide: BorderSide(
-                color: error ? AppColors.danger : AppColors.teal,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
