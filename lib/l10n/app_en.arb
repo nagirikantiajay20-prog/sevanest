@@ -1432,14 +1432,6 @@
   "ratingTagRude": "Rude",
   "ratingTagPoorWork": "Poor quality work",
   "ratingTagUnreliable": "Unreliable",
-  "ratingTagsLine": "Tags: {tags}",
-  "@ratingTagsLine": {
-    "placeholders": {
-      "tags": {
-        "type": "String"
-      }
-    }
-  },
   "ratingReviewLabel": "Write a review (optional)",
   "ratingReviewHint": "Tell others about your experience.",
   "ratingReviewNote": "Your review helps other families choose. Don't share phone numbers or personal details.",
@@ -1787,6 +1779,7 @@
   "notifTabAll": "All",
   "notifTabUnread": "Unread",
   "notifMarkAll": "Mark all as read",
+  "notifMarkedUnread": "Marked as unread",
   "notifNew": "New",
   "notifEmptyTitle": "No notifications yet",
   "notifEmptyBody": "Updates about your bookings, payments and support will appear here.",
