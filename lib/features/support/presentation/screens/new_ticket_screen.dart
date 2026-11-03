@@ -2,22 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
-import 'package:sevanest_customer/core/localization/failure_message.dart';
-import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
-import 'package:sevanest_customer/features/booking/domain/booking.dart';
-import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
-import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta;
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/providers/replacement_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/support/domain/support.dart';
 import 'package:sevanest_customer/features/support/presentation/providers/support_providers.dart';
 import 'package:sevanest_customer/features/support/presentation/support_labels.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/new_ticket_parts.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/support_glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_success_overlay.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -120,13 +119,14 @@ class _State extends ConsumerState<NewTicketScreen> {
 
   Future<void> _confirmLeave() async {
     final l10n = AppLocalizations.of(context);
-    final discard = await confirmDialog(
+    final discard = await showGlassConfirm(
       context,
       title: l10n.discardTitle,
       body: l10n.discardBody,
       confirmLabel: l10n.discard,
-      cancelLabel: l10n.keepEditing,
+      keepLabel: l10n.keepEditing,
       confirmKey: const Key('ticket_discard_confirm_btn'),
+      destructive: true,
     );
     if (discard && mounted) context.pop();
   }
@@ -219,9 +219,9 @@ class _State extends ConsumerState<NewTicketScreen> {
   }
 
   Future<void> _pickBooking() async {
-    final picked = await showSnBottomSheet<_Pick>(
+    final picked = await showGlassSheet<BookingPick>(
       context,
-      builder: (_) => _BookingPicker(current: _bookingId()),
+      builder: (_) => BookingPickerSheet(current: _bookingId()),
     );
     if (picked == null || !mounted) return;
     _edited(() {
@@ -233,31 +233,6 @@ class _State extends ConsumerState<NewTicketScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final created = _created;
-    return PopScope(
-      canPop: !_dirty || _sending,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _confirmLeave();
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.canvasCool,
-        body: Column(
-          children: [
-            SnHeader(
-              title: l10n.tkNewTitle,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Expanded(
-              child: created != null ? _Created(ticket: created) : _form(l10n),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _form(AppLocalizations l10n) {
-    final text = Theme.of(context).textTheme;
     final cats = ref.watch(supportCategoriesProvider);
     final booking = _bookingId();
     final max = ref.watch(ticketDescriptionMaxProvider);
@@ -265,229 +240,55 @@ class _State extends ConsumerState<NewTicketScreen> {
     final category = cats.hasValue ? _selected(cats.requireValue) : null;
     final tooShort = len > 0 && len < _min;
     final valid = category != null && len >= _min && len <= max;
+    final linked = booking != null && (_linkedByRoute || _picked != null);
     final dup = booking == null
         ? null
         : ref.watch(openTicketForBookingProvider(booking)).value;
     final selectedCat = cats.hasValue && category != null
         ? cats.requireValue.firstWhere((c) => c.id == category)
         : null;
-    final hint = _offline
-        ? l10n.tkNewHintOffline
-        : category == null
-        ? l10n.tkNewHintCategory
-        : len == 0
-        ? l10n.tkNewHintDescribe
-        : tooShort
-        ? l10n.tkNewHintMore
-        : null;
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(AppSpacing.md),
-            children: [
-              if (_offline)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: _Notice(
-                    key: const Key('ticket_offline_banner'),
-                    icon: Icons.wifi_off,
-                    color: AppColors.warnBg,
-                    iconColor: AppColors.warn,
-                    title: l10n.tkNewOfflineBanner,
-                  ),
-                ),
-              if (booking != null && (_linkedByRoute || _picked != null))
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: _AttachedChip(
-                    bookingId: booking,
-                    onRemove: () => _edited(() {
-                      _picked = null;
-                      _unlinked = true;
-                    }),
-                  ),
-                ),
-              Text.rich(
-                TextSpan(
-                  text: l10n.tkNewAbout,
-                  style: text.titleMedium,
-                  children: const [
-                    TextSpan(
-                      text: ' *',
-                      style: TextStyle(color: AppColors.danger),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              if (cats.hasValue)
-                for (final c in cats.requireValue)
-                  _CategoryTile(
-                    category: c,
-                    selected: c.id == category,
-                    enabled: !_sending,
-                    onTap: () => _edited(() => _category = c.id),
-                  )
-              else if (cats.hasError)
-                Row(
-                  key: const Key('ticket_categories_error'),
-                  children: [
-                    Expanded(child: Text(l10n.tkNewCategoriesError)),
-                    TextButton(
-                      key: const Key('error_retry_btn'),
-                      onPressed: () =>
-                          ref.invalidate(supportCategoriesProvider),
-                      child: Text(l10n.retry),
-                    ),
-                  ],
-                )
-              else
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              if (!(booking != null &&
-                  (_linkedByRoute || _picked != null))) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(l10n.tkNewRelated, style: text.titleMedium),
-                const SizedBox(height: AppSpacing.sm),
-                InkWell(
-                  key: const Key('ticket_related_picker'),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  onTap: _sending ? null : _pickBooking,
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      suffixIcon: const Icon(Icons.keyboard_arrow_down),
-                      helperText: l10n.tkNewRelatedHelp,
-                    ),
-                    child: Text(
-                      l10n.tkNewRelatedHint,
-                      style: text.bodyLarge?.copyWith(color: AppColors.slate),
-                    ),
-                  ),
-                ),
-              ],
-              if (selectedCat != null && selectedCat.isSafety)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.md),
-                  child: _Notice(
-                    key: const Key('ticket_safety_card'),
-                    icon: Icons.gpp_maybe_outlined,
-                    color: AppColors.dangerBg,
-                    iconColor: AppColors.danger,
-                    title: l10n.tkNewSafetyTitle,
-                    body: l10n.tkNewSafetyBody,
-                  ),
-                ),
-              const SizedBox(height: AppSpacing.lg),
-              Text.rich(
-                TextSpan(
-                  text: l10n.tkNewDescribe,
-                  style: text.titleMedium,
-                  children: const [
-                    TextSpan(
-                      text: ' *',
-                      style: TextStyle(color: AppColors.danger),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                key: const Key('ticket_description_field'),
-                controller: _text,
-                enabled: !_sending,
-                maxLength: max,
-                minLines: 5,
-                maxLines: 8,
-                keyboardType: TextInputType.multiline,
-                textCapitalization: TextCapitalization.sentences,
-                onChanged: (_) => _edited(() {}),
-                decoration: InputDecoration(
-                  hintText: l10n.tkNewDescribeHint,
-                  errorText: tooShort ? l10n.tkNewDescribeShort : null,
-                  helperText: l10n.tkNewPrivacy,
-                  prefixIcon: null,
-                ),
-              ),
-              if (dup != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.md),
-                  child: _Notice(
-                    key: const Key('ticket_duplicate_notice'),
-                    icon: Icons.warning_amber_rounded,
-                    color: AppColors.warnBg,
-                    iconColor: AppColors.warn,
-                    title: l10n.tkNewDupTitle,
-                    body:
-                        '#${dup.reference} · ${ticketStatusLabel(l10n, dup.status)}',
-                    trailing: TextButton(
-                      key: const Key('ticket_duplicate_open_btn'),
-                      onPressed: () => context.push(
-                        Routes.path(Routes.supportDetail, {'id': dup.id}),
-                      ),
-                      child: Text(l10n.tkNewDupOpen),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  const Icon(Icons.schedule, size: 20, color: AppColors.teal),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(l10n.tkNewNotified, style: text.bodyMedium),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        DecoratedBox(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.hairline)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
+    final created = _created;
+    return PopScope(
+      canPop: !_dirty || _sending,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmLeave();
+      },
+      child: FindGlassPage(
+        title: l10n.tkNewTitle,
+        backLabel: l10n.back,
+        onBack: () => Navigator.of(context).maybePop(),
+        overlay: created == null ? null : _createdOverlay(l10n, created),
+        bottom: created != null
+            ? null
+            : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_failed || _error != null)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: _Notice(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: SupportNotice(
                         key: const Key('ticket_error_card'),
-                        icon: Icons.error_outline,
-                        color: AppColors.surface,
-                        iconColor: AppColors.danger,
+                        icon: Icons.error_outline_rounded,
+                        iconColor: supportDanger,
                         title: l10n.tkNewErrTitle,
                         body: _error ?? l10n.tkNewErrBody,
                       ),
                     ),
-                  if (hint != null && !_failed)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: Text(
-                        hint,
-                        key: const Key('ticket_submit_hint'),
-                        style: text.bodyMedium,
-                      ),
+                  Builder(
+                    builder: (ctx) => AuthCta(
+                      key: const Key('ticket_submit_btn'),
+                      clock: DiscoverClock.of(ctx),
+                      label: _failed ? l10n.tkNewTryAgain : l10n.tkNewSubmit,
+                      loadingLabel: l10n.tkNewSubmitting,
+                      loading: _sending,
+                      breathe: true,
+                      showArrow: false,
+                      radius: 18,
+                      height: 58,
+                      onPressed: valid && !_sending && !_offline
+                          ? () => _submit(category, booking)
+                          : null,
                     ),
-                  SnButton(
-                    key: const Key('ticket_submit_btn'),
-                    label: _failed ? l10n.tkNewTryAgain : l10n.tkNewSubmit,
-                    isLoading: _sending,
-                    loadingLabel: l10n.tkNewSubmitting,
-                    onPressed: valid && !_sending && !_offline
-                        ? () => _submit(category, booking)
-                        : null,
                   ),
                   if (_offline)
                     TextButton(
@@ -499,398 +300,178 @@ class _State extends ConsumerState<NewTicketScreen> {
                     ),
                 ],
               ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Pick {
-  const _Pick(this.bookingId);
-  final String? bookingId;
-}
-
-class _Notice extends StatelessWidget {
-  const _Notice({
-    required this.icon,
-    required this.color,
-    required this.iconColor,
-    required this.title,
-    this.body,
-    this.trailing,
-    super.key,
-  });
-  final IconData icon;
-  final Color color;
-  final Color iconColor;
-  final String title;
-  final String? body;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.hairline),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
-            Icon(icon, color: iconColor),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
+            if (_offline)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: SupportNotice(
+                  key: const Key('ticket_offline_banner'),
+                  icon: Icons.wifi_off_rounded,
+                  iconColor: const Color(0xFF8A4B06),
+                  tint: supportWarnTint,
+                  title: l10n.tkNewOfflineBanner,
+                  body: l10n.tkNewHintOffline,
+                ),
+              ),
+            SupportSection(
+              title: l10n.tkNewHeading,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: text.titleMedium),
-                  if (body != null) Text(body!, style: text.bodyMedium),
-                  ?trailing,
+                  SupportLabel(l10n.tkNewCategory),
+                  _categoryField(l10n, cats, category, selectedCat),
+                  const SizedBox(height: 14),
+                  SupportLabel(l10n.tkNewRelatedTo),
+                  if (linked)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: RelatedChip(
+                        bookingId: booking,
+                        onRemove: () => _edited(() {
+                          _picked = null;
+                          _unlinked = true;
+                        }),
+                      ),
+                    )
+                  else
+                    SelectField(
+                      key: const Key('ticket_related_picker'),
+                      text: null,
+                      placeholder: l10n.tkNewRelatedHint,
+                      onTap: _sending ? null : _pickBooking,
+                    ),
+                  if (selectedCat != null && selectedCat.isSafety)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 14),
+                      child: SupportNotice(
+                        key: const Key('ticket_safety_card'),
+                        icon: Icons.gpp_maybe_outlined,
+                        iconColor: supportDanger,
+                        tint: supportDangerTint,
+                        title: l10n.tkNewSafetyTitle,
+                        body: l10n.tkNewSafetyBody,
+                      ),
+                    ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AttachedChip extends ConsumerWidget {
-  const _AttachedChip({required this.bookingId, required this.onRemove});
-  final String bookingId;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final b = ref.watch(bookingProvider(bookingId)).value;
-    final ref6 = b?.reference ?? _shortRef(bookingId);
-    return DecoratedBox(
-      key: const Key('ticket_related_chip'),
-      decoration: BoxDecoration(
-        color: AppColors.tealMist,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.tealLine),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.attach_file, color: AppColors.teal),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(child: Text(l10n.tkNewAttached(ref6))),
-            TextButton(
-              key: const Key('ticket_related_remove_btn'),
-              onPressed: onRemove,
-              child: Text(l10n.tkNewRemove),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-String _shortRef(String id) =>
-    (id.length > 6 ? id.substring(id.length - 6) : id).toUpperCase();
-
-class _CategoryTile extends StatelessWidget {
-  const _CategoryTile({
-    required this.category,
-    required this.selected,
-    required this.enabled,
-    required this.onTap,
-  });
-  final SupportCategory category;
-  final bool selected;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Semantics(
-        selected: selected,
-        inMutuallyExclusiveGroup: true,
-        child: Material(
-          color: selected ? AppColors.tealMist : AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            side: BorderSide(
-              color: selected ? AppColors.teal : AppColors.slate,
-              width: selected ? 2 : 1,
-            ),
-          ),
-          child: InkWell(
-            key: Key('ticket_category_${category.id}'),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            onTap: enabled ? onTap : null,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: kMinTapTarget + 8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm + 4,
-                  vertical: AppSpacing.sm,
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: category.isSafety
-                          ? AppColors.dangerBg
-                          : AppColors.tealSoft,
-                      child: Icon(
-                        supportCategoryIcon(category),
-                        size: 22,
-                        color: category.isSafety
-                            ? AppColors.danger
-                            : AppColors.teal,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        category.name,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    Icon(
-                      selected
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color: selected ? AppColors.teal : AppColors.slate,
-                    ),
-                  ],
-                ),
+            SupportSection(
+              title: l10n.tkNewMore,
+              delayMs: 80,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SupportLabel(l10n.tkNewDescLabel),
+                  DescriptionBox(
+                    controller: _text,
+                    enabled: !_sending,
+                    max: max,
+                    min: _min,
+                    hint: tooShort ? l10n.tkNewDescribeShort : null,
+                    onChanged: () => _edited(() {}),
+                  ),
+                ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The booking picker sheet (design "Booking picker sheet"): recent bookings and "None".
-class _BookingPicker extends ConsumerWidget {
-  const _BookingPicker({required this.current});
-  final String? current;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    final list = ref.watch(bookingListProvider);
-    final items = list.value?.items ?? const <Booking>[];
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(l10n.tkNewPickerTitle, style: text.titleLarge),
-            ),
-            IconButton(
-              key: const Key('ticket_picker_close_btn'),
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
-        Text(l10n.tkNewPickerSub, style: text.bodyMedium),
-        const SizedBox(height: AppSpacing.sm),
-        Flexible(
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              if (list.isLoading && items.isEmpty)
-                const Center(child: CircularProgressIndicator())
-              else if (items.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Text(
-                    plainOrEmpty(l10n, list.error, l10n.tkNewPickerEmpty),
-                    key: const Key('ticket_picker_empty'),
+            if (dup != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 14),
+                child: SupportNotice(
+                  key: const Key('ticket_duplicate_notice'),
+                  icon: Icons.warning_amber_rounded,
+                  iconColor: const Color(0xFF8A4B06),
+                  tint: supportWarnTint,
+                  title: l10n.tkNewDupTitle,
+                  body:
+                      '#${dup.reference} · ${ticketStatusLabel(l10n, dup.status)}',
+                  trailing: TextButton(
+                    key: const Key('ticket_duplicate_open_btn'),
+                    onPressed: () => context.push(
+                      Routes.path(Routes.supportDetail, {'id': dup.id}),
+                    ),
+                    child: Text(l10n.tkNewDupOpen),
                   ),
                 ),
-              for (final b in items)
-                _PickRow(
-                  key: Key('ticket_booking_option_${b.id}'),
-                  title:
-                      '#${b.reference} · ${b.categoryName ?? b.categoryCode ?? ''}',
-                  subtitle: bookingStatusLabel(l10n, b.status),
-                  selected: current == b.id,
-                  onTap: () => Navigator.of(context).pop(_Pick(b.id)),
-                ),
-              _PickRow(
-                key: const Key('ticket_booking_none'),
-                title: l10n.tkNewPickerNone,
-                selected: current == null,
-                onTap: () => Navigator.of(context).pop(const _Pick(null)),
               ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The error text when the list failed, else [empty].
-String plainOrEmpty(AppLocalizations l10n, Object? error, String empty) =>
-    error == null ? empty : plainFailureMessage(l10n, error);
-
-class _PickRow extends StatelessWidget {
-  const _PickRow({
-    required this.title,
-    required this.selected,
-    required this.onTap,
-    this.subtitle,
-    super.key,
-  });
-  final String title;
-  final String? subtitle;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Material(
-        color: selected ? AppColors.tealMist : AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          side: BorderSide(
-            color: selected ? AppColors.teal : AppColors.slate,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: ListTile(
-          onTap: onTap,
-          leading: Icon(
-            selected ? Icons.check_circle : Icons.radio_button_unchecked,
-            color: selected ? AppColors.teal : AppColors.slate,
-          ),
-          title: Text(title),
-          subtitle: subtitle == null ? null : Text(subtitle!),
-        ),
-      ),
-    );
-  }
-}
-
-/// "Ticket created" (design 28): View ticket replaces the form, so Back never returns to it.
-class _Created extends StatelessWidget {
-  const _Created({required this.ticket});
-  final Ticket ticket;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return SafeArea(
-      key: const Key('ticket_created'),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: AppSpacing.lg),
-                    const CircleAvatar(
-                      radius: 48,
-                      backgroundColor: AppColors.successBg,
-                      child: Icon(
-                        Icons.check_circle_outline,
-                        size: 48,
-                        color: AppColors.success,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      l10n.tkNewCreatedTitle,
-                      style: text.headlineMedium?.copyWith(
-                        color: AppColors.navy,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      l10n.tkNewCreatedBody,
-                      textAlign: TextAlign.center,
-                      style: text.bodyLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Card(
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    l10n.tkNewRef(ticket.reference),
-                                    key: const Key('ticket_created_ref'),
-                                    style: text.bodySmall,
-                                  ),
-                                ),
-                                SnBadge(
-                                  key: const Key('ticket_created_status'),
-                                  label: ticketStatusLabel(l10n, ticket.status),
-                                  tone: ticketStatusTone(ticket.status),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              ticket.title(),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: text.titleMedium,
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Chip(label: Text(ticket.category.name)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SnButton(
-              key: const Key('ticket_view_btn'),
-              label: l10n.tkNewView,
-              onPressed: () => context.pushReplacement(
-                Routes.path(Routes.supportDetail, {'id': ticket.id}),
-              ),
-            ),
-            TextButton(
-              key: const Key('ticket_back_support_btn'),
-              onPressed: () => context.pushReplacement(Routes.support),
-              child: Text(l10n.tkNewBack),
-            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _categoryField(
+    AppLocalizations l10n,
+    AsyncValue<List<SupportCategory>> cats,
+    String? category,
+    SupportCategory? selected,
+  ) {
+    if (cats.hasValue) {
+      return SelectField(
+        key: const Key('ticket_category_field'),
+        text: selected?.name,
+        placeholder: l10n.tkNewCategoryHint,
+        onTap: _sending
+            ? null
+            : () async {
+                final id = await pickCategory(
+                  context,
+                  categories: cats.requireValue,
+                  current: category,
+                );
+                if (id != null && mounted) _edited(() => _category = id);
+              },
+      );
+    }
+    if (cats.hasError) {
+      return Row(
+        key: const Key('ticket_categories_error'),
+        children: [
+          Expanded(
+            child: Text(
+              l10n.tkNewCategoriesError,
+              style: AppText.body.copyWith(fontSize: 14.5, color: dsText),
+            ),
+          ),
+          TextButton(
+            key: const Key('error_retry_btn'),
+            onPressed: () => ref.invalidate(supportCategoriesProvider),
+            child: Text(l10n.retry),
+          ),
+        ],
+      );
+    }
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  /// "Ticket created": View ticket replaces the form, so Back never returns to it.
+  Widget _createdOverlay(AppLocalizations l10n, Ticket t) => KeyedSubtree(
+    key: const Key('ticket_created'),
+    child: GlassSuccessOverlay(
+      title: l10n.tkNewCreatedTitle,
+      body: l10n.tkNewCreatedBody,
+      rows: [
+        (l10n.tkdTitle, '#${t.reference}'),
+        (l10n.tkNewCategory, t.category.name),
+        (l10n.interviewTkStatus, ticketStatusLabel(l10n, t.status)),
+      ],
+      ctaKey: const Key('ticket_view_btn'),
+      ctaLabel: l10n.tkNewView,
+      onPressed: () => context.pushReplacement(
+        Routes.path(Routes.supportDetail, {'id': t.id}),
+      ),
+      secondary: TextButton(
+        key: const Key('ticket_back_support_btn'),
+        onPressed: () => context.pushReplacement(Routes.support),
+        child: Text(l10n.tkNewBack),
+      ),
+    ),
+  );
 }

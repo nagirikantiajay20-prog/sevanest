@@ -49,6 +49,7 @@ void main() {
       await env.go('/support');
       await tap(t, 'support_new_btn');
       expect(env.where, '/support/new');
+      await tap(t, 'ticket_category_field');
       await tap(t, 'ticket_category_c2');
       await type(
         t,
@@ -118,6 +119,7 @@ void main() {
       expect(env.where, '/support/new');
       // The payment links its booking.
       expect(k('ticket_related_chip'), findsOneWidget);
+      await tap(t, 'ticket_category_field');
       await tap(t, 'ticket_category_c2');
       await type(
         t,

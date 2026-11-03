@@ -68,6 +68,11 @@ void main() {
     await t.pump();
   }
 
+  Future<void> pickCat(WidgetTester t, String id) async {
+    await tapKey(t, 'ticket_category_field');
+    await tapKey(t, 'ticket_category_$id');
+  }
+
   const longText = 'I was charged twice for the same booking today.';
 
   group('Support home (screen 27)', () {
@@ -76,7 +81,7 @@ void main() {
       (t) async {
         repo.tickets = [ticket('tk_1', status: TicketStatus.inProgress)];
         await open(t, '/support');
-        expect(find.text('How can we help?'), findsOneWidget);
+        expect(find.text('Raise a ticket'), findsOneWidget);
         expect(k('support_safety_card'), findsOneWidget);
         for (final c in fakeCategories) {
           expect(k('support_topic_${c.id}'), findsOneWidget);
@@ -95,8 +100,8 @@ void main() {
       t,
     ) async {
       await open(t, '/support');
-      expect(t.widget<ListTile>(k('support_call_btn')).enabled, isFalse);
-      expect(t.widget<ListTile>(k('support_email_btn')).enabled, isFalse);
+      expect(t.widget<InkWell>(k('support_call_btn')).onTap, isNull);
+      expect(t.widget<InkWell>(k('support_email_btn')).onTap, isNull);
       expect(find.text('Not available right now'), findsNWidgets(2));
     });
 
@@ -113,8 +118,8 @@ void main() {
           ),
         ],
       );
-      expect(t.widget<ListTile>(k('support_call_btn')).enabled, isTrue);
-      expect(t.widget<ListTile>(k('support_email_btn')).enabled, isTrue);
+      expect(t.widget<InkWell>(k('support_call_btn')).onTap, isNotNull);
+      expect(t.widget<InkWell>(k('support_email_btn')).onTap, isNotNull);
       expect(find.text('+911234567890'), findsOneWidget);
     });
 
@@ -191,11 +196,10 @@ void main() {
         final env = await open(t, '/support');
         await tapKey(t, 'support_topic_c2');
         expect(env.where, '/support/new');
-        expect(t.widget<InkWell>(k('ticket_category_c2')).onTap, isNotNull);
         expect(
           find.descendant(
-            of: k('ticket_category_c2'),
-            matching: find.byIcon(Icons.check_circle),
+            of: k('ticket_category_field'),
+            matching: find.text('Payment or refund'),
           ),
           findsOneWidget,
         );
@@ -213,8 +217,8 @@ void main() {
       await tapKey(t, 'support_safety_btn');
       expect(
         find.descendant(
-          of: k('ticket_category_c3'),
-          matching: find.byIcon(Icons.check_circle),
+          of: k('ticket_category_field'),
+          matching: find.text('Safety or trust concern'),
         ),
         findsOneWidget,
       );
@@ -239,11 +243,12 @@ void main() {
       t,
     ) async {
       await open(t, '/support/new');
+      expect(find.text('Choose a category'), findsOneWidget);
+      await tapKey(t, 'ticket_category_field');
       for (final c in fakeCategories) {
         expect(k('ticket_category_${c.id}'), findsOneWidget);
       }
       expect(k('ticket_related_picker'), findsOneWidget);
-      expect(find.text('Choose a category to continue'), findsOneWidget);
       expect(
         t
             .widget<FilledButton>(
@@ -265,7 +270,7 @@ void main() {
       expect(k('ticket_categories_error'), findsOneWidget);
       repo.categoriesFail = null;
       await tapKey(t, 'error_retry_btn');
-      expect(k('ticket_category_c1'), findsOneWidget);
+      expect(k('ticket_category_field'), findsOneWidget);
     });
 
     testWidgets(
@@ -284,7 +289,7 @@ void main() {
             null;
         await typeIn(t, 'ticket_description_field', longText);
         expect(enabled(), isFalse); // no category yet
-        await tapKey(t, 'ticket_category_c2');
+        await pickCat(t, 'c2');
         expect(enabled(), isTrue);
         await typeIn(t, 'ticket_description_field', 'She was late');
         await t.pump();
@@ -292,10 +297,6 @@ void main() {
         await typeIn(t, 'ticket_description_field', 'Late');
         await t.pump();
         expect(find.text('Please add a little more detail'), findsOneWidget);
-        expect(
-          find.text('Add a little more detail to continue'),
-          findsOneWidget,
-        );
         expect(enabled(), isFalse);
         await typeIn(t, 'ticket_description_field', '   ');
         await t.pump();
@@ -308,8 +309,8 @@ void main() {
       (t) async {
         await open(t, '/support/new?bookingId=bk_2048');
         expect(k('ticket_related_chip'), findsOneWidget);
-        expect(find.textContaining('Attached: Booking #'), findsOneWidget);
-        await tapKey(t, 'ticket_category_c1');
+        expect(find.textContaining('Booking #'), findsOneWidget);
+        await pickCat(t, 'c1');
         await typeIn(t, 'ticket_description_field', longText);
         await tapKey(t, 'ticket_submit_btn');
         expect(repo.lastBooking, 'bk_2048');
@@ -324,7 +325,7 @@ void main() {
       await tapKey(t, 'ticket_related_remove_btn');
       expect(k('ticket_related_chip'), findsNothing);
       expect(k('ticket_related_picker'), findsOneWidget);
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(repo.lastBooking, isNull);
@@ -348,7 +349,7 @@ void main() {
         ],
       );
       expect(k('ticket_related_chip'), findsOneWidget);
-      await tapKey(t, 'ticket_category_c2');
+      await pickCat(t, 'c2');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(repo.lastBooking, 'bk_2100');
@@ -369,7 +370,7 @@ void main() {
           ),
         ],
       );
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(repo.lastBooking, 'bk_2048');
@@ -379,7 +380,7 @@ void main() {
       'an interview link names its booking (an interview is a booking)',
       (t) async {
         await open(t, '/support/new?interviewId=iv_301');
-        await tapKey(t, 'ticket_category_c1');
+        await pickCat(t, 'c1');
         await typeIn(t, 'ticket_description_field', longText);
         await tapKey(t, 'ticket_submit_btn');
         expect(repo.lastBooking, 'iv_301');
@@ -415,7 +416,7 @@ void main() {
     ) async {
       await open(t, '/support/new');
       expect(k('ticket_safety_card'), findsNothing);
-      await tapKey(t, 'ticket_category_c3');
+      await pickCat(t, 'c3');
       expect(k('ticket_safety_card'), findsOneWidget);
       expect(find.textContaining('urgent'), findsNothing);
     });
@@ -448,7 +449,7 @@ void main() {
       'SUP-04 Submit success: Ticket created, then View ticket replaces the form',
       (t) async {
         final env = await open(t, '/support/new?bookingId=bk_2048');
-        await tapKey(t, 'ticket_category_c2');
+        await pickCat(t, 'c2');
         await typeIn(t, 'ticket_description_field', longText);
         await tapKey(t, 'ticket_submit_btn');
         expect(k('ticket_created'), findsOneWidget);
@@ -470,7 +471,7 @@ void main() {
     ) async {
       repo.createGate = Completer();
       await open(t, '/support/new');
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await t.tap(k('ticket_submit_btn'));
       await t.pump();
@@ -489,7 +490,7 @@ void main() {
       (t) async {
         repo.createFail = const ServerFailure();
         await open(t, '/support/new');
-        await tapKey(t, 'ticket_category_c1');
+        await pickCat(t, 'c1');
         await typeIn(t, 'ticket_description_field', longText);
         await tapKey(t, 'ticket_submit_btn');
         expect(find.text("We couldn't submit your ticket"), findsOneWidget);
@@ -510,7 +511,7 @@ void main() {
     testWidgets('an edit after a failure gets a fresh key', (t) async {
       repo.createFail = const ServerFailure();
       await open(t, '/support/new');
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       repo.createFail = null;
@@ -526,7 +527,7 @@ void main() {
         ..createFail = const NetworkFailure()
         ..storeThenFail = true;
       await open(t, '/support/new');
-      await tapKey(t, 'ticket_category_c2');
+      await pickCat(t, 'c2');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(k('ticket_created'), findsOneWidget);
@@ -539,7 +540,7 @@ void main() {
     ) async {
       repo.createFail = const NetworkFailure();
       await open(t, '/support/new');
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(k('ticket_offline_banner'), findsOneWidget);
@@ -561,7 +562,7 @@ void main() {
         'SUPPORT_CATEGORY_INVALID',
       );
       await open(t, '/support/new');
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(
@@ -578,7 +579,7 @@ void main() {
     ) async {
       repo.createFail = const NotFoundFailure();
       await open(t, '/support/new?bookingId=bk_x');
-      await tapKey(t, 'ticket_category_c1');
+      await pickCat(t, 'c1');
       await typeIn(t, 'ticket_description_field', longText);
       await tapKey(t, 'ticket_submit_btn');
       expect(
@@ -667,17 +668,13 @@ void main() {
         expect(find.text('#TK_1'.replaceAll('_', '-')), findsNothing);
         expect(k('ticket_status_chip'), findsOneWidget);
         expect(find.text('Open'), findsOneWidget);
-        expect(find.text('Payment or refund'), findsOneWidget);
+        expect(find.textContaining('Payment or refund'), findsOneWidget);
         expect(
           find.text('The payment was taken twice for my booking.'),
           findsWidgets,
         );
         expect(find.textContaining('Ticket created ·'), findsOneWidget);
         expect(k('ticket_reply_field'), findsOneWidget);
-        expect(
-          find.text("Don't share OTPs, PINs or card numbers."),
-          findsOneWidget,
-        );
       },
     );
 
@@ -688,7 +685,7 @@ void main() {
       ];
       await open(t, '/support/tk_1');
       expect(find.text('In progress'), findsWidgets);
-      expect(find.text('SevaNest Support'), findsOneWidget);
+      expect(find.textContaining('SevaNest Support'), findsOneWidget);
       expect(
         find.text('We are checking this with the payment provider.'),
         findsOneWidget,

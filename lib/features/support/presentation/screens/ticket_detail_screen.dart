@@ -4,18 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/time_format.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/support/domain/support.dart';
 import 'package:sevanest_customer/features/support/presentation/providers/support_providers.dart';
 import 'package:sevanest_customer/features/support/presentation/support_labels.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/support_glass_parts.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/ticket_detail_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -44,7 +45,7 @@ class _EventRow extends _Row {
   final IconData icon;
 }
 
-/// `/support/:id` (module doc 12.3, design screen 29): the ticket, its conversation and, while it
+/// `/support/:id` (module doc 12.3, design screen 29): the ticket card, its conversation and, while it
 /// is open, a composer. Internal fields (owner, priority, escalation) are never read. NOT built, no
 /// backend support: "Waiting for you", resolved feedback, attachments, the overflow menu
 /// (BACKEND_REQUESTS 46).
@@ -205,27 +206,38 @@ class _State extends ConsumerState<TicketDetailScreen>
     final ticket = ref.watch(ticketProvider(_id));
     final msgs = ref.watch(ticketMessagesProvider(_id));
     final t = ticket.value;
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
-        children: [
-          SnHeader(
-            title: t == null ? '' : '#${t.reference}',
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go(Routes.support),
-          ),
-          Expanded(
-            child: t == null
-                ? (ticket.hasError
-                      ? _LoadError(
-                          gone: ticket.error is NotFoundFailure,
-                          onRetry: _reload,
-                        )
-                      : const _Skeleton())
-                : _content(l10n, t, msgs),
-          ),
-        ],
-      ),
+    final open = t != null && ticketAcceptsReplies(t.status);
+    return FindGlassPage(
+      title: l10n.tkdTitle,
+      backLabel: l10n.back,
+      onBack: () =>
+          context.canPop() ? context.pop() : context.go(Routes.support),
+      body: t == null
+          ? (ticket.hasError
+                ? _LoadError(
+                    gone: ticket.error is NotFoundFailure,
+                    onRetry: _reload,
+                  )
+                : const TicketSkeleton())
+          : _content(l10n, t, msgs),
+      bottom: t == null
+          ? null
+          : open
+          ? TicketComposer(
+              controller: _text,
+              sending: _sending && _failed == null,
+              max: ref.watch(ticketMessageMaxProvider),
+              onSend: _send,
+            )
+          : t.status == TicketStatus.closed
+          ? TicketClosedBar(
+              onNew: () => context.push(
+                t.bookingId == null
+                    ? Routes.supportNew
+                    : '${Routes.supportNew}?bookingId=${Uri.encodeComponent(t.bookingId!)}',
+              ),
+            )
+          : null,
     );
   }
 
@@ -245,21 +257,21 @@ class _State extends ConsumerState<TicketDetailScreen>
     for (final r in rows) {
       final at = r.at;
       if (at != null && (last == null || !sameDay(last, at))) {
-        children.add(_DayChip(label: dayHeader(l10n, at, now)));
+        children.add(TicketDayChip(label: dayHeader(l10n, at, now)));
         last = at;
       }
       children.add(switch (r) {
-        _MessageRow() => _Bubble(message: r.message),
-        _EventRow() => _Event(text: r.text, icon: r.icon),
+        _MessageRow() => TicketBubble(message: r.message),
+        _EventRow() => TicketEventLine(text: r.text, icon: r.icon),
       });
     }
     if (t.status == TicketStatus.closed && t.resolution != null) {
-      children.add(_Resolution(text: t.resolution!));
+      children.add(TicketResolution(text: t.resolution!));
     }
     final failed = _failed;
     if (failed != null) {
       children.add(
-        _FailedBubble(
+        FailedBubble(
           body: failed.body,
           busy: _sending,
           onRetry: () => _send(retry: failed),
@@ -270,582 +282,95 @@ class _State extends ConsumerState<TicketDetailScreen>
     if (_error != null) {
       children.add(
         Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          padding: const EdgeInsets.only(top: 12),
           child: Text(
             _error!,
             key: const Key('ticket_closed_error'),
-            style: const TextStyle(color: AppColors.danger),
+            style: AppText.body.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: supportDanger,
+            ),
           ),
         ),
       );
     }
-    final updated = t.updatedAt;
-    return Column(
-      children: [
-        _Header(ticket: t, updated: updated, now: now),
-        if (stale)
-          Material(
-            color: AppColors.warnBg,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              child: Row(
-                key: const Key('ticket_offline_banner'),
-                children: [
-                  const Icon(Icons.wifi_off, color: AppColors.warn),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: Text(l10n.tkdOffline)),
-                  TextButton(
-                    key: const Key('ticket_offline_retry_btn'),
-                    onPressed: () {
-                      setState(() => _offline = false);
-                      _reload();
-                    },
-                    child: Text(l10n.retry),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView(
-              key: const Key('ticket_conversation'),
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSpacing.md),
-              children: children,
-            ),
-          ),
-        ),
-        if (ticketAcceptsReplies(t.status))
-          _Composer(
-            controller: _text,
-            sending: _sending && _failed == null,
-            max: ref.watch(ticketMessageMaxProvider),
-            onSend: _send,
-          )
-        else if (t.status == TicketStatus.closed)
-          _ClosedBar(
-            onNew: () => context.push(
-              t.bookingId == null
-                  ? Routes.supportNew
-                  : '${Routes.supportNew}?bookingId=${Uri.encodeComponent(t.bookingId!)}',
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _Header extends ConsumerWidget {
-  const _Header({
-    required this.ticket,
-    required this.updated,
-    required this.now,
-  });
-  final Ticket ticket;
-  final DateTime? updated;
-  final DateTime now;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    final created = ticket.createdAt;
-    final bookingId = ticket.bookingId;
+    final bookingId = t.bookingId;
     final booking = bookingId == null
         ? null
         : ref.watch(bookingProvider(bookingId)).value;
-    return Material(
-      color: AppColors.surface,
-      child: Container(
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: AppColors.hairline)),
-        ),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              ticket.title(120),
-              key: const Key('ticket_title'),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+    final created = t.createdAt;
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        key: const Key('ticket_conversation'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          if (stale)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: SupportNotice(
+                key: const Key('ticket_offline_banner'),
+                icon: Icons.wifi_off_rounded,
+                iconColor: const Color(0xFF8A4B06),
+                tint: supportWarnTint,
+                title: l10n.tkdOffline,
+                trailing: TextButton(
+                  key: const Key('ticket_offline_retry_btn'),
+                  onPressed: () {
+                    setState(() => _offline = false);
+                    _reload();
+                  },
+                  child: Text(l10n.retry),
+                ),
+              ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Chip(
-                  label: Text(ticket.category.name),
-                  visualDensity: VisualDensity.compact,
-                ),
-                SnBadge(
-                  key: const Key('ticket_status_chip'),
-                  label: ticketStatusLabel(l10n, ticket.status),
-                  tone: ticketStatusTone(ticket.status),
-                ),
-                if (bookingId != null)
-                  ActionChip(
-                    key: const Key('ticket_related_link'),
-                    avatar: const Icon(Icons.attach_file, size: 18),
-                    label: Text(
-                      l10n.tkdBooking(
-                        booking?.reference ??
-                            (bookingId.length > 6
-                                    ? bookingId.substring(bookingId.length - 6)
-                                    : bookingId)
-                                .toUpperCase(),
-                      ),
+          TicketHero(
+            title: t.title(120),
+            statusLabel: ticketStatusLabel(l10n, t.status),
+            line: '${l10n.tkNewRef(t.reference)} · ${t.category.name}',
+            closed: ticketStatusForCustomer(t.status) == TicketStatus.closed,
+          ),
+          if (created != null || bookingId != null)
+            SupportSection(
+              delayMs: 60,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: TicketInfoRows(
+                rows: [
+                  if (created != null)
+                    (
+                      l10n.tkdRaised,
+                      Text(dateTimeShort(created), style: infoValue()),
                     ),
-                    onPressed: () => context.push(
-                      Routes.path(Routes.bookingDetail, {'id': bookingId}),
-                    ),
-                  ),
-              ],
-            ),
-            if (created != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                l10n.tkdMeta(
-                  dateTimeShort(created),
-                  updated == null ? '' : timeAgo(l10n, updated!, now),
-                ),
-                style: text.bodySmall,
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DayChip extends StatelessWidget {
-  const _DayChip({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Chip(label: Text(label), visualDensity: VisualDensity.compact),
-    ),
-  );
-}
-
-class _Event extends StatelessWidget {
-  const _Event({required this.text, required this.icon});
-  final String text;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 16, color: AppColors.navy),
-        const SizedBox(width: AppSpacing.xs),
-        Flexible(
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.navy),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message});
-  final TicketMessage message;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    final at = message.createdAt;
-    final time = at == null ? '' : clockTime(at);
-    if (message.isMine) {
-      return Align(
-        alignment: Alignment.centerRight,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.sizeOf(context).width * .8,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: AppColors.teal,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Text(
-                      message.body,
-                      style: text.bodyLarge?.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
-                if (time.isNotEmpty) Text(time, style: text.bodySmall),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-    final who = message.from == MessageAuthor.worker
-        ? l10n.tkdWorkerName
-        : l10n.tkdSupportName;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * .8,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-          child: Card(
-            margin: EdgeInsets.zero,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.xs,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      const CircleAvatar(
-                        radius: 12,
-                        backgroundColor: AppColors.navy,
-                        child: Icon(Icons.home, size: 14, color: Colors.white),
-                      ),
-                      Text(who, style: text.titleSmall),
-                      Text(time, style: text.bodySmall),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(message.body, style: text.bodyLarge),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FailedBubble extends StatelessWidget {
-  const _FailedBubble({
-    required this.body,
-    required this.busy,
-    required this.onRetry,
-    required this.onRemove,
-  });
-  final String body;
-  final bool busy;
-  final VoidCallback onRetry;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Align(
-      key: const Key('ticket_failed_message'),
-      alignment: Alignment.centerRight,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.teal,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-                border: Border.all(color: AppColors.danger, width: 2),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Text(
-                  body,
-                  style: text.bodyLarge?.copyWith(color: Colors.white),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.error_outline,
-                  size: 16,
-                  color: AppColors.danger,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(busy ? l10n.tkdSending : l10n.tkdFailed),
-                TextButton(
-                  key: const Key('ticket_send_retry_btn'),
-                  onPressed: busy ? null : onRetry,
-                  child: Text(l10n.tkdRetry),
-                ),
-                TextButton(
-                  key: const Key('ticket_send_remove_btn'),
-                  onPressed: busy ? null : onRemove,
-                  child: Text(l10n.tkdDismiss),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Resolution extends StatelessWidget {
-  const _Resolution({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final t = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Card(
-        key: const Key('ticket_resolution_card'),
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const CircleAvatar(
-                backgroundColor: AppColors.successBg,
-                child: Icon(
-                  Icons.check_circle_outline,
-                  color: AppColors.success,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.tkdResolutionTitle, style: t.titleMedium),
-                    Text(text, style: t.bodyMedium),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Composer extends StatelessWidget {
-  const _Composer({
-    required this.controller,
-    required this.sending,
-    required this.max,
-    required this.onSend,
-  });
-  final TextEditingController controller;
-  final bool sending;
-  final int max;
-  final VoidCallback onSend;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Material(
-      color: AppColors.surface,
-      child: SafeArea(
-        top: false,
-        child: Container(
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: AppColors.hairline)),
-          ),
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md,
-            AppSpacing.sm,
-            AppSpacing.md,
-            AppSpacing.sm,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.lock_outline,
-                    size: 16,
-                    color: AppColors.teal,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(child: Text(l10n.tkdPrivacy, style: text.bodySmall)),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: controller,
-                      builder: (context, _, _) => TextField(
-                        key: const Key('ticket_reply_field'),
-                        controller: controller,
-                        enabled: !sending,
-                        maxLength: max,
-                        minLines: 1,
-                        maxLines: 4,
-                        keyboardType: TextInputType.multiline,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: InputDecoration(
-                          hintText: l10n.tkdReplyHint,
-                          counterText: '',
+                  if (bookingId != null)
+                    (
+                      l10n.tkdRelatedTo,
+                      InkWell(
+                        key: const Key('ticket_related_link'),
+                        onTap: () => context.push(
+                          Routes.path(Routes.bookingDetail, {'id': bookingId}),
+                        ),
+                        child: Text(
+                          l10n.tkdBooking(
+                            booking?.reference ??
+                                (bookingId.length > 6
+                                        ? bookingId.substring(
+                                            bookingId.length - 6,
+                                          )
+                                        : bookingId)
+                                    .toUpperCase(),
+                          ),
+                          style: infoValue(const Color(0xFF0F766E)),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: controller,
-                    builder: (context, v, _) {
-                      final can = v.text.trim().isNotEmpty && !sending;
-                      return IconButton.filled(
-                        key: const Key('ticket_reply_btn'),
-                        tooltip: l10n.tkdSend,
-                        onPressed: can ? onSend : null,
-                        icon: sending
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Icon(Icons.send_outlined),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ClosedBar extends StatelessWidget {
-  const _ClosedBar({required this.onNew});
-  final VoidCallback onNew;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Material(
-      color: AppColors.surface,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: DecoratedBox(
-            key: const Key('ticket_closed_bar'),
-            decoration: BoxDecoration(
-              color: AppColors.fieldBg,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              child: Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.xs,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.lock_outline),
-                      const SizedBox(width: AppSpacing.sm),
-                      Flexible(child: Text(l10n.tkdClosedBar)),
-                    ],
-                  ),
-                  OutlinedButton(
-                    key: const Key('ticket_new_from_closed_btn'),
-                    onPressed: onNew,
-                    child: Text(l10n.tkdClosedNew),
-                  ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Skeleton extends StatelessWidget {
-  const _Skeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    Widget bar(double w, double h) => Container(
-      width: w,
-      height: h,
-      decoration: BoxDecoration(
-        color: AppColors.hairline,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-    );
-    return Semantics(
-      label: AppLocalizations.of(context).loading,
-      child: Padding(
-        key: const Key('ticket_loading'),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            bar(240, 20),
-            const SizedBox(height: AppSpacing.sm),
-            bar(180, 28),
-            const SizedBox(height: AppSpacing.lg),
-            Align(alignment: Alignment.centerRight, child: bar(240, 80)),
-            const SizedBox(height: AppSpacing.md),
-            bar(260, 100),
-            const SizedBox(height: AppSpacing.md),
-            Align(alignment: Alignment.centerRight, child: bar(180, 60)),
-          ],
-        ),
+          ConversationHeading(l10n.tkdConversation),
+          ...children,
+        ],
       ),
     );
   }
@@ -859,41 +384,31 @@ class _LoadError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          key: const Key('ticket_error'),
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircleAvatar(
-              radius: 36,
-              backgroundColor: AppColors.dangerBg,
-              child: Icon(
-                Icons.error_outline,
-                size: 36,
-                color: AppColors.danger,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: SupportSection(
+        key: const Key('ticket_error'),
+        title: gone ? l10n.tkdGone : l10n.tkdLoadErrorTitle,
+        child: gone
+            ? const SizedBox.shrink()
+            : Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.tkdLoadErrorBody,
+                      style: AppText.body.copyWith(
+                        fontSize: 14.5,
+                        color: dsText,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    key: const Key('error_retry_btn'),
+                    onPressed: onRetry,
+                    child: Text(l10n.tkNewTryAgain),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              gone ? l10n.tkdGone : l10n.tkdLoadErrorTitle,
-              style: text.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            if (!gone) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(l10n.tkdLoadErrorBody, style: text.bodyMedium),
-              const SizedBox(height: AppSpacing.md),
-              SnButton(
-                key: const Key('error_retry_btn'),
-                label: l10n.tkNewTryAgain,
-                onPressed: onRetry,
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }
