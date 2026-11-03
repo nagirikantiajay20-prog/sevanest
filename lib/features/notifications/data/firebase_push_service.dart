@@ -24,9 +24,9 @@ PushMessage _fromRemote(RemoteMessage m) => PushMessage(
   data: Map<String, dynamic>.from(m.data),
 );
 
-/// FCM through `firebase_messaging`. Firebase config files are an owner task and are not in the
-/// repo: when `Firebase.initializeApp()` fails this service stays inert and reports
-/// [PushPermission.unavailable], so the app builds and runs without Firebase.
+/// FCM through `firebase_messaging`. When `Firebase.initializeApp()` fails (no config in a build)
+/// this service stays inert and reports [PushPermission.unavailable], so the app builds and runs
+/// without Firebase.
 class FirebasePushService implements PushService {
   FirebasePushService();
 

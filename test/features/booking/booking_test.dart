@@ -425,6 +425,30 @@ void main() {
       expect(find.byKey(const Key('confirm_total')), findsOneWidget);
     });
 
+    testWidgets('the backend fee is shown as is, with no invented tax', (
+      t,
+    ) async {
+      final env = await launchDiscover(
+        t,
+        overrides: [
+          bookingRepositoryProvider.overrideWithValue(_Spy()),
+          bookingFeeProvider.overrideWith((ref, id) async => 30000),
+        ],
+      );
+      env.stepsOneToThree(EngagementType.fullTime);
+      t.view.physicalSize = const Size(1170, 3600);
+      await env.go(route);
+      await settle(t);
+      expect(find.text('₹300'), findsWidgets);
+      expect(find.text('₹90'), findsNothing);
+      expect(find.text('₹500'), findsNothing);
+      expect(find.byKey(const Key('confirm_fee_note')), findsOneWidget);
+      expect(
+        find.text('Taxes, if any, are confirmed on the payment step.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('BOOK-02 Confirm is disabled while the booking loads', (
       t,
     ) async {

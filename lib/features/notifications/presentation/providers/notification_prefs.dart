@@ -13,7 +13,9 @@ const notificationCategories = [
 
 /// The category a route from `routeForNotification` belongs to, or null (always shown).
 String? notificationCategoryOfRoute(String route) {
-  if (route.startsWith('/bookings') || route.startsWith('/interviews')) {
+  if (route.startsWith('/bookings') ||
+      route.startsWith('/interviews') ||
+      route.startsWith('/ratings')) {
     return 'bookings';
   }
   if (route.startsWith('/payments') || route.startsWith('/transactions')) {

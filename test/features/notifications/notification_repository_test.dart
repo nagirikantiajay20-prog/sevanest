@@ -99,6 +99,19 @@ void main() {
         }),
         Routes.path(Routes.payment, {'id': id}),
       );
+      // Booking completed: the rating screen, not the booking.
+      expect(
+        routeForPushData({
+          'event': 'BOOKING_COMPLETED',
+          'routeType': 'booking',
+          'routeId': id,
+        }),
+        '/ratings/$id',
+      );
+      expect(
+        routeForPushData({'event': 'BOOKING_COMPLETED'}),
+        Routes.notifications,
+      );
       expect(routeForPushData({'type': 'booking'}), Routes.notifications);
       expect(routeForPushData({'route': 5}), Routes.notifications);
     });

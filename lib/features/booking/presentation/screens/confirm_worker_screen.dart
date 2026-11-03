@@ -368,7 +368,11 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
               ],
               totalLabel: l10n.confirmTotalRow,
               total: minorAmount(quote.totalMinor),
-              note: quote.isEstimate ? l10n.confirmFeeNote : null,
+              note: quote.isEstimate
+                  ? l10n.confirmFeeNote
+                  : quote.taxPending
+                  ? l10n.confirmFeeTaxNote
+                  : null,
             ),
           ),
           if (policy != null && !policy.isEmpty)

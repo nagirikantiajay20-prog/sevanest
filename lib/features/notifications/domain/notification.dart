@@ -155,10 +155,20 @@ String routeForPushData(Map<String, dynamic> data) {
       _s(route['id']) ?? _s(route['entityId']),
     );
   }
-  return routeForNotification(
-    _s(data['routeType']) ?? _s(data['type']),
+  final type = _s(data['routeType']) ?? _s(data['type']);
+  final target = routeForNotification(
+    type,
     _s(data['routeId']) ?? _s(data['entityId']) ?? _s(data['id']),
   );
+  // A finished booking has no rating-prompt type: the event says it (BACKEND_REQUESTS 52). The
+  // rating screen checks eligibility itself.
+  if (_s(data['event']) == 'BOOKING_COMPLETED' &&
+      target.startsWith('/bookings/')) {
+    return Routes.path(Routes.rating, {
+      'id': target.substring('/bookings/'.length),
+    });
+  }
+  return target;
 }
 
 /// Where to navigate for [route] from [routeForNotification]: the centre directly, any entity

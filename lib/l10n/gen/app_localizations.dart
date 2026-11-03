@@ -4078,6 +4078,12 @@ abstract class AppLocalizations {
   /// **'This is an estimate. The final fee is shown on the payment step.'**
   String get confirmFeeNote;
 
+  /// No description provided for @confirmFeeTaxNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxes, if any, are confirmed on the payment step.'**
+  String get confirmFeeTaxNote;
+
   /// No description provided for @confirmTaxRow.
   ///
   /// In en, this message translates to:
