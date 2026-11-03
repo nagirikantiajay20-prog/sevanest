@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
-import 'package:sevanest_customer/core/widgets/async_value_view.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_chip.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta;
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/ratings/domain/rating.dart';
 import 'package:sevanest_customer/features/ratings/presentation/providers/rating_providers.dart';
+import 'package:sevanest_customer/features/ratings/presentation/widgets/rating_parts.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/support_glass_parts.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
-import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_success_overlay.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -140,148 +141,128 @@ class _State extends ConsumerState<RatingScreen> {
     final l10n = AppLocalizations.of(context);
     final booking = ref.watch(bookingProvider(widget.bookingId));
     final rated = ref.watch(bookingRatingProvider(widget.bookingId));
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
-        children: [
-          SnHeader(
-            title: l10n.ratingTitle,
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go(Routes.bookings),
-          ),
-          Expanded(child: _content(l10n, booking, rated)),
-        ],
-      ),
-    );
-  }
-
-  Widget _content(
-    AppLocalizations l10n,
-    AsyncValue<Booking> booking,
-    AsyncValue<Rating?> rated,
-  ) {
-    return _thanks
-        ? _Message(
-            key: const Key('rating_thanks'),
-            icon: Icons.favorite,
-            title: l10n.ratingThanksTitle,
-            body: l10n.ratingThanksBody,
-            onDone: _toBooking,
-          )
-        : AsyncValueView<Booking>(
-            value: booking,
-            onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
-            data: (b) => AsyncValueView<Rating?>(
-              value: rated,
-              onRetry: () =>
-                  ref.invalidate(bookingRatingProvider(widget.bookingId)),
-              data: (existing) {
-                if (existing != null || _alreadyRated) {
-                  return _Message(
-                    key: const Key('rating_already_rated'),
-                    icon: Icons.star,
-                    title: l10n.ratingAlreadyTitle,
-                    score: existing?.score,
-                    scale: ref.watch(ratingScaleMaxProvider).value ?? 5,
-                    body: existing?.review,
-                    onDone: _toBooking,
-                  );
-                }
-                if (_notEligible || !b.actions.contains(BookingAction.rate)) {
-                  return _Message(
-                    key: const Key('rating_not_eligible'),
-                    icon: Icons.info_outline,
-                    title: l10n.ratingNotEligibleTitle,
-                    body: l10n.ratingNotEligibleBody,
-                    onDone: _toBooking,
-                  );
-                }
-                return _form(l10n, b);
-              },
+    final b = booking.value;
+    final existing = rated.value;
+    final showForm =
+        !_thanks &&
+        b != null &&
+        rated.hasValue &&
+        existing == null &&
+        !_alreadyRated &&
+        !_notEligible &&
+        b.actions.contains(BookingAction.rate);
+    return FindGlassPage(
+      title: l10n.ratingTitle,
+      backLabel: l10n.back,
+      onBack: () =>
+          context.canPop() ? context.pop() : context.go(Routes.bookings),
+      overlay: _thanks
+          ? KeyedSubtree(
+              key: const Key('rating_thanks'),
+              child: GlassSuccessOverlay(
+                title: l10n.ratingThanksTitle,
+                body: l10n.ratingThanksBody,
+                rows: const [],
+                ctaKey: const Key('rating_done_btn'),
+                ctaLabel: l10n.ratingDone,
+                onPressed: _toBooking,
+              ),
+            )
+          : null,
+      bottom: showForm
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Builder(
+                  builder: (ctx) => AuthCta(
+                    key: const Key('rating_submit_btn'),
+                    clock: DiscoverClock.of(ctx),
+                    label: l10n.ratingSubmit,
+                    loadingLabel: l10n.ratingSubmit,
+                    loading: _sending,
+                    breathe: true,
+                    showArrow: false,
+                    radius: 18,
+                    height: 58,
+                    onPressed: _score == null ? null : _submit,
+                  ),
+                ),
+                TextButton(
+                  key: const Key('rating_skip_btn'),
+                  onPressed: _sending ? null : _toBooking,
+                  child: Text(l10n.ratingSkip),
+                ),
+              ],
+            )
+          : null,
+      body: _thanks
+          ? const SizedBox.shrink()
+          : GlassAsyncView<Booking>(
+              value: booking,
+              onRetry: () => ref.invalidate(bookingProvider(widget.bookingId)),
+              data: (b) => GlassAsyncView<Rating?>(
+                value: rated,
+                onRetry: () =>
+                    ref.invalidate(bookingRatingProvider(widget.bookingId)),
+                data: (existing) {
+                  if (existing != null || _alreadyRated) {
+                    return RatingMessage(
+                      key: const Key('rating_already_rated'),
+                      icon: Icons.star_rounded,
+                      title: l10n.ratingAlreadyTitle,
+                      score: existing?.score,
+                      scale: ref.watch(ratingScaleMaxProvider).value ?? 5,
+                      body: existing?.review,
+                      onDone: _toBooking,
+                    );
+                  }
+                  if (_notEligible || !b.actions.contains(BookingAction.rate)) {
+                    return RatingMessage(
+                      key: const Key('rating_not_eligible'),
+                      icon: Icons.info_outline_rounded,
+                      title: l10n.ratingNotEligibleTitle,
+                      body: l10n.ratingNotEligibleBody,
+                      onDone: _toBooking,
+                    );
+                  }
+                  return _form(l10n, b);
+                },
+              ),
             ),
-          );
+    );
   }
 
   Widget _form(AppLocalizations l10n, Booking b) {
     final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
     final max = ref.watch(ratingReviewMaxProvider);
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (b.worker != null) ...[
-            SnCard(
-              key: const Key('rating_worker_card'),
-              child: Row(
-                children: [
-                  WorkerAvatar(b.worker!, radius: 24),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(
-                      b.categoryName ?? b.worker!.categories.firstOrNull ?? '',
-                      style: AppText.heading,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-          Center(
-            child: Text(
-              l10n.ratingQuestion,
-              style: AppText.screenTitle,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Wrap(
-            alignment: WrapAlignment.center,
-            children: [
-              for (var n = 1; n <= scale; n++)
-                IconButton(
-                  key: Key('rating_star_$n'),
-                  tooltip: l10n.ratingStarLabel(n, scale),
-                  iconSize: 36,
-                  onPressed: _sending
-                      ? null
-                      : () => setState(() {
-                          _score = n;
-                          _tags.clear();
-                        }),
-                  icon: Icon(
-                    n <= (_score ?? 0) ? Icons.star : Icons.star_border,
-                    color: n <= (_score ?? 0)
-                        ? AppColors.amber
-                        : AppColors.slate,
-                  ),
-                ),
-            ],
-          ),
-          Center(
-            child: Text(
-              _score == null
-                  ? l10n.ratingTapHint
-                  : l10n.ratingStarLabel(_score!, scale),
-              key: const Key('rating_score_label'),
-            ),
-          ),
-          if (_offered(scale).isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              _offered(scale).first.positive
-                  ? l10n.ratingTagsGood
-                  : l10n.ratingTagsBad,
-              style: AppText.label,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
+    final offered = _offered(scale);
+    return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        RatingHero(
+          booking: b,
+          score: _score,
+          scale: scale,
+          enabled: !_sending,
+          onScore: (n) => setState(() {
+            _score = n;
+            _tags.clear();
+          }),
+        ),
+        if (offered.isNotEmpty)
+          SupportSection(
+            title: offered.first.positive
+                ? l10n.ratingTagsGood
+                : l10n.ratingTagsBad,
+            hint: l10n.hintOptional,
+            delayMs: 80,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                for (final t in _offered(scale))
-                  SnChip(
+                for (final t in offered)
+                  RatingChip(
                     key: Key('rating_tag_${t.code}'),
                     label: t.label,
                     selected: _tags.contains(t.code),
@@ -295,113 +276,41 @@ class _State extends ConsumerState<RatingScreen> {
                   ),
               ],
             ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          Text(l10n.ratingReviewLabel, style: AppText.label),
-          const SizedBox(height: AppSpacing.sm),
-          TextField(
-            key: const Key('rating_comment_field'),
-            controller: _comment,
-            enabled: !_sending,
-            maxLength: max,
-            maxLines: 5,
-            decoration: InputDecoration(hintText: l10n.ratingReviewHint),
           ),
-          Text(l10n.ratingReviewNote, style: AppText.meta),
-          if (_error != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              _error!,
-              key: const Key('rating_error'),
-              style: AppText.body.copyWith(color: AppColors.danger),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          if (_score == null)
-            Center(
-              child: Text(
-                l10n.ratingChoose,
-                key: const Key('rating_choose_hint'),
+        SupportSection(
+          title: l10n.ratingReviewLabel,
+          hint: l10n.hintOptional,
+          delayMs: 140,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GlassNoteField(
+                key: const Key('rating_comment_field'),
+                controller: _comment,
+                enabled: !_sending,
+                maxLength: max,
+                minLines: 3,
+                hint: l10n.ratingReviewHint,
               ),
-            ),
-          const SizedBox(height: AppSpacing.sm),
-          SnButton(
-            key: const Key('rating_submit_btn'),
-            label: l10n.ratingSubmit,
-            variant: SnButtonVariant.deep,
-            isLoading: _sending,
-            onPressed: _score == null ? null : _submit,
-          ),
-          SnButton(
-            key: const Key('rating_skip_btn'),
-            label: l10n.ratingSkip,
-            variant: SnButtonVariant.text,
-            onPressed: _sending ? null : _toBooking,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Thank-you, already-rated and not-eligible states: no form, one way back to the booking.
-class _Message extends StatelessWidget {
-  const _Message({
-    required this.icon,
-    required this.title,
-    required this.onDone,
-    this.body,
-    this.score,
-    this.scale = 5,
-    super.key,
-  });
-  final IconData icon;
-  final String title;
-  final String? body;
-  final int? score;
-  final int scale;
-  final VoidCallback onDone;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                color: AppColors.tealWash,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.teal, width: 2),
-              ),
-              child: Icon(icon, size: 40, color: AppColors.teal),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(title, style: AppText.title, textAlign: TextAlign.center),
-            if (score != null)
+              const SizedBox(height: 6),
               Text(
-                l10n.ratingStarLabel(score!, scale),
-                key: const Key('rating_existing_score'),
+                l10n.ratingReviewNote,
+                style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
               ),
-            if (body != null && body!.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(body!, textAlign: TextAlign.center),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            SnButton(
-              key: const Key('rating_done_btn'),
-              label: l10n.ratingDone,
-              variant: SnButtonVariant.deep,
-              onPressed: onDone,
-            ),
-          ],
+          ),
         ),
-      ),
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: SupportNotice(
+              key: const Key('rating_error'),
+              icon: Icons.error_outline_rounded,
+              iconColor: supportDanger,
+              title: _error!,
+            ),
+          ),
+      ],
     );
   }
 }

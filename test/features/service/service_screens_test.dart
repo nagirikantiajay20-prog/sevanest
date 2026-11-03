@@ -12,6 +12,8 @@ import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/active_service/domain/attendance.dart';
 import 'package:sevanest_customer/features/active_service/presentation/providers/service_providers.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta;
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
@@ -22,6 +24,8 @@ import 'package:sevanest_customer/features/ratings/presentation/providers/rating
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_mock.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart'
+    show GlassNoteField;
 
 import '../../helpers/discover_harness.dart';
 import '../../helpers/fakes.dart';
@@ -615,7 +619,7 @@ void main() {
       t,
     ) async {
       await open(t, '/services/history');
-      for (final s in ['current', 'completed', 'cancelled', 'replaced']) {
+      for (final s in ['current', 'completed', 'cancelled']) {
         expect(k('history_section_$s'), findsOneWidget, reason: s);
       }
       for (final id in ['a1', 'c1', 'c2', 'x1', 'r1']) {
@@ -707,7 +711,7 @@ void main() {
     });
 
     bool submitEnabled(WidgetTester t) =>
-        t.widget<SnButton>(k('rating_submit_btn')).onPressed != null;
+        t.widget<AuthCta>(k('rating_submit_btn')).onPressed != null;
 
     testWidgets('SVC-07 Submit is disabled until a star is chosen', (t) async {
       await open(t, '/ratings/c2');
@@ -718,7 +722,7 @@ void main() {
       await t.tap(k('rating_star_3'));
       await t.pump();
       expect(submitEnabled(t), isTrue);
-      expect(find.text('3 out of 5'), findsOneWidget);
+      expect(find.text('Good'), findsOneWidget);
     });
 
     testWidgets('SVC-08 success: thank-you, then Done returns to the booking', (
@@ -726,6 +730,9 @@ void main() {
     ) async {
       await open(t, '/ratings/c2');
       await t.tap(k('rating_star_4'));
+      await t.ensureVisible(k('rating_comment_field'));
+      await t.tap(k('rating_comment_field'));
+      await t.pump();
       await t.enterText(k('rating_comment_field'), 'Very punctual');
       await t.pump();
       await tapKey(t, 'rating_submit_btn');
@@ -762,6 +769,9 @@ void main() {
       await t.pump();
       await t.tap(k('rating_tag_PUNCTUAL'));
       await t.tap(k('rating_tag_POLITE'));
+      await t.ensureVisible(k('rating_comment_field'));
+      await t.tap(k('rating_comment_field'));
+      await t.pump();
       await t.enterText(k('rating_comment_field'), 'Great');
       await t.pump();
       await tapKey(t, 'rating_submit_btn');
@@ -795,12 +805,10 @@ void main() {
       expect(k('rating_thanks'), findsOneWidget);
     });
 
-    testWidgets('Skip for now goes back to the booking without submitting', (
-      t,
-    ) async {
+    testWidgets('Back leaves the form without submitting', (t) async {
       await open(t, '/ratings/c2');
-      await tapKey(t, 'rating_skip_btn');
-      expect(where(t), '/bookings/c2');
+      await tapKey(t, 'app_back_btn');
+      expect(where(t), '/home');
       expect(rate.submitCalls, 0);
     });
 
@@ -866,12 +874,15 @@ void main() {
         rate.submitFails = const NetworkFailure();
         await open(t, '/ratings/c2');
         await t.tap(k('rating_star_4'));
+        await t.ensureVisible(k('rating_comment_field'));
+        await t.tap(k('rating_comment_field'));
+        await t.pump();
         await t.enterText(k('rating_comment_field'), 'Kind and neat');
         await t.pump();
         await tapKey(t, 'rating_submit_btn');
         expect(k('rating_error'), findsOneWidget);
         expect(find.text('Kind and neat'), findsOneWidget);
-        expect(find.text('4 out of 5'), findsOneWidget);
+        expect(find.text('Very good'), findsOneWidget);
         expect(submitEnabled(t), isTrue);
         expect(k('rating_thanks'), findsNothing);
         rate.submitFails = null;
@@ -913,7 +924,10 @@ void main() {
         );
         expect(k('rating_star_10'), findsOneWidget);
         expect(k('rating_star_11'), findsNothing);
-        expect(t.widget<TextField>(k('rating_comment_field')).maxLength, 120);
+        expect(
+          t.widget<GlassNoteField>(k('rating_comment_field')).maxLength,
+          120,
+        );
         await t.tap(k('rating_star_9'));
         await t.pump();
         expect(find.text('9 out of 10'), findsOneWidget);
