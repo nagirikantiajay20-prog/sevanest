@@ -11,6 +11,8 @@ import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/addresses/presentation/screens/address_list_screen.dart';
 import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart';
+import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
+    show splashHoldProvider;
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -285,7 +287,11 @@ void main() {
         );
         await t.pumpWidget(
           ProviderScope(
-            overrides: [addressRepositoryProvider.overrideWithValue(addresses)],
+            overrides: [
+              addressRepositoryProvider.overrideWithValue(addresses),
+              // Glass screens animate only when the splash hold is on.
+              splashHoldProvider.overrideWithValue(Duration.zero),
+            ],
             child: MaterialApp.router(
               routerConfig: router,
               theme: AppTheme.light,

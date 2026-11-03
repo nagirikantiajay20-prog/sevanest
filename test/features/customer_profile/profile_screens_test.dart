@@ -282,11 +282,12 @@ void main() {
         profiles.stored = existing;
         await launch(t, complete: true);
         await openProfile(t);
-        expect(
-          t.widget<TextField>(find.byKey(_name)).controller!.text,
-          'Asha Rao',
-        );
-        expect(t.widget<TextField>(find.byKey(_name)).readOnly, isTrue);
+        expect(find.byKey(const Key('profile_name_value')), findsOneWidget);
+        expect(find.text('asha@example.com'), findsOneWidget);
+        expect(find.text('+91 98765 43210'), findsOneWidget);
+        expect(find.text('Mobile verified'), findsOneWidget);
+        // Read mode has no inputs.
+        expect(find.byKey(_name), findsNothing);
         expect(find.text('PENDING'), findsOneWidget);
         expect(find.byKey(const Key('profile_edit_btn')), findsOneWidget);
       },
@@ -296,14 +297,16 @@ void main() {
       profiles.stored = existing;
       await launch(t, complete: true);
       await openProfile(t);
-      const mobile = Key('profile_mobile_field');
-      expect(t.widget<TextField>(find.byKey(mobile)).readOnly, isTrue);
+      const mobile = Key('profile_mobile_value');
+      expect(find.byKey(mobile), findsOneWidget);
       expect(find.byIcon(Icons.lock_outline), findsOneWidget);
 
       await t.tap(find.byKey(const Key('profile_edit_btn')));
       await t.pumpAndSettle();
       expect(t.widget<TextField>(find.byKey(_name)).readOnly, isFalse);
-      expect(t.widget<TextField>(find.byKey(mobile)).readOnly, isTrue);
+      // Mobile is still plain text, never an input.
+      expect(find.byKey(mobile), findsOneWidget);
+      expect(find.byKey(const Key('profile_mobile_field')), findsNothing);
     });
 
     testWidgets('edit -> save sends PATCH once, confirms, returns to read mode', (
@@ -325,11 +328,14 @@ void main() {
       expect(find.text('Profile updated'), findsOneWidget);
       expect(find.byKey(const Key('profile_edit_btn')), findsOneWidget);
       expect(
-        t.widget<TextField>(find.byKey(_name)).controller!.text,
-        'Asha K Rao',
+        find.descendant(
+          of: find.byKey(const Key('profile_name_value')),
+          matching: find.text('Asha K Rao'),
+        ),
+        findsOneWidget,
       );
       // Mobile survives the PATCH even though the (mock) response omits nothing here.
-      expect(find.byKey(const Key('profile_mobile_field')), findsOneWidget);
+      expect(find.byKey(const Key('profile_mobile_value')), findsOneWidget);
     });
 
     testWidgets(
@@ -374,8 +380,11 @@ void main() {
       await t.tap(find.byKey(const Key('profile_discard_confirm_btn')));
       await t.pumpAndSettle();
       expect(
-        t.widget<TextField>(find.byKey(_name)).controller!.text,
-        'Asha Rao',
+        find.descendant(
+          of: find.byKey(const Key('profile_name_value')),
+          matching: find.text('Asha Rao'),
+        ),
+        findsOneWidget,
       );
       expect(find.byKey(const Key('profile_edit_btn')), findsOneWidget);
       expect(profiles.updateCalls, 0);

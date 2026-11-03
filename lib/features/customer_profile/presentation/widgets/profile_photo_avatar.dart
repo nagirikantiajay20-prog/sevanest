@@ -74,11 +74,15 @@ class ProfilePhotoAvatar extends ConsumerStatefulWidget {
     this.radius = 28,
     this.onPicked,
     this.localBytes,
+    this.gradient,
     super.key,
   });
 
   final String initials;
   final double radius;
+
+  /// Design look of My profile: initials in white on this gradient, white ring, small badge.
+  final List<Color>? gradient;
   final ValueChanged<PickedPhoto>? onPicked;
   final Uint8List? localBytes;
 
@@ -144,6 +148,9 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
     final l10n = AppLocalizations.of(context);
     final r = widget.radius;
     final image = _image();
+    final gradient = widget.gradient;
+    // The large badge belongs to profile setup; the gradient avatar keeps it compact.
+    final big = r > 40 && gradient == null;
     return Semantics(
       button: true,
       label: image == null ? l10n.profilePhotoAdd : l10n.profilePhotoChange,
@@ -159,24 +166,50 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              CircleAvatar(
-                radius: r,
-                backgroundColor: r > 40
-                    ? const Color(0xFFE2EEEC)
-                    : AppColors.tealWash,
-                foregroundColor: AppColors.teal,
-                foregroundImage: image,
-                // An expired link just leaves the initials showing.
-                onForegroundImageError: image == null ? null : (_, _) {},
-                child: widget.initials.isEmpty
-                    ? Icon(Icons.person_outline, size: r > 40 ? 52 : r * 1.1)
-                    : Text(
-                        widget.initials,
-                        style: TextStyle(
-                          fontSize: r * 0.6,
-                          fontWeight: FontWeight.w700,
+              Container(
+                decoration: gradient == null
+                    ? null
+                    : BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: gradient,
                         ),
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x471B3354),
+                            blurRadius: 24,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
                       ),
+                child: CircleAvatar(
+                  radius: gradient == null ? r : r - 3,
+                  backgroundColor: gradient != null
+                      ? Colors.transparent
+                      : r > 40
+                      ? const Color(0xFFE2EEEC)
+                      : AppColors.tealWash,
+                  foregroundColor: gradient == null
+                      ? AppColors.teal
+                      : Colors.white,
+                  foregroundImage: image,
+                  // An expired link just leaves the initials showing.
+                  onForegroundImageError: image == null ? null : (_, _) {},
+                  child: widget.initials.isEmpty
+                      ? Icon(Icons.person_outline, size: r > 40 ? 52 : r * 1.1)
+                      : Text(
+                          widget.initials,
+                          style: TextStyle(
+                            fontSize: gradient == null ? r * 0.6 : r * 0.66,
+                            fontWeight: gradient == null
+                                ? FontWeight.w700
+                                : FontWeight.w800,
+                          ),
+                        ),
+                ),
               ),
               if (_busy)
                 SizedBox(
@@ -188,21 +221,21 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                   ),
                 ),
               Positioned(
-                right: r > 40 ? -4 : 0,
-                bottom: r > 40 ? 0 : 0,
+                right: big ? -4 : 0,
+                bottom: big ? 0 : 0,
                 child: Container(
-                  width: r > 40 ? 44 : null,
-                  height: r > 40 ? 44 : null,
+                  width: big ? 44 : null,
+                  height: big ? 44 : null,
                   alignment: Alignment.center,
-                  padding: r > 40 ? null : const EdgeInsets.all(5),
+                  padding: big ? null : const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     color: AppColors.teal,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: r > 40 ? Colors.white : AppColors.surface,
-                      width: r > 40 ? 3 : 2,
+                      color: big ? Colors.white : AppColors.surface,
+                      width: big ? 3 : 2,
                     ),
-                    boxShadow: r > 40
+                    boxShadow: big
                         ? [
                             BoxShadow(
                               color: AppColors.teal.withValues(alpha: 0.4),
@@ -214,7 +247,7 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                   ),
                   child: Icon(
                     Icons.photo_camera_outlined,
-                    size: r > 40 ? 19 : (r * 0.5).clamp(14, 20),
+                    size: big ? 19 : (r * 0.5).clamp(14, 20),
                     color: Colors.white,
                   ),
                 ),

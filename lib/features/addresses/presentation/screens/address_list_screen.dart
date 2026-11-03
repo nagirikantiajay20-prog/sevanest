@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
-import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
+import 'package:sevanest_customer/features/addresses/presentation/widgets/address_list_parts.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// `/addresses` (modules/02, screen 2.3). With [selectMode] a tap returns the address to the caller
-/// (service discovery) instead of opening the editor.
+/// `/addresses` (modules/02, screen 2.3; design: Find a Worker > My addresses). With [selectMode]
+/// a tap returns the address to the caller (service discovery) instead of opening the editor.
 class AddressListScreen extends ConsumerWidget {
   const AddressListScreen({this.selectMode = false, super.key});
   final bool selectMode;
@@ -25,6 +27,8 @@ class AddressListScreen extends ConsumerWidget {
     final notifier = ref.read(addressesProvider.notifier);
 
     Future<void> add() => context.push<Object?>(Routes.addressNew);
+    Future<void> edit(Address a) =>
+        context.push<Object?>(Routes.path(Routes.addressEdit, {'id': a.id}));
 
     Future<void> run(Future<AppFailure?> Function() action, String ok) async {
       final messenger = ScaffoldMessenger.of(context);
@@ -47,227 +51,101 @@ class AddressListScreen extends ConsumerWidget {
         );
     }
 
-    Future<void> delete(Address a) async {
-      final yes = await confirmDialog(
-        context,
-        title: l10n.deleteConfirmTitle,
-        body: l10n.deleteConfirmBody,
-        confirmLabel: l10n.delete,
-        cancelLabel: l10n.cancel,
-        confirmKey: const Key('address_delete_confirm_btn'),
-        destructive: true,
-      );
-      if (yes && context.mounted) {
-        await run(() => notifier.delete(a.id), l10n.addressDeleted);
+    Future<void> menu(Address a) async {
+      final action = await showAddressActions(context, a);
+      if (!context.mounted) return;
+      switch (action) {
+        case AddressAction.setDefault:
+          await run(() => notifier.setDefault(a.id), l10n.defaultUpdated);
+        case AddressAction.edit:
+          await edit(a);
+        case AddressAction.delete:
+          final yes = await showGlassConfirm(
+            context,
+            title: l10n.deleteConfirmTitle,
+            body: l10n.addressDeleteBody,
+            confirmLabel: l10n.addressDeleteYes,
+            keepLabel: l10n.addressKeep,
+            confirmKey: const Key('address_delete_confirm_btn'),
+            destructive: true,
+          );
+          if (yes && context.mounted) {
+            await run(() => notifier.delete(a.id), l10n.addressDeleted);
+          }
+        case null:
       }
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      floatingActionButton: FloatingActionButton.extended(
-        key: const Key('addresses_add_btn'),
-        onPressed: add,
-        icon: const Icon(Icons.add),
-        label: Text(l10n.addAddress),
-      ),
+    final value = ref.watch(addressesProvider);
+    final hasList = value.value?.isNotEmpty ?? false;
 
-      body: Column(
+    return FindGlassPage(
+      title: l10n.myAddressesTitle,
+      backLabel: l10n.back,
+      onBack: () =>
+          context.canPop() ? context.pop() : context.go(Routes.account),
+      body: Stack(
         children: [
-          SnHeader(
-            title: l10n.addressesTitle,
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go(Routes.account),
-          ),
-          Expanded(
-            child: AsyncValueView<List<Address>>(
-              value: ref.watch(addressesProvider),
-              onRetry: notifier.refresh,
-              isEmpty: (list) => list.isEmpty,
-              empty: SnEmptyState(
-                title: l10n.addFirstAddress,
-                message: l10n.addFirstAddressHelp,
-                actionLabel: l10n.addAddress,
-                actionKey: const Key('addresses_empty_add_btn'),
-                onAction: add,
-              ),
-              data: (list) => RefreshIndicator(
-                onRefresh: notifier.refresh,
-                child: ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    96,
-                  ),
-                  itemCount: list.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (_, i) => _AddressCard(
+          AsyncValueView<List<Address>>(
+            value: value,
+            onRetry: notifier.refresh,
+            isEmpty: (list) => list.isEmpty,
+            empty: GlassEmpty(
+              icon: Icons.location_on_outlined,
+              iconColor: const Color(0xFF0F766E),
+              discColors: const [Color(0xFFE2EEEC), Colors.white],
+              title: l10n.addFirstAddress,
+              body: l10n.addressesEmptyBody,
+              actionLabel: l10n.addAddress,
+              actionKey: const Key('addresses_empty_add_btn'),
+              onAction: add,
+            ),
+            data: (list) => RefreshIndicator(
+              onRefresh: notifier.refresh,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 110),
+                itemCount: list.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (_, i) => DiscoverRise(
+                  delayMs: 60.0 + 40 * i.clamp(0, 6),
+                  child: AddressCard(
                     address: list[i],
-                    onTap: () => selectMode
-                        ? context.pop(list[i])
-                        : context.push<Object?>(
-                            Routes.path(Routes.addressEdit, {'id': list[i].id}),
-                          ),
-                    onEdit: () => context.push<Object?>(
-                      Routes.path(Routes.addressEdit, {'id': list[i].id}),
-                    ),
-                    onSetDefault: () => run(
-                      () => notifier.setDefault(list[i].id),
-                      l10n.defaultUpdated,
-                    ),
-                    onDelete: () => delete(list[i]),
+                    index: i,
+                    onTap: () =>
+                        selectMode ? context.pop(list[i]) : edit(list[i]),
+                    onMenu: () => menu(list[i]),
                   ),
                 ),
               ),
             ),
           ),
+          if (hasList)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 22 + MediaQuery.paddingOf(context).bottom,
+              child: Center(
+                child: SizedBox(
+                  width: 200,
+                  child: Builder(
+                    builder: (ctx) => AuthCta(
+                      key: const Key('addresses_add_btn'),
+                      clock: DiscoverClock.of(ctx),
+                      label: l10n.addAddress,
+                      loadingLabel: l10n.addAddress,
+                      loading: false,
+                      breathe: true,
+                      icon: Icons.add_rounded,
+                      radius: 18,
+                      height: 56,
+                      onPressed: add,
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _AddressCard extends StatelessWidget {
-  const _AddressCard({
-    required this.address,
-    required this.onTap,
-    required this.onEdit,
-    required this.onSetDefault,
-    required this.onDelete,
-  });
-
-  final Address address;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onSetDefault;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final id = address.id;
-    final title = address.title;
-    final detail = [
-      address.fullLine,
-      '${address.city} ${address.pincode}'.trim(),
-    ].where((s) => s.isNotEmpty).join(', ');
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: InkWell(
-        key: Key('address_card_$id'),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(
-              color: address.isDefault ? AppColors.teal : AppColors.hairline,
-              width: address.isDefault ? 1.5 : 1,
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: AppColors.tealMist,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  address.isDefault
-                      ? Icons.home_outlined
-                      : Icons.location_on_outlined,
-                  color: AppColors.teal,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.ink,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (address.isDefault) ...[
-                          const SizedBox(width: AppSpacing.sm),
-                          Container(
-                            key: Key('address_default_tag_$id'),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm + 2,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.fieldBg,
-                              borderRadius: BorderRadius.circular(AppRadius.lg),
-                            ),
-                            child: Text(
-                              l10n.defaultTag,
-                              style: const TextStyle(
-                                color: AppColors.ink,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      detail,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.slate,
-                        fontSize: 16,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<VoidCallback>(
-                key: Key('address_menu_$id'),
-                tooltip: l10n.addressMenu,
-                onSelected: (action) => action(),
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    key: Key('address_edit_$id'),
-                    value: onEdit,
-                    child: Text(l10n.edit),
-                  ),
-                  if (!address.isDefault)
-                    PopupMenuItem(
-                      key: Key('address_set_default_$id'),
-                      value: onSetDefault,
-                      child: Text(l10n.setAsDefault),
-                    ),
-                  PopupMenuItem(
-                    key: Key('address_menu_delete_$id'),
-                    value: onDelete,
-                    child: Text(l10n.delete),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
