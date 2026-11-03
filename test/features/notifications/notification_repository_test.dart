@@ -88,6 +88,17 @@ void main() {
         '/payments/$id',
       );
       expect(routeForPushData({}), Routes.notifications);
+      // The backend's keys win over the older spellings.
+      expect(
+        routeForPushData({
+          'notificationId': 'n1',
+          'event': 'PAYMENT_SUCCEEDED',
+          'routeType': 'payment',
+          'routeId': id,
+          'id': 'n1',
+        }),
+        Routes.path(Routes.payment, {'id': id}),
+      );
       expect(routeForPushData({'type': 'booking'}), Routes.notifications);
       expect(routeForPushData({'route': 5}), Routes.notifications);
     });
@@ -152,6 +163,8 @@ void main() {
       await r.markRead('n 1');
       expect(seen.last.method, 'POST');
       expect(seen.last.path, '/notifications/n%201/read');
+      await r.markUnread('n 1');
+      expect(seen.last.path, '/notifications/n%201/unread');
       await r.markAllRead();
       expect(seen.last.path, '/notifications/read-all');
     });
@@ -209,6 +222,8 @@ void main() {
       expect((await r.list(unreadOnly: true)).items.length, 3);
       await r.markRead('n1');
       expect(await r.unreadCount(), 2);
+      await r.markUnread('n1');
+      expect(await r.unreadCount(), 3);
       await r.markAllRead();
       expect(await r.unreadCount(), 0);
       expect((await r.list()).items.length, 5);

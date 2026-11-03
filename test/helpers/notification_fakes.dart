@@ -55,6 +55,16 @@ class FakeNotificationRepository implements NotificationRepository {
     ];
   }
 
+  final unreadIds = <String>[];
+
+  @override
+  Future<void> markUnread(String id) async {
+    unreadIds.add(id);
+    final f = markFails;
+    if (f != null) throw f;
+    items = [for (final n in items) n.id == id ? n.markedUnread() : n];
+  }
+
   @override
   Future<void> markAllRead() async {
     markAllCalls++;

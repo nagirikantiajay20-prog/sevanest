@@ -110,6 +110,12 @@ class NotificationRepositoryMock implements NotificationRepository {
   });
 
   @override
+  Future<void> markUnread(String id) => mockCall(_state(), () {
+    final i = _index(id);
+    _items[i] = _items[i].markedUnread();
+  });
+
+  @override
   Future<void> markAllRead() => mockCall(_state(), () {
     markAllCalls++;
     for (var i = 0; i < _items.length; i++) {

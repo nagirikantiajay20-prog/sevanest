@@ -521,6 +521,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addressMenu => 'Address options';
 
   @override
+  String get myAddressesTitle => 'My addresses';
+
+  @override
+  String get addressesEmptyBody => 'Workers visit the address you save here.';
+
+  @override
+  String get addressDeleteBody => 'You can add it again any time.';
+
+  @override
+  String get addressDeleteYes => 'Yes, delete';
+
+  @override
+  String get addressKeep => 'Keep address';
+
+  @override
+  String get profileEditBtn => 'Edit profile';
+
+  @override
+  String get profileSaveChanges => 'Save changes';
+
+  @override
+  String get profileMobileVerified => 'Mobile verified';
+
+  @override
+  String get profileMobileFixed => 'Mobile number (cannot be changed)';
+
+  @override
+  String get languageLabel => 'Language';
+
+  @override
   String homeGreeting(String name) {
     return 'Namaste, $name';
   }
@@ -2753,11 +2783,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingTagUnreliable => 'Unreliable';
 
   @override
-  String ratingTagsLine(String tags) {
-    return 'Tags: $tags';
-  }
-
-  @override
   String get ratingReviewLabel => 'Write a review (optional)';
 
   @override
@@ -3559,6 +3584,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifMarkAll => 'Mark all as read';
+
+  @override
+  String get notifMarkedUnread => 'Marked as unread';
 
   @override
   String get notifNew => 'New';

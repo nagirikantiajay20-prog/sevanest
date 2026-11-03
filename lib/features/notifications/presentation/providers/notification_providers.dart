@@ -121,6 +121,16 @@ Future<void> markNotificationRead(WidgetRef ref, AppNotification n) async {
   }
 }
 
+/// Marks one read notification unread again, then reads the badge and both tabs again.
+Future<void> markNotificationUnread(WidgetRef ref, AppNotification n) async {
+  if (!n.isRead) return;
+  await ref.read(notificationRepositoryProvider).markUnread(n.id);
+  ref
+    ..invalidate(notificationUnreadProvider)
+    ..invalidate(notificationListProvider(false))
+    ..invalidate(notificationListProvider(true));
+}
+
 /// Marks everything read, then reads the badge and both tabs again.
 Future<void> markAllNotificationsRead(WidgetRef ref) async {
   await ref.read(notificationRepositoryProvider).markAllRead();

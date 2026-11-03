@@ -1060,6 +1060,66 @@ abstract class AppLocalizations {
   /// **'Address options'**
   String get addressMenu;
 
+  /// No description provided for @myAddressesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My addresses'**
+  String get myAddressesTitle;
+
+  /// No description provided for @addressesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Workers visit the address you save here.'**
+  String get addressesEmptyBody;
+
+  /// No description provided for @addressDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add it again any time.'**
+  String get addressDeleteBody;
+
+  /// No description provided for @addressDeleteYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete'**
+  String get addressDeleteYes;
+
+  /// No description provided for @addressKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep address'**
+  String get addressKeep;
+
+  /// No description provided for @profileEditBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEditBtn;
+
+  /// No description provided for @profileSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get profileSaveChanges;
+
+  /// No description provided for @profileMobileVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile verified'**
+  String get profileMobileVerified;
+
+  /// No description provided for @profileMobileFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number (cannot be changed)'**
+  String get profileMobileFixed;
+
+  /// No description provided for @languageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageLabel;
+
   /// No description provided for @homeGreeting.
   ///
   /// In en, this message translates to:
@@ -5080,12 +5140,6 @@ abstract class AppLocalizations {
   /// **'Unreliable'**
   String get ratingTagUnreliable;
 
-  /// No description provided for @ratingTagsLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Tags: {tags}'**
-  String ratingTagsLine(String tags);
-
   /// No description provided for @ratingReviewLabel.
   ///
   /// In en, this message translates to:
@@ -6567,6 +6621,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark all as read'**
   String get notifMarkAll;
+
+  /// No description provided for @notifMarkedUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as unread'**
+  String get notifMarkedUnread;
 
   /// No description provided for @notifNew.
   ///

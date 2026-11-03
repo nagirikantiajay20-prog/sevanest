@@ -30,8 +30,8 @@ IconData _iconFor(String? type) =>
     };
 
 /// `/notifications` (module doc 13.1, design screen 32): All / Unread, newest first, grouped by
-/// day. NOT built, no backend support: the per-row "Mark as unread" /
-/// "Delete" actions (BACKEND_REQUESTS 53).
+/// day. Long-press a read row to mark it unread. NOT built, no backend support: per-row "Delete"
+/// (BACKEND_REQUESTS 53).
 class NotificationCentreScreen extends ConsumerStatefulWidget {
   const NotificationCentreScreen({super.key});
 
@@ -82,6 +82,19 @@ class _State extends ConsumerState<NotificationCentreScreen>
         ..showSnackBar(SnackBar(content: Text(plainFailureMessage(l10n, e))));
     } finally {
       if (mounted) setState(() => _markingAll = false);
+    }
+  }
+
+  Future<void> _markUnread(AppNotification n) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
+    try {
+      await markNotificationUnread(ref, n);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.notifMarkedUnread)));
+    } on Object catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(plainFailureMessage(l10n, e))),
+      );
     }
   }
 
@@ -289,7 +302,14 @@ class _State extends ConsumerState<NotificationCentreScreen>
           );
           last = n.createdAt;
         }
-        children.add(_Row(notification: n, now: now, onTap: () => _open(n)));
+        children.add(
+          _Row(
+            notification: n,
+            now: now,
+            onTap: () => _open(n),
+            onLongPress: n.isRead ? () => _markUnread(n) : null,
+          ),
+        );
       }
       if (state.isLoadingMore) {
         children.add(
@@ -406,10 +426,12 @@ class _Row extends StatelessWidget {
     required this.notification,
     required this.now,
     required this.onTap,
+    this.onLongPress,
   });
   final AppNotification notification;
   final DateTime now;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -431,6 +453,7 @@ class _Row extends StatelessWidget {
         child: InkWell(
           key: Key('notification_row_${n.id}'),
           onTap: onTap,
+          onLongPress: onLongPress,
           child: Container(
             decoration: BoxDecoration(
               border: Border(

@@ -217,6 +217,16 @@
   "chooseArea": "Choose your area",
   "areasUnavailable": "Couldn't load areas. You can type your area instead.",
   "addressMenu": "Address options",
+  "myAddressesTitle": "My addresses",
+  "addressesEmptyBody": "Workers visit the address you save here.",
+  "addressDeleteBody": "You can add it again any time.",
+  "addressDeleteYes": "Yes, delete",
+  "addressKeep": "Keep address",
+  "profileEditBtn": "Edit profile",
+  "profileSaveChanges": "Save changes",
+  "profileMobileVerified": "Mobile verified",
+  "profileMobileFixed": "Mobile number (cannot be changed)",
+  "languageLabel": "Language",
   "homeGreeting": "Namaste, {name}",
   "@homeGreeting": {
     "placeholders": {

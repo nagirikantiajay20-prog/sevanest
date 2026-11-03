@@ -42,6 +42,15 @@ class AppNotification {
     createdAt: createdAt,
   );
 
+  AppNotification markedUnread() => AppNotification(
+    id: id,
+    event: event,
+    title: title,
+    body: body,
+    target: target,
+    createdAt: createdAt,
+  );
+
   static AppNotification? fromJson(Object? json) {
     if (json is! Map) return null;
     final id = _s(json['id']);
@@ -79,6 +88,9 @@ abstract interface class NotificationRepository {
 
   /// `POST /notifications/{id}/read` (404 for an unknown id or someone else's).
   Future<void> markRead(String id);
+
+  /// `POST /notifications/{id}/unread`.
+  Future<void> markUnread(String id);
 
   /// `POST /notifications/read-all`.
   Future<void> markAllRead();
@@ -127,8 +139,8 @@ String routeForNotification(String? type, String? id) {
   };
 }
 
-/// A push `data` map -> route. Reads `route` as `{type, id}` (or its JSON string), or the flat
-/// `type` + `entityId` / `id` keys.
+/// A push `data` map -> route. The backend sends flat `routeType` + `routeId`; `route` as
+/// `{type, id}` (or `type:id`) and `type` + `entityId` / `id` are still read.
 String routeForPushData(Map<String, dynamic> data) {
   final route = data['route'];
   if (route is String) {
@@ -144,8 +156,8 @@ String routeForPushData(Map<String, dynamic> data) {
     );
   }
   return routeForNotification(
-    _s(data['type']) ?? _s(data['routeType']),
-    _s(data['entityId']) ?? _s(data['id']) ?? _s(data['routeId']),
+    _s(data['routeType']) ?? _s(data['type']),
+    _s(data['routeId']) ?? _s(data['entityId']) ?? _s(data['id']),
   );
 }
 

@@ -44,6 +44,15 @@ class NotificationRepositoryRemote implements NotificationRepository {
   }
 
   @override
+  Future<void> markUnread(String id) async {
+    await guarded(
+      () => _dio.post<dynamic>(
+        '/notifications/${Uri.encodeComponent(id)}/unread',
+      ),
+    );
+  }
+
+  @override
   Future<void> markAllRead() async {
     await guarded(() => _dio.post<dynamic>('/notifications/read-all'));
   }
