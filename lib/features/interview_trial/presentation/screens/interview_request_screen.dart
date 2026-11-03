@@ -28,6 +28,7 @@ import 'package:sevanest_customer/features/worker_search/domain/worker_search.da
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_success_overlay.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -329,13 +330,34 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         ),
         overlay: _sentId == null
             ? null
-            : InterviewSentOverlay(
-                workerName: worker.value?.title ?? '',
-                kind: kind,
-                when: _summary(date!, locale),
-                onView: _viewRequest,
+            : _sentOverlay(
+                l10n,
+                worker.value?.title ?? '',
+                kind,
+                _summary(date!, locale),
               ),
       ),
+    );
+  }
+
+  Widget _sentOverlay(
+    AppLocalizations l10n,
+    String name,
+    String kind,
+    String when,
+  ) {
+    return GlassSuccessOverlay(
+      title: l10n.interviewSentTitle,
+      body: l10n.interviewSentBody(name, kind, when),
+      rows: [
+        (l10n.interviewTkWorker, name),
+        (l10n.interviewTypeRow, '${kind[0].toUpperCase()}${kind.substring(1)}'),
+        (l10n.interviewWhenRow, when),
+        (l10n.interviewTkStatus, l10n.interviewTkWaiting),
+      ],
+      ctaKey: const Key('interview_view_request_btn'),
+      ctaLabel: l10n.interviewViewRequest,
+      onPressed: _viewRequest,
     );
   }
 

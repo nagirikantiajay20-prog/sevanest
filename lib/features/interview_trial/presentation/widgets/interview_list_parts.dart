@@ -55,26 +55,33 @@ DateTime? interviewStart(Interview i) {
       : DateTime(d.year, d.month, d.day, m ~/ 60, m % 60);
 }
 
-/// All / Upcoming / Past as one frosted track with a navy thumb that slides.
+/// All / Upcoming / Past (or any [labels]) as one frosted track with a navy thumb that slides.
 class InterviewSegments extends StatelessWidget {
   const InterviewSegments({
     required this.selected,
     required this.counts,
     required this.onChanged,
+    this.labels,
+    this.tabKey,
     super.key,
   });
   final int selected;
   final List<int> counts;
   final ValueChanged<int> onChanged;
 
+  /// Defaults to All / Upcoming / Past.
+  final List<String>? labels;
+
+  /// Key of the tab at an index (default `interviews_tab_<i>`).
+  final Key Function(int index)? tabKey;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final labels = [
-      l10n.interviewsAll,
-      l10n.interviewsUpcoming,
-      l10n.interviewsPast,
-    ];
+    final labels =
+        this.labels ??
+        [l10n.interviewsAll, l10n.interviewsUpcoming, l10n.interviewsPast];
+    final n = labels.length;
     return DiscoverGlass(
       radius: 18,
       child: Padding(
@@ -86,9 +93,9 @@ class InterviewSegments extends StatelessWidget {
               AnimatedAlign(
                 duration: const Duration(milliseconds: 400),
                 curve: const Cubic(.34, 1.4, .64, 1),
-                alignment: Alignment(-1 + selected.toDouble(), 0),
+                alignment: Alignment(-1 + 2 * selected / (n - 1), 0),
                 child: FractionallySizedBox(
-                  widthFactor: 1 / 3,
+                  widthFactor: 1 / n,
                   heightFactor: 1,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -111,13 +118,13 @@ class InterviewSegments extends StatelessWidget {
               ),
               Row(
                 children: [
-                  for (var i = 0; i < 3; i++)
+                  for (var i = 0; i < n; i++)
                     Expanded(
                       child: Semantics(
                         button: true,
                         selected: selected == i,
                         child: InkWell(
-                          key: Key('interviews_tab_$i'),
+                          key: tabKey?.call(i) ?? Key('interviews_tab_$i'),
                           borderRadius: BorderRadius.circular(14),
                           onTap: () => onChanged(i),
                           child: Center(
@@ -442,6 +449,8 @@ class InterviewTile extends StatelessWidget {
     required this.statusLabel,
     required this.look,
     required this.onTap,
+    this.footer,
+    this.titleKey,
     super.key,
   });
   final String title;
@@ -452,6 +461,10 @@ class InterviewTile extends StatelessWidget {
   final String statusLabel;
   final InterviewLook look;
   final VoidCallback onTap;
+
+  /// Dashed-rule strip under the row (Bookings: start date, payment, pay button).
+  final Widget? footer;
+  final Key? titleKey;
 
   @override
   Widget build(BuildContext context) => DiscoverGlass(
@@ -472,86 +485,101 @@ class InterviewTile extends StatelessWidget {
             ),
           ),
         ),
-        Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(24),
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Row(
-                children: [
-                  GlassAvatar(
-                    title: title,
-                    initials: initials,
-                    photoUrl: photoUrl,
-                    gradient: gradient,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: authSerif(19, 1.2),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: AppText.body.copyWith(
-                            fontSize: 13.5,
-                            height: 1.35,
-                            color: dsMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 7),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: look.badgeBg,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: look.badgeFg,
-                                ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(24),
+                onTap: onTap,
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      GlassAvatar(
+                        title: title,
+                        initials: initials,
+                        photoUrl: photoUrl,
+                        gradient: gradient,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              key: titleKey,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: authSerif(19, 1.2),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              style: AppText.body.copyWith(
+                                fontSize: 13.5,
+                                height: 1.35,
+                                color: dsMuted,
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                statusLabel,
-                                style: AppText.body.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: look.badgeFg,
-                                ),
+                            ),
+                            const SizedBox(height: 7),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 3,
                               ),
-                            ],
-                          ),
+                              decoration: BoxDecoration(
+                                color: look.badgeBg,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: look.badgeFg,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      statusLabel,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.body.copyWith(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: look.badgeFg,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 24,
+                        color: dsMuted,
+                      ),
+                    ],
                   ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    size: 24,
-                    color: dsMuted,
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            if (footer != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                child: footer,
+              ),
+          ],
         ),
       ],
     ),

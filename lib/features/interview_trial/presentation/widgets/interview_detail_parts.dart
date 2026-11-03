@@ -22,6 +22,9 @@ class InterviewHero extends StatelessWidget {
     required this.copy,
     required this.progress,
     required this.tone,
+    this.showSteps = true,
+    this.chipKey = const Key('interview_status_chip'),
+    this.copyKey = const Key('interview_status_copy'),
     super.key,
   });
   final String statusLabel;
@@ -31,6 +34,11 @@ class InterviewHero extends StatelessWidget {
   /// 0..1 of the way from Requested to Decision.
   final double progress;
   final HeroTone tone;
+
+  /// The Requested / Scheduled / Done / Decision captions under the bar (interview flow only).
+  final bool showSteps;
+  final Key chipKey;
+  final Key copyKey;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +82,7 @@ class InterviewHero extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  key: const Key('interview_status_chip'),
+                  key: chipKey,
                   padding: const EdgeInsets.fromLTRB(12, 6, 14, 6),
                   decoration: BoxDecoration(
                     color: const Color(0x2EFFFFFF),
@@ -86,12 +94,16 @@ class InterviewHero extends StatelessWidget {
                     children: [
                       _PingDot(color: tone.dot, clock: clock),
                       const SizedBox(width: 8),
-                      Text(
-                        statusLabel,
-                        style: AppText.body.copyWith(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                      Flexible(
+                        child: Text(
+                          statusLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.body.copyWith(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -108,7 +120,7 @@ class InterviewHero extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   copy,
-                  key: const Key('interview_status_copy'),
+                  key: copyKey,
                   style: AppText.body.copyWith(
                     fontSize: 15,
                     height: 1.5,
@@ -120,23 +132,25 @@ class InterviewHero extends StatelessWidget {
                   value: '${(progress * 100).round()}%',
                   child: _ProgressBar(progress: progress, clock: clock),
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    for (final (i, l) in labels.indexed)
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: i == 0
-                              ? Alignment.centerLeft
-                              : i == labels.length - 1
-                              ? Alignment.centerRight
-                              : Alignment.center,
-                          child: Text(l, style: small),
+                if (showSteps) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      for (final (i, l) in labels.indexed)
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: i == 0
+                                ? Alignment.centerLeft
+                                : i == labels.length - 1
+                                ? Alignment.centerRight
+                                : Alignment.center,
+                            child: Text(l, style: small),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -248,6 +262,7 @@ class InterviewWorkerCard extends StatelessWidget {
     required this.gradient,
     required this.verified,
     required this.rating,
+    this.extra,
     required this.onTap,
     super.key,
   });
@@ -259,6 +274,9 @@ class InterviewWorkerCard extends StatelessWidget {
 
   /// "4.8", or null when there is no rating.
   final String? rating;
+
+  /// Muted caption after the rating (Confirm: "4 years").
+  final String? extra;
   final VoidCallback onTap;
 
   @override
@@ -348,6 +366,14 @@ class InterviewWorkerCard extends StatelessWidget {
                                 ),
                               ],
                             ),
+                          if (extra != null)
+                            Text(
+                              extra!,
+                              style: AppText.body.copyWith(
+                                fontSize: 13,
+                                color: dsMuted,
+                              ),
+                            ),
                         ],
                       ),
                     ],
@@ -369,11 +395,19 @@ class InterviewInfoCard extends StatelessWidget {
     required this.rows,
     this.calendarLabel,
     this.onCalendar,
+    this.valueColor,
+    this.trailing,
     super.key,
   });
   final List<(String, String)> rows;
   final String? calendarLabel;
   final VoidCallback? onCalendar;
+
+  /// Tint of a row's value by index (Booking: payment due in amber), null = navy.
+  final Color? Function(int index)? valueColor;
+
+  /// A small action after a row's value by index (Booking: copy the reference).
+  final Widget? Function(int index)? trailing;
 
   @override
   Widget build(BuildContext context) => DiscoverGlass(
@@ -384,7 +418,7 @@ class InterviewInfoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final (i, r) in rows.indexed) ...[
-            if (i > 0) const _Dashed(),
+            if (i > 0) const DashedRule(),
             Padding(
               padding: EdgeInsets.only(
                 top: i == 0 ? 0 : 11,
@@ -405,14 +439,21 @@ class InterviewInfoCard extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      r.$2,
-                      style: AppText.body.copyWith(
-                        fontSize: 15,
-                        height: 1.4,
-                        fontWeight: FontWeight.w700,
-                        color: dsNavy,
-                      ),
+                    child: Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      children: [
+                        Text(
+                          r.$2,
+                          style: AppText.body.copyWith(
+                            fontSize: 15,
+                            height: 1.4,
+                            fontWeight: FontWeight.w700,
+                            color: valueColor?.call(i) ?? dsNavy,
+                          ),
+                        ),
+                        ?trailing?.call(i),
+                      ],
                     ),
                   ),
                 ],
@@ -449,8 +490,8 @@ class InterviewInfoCard extends StatelessWidget {
   );
 }
 
-class _Dashed extends StatelessWidget {
-  const _Dashed();
+class DashedRule extends StatelessWidget {
+  const DashedRule({super.key});
 
   @override
   Widget build(BuildContext context) => SizedBox(
