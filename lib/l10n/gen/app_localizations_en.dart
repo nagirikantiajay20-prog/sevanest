@@ -2682,7 +2682,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyEmptyTitle => 'No past services yet';
 
   @override
-  String get historyEmptyBody => 'Services you\'ve booked will appear here.';
+  String get historyEmptyBody =>
+      'Completed and cancelled services will show up here.';
 
   @override
   String get historySectionCurrent => 'Current';
@@ -2691,13 +2692,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historySectionCompleted => 'Completed';
 
   @override
-  String get historySectionCancelled => 'Cancelled';
+  String get historySectionCancelled => 'Cancelled & replaced';
 
   @override
   String get historySectionReplaced => 'Replaced';
 
   @override
-  String get historyRate => 'Rate now';
+  String get historyRate => 'Rate';
 
   @override
   String historyRatedLabel(int score, int max) {
@@ -2708,10 +2709,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountHistory => 'Service history';
 
   @override
-  String get ratingTitle => 'Rate your experience';
+  String get ratingTitle => 'Rate your worker';
 
   @override
-  String get ratingQuestion => 'How was your experience?';
+  String get ratingQuestion => 'How was your worker?';
 
   @override
   String get ratingTapHint => 'Tap a star to rate';
@@ -2799,20 +2800,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingTagUnreliable => 'Unreliable';
 
   @override
-  String get ratingReviewLabel => 'Write a review (optional)';
+  String get ratingReviewLabel => 'Add a comment';
 
   @override
-  String get ratingReviewHint => 'Tell others about your experience.';
+  String get ratingReviewHint => 'Tell others about your experience';
 
   @override
   String get ratingReviewNote =>
       'Your review helps other families choose. Don\'t share phone numbers or personal details.';
 
   @override
-  String get ratingChoose => 'Choose a star rating to continue';
-
-  @override
-  String get ratingSubmit => 'Submit review';
+  String get ratingSubmit => 'Submit rating';
 
   @override
   String get ratingSkip => 'Skip for now';
@@ -2821,7 +2819,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingThanksTitle => 'Thanks for your feedback';
 
   @override
-  String get ratingThanksBody => 'Your rating helps other families choose.';
+  String get ratingThanksBody =>
+      'Your rating helps other families choose with confidence.';
 
   @override
   String get ratingDone => 'Back to booking';
@@ -2844,7 +2843,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repRequestTitle => 'Request replacement';
 
   @override
-  String get repStatusTitle => 'Replacement';
+  String get repStatusTitle => 'Replacement status';
 
   @override
   String get repHeadline => 'Let\'s find you a better match';
@@ -2890,7 +2889,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repMore => 'Tell us more';
 
   @override
-  String get repNotesHint => 'What happened? Include dates if you can.';
+  String get repNotesHint => 'Anything we should know?';
 
   @override
   String get repNotesNote => 'Don\'t share phone numbers or personal details.';
@@ -2921,7 +2920,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repNoteHint => 'Tell us what happened to continue';
 
   @override
-  String get repSubmit => 'Submit request';
+  String get repSubmit => 'Request replacement';
 
   @override
   String get repSubmitting => 'Submitting...';
@@ -2933,14 +2932,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repOfflineHint => 'Connect to the internet to submit';
 
   @override
-  String get repConfirmTitle => 'Submit replacement request?';
+  String get repConfirmTitle => 'Request a replacement?';
 
   @override
-  String get repConfirmBody =>
-      'We\'ll start looking for an alternative. Your current booking stays active until you choose.';
+  String get repConfirmBody => 'Our team will review it.';
 
   @override
-  String get repConfirmYes => 'Yes, submit';
+  String get repConfirmYes => 'Yes, send request';
 
   @override
   String get repGoBack => 'Go back';
@@ -3018,7 +3016,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repBannerReviewTitle => 'We\'re reviewing your request';
 
   @override
-  String get repBannerReviewBody => 'We\'ll suggest alternatives soon.';
+  String get repBannerReviewBody =>
+      'You will hear from us within one working day.';
 
   @override
   String get repBannerFindingTitle => 'Finding alternatives for you';
@@ -3028,15 +3027,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your request is approved. Pull down to refresh.';
 
   @override
-  String repBannerReadyTitle(int n) {
-    String _temp0 = intl.Intl.pluralLogic(
-      n,
-      locale: localeName,
-      other: '$n alternatives are ready',
-      one: '1 alternative is ready',
-    );
-    return '$_temp0';
-  }
+  String get repBannerReadyTitle => 'Workers ready for you';
 
   @override
   String get repBannerReadyBody => 'Choose one to continue.';
@@ -3098,13 +3089,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repProgress => 'Progress';
 
   @override
-  String get repStepReceived => 'Request received';
+  String get repStepReceived => 'Request sent';
 
   @override
-  String get repStepReview => 'Under review';
+  String get repStepReview => 'Team review';
 
   @override
-  String get repStepReady => 'Alternatives ready';
+  String get repStepReady => 'New workers for you';
 
   @override
   String get repStepChoose => 'You choose a worker';
@@ -3125,7 +3116,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repChipDone => 'Done';
 
   @override
-  String get repChipNow => 'Now';
+  String get repChipNow => 'In progress';
 
   @override
   String get repChipUpcoming => 'Upcoming';
@@ -3182,7 +3173,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repOfflineContinue => 'Connect to the internet to continue.';
 
   @override
-  String get repWithdraw => 'Cancel request';
+  String get repWithdraw => 'Withdraw request';
 
   @override
   String get repWithdrawTitle => 'Cancel this request?';
@@ -3313,6 +3304,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tkStatusUnknown => 'Updated';
+
+  @override
+  String get supRaise => 'Raise a ticket';
+
+  @override
+  String get supFilterLabel => 'Filter tickets';
+
+  @override
+  String get supNoOpen => 'No open tickets';
+
+  @override
+  String get supNoClosed => 'No closed tickets';
+
+  @override
+  String get tkNewHeading => 'What do you need help with?';
+
+  @override
+  String get tkNewCategory => 'Category';
+
+  @override
+  String get tkNewCategoryHint => 'Choose a category';
+
+  @override
+  String get tkNewMore => 'Tell us more';
+
+  @override
+  String get tkNewDescLabel => 'Description';
+
+  @override
+  String tkNewDescPlaceholder(int min) {
+    return 'Describe what happened (at least $min characters)';
+  }
+
+  @override
+  String get tkNewRelatedTo => 'Related to';
+
+  @override
+  String get tkdTitle => 'Ticket';
+
+  @override
+  String get tkdRaised => 'Raised';
+
+  @override
+  String get tkdRelatedTo => 'Related to';
+
+  @override
+  String get tkdConversation => 'Conversation';
+
+  @override
+  String get tkdYou => 'You';
 
   @override
   String get tkNewTitle => 'New ticket';
@@ -4372,4 +4413,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get interviewsTabEmpty => 'Nothing here yet';
+
+  @override
+  String ratingHow(String name) {
+    return 'How was $name?';
+  }
+
+  @override
+  String get ratingWord1 => 'Poor';
+
+  @override
+  String get ratingWord2 => 'Fair';
+
+  @override
+  String get ratingWord3 => 'Good';
+
+  @override
+  String get ratingWord4 => 'Very good';
+
+  @override
+  String get ratingWord5 => 'Excellent';
+
+  @override
+  String get historyNotRated => 'Not rated yet';
+
+  @override
+  String get historyYouRated => 'You rated';
+
+  @override
+  String get repInfo =>
+      'Tell us what went wrong. Our team reviews it and finds you other verified workers. Your current worker stays until you choose.';
+
+  @override
+  String get repNotesTitle => 'Notes';
+
+  @override
+  String get repRequestCancel => 'Cancel';
+
+  @override
+  String get repChooseWorkerTitle => 'Choose a worker';
+
+  @override
+  String repBannerReadyFor(String name) {
+    return 'Pick one to replace $name.';
+  }
+
+  @override
+  String get hintOptional => '(optional)';
+
+  @override
+  String get hintRequired => '(required)';
 }

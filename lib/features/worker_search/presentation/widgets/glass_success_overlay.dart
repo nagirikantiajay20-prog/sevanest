@@ -168,13 +168,14 @@ class _SentState extends State<GlassSuccessOverlay>
                               ),
                             ),
                           ),
-                          Opacity(
-                            opacity: ticket,
-                            child: Transform.translate(
-                              offset: Offset(0, 20 * (1 - ticket)),
-                              child: _Ticket(rows: widget.rows),
+                          if (widget.rows.isNotEmpty)
+                            Opacity(
+                              opacity: ticket,
+                              child: Transform.translate(
+                                offset: Offset(0, 20 * (1 - ticket)),
+                                child: _Ticket(rows: widget.rows),
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 28),
                           AuthCta(
                             key: widget.ctaKey,

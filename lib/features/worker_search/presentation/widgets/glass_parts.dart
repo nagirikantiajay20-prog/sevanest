@@ -1,11 +1,16 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
+import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
+import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart'
-    show workerInitials;
+    show avatarGradientFor, workerInitials;
+import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Pieces shared by the glass list / status screens (Favourites, Interviews): avatar, empty state
 /// and the bottom confirmation sheet.
@@ -302,4 +307,148 @@ Future<bool> showGlassConfirm(
     ),
   );
   return yes ?? false;
+}
+
+/// Name of the worker on [b] (the backend sends it from the interview stage on), else null.
+String? bookingWorkerName(Booking b) =>
+    b.identity?.displayName ?? b.worker?.name;
+
+/// Avatar of the worker on [b]: photo or initials on that worker's own gradient.
+Widget bookingAvatar(Booking b, {double size = 48, double fontSize = 16}) =>
+    GlassAvatar(
+      title: bookingWorkerName(b) ?? b.categoryName ?? '',
+      initials: b.identity?.initials ?? b.worker?.initials,
+      photoUrl: b.identity?.photoUrl ?? b.worker?.photoUrl,
+      gradient: avatarGradientFor(b.workerId ?? b.id),
+      size: size,
+      fontSize: fontSize,
+    );
+
+/// `AsyncValueView` for the glass pages: frosted placeholders while it loads, a frosted card with
+/// Retry when it fails (no connection reads differently from a server problem).
+class GlassAsyncView<T> extends StatelessWidget {
+  const GlassAsyncView({
+    required this.value,
+    required this.data,
+    this.onRetry,
+    super.key,
+  });
+  final AsyncValue<T> value;
+  final Widget Function(T data) data;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.hasValue) return data(value.requireValue);
+    final l10n = AppLocalizations.of(context);
+    if (!value.hasError) {
+      return Semantics(
+        label: l10n.loading,
+        container: true,
+        child: ListView(
+          key: const Key('glass_loading'),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+          children: [
+            for (var i = 0; i < 3; i++)
+              Container(
+                height: 92,
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0x99FFFFFF),
+                  borderRadius: BorderRadius.circular(26),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+    final offline = value.error is NetworkFailure;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: DiscoverGlass(
+          radius: 26,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  offline
+                      ? Icons.wifi_off_rounded
+                      : Icons.error_outline_rounded,
+                  size: 36,
+                  color: const Color(0xFFBE123C),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  failureMessage(l10n, value.error!),
+                  textAlign: TextAlign.center,
+                  style: AppText.body.copyWith(fontSize: 15, color: dsText),
+                ),
+                if (onRetry != null)
+                  TextButton(
+                    key: const Key('error_retry_btn'),
+                    onPressed: onRetry,
+                    child: Text(l10n.retry),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The design's `.note` text area: white, rounded, navy hairline, no counter.
+class GlassNoteField extends StatelessWidget {
+  const GlassNoteField({
+    required this.controller,
+    required this.hint,
+    required this.maxLength,
+    this.enabled = true,
+    this.minLines = 4,
+    this.errorText,
+    this.onChanged,
+    super.key,
+  });
+  final TextEditingController controller;
+  final String hint;
+  final int maxLength;
+  final bool enabled;
+  final int minLines;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    OutlineInputBorder line(Color c) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: c),
+    );
+    return TextField(
+      controller: controller,
+      enabled: enabled,
+      maxLength: maxLength,
+      minLines: minLines,
+      maxLines: minLines + 2,
+      onChanged: onChanged,
+      style: AppText.body.copyWith(fontSize: 15, height: 1.45, color: dsNavy),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: AppText.body.copyWith(fontSize: 15, color: dsMuted),
+        errorText: errorText,
+        counterText: '',
+        filled: true,
+        fillColor: const Color(0xD9FFFFFF),
+        contentPadding: const EdgeInsets.all(12),
+        enabledBorder: line(const Color(0x2E1B3354)),
+        disabledBorder: line(const Color(0x2E1B3354)),
+        focusedBorder: line(dsNavy),
+        errorBorder: line(const Color(0xFFBE123C)),
+        focusedErrorBorder: line(const Color(0xFFBE123C)),
+      ),
+    );
+  }
 }

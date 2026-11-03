@@ -211,6 +211,7 @@ class AuthCta extends StatelessWidget {
     this.breathe = false,
     this.showArrow = true,
     this.icon = Icons.arrow_forward_rounded,
+    this.leadingIcon,
     this.radius = 16,
     this.height = 54,
     super.key,
@@ -231,6 +232,9 @@ class AuthCta extends StatelessWidget {
 
   /// Replaces the arrow (Review: search).
   final IconData icon;
+
+  /// Icon before the label (Support: the plus of "Raise a ticket").
+  final IconData? leadingIcon;
   final double radius;
   final double height;
 
@@ -338,6 +342,10 @@ class AuthCta extends StatelessWidget {
                       if (done) ...[
                         const Icon(Icons.check_rounded, size: 20),
                         const SizedBox(width: 10),
+                      ],
+                      if (leadingIcon != null && !loading && !done) ...[
+                        Icon(leadingIcon, size: 20),
+                        const SizedBox(width: 8),
                       ],
                       Flexible(
                         child: Text(

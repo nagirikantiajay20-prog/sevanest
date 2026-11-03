@@ -4951,7 +4951,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Services you\'ve booked will appear here.'**
+  /// **'Completed and cancelled services will show up here.'**
   String get historyEmptyBody;
 
   /// No description provided for @historySectionCurrent.
@@ -4969,7 +4969,7 @@ abstract class AppLocalizations {
   /// No description provided for @historySectionCancelled.
   ///
   /// In en, this message translates to:
-  /// **'Cancelled'**
+  /// **'Cancelled & replaced'**
   String get historySectionCancelled;
 
   /// No description provided for @historySectionReplaced.
@@ -4981,7 +4981,7 @@ abstract class AppLocalizations {
   /// No description provided for @historyRate.
   ///
   /// In en, this message translates to:
-  /// **'Rate now'**
+  /// **'Rate'**
   String get historyRate;
 
   /// No description provided for @historyRatedLabel.
@@ -4999,13 +4999,13 @@ abstract class AppLocalizations {
   /// No description provided for @ratingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Rate your experience'**
+  /// **'Rate your worker'**
   String get ratingTitle;
 
   /// No description provided for @ratingQuestion.
   ///
   /// In en, this message translates to:
-  /// **'How was your experience?'**
+  /// **'How was your worker?'**
   String get ratingQuestion;
 
   /// No description provided for @ratingTapHint.
@@ -5173,13 +5173,13 @@ abstract class AppLocalizations {
   /// No description provided for @ratingReviewLabel.
   ///
   /// In en, this message translates to:
-  /// **'Write a review (optional)'**
+  /// **'Add a comment'**
   String get ratingReviewLabel;
 
   /// No description provided for @ratingReviewHint.
   ///
   /// In en, this message translates to:
-  /// **'Tell others about your experience.'**
+  /// **'Tell others about your experience'**
   String get ratingReviewHint;
 
   /// No description provided for @ratingReviewNote.
@@ -5188,16 +5188,10 @@ abstract class AppLocalizations {
   /// **'Your review helps other families choose. Don\'t share phone numbers or personal details.'**
   String get ratingReviewNote;
 
-  /// No description provided for @ratingChoose.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a star rating to continue'**
-  String get ratingChoose;
-
   /// No description provided for @ratingSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Submit review'**
+  /// **'Submit rating'**
   String get ratingSubmit;
 
   /// No description provided for @ratingSkip.
@@ -5215,7 +5209,7 @@ abstract class AppLocalizations {
   /// No description provided for @ratingThanksBody.
   ///
   /// In en, this message translates to:
-  /// **'Your rating helps other families choose.'**
+  /// **'Your rating helps other families choose with confidence.'**
   String get ratingThanksBody;
 
   /// No description provided for @ratingDone.
@@ -5257,7 +5251,7 @@ abstract class AppLocalizations {
   /// No description provided for @repStatusTitle.
   ///
   /// In en, this message translates to:
-  /// **'Replacement'**
+  /// **'Replacement status'**
   String get repStatusTitle;
 
   /// No description provided for @repHeadline.
@@ -5347,7 +5341,7 @@ abstract class AppLocalizations {
   /// No description provided for @repNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'What happened? Include dates if you can.'**
+  /// **'Anything we should know?'**
   String get repNotesHint;
 
   /// No description provided for @repNotesNote.
@@ -5407,7 +5401,7 @@ abstract class AppLocalizations {
   /// No description provided for @repSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Submit request'**
+  /// **'Request replacement'**
   String get repSubmit;
 
   /// No description provided for @repSubmitting.
@@ -5431,19 +5425,19 @@ abstract class AppLocalizations {
   /// No description provided for @repConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'Submit replacement request?'**
+  /// **'Request a replacement?'**
   String get repConfirmTitle;
 
   /// No description provided for @repConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'We\'ll start looking for an alternative. Your current booking stays active until you choose.'**
+  /// **'Our team will review it.'**
   String get repConfirmBody;
 
   /// No description provided for @repConfirmYes.
   ///
   /// In en, this message translates to:
-  /// **'Yes, submit'**
+  /// **'Yes, send request'**
   String get repConfirmYes;
 
   /// No description provided for @repGoBack.
@@ -5593,7 +5587,7 @@ abstract class AppLocalizations {
   /// No description provided for @repBannerReviewBody.
   ///
   /// In en, this message translates to:
-  /// **'We\'ll suggest alternatives soon.'**
+  /// **'You will hear from us within one working day.'**
   String get repBannerReviewBody;
 
   /// No description provided for @repBannerFindingTitle.
@@ -5611,8 +5605,8 @@ abstract class AppLocalizations {
   /// No description provided for @repBannerReadyTitle.
   ///
   /// In en, this message translates to:
-  /// **'{n, plural, =1{1 alternative is ready} other{{n} alternatives are ready}}'**
-  String repBannerReadyTitle(int n);
+  /// **'Workers ready for you'**
+  String get repBannerReadyTitle;
 
   /// No description provided for @repBannerReadyBody.
   ///
@@ -5719,19 +5713,19 @@ abstract class AppLocalizations {
   /// No description provided for @repStepReceived.
   ///
   /// In en, this message translates to:
-  /// **'Request received'**
+  /// **'Request sent'**
   String get repStepReceived;
 
   /// No description provided for @repStepReview.
   ///
   /// In en, this message translates to:
-  /// **'Under review'**
+  /// **'Team review'**
   String get repStepReview;
 
   /// No description provided for @repStepReady.
   ///
   /// In en, this message translates to:
-  /// **'Alternatives ready'**
+  /// **'New workers for you'**
   String get repStepReady;
 
   /// No description provided for @repStepChoose.
@@ -5773,7 +5767,7 @@ abstract class AppLocalizations {
   /// No description provided for @repChipNow.
   ///
   /// In en, this message translates to:
-  /// **'Now'**
+  /// **'In progress'**
   String get repChipNow;
 
   /// No description provided for @repChipUpcoming.
@@ -5875,7 +5869,7 @@ abstract class AppLocalizations {
   /// No description provided for @repWithdraw.
   ///
   /// In en, this message translates to:
-  /// **'Cancel request'**
+  /// **'Withdraw request'**
   String get repWithdraw;
 
   /// No description provided for @repWithdrawTitle.
@@ -6123,6 +6117,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Updated'**
   String get tkStatusUnknown;
+
+  /// No description provided for @supRaise.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise a ticket'**
+  String get supRaise;
+
+  /// No description provided for @supFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter tickets'**
+  String get supFilterLabel;
+
+  /// No description provided for @supNoOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No open tickets'**
+  String get supNoOpen;
+
+  /// No description provided for @supNoClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'No closed tickets'**
+  String get supNoClosed;
+
+  /// No description provided for @tkNewHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need help with?'**
+  String get tkNewHeading;
+
+  /// No description provided for @tkNewCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get tkNewCategory;
+
+  /// No description provided for @tkNewCategoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a category'**
+  String get tkNewCategoryHint;
+
+  /// No description provided for @tkNewMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us more'**
+  String get tkNewMore;
+
+  /// No description provided for @tkNewDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get tkNewDescLabel;
+
+  /// No description provided for @tkNewDescPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what happened (at least {min} characters)'**
+  String tkNewDescPlaceholder(int min);
+
+  /// No description provided for @tkNewRelatedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Related to'**
+  String get tkNewRelatedTo;
+
+  /// No description provided for @tkdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ticket'**
+  String get tkdTitle;
+
+  /// No description provided for @tkdRaised.
+  ///
+  /// In en, this message translates to:
+  /// **'Raised'**
+  String get tkdRaised;
+
+  /// No description provided for @tkdRelatedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Related to'**
+  String get tkdRelatedTo;
+
+  /// No description provided for @tkdConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation'**
+  String get tkdConversation;
+
+  /// No description provided for @tkdYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get tkdYou;
 
   /// No description provided for @tkNewTitle.
   ///
@@ -7923,6 +8013,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing here yet'**
   String get interviewsTabEmpty;
+
+  /// No description provided for @ratingHow.
+  ///
+  /// In en, this message translates to:
+  /// **'How was {name}?'**
+  String ratingHow(String name);
+
+  /// No description provided for @ratingWord1.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get ratingWord1;
+
+  /// No description provided for @ratingWord2.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair'**
+  String get ratingWord2;
+
+  /// No description provided for @ratingWord3.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get ratingWord3;
+
+  /// No description provided for @ratingWord4.
+  ///
+  /// In en, this message translates to:
+  /// **'Very good'**
+  String get ratingWord4;
+
+  /// No description provided for @ratingWord5.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent'**
+  String get ratingWord5;
+
+  /// No description provided for @historyNotRated.
+  ///
+  /// In en, this message translates to:
+  /// **'Not rated yet'**
+  String get historyNotRated;
+
+  /// No description provided for @historyYouRated.
+  ///
+  /// In en, this message translates to:
+  /// **'You rated'**
+  String get historyYouRated;
+
+  /// No description provided for @repInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what went wrong. Our team reviews it and finds you other verified workers. Your current worker stays until you choose.'**
+  String get repInfo;
+
+  /// No description provided for @repNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get repNotesTitle;
+
+  /// No description provided for @repRequestCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get repRequestCancel;
+
+  /// No description provided for @repChooseWorkerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a worker'**
+  String get repChooseWorkerTitle;
+
+  /// No description provided for @repBannerReadyFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one to replace {name}.'**
+  String repBannerReadyFor(String name);
+
+  /// No description provided for @hintOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get hintOptional;
+
+  /// No description provided for @hintRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'(required)'**
+  String get hintRequired;
 }
 
 class _AppLocalizationsDelegate
