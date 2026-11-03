@@ -10,12 +10,22 @@ import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show authSerif;
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/booking/presentation/widgets/booking_confirm_parts.dart'
+    show ConfirmRows;
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_request_parts.dart'
+    show RequestSection;
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
 import 'package:sevanest_customer/features/payment/presentation/payment_labels.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
+import 'package:sevanest_customer/features/payment/presentation/widgets/payment_parts.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_success_overlay.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -255,7 +265,14 @@ class _State extends ConsumerState<PaymentScreen> {
       _set(_Phase.ready);
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.payCancelledSnack)));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(l10n.payCancelledSnack),
+            // Above the Pay bar, so the button stays tappable while it shows.
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          ),
+        );
     } else {
       _set(_Phase.failed);
     }
@@ -302,138 +319,64 @@ class _State extends ConsumerState<PaymentScreen> {
     }
   }
 
-  Widget _result({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String body,
-    required List<Widget> buttons,
-    Widget? extra,
-  }) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color, width: 2),
-                ),
-                child: Icon(icon, size: 44, color: color),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(title, style: AppText.title, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.sm),
-            Text(body, style: AppText.bodyLarge, textAlign: TextAlign.center),
-            ?extra,
-            const SizedBox(height: AppSpacing.lg),
-            for (final b in buttons) ...[
-              b,
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
+    final locale = Localizations.localeOf(context).toString();
     final p = _p;
+    const bad = [Color(0xFFBE123C), Color(0xFFF43F5E)];
+    const wait = [Color(0xFFB45309), AppColors.amber];
 
-    SnButton viewBooking() => SnButton(
-      key: const Key('payment_view_booking_btn'),
-      label: l10n.payViewBooking,
-      variant: SnButtonVariant.deep,
-      onPressed: _toBooking,
-    );
+    Widget viewBooking({bool outline = false}) => outline
+        ? PayOutline(
+            key: const Key('payment_view_booking_btn'),
+            label: l10n.payViewBooking,
+            onPressed: _toBooking,
+          )
+        : PayButton(
+            key: const Key('payment_view_booking_btn'),
+            label: l10n.payViewBooking,
+            onPressed: _toBooking,
+          );
 
     final Widget body = switch (_phase) {
       _Phase.loading => const Center(
         child: CircularProgressIndicator(key: Key('payment_loading')),
       ),
-      _Phase.loadFailed => _result(
-        icon: Icons.error_outline,
-        color: scheme.error,
+      _Phase.loadFailed => PayResult(
+        icon: Icons.error_outline_rounded,
+        colors: bad,
         title: l10n.payFailedTitle,
         body: _error ?? l10n.errorGeneric,
         buttons: [
-          SnButton(
+          PayButton(
             key: const Key('payment_load_retry_btn'),
             label: l10n.retry,
             onPressed: () => _load(fresh: widget.paymentId == null),
           ),
-          SnButton(
+          PayOutline(
             key: const Key('payment_close_btn'),
             label: l10n.payClose,
-            variant: SnButtonVariant.secondary,
             onPressed: _back,
           ),
         ],
       ),
-      _Phase.notPayable => _result(
-        icon: Icons.info_outline,
-        color: scheme.primary,
+      _Phase.notPayable => PayResult(
+        icon: Icons.info_outline_rounded,
+        colors: const [AppColors.teal, dsSky],
         title: l10n.payNotPayableTitle,
         body: l10n.payNotPayableBody,
         buttons: [viewBooking()],
       ),
-      _Phase.success => _result(
-        icon: Icons.check_circle,
-        color: scheme.primary,
-        title: l10n.paySuccessTitle,
-        body: l10n.paySuccessBody,
-        extra: p == null
-            ? null
-            : Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.md),
-                child: SnCard(
-                  child: Column(
-                    children: [
-                      Text(
-                        paymentAmount(p),
-                        key: const Key('payment_success_amount'),
-                        style: AppText.title,
-                      ),
-                      if (p.receiptNumber != null)
-                        Text(
-                          l10n.payReceiptNumber(p.receiptNumber!),
-                          style: AppText.body,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-        buttons: [
-          viewBooking(),
-          if (p != null)
-            SnButton(
-              key: const Key('payment_receipt_btn'),
-              label: l10n.payViewReceipt,
-              variant: SnButtonVariant.secondary,
-              onPressed: () => context.push(
-                Routes.path(Routes.transactionDetail, {'id': p.id}),
-              ),
-            ),
-        ],
-      ),
-      _Phase.failed => _result(
-        icon: Icons.cancel_outlined,
-        color: scheme.error,
+      // The success card is the page overlay below.
+      _Phase.success => const SizedBox.shrink(),
+      _Phase.failed => PayResult(
+        icon: Icons.close_rounded,
+        colors: bad,
         title: l10n.payFailedTitle,
         body: p?.failureReason ?? l10n.payFailedBody,
         extra: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.sm),
+          padding: const EdgeInsets.only(top: 12),
           child: Text(
             l10n.payFailedDebitNote,
             key: const Key('payment_debit_note'),
@@ -442,94 +385,60 @@ class _State extends ConsumerState<PaymentScreen> {
           ),
         ),
         buttons: [
-          SnButton(
+          PayButton(
             key: const Key('payment_retry_btn'),
             label: l10n.payRetry,
+            danger: true,
             // Starts the same booking's payment again; a booking is never created twice.
             onPressed: () => _load(fresh: true),
           ),
-          SnButton(
+          PayOutline(
             key: const Key('payment_support_btn'),
             label: l10n.payGetHelp,
-            variant: SnButtonVariant.secondary,
             onPressed: () => context.push(
               '${Routes.supportNew}?paymentId=${Uri.encodeComponent(p?.id ?? '')}',
             ),
           ),
-          SnButton(
+          PayOutline(
             key: const Key('payment_close_btn'),
             label: l10n.payClose,
-            variant: SnButtonVariant.text,
+            quiet: true,
             onPressed: _toBooking,
           ),
         ],
       ),
-      _Phase.pending => _result(
-        icon: Icons.hourglass_top,
-        color: scheme.tertiary,
+      _Phase.pending => PayResult(
+        icon: Icons.hourglass_top_rounded,
+        colors: wait,
         title: l10n.payPendingTitle,
         body: l10n.payPendingBody,
         buttons: [
-          SnButton(
+          PayButton(
             key: const Key('payment_refresh_btn'),
             label: l10n.payRefresh,
             onPressed: _refresh,
           ),
           if (_resumed && (p?.canPay ?? false))
-            SnButton(
+            PayOutline(
               key: const Key('payment_pay_again_btn'),
               label: l10n.payAgain,
-              variant: SnButtonVariant.secondary,
               onPressed: _payAgain,
             ),
-          SnButton(
-            key: const Key('payment_view_booking_btn'),
-            label: l10n.payViewBooking,
-            variant: SnButtonVariant.secondary,
-            onPressed: _toBooking,
-          ),
+          viewBooking(outline: true),
         ],
       ),
-      _Phase.verifying => _result(
-        icon: Icons.lock_clock,
-        color: scheme.primary,
+      _Phase.verifying => PayResult(
+        icon: Icons.lock_clock_rounded,
+        colors: const [AppColors.teal, dsSky],
         title: l10n.payVerifying,
         body: l10n.payVerifyingWait,
-        buttons: const [
-          SizedBox(
-            width: 32,
-            height: 32,
-            child: CircularProgressIndicator(key: Key('payment_verifying')),
-          ),
-        ],
+        loading: true,
+        buttons: const [],
       ),
-      _Phase.ready || _Phase.paying => SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.payHeading, style: AppText.title),
-            const SizedBox(height: AppSpacing.xs),
-            Text(l10n.paySub, style: AppText.bodyLarge),
-            const SizedBox(height: AppSpacing.lg),
-            SnCard(
-              child: SizedBox(
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.payAmountLabel, style: AppText.meta),
-                    Text(
-                      p == null ? '' : paymentAmount(p),
-                      key: const Key('payment_amount'),
-                      style: AppText.display,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+      _Phase.ready || _Phase.paying => _ReadyBody(
+        payment: p,
+        bookingId: _bookingId,
+        locale: locale,
       ),
     };
 
@@ -539,37 +448,163 @@ class _State extends ConsumerState<PaymentScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) unawaited(_back());
       },
-      child: Scaffold(
-        backgroundColor: AppColors.canvasCool,
-        body: Column(
-          children: [
-            SnHeader(title: l10n.payTitle, onBack: _back),
-            Expanded(child: body),
-          ],
-        ),
-        bottomNavigationBar: canPay && p != null
-            ? DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  boxShadow: AppShadows.floating,
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: SnButton(
-                      key: const Key('payment_pay_btn'),
-                      label: l10n.payButton(paymentAmount(p)),
-                      loadingLabel: l10n.payButtonBusy,
-                      isLoading: _phase == _Phase.paying,
-                      variant: SnButtonVariant.deep,
-                      onPressed: _phase == _Phase.ready ? _pay : null,
-                    ),
+      child: FindGlassPage(
+        title: l10n.payTitle,
+        backLabel: l10n.back,
+        onBack: _back,
+        body: body,
+        overlay: _phase == _Phase.success && p != null
+            ? GlassSuccessOverlay(
+                title: l10n.paySuccessTitle,
+                body: l10n.paySuccessBody,
+                rows: [
+                  (l10n.payAmountPaid, paymentAmount(p)),
+                  if (p.receiptNumber != null)
+                    (l10n.payReceiptRow, p.receiptNumber!),
+                  (l10n.txnStatusRow, paymentStatusLabel(l10n, p.status)),
+                ],
+                ctaKey: const Key('payment_view_booking_btn'),
+                ctaLabel: l10n.payViewBooking,
+                onPressed: _toBooking,
+                secondary: PayOutline(
+                  key: const Key('payment_receipt_btn'),
+                  label: l10n.payViewReceipt,
+                  onPressed: () => context.push(
+                    Routes.path(Routes.transactionDetail, {'id': p.id}),
                   ),
                 ),
               )
             : null,
+        bottom: canPay && p != null
+            ? PayButton(
+                key: const Key('payment_pay_btn'),
+                label: _phase == _Phase.paying
+                    ? l10n.payButtonBusy
+                    : l10n.payButton(paymentAmount(p)),
+                loading: _phase == _Phase.paying,
+                icon: Icons.lock_outline_rounded,
+                onPressed: _phase == _Phase.ready ? _pay : null,
+              )
+            : null,
       ),
+    );
+  }
+}
+
+/// "Pay the booking fee": heading, amount card, who and when, and the methods on offer. The
+/// worker and start date come from the booking when it has loaded; the page works without them.
+class _ReadyBody extends ConsumerWidget {
+  const _ReadyBody({
+    required this.payment,
+    required this.bookingId,
+    required this.locale,
+  });
+  final Payment? payment;
+  final String bookingId;
+  final String locale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final p = payment;
+    final b = bookingId.isEmpty
+        ? null
+        : ref.watch(bookingProvider(bookingId)).value;
+    final name = b?.identity?.displayName;
+    final service = [
+      ?b?.categoryName,
+      if (b?.engagement != null) engagementLabels(l10n, b!.engagement!).name,
+    ].join(' · ');
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+      children: [
+        DiscoverRise(
+          delayMs: 0,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(l10n.payHeading, style: authSerif(30, 1.15)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.paySub,
+                  style: AppText.body.copyWith(
+                    fontSize: 15,
+                    height: 1.45,
+                    color: dsText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        DiscoverRise(
+          delayMs: 100,
+          child: PayAmountCard(
+            label: l10n.payAmountLabel,
+            amount: p == null ? '' : paymentAmount(p),
+            amountKey: const Key('payment_amount'),
+          ),
+        ),
+        if (b != null && name != null)
+          RequestSection(
+            title: l10n.bookingDetailTitle,
+            delayMs: 180,
+            child: Column(
+              children: [
+                PayWorkerLine(
+                  name: name,
+                  subtitle: service,
+                  gradient: avatarGradientFor(b.workerId ?? b.id),
+                ),
+                const SizedBox(height: 12),
+                ConfirmRows(
+                  rows: [
+                    if (b.startDate != null)
+                      (l10n.payStartsRow, formatDate(b.startDate!, locale)),
+                    (l10n.txnReferenceRow, b.reference),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        RequestSection(
+          title: l10n.payPayWith,
+          delayMs: 260,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PayMethodTile(
+                icon: Icons.smartphone_rounded,
+                title: l10n.txnMethodUpi,
+                note: l10n.payMethodUpiNote,
+                badge: l10n.payFastest,
+              ),
+              PayMethodTile(
+                icon: Icons.credit_card_rounded,
+                title: l10n.payMethodCardTitle,
+                note: l10n.payMethodCardNote,
+              ),
+              PayMethodTile(
+                icon: Icons.account_balance_rounded,
+                title: l10n.txnMethodNetbanking,
+                note: l10n.payMethodNetNote,
+              ),
+              PayMethodTile(
+                icon: Icons.account_balance_wallet_outlined,
+                title: l10n.txnMethodWallet,
+                note: l10n.payMethodWalletNote,
+              ),
+              PaySecureNote(l10n.paySecureNote),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

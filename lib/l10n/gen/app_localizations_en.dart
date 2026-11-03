@@ -1941,7 +1941,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get bookingsTitle => 'Bookings';
+  String get bookingsTitle => 'My bookings';
 
   @override
   String get bookingsTabCurrent => 'Current';
@@ -1950,11 +1950,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingsTabPast => 'Past';
 
   @override
-  String get bookingsEmptyTitle => 'No bookings yet';
+  String get bookingsEmptyTitle => 'No current bookings';
 
   @override
   String get bookingsEmptyBody =>
-      'When you hire a worker, your booking appears here.';
+      'Find a verified worker and book them in a few steps.';
 
   @override
   String get bookingsPastEmpty => 'No past bookings';
@@ -1966,7 +1966,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingsPay => 'Complete payment';
 
   @override
-  String get bookingDetailTitle => 'Booking';
+  String get bookingDetailTitle => 'Booking details';
 
   @override
   String get bookingStatusNewRequest => 'Request received';
@@ -2144,11 +2144,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmTitle => 'Confirm worker';
 
   @override
-  String get confirmHeading => 'Confirm this worker?';
+  String get confirmHeading => 'Confirm your worker';
 
   @override
   String get confirmSub =>
-      'Check the details, then confirm. You pay the booking fee next.';
+      'Check the details and pick a start date. You pay the booking fee next.';
 
   @override
   String get confirmStartDate => 'Start date';
@@ -2161,19 +2161,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmFeeNote =>
-      'Estimate. The final amount is shown at the payment step.';
+      'This is an estimate. The final fee is shown on the payment step.';
 
   @override
   String get confirmTaxRow => 'Taxes';
 
   @override
-  String get confirmTotalRow => 'Total due today';
+  String get confirmTotalRow => 'Total today';
 
   @override
   String get confirmPriceDetails => 'Price details';
 
   @override
-  String get confirmSummary => 'Booking summary';
+  String get confirmSummary => 'Your requirement';
 
   @override
   String get confirmButton => 'Confirm worker';
@@ -2189,6 +2189,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmDateInvalid => 'Pick today or a later date.';
+
+  @override
+  String get confirmEarlier => 'Earlier day';
+
+  @override
+  String get confirmLater => 'Later day';
+
+  @override
+  String get confirmContinue => 'Continue to payment';
+
+  @override
+  String get confirmTkStarts => 'Starts';
+
+  @override
+  String get confirmTkAmount => 'Amount due';
+
+  @override
+  String confirmSuccessBody(String name, String date) {
+    return '$name will start on $date. Pay the booking fee to lock it in.';
+  }
+
+  @override
+  String bookingStartsOn(String date) {
+    return 'Starts $date';
+  }
+
+  @override
+  String bookingStartedOn(String date) {
+    return 'Started $date';
+  }
+
+  @override
+  String bookingCancelledOn(String date) {
+    return 'Cancelled $date';
+  }
+
+  @override
+  String get bookingPayPaid => 'Paid';
+
+  @override
+  String get bookingPayUnpaid => 'Unpaid';
+
+  @override
+  String bookingPayNowAmount(String amount) {
+    return 'Pay $amount now';
+  }
+
+  @override
+  String get bookingPayBannerTitle => 'Payment pending';
+
+  @override
+  String get bookingPayBannerBody => 'Pay the booking fee to lock it in';
+
+  @override
+  String get bookingHeadPay => 'One step left';
+
+  @override
+  String get bookingHeadConfirmed => 'You are all set';
+
+  @override
+  String get bookingHeadActive => 'Service in progress';
+
+  @override
+  String bookingHeadRate(String name) {
+    return 'How was $name?';
+  }
+
+  @override
+  String get bookingHeadCancelled => 'Booking cancelled';
+
+  @override
+  String get bookingCopyRef => 'Copy';
+
+  @override
+  String get bookingRefCopied => 'Reference copied';
 
   @override
   String bookingCopyScheduledAt(String kind, String date, String time) {
@@ -2225,10 +2300,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payTitle => 'Payment';
 
   @override
-  String get payHeading => 'Complete your payment';
+  String get payHeading => 'Pay the booking fee';
 
   @override
-  String get paySub => 'Pay securely with UPI, cards or net banking.';
+  String get paySub => 'This locks in your worker and your start date.';
 
   @override
   String get payAmountLabel => 'Amount to pay';
@@ -2263,10 +2338,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payLeaveConfirm => 'Leave';
 
   @override
-  String get paySuccessTitle => 'Payment received';
+  String get paySuccessTitle => 'Payment successful';
 
   @override
-  String get paySuccessBody => 'Thank you. We\'re updating your booking.';
+  String get paySuccessBody => 'Your booking is confirmed.';
 
   @override
   String payReceiptNumber(String number) {
@@ -2435,6 +2510,70 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get txnRefundNote =>
       'Refunds go back to your original payment method.';
+
+  @override
+  String get payPayWith => 'Pay with';
+
+  @override
+  String get payFastest => 'Fastest';
+
+  @override
+  String get payMethodUpiNote => 'Google Pay, PhonePe, Paytm and more';
+
+  @override
+  String get payMethodCardNote => 'Visa, Mastercard, RuPay';
+
+  @override
+  String get payMethodNetNote => 'All major Indian banks';
+
+  @override
+  String get payMethodWalletNote => 'Pay from your wallet balance';
+
+  @override
+  String get payMethodCardTitle => 'Debit or credit card';
+
+  @override
+  String get paySecureNote =>
+      'You will choose how to pay on the next step. Payments are secure and encrypted.';
+
+  @override
+  String get payStartsRow => 'Starts';
+
+  @override
+  String get payAmountPaid => 'Amount paid';
+
+  @override
+  String get payReceiptRow => 'Receipt';
+
+  @override
+  String get txnTotalPaid => 'Total paid';
+
+  @override
+  String get txnCopy => 'Copy';
+
+  @override
+  String get txnCopied => 'Copied';
+
+  @override
+  String get txnCopyReceiptNo => 'Copy receipt number';
+
+  @override
+  String get txnCopyReference => 'Copy payment reference';
+
+  @override
+  String get txnCopyReceipt => 'Copy receipt details';
+
+  @override
+  String get txnReceiptCopied => 'Receipt details copied';
+
+  @override
+  String txnRefundTitle(String amount) {
+    return 'Refund of $amount on its way';
+  }
+
+  @override
+  String get txnRefundBody =>
+      'It usually reaches your original payment method within 5 to 7 working days.';
 
   @override
   String get serviceTitle => 'Active service';

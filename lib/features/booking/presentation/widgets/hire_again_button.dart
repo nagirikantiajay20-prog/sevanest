@@ -8,6 +8,8 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_detail_parts.dart'
+    show OutlineAction;
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// "Hire again" (`POST /bookings/rebook`): a new booking for the same worker, opened on success.
@@ -17,6 +19,7 @@ class HireAgainButton extends ConsumerStatefulWidget {
     required this.bookingId,
     this.variant = SnButtonVariant.secondary,
     this.compact = false,
+    this.glass = false,
     super.key,
   });
   final String bookingId;
@@ -24,6 +27,9 @@ class HireAgainButton extends ConsumerStatefulWidget {
 
   /// Small deep-teal pill for the Home "Book again" cards.
   final bool compact;
+
+  /// Teal outline button of the glass booking screens.
+  final bool glass;
 
   @override
   ConsumerState<HireAgainButton> createState() => _State();
@@ -88,6 +94,13 @@ class _State extends ConsumerState<HireAgainButton> {
           ),
           child: Text(label),
         ),
+      );
+    }
+    if (widget.glass) {
+      return OutlineAction(
+        key: Key('hire_again_btn_${widget.bookingId}'),
+        label: label,
+        onPressed: _busy ? null : _go,
       );
     }
     return SnButton(

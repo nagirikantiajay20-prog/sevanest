@@ -28,6 +28,7 @@ import 'package:sevanest_customer/features/interview_trial/presentation/screens/
 import 'package:sevanest_customer/features/notifications/presentation/screens/deep_link_screen.dart';
 import 'package:sevanest_customer/features/notifications/presentation/screens/notification_centre_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/payment_screen.dart';
+import 'package:sevanest_customer/features/payment/presentation/screens/transaction_detail_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/transactions_screen.dart';
 import 'package:sevanest_customer/features/ratings/presentation/screens/rating_screen.dart';
 import 'package:sevanest_customer/features/replacement/presentation/screens/replacement_request_screen.dart';

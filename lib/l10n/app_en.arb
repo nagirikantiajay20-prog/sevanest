@@ -1052,15 +1052,15 @@
       }
     }
   },
-  "bookingsTitle": "Bookings",
+  "bookingsTitle": "My bookings",
   "bookingsTabCurrent": "Current",
   "bookingsTabPast": "Past",
-  "bookingsEmptyTitle": "No bookings yet",
-  "bookingsEmptyBody": "When you hire a worker, your booking appears here.",
+  "bookingsEmptyTitle": "No current bookings",
+  "bookingsEmptyBody": "Find a verified worker and book them in a few steps.",
   "bookingsPastEmpty": "No past bookings",
   "bookingsFind": "Find a worker",
   "bookingsPay": "Complete payment",
-  "bookingDetailTitle": "Booking",
+  "bookingDetailTitle": "Booking details",
   "bookingStatusNewRequest": "Request received",
   "bookingStatusMatched": "Worker matched",
   "bookingStatusScheduled": "Interview scheduled",
@@ -1118,21 +1118,80 @@
   "cancelDismiss": "Keep booking",
   "cancelRequested": "Cancellation requested",
   "confirmTitle": "Confirm worker",
-  "confirmHeading": "Confirm this worker?",
-  "confirmSub": "Check the details, then confirm. You pay the booking fee next.",
+  "confirmHeading": "Confirm your worker",
+  "confirmSub": "Check the details and pick a start date. You pay the booking fee next.",
   "confirmStartDate": "Start date",
   "confirmEditRequirement": "Edit requirement",
   "confirmFeeRow": "Booking fee",
-  "confirmFeeNote": "Estimate. The final amount is shown at the payment step.",
+  "confirmFeeNote": "This is an estimate. The final fee is shown on the payment step.",
   "confirmTaxRow": "Taxes",
-  "confirmTotalRow": "Total due today",
+  "confirmTotalRow": "Total today",
   "confirmPriceDetails": "Price details",
-  "confirmSummary": "Booking summary",
+  "confirmSummary": "Your requirement",
   "confirmButton": "Confirm worker",
   "confirmButtonBusy": "Confirming...",
   "confirmDone": "Worker confirmed",
   "confirmNotAllowed": "This booking can't be confirmed right now.",
   "confirmDateInvalid": "Pick today or a later date.",
+  "confirmEarlier": "Earlier day",
+  "confirmLater": "Later day",
+  "confirmContinue": "Continue to payment",
+  "confirmTkStarts": "Starts",
+  "confirmTkAmount": "Amount due",
+  "confirmSuccessBody": "{name} will start on {date}. Pay the booking fee to lock it in.",
+  "@confirmSuccessBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingStartsOn": "Starts {date}",
+  "@bookingStartsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingStartedOn": "Started {date}",
+  "@bookingStartedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingCancelledOn": "Cancelled {date}",
+  "@bookingCancelledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingPayPaid": "Paid",
+  "bookingPayUnpaid": "Unpaid",
+"bookingPayNowAmount": "Pay {amount} now",  "@bookingPayNowAmount": {    "placeholders": {      "amount": {        "type": "String"      }    }  },
+  "bookingPayBannerTitle": "Payment pending",
+  "bookingPayBannerBody": "Pay the booking fee to lock it in",
+  "bookingHeadPay": "One step left",
+  "bookingHeadConfirmed": "You are all set",
+  "bookingHeadActive": "Service in progress",
+  "bookingHeadRate": "How was {name}?",
+  "@bookingHeadRate": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingHeadCancelled": "Booking cancelled",
+  "bookingCopyRef": "Copy",
+  "bookingRefCopied": "Reference copied",
   "bookingCopyScheduledAt": "{kind} on {date}, {time}",
   "@bookingCopyScheduledAt": {
     "placeholders": {
@@ -1172,8 +1231,8 @@
   "bookingViewInterview": "Interview details",
   "bookingPaymentRow": "Payment",
   "payTitle": "Payment",
-  "payHeading": "Complete your payment",
-  "paySub": "Pay securely with UPI, cards or net banking.",
+  "payHeading": "Pay the booking fee",
+  "paySub": "This locks in your worker and your start date.",
   "payAmountLabel": "Amount to pay",
   "payButton": "Pay {amount}",
   "payButtonBusy": "Opening payment…",
@@ -1184,8 +1243,8 @@
   "payLeaveBody": "Your booking stays pending.",
   "payLeaveStay": "Stay",
   "payLeaveConfirm": "Leave",
-  "paySuccessTitle": "Payment received",
-  "paySuccessBody": "Thank you. We're updating your booking.",
+  "paySuccessTitle": "Payment successful",
+  "paySuccessBody": "Your booking is confirmed.",
   "payReceiptNumber": "Receipt {number}",
   "payViewBooking": "View booking",
   "payViewReceipt": "View receipt",
@@ -1239,6 +1298,33 @@
   "txnNoReceipt": "Issued once the payment succeeds",
   "txnNeedHelp": "Need help with this payment?",
   "txnRefundNote": "Refunds go back to your original payment method.",
+  "payPayWith": "Pay with",
+  "payFastest": "Fastest",
+  "payMethodUpiNote": "Google Pay, PhonePe, Paytm and more",
+  "payMethodCardNote": "Visa, Mastercard, RuPay",
+  "payMethodNetNote": "All major Indian banks",
+  "payMethodWalletNote": "Pay from your wallet balance",
+  "payMethodCardTitle": "Debit or credit card",
+  "paySecureNote": "You will choose how to pay on the next step. Payments are secure and encrypted.",
+  "payStartsRow": "Starts",
+  "payAmountPaid": "Amount paid",
+  "payReceiptRow": "Receipt",
+  "txnTotalPaid": "Total paid",
+  "txnCopy": "Copy",
+  "txnCopied": "Copied",
+  "txnCopyReceiptNo": "Copy receipt number",
+  "txnCopyReference": "Copy payment reference",
+  "txnCopyReceipt": "Copy receipt details",
+  "txnReceiptCopied": "Receipt details copied",
+  "txnRefundTitle": "Refund of {amount} on its way",
+  "txnRefundBody": "It usually reaches your original payment method within 5 to 7 working days.",
+  "@txnRefundTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "@payButton": {
     "placeholders": {
       "amount": {

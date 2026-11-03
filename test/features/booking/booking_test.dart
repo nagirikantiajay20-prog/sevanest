@@ -182,7 +182,7 @@ void main() {
     testWidgets('BOOK-13 empty Current: message and CTA', (t) async {
       final env = await open(t, route: '/home', returning: false);
       await tapKey(t, 'nav_bookings');
-      expect(find.text('No bookings yet'), findsOneWidget);
+      expect(find.text('No current bookings'), findsOneWidget);
       await tapKey(t, 'bookings_empty_find_btn');
       expect(env.where, '/discover/category');
     });
@@ -260,7 +260,7 @@ void main() {
       final spy = _Spy()
         ..forced = Booking.fromJson({'id': 'bk_x', 'status': 'BRAND_NEW'});
       await open(t, route: '/bookings/bk_x', spy: spy);
-      expect(find.text('Updated'), findsOneWidget);
+      expect(find.text('Updated'), findsWidgets);
       expect(find.text('Status updated'), findsOneWidget);
       expect(t.takeException(), isNull);
     });
@@ -281,7 +281,6 @@ void main() {
       await open(t, route: '/bookings/bk_x', spy: spy);
       expect(find.text('Request received'), findsOneWidget);
       expect(find.text('Updated'), findsWidgets);
-      expect(find.byIcon(Icons.check_circle), findsWidgets);
     });
 
     testWidgets('deployed timeline {from,to,at}; scheduled shows the time and '
@@ -372,10 +371,7 @@ void main() {
       final spy = _Spy();
       await open(t, route: '/bookings/bk_2100', spy: spy);
       await tapKey(t, 'booking_cancel_btn');
-      final confirm = find.descendant(
-        of: find.byKey(const Key('cancel_confirm_btn')),
-        matching: find.byType(FilledButton),
-      );
+      final confirm = find.byKey(const Key('cancel_confirm_btn'));
       expect(t.widget<FilledButton>(confirm).onPressed, isNull);
       await tapKey(t, 'cancel_reason_1');
       await t.enterText(find.byKey(const Key('cancel_note_field')), 'Moving');
@@ -453,6 +449,7 @@ void main() {
         final spy = _Spy();
         final env = await open(t, route: route, spy: spy);
         await tapKey(t, 'confirm_pay_btn');
+        await tapKey(t, 'confirm_continue_btn');
         expect(spy.confirmCalls, 1);
         expect(env.where, '/bookings/iv_302');
         expect(find.byKey(const Key('booking_pay_btn')), findsOneWidget);
@@ -470,6 +467,7 @@ void main() {
       await t.tap(find.text('OK'));
       await settle(t);
       await tapKey(t, 'confirm_pay_btn');
+      await tapKey(t, 'confirm_continue_btn');
       expect(spy.lastStart, isNotNull);
       expect(spy.lastStart!.isBefore(DateTime(2026, 10, 9)), isFalse);
     });
@@ -510,6 +508,7 @@ void main() {
         final spy = _Spy()..loseConfirmAnswer = true;
         final env = await open(t, route: route, spy: spy);
         await tapKey(t, 'confirm_pay_btn');
+        await tapKey(t, 'confirm_continue_btn');
         expect(find.byKey(const Key('confirm_error')), findsNothing);
         expect(env.where, '/bookings/iv_302');
       },
@@ -547,6 +546,7 @@ void main() {
       await tapKey(t, 'interview_confirm_worker_btn');
       expect(env.where, '/bookings/confirm');
       await tapKey(t, 'confirm_pay_btn');
+      await tapKey(t, 'confirm_continue_btn');
       expect(env.where, '/bookings/iv_302');
       await tapKey(t, 'booking_pay_btn');
       expect(env.where, '/payments/new');

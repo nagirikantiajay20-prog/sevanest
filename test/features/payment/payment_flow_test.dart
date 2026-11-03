@@ -231,7 +231,7 @@ void main() {
     ) async {
       final env = await open(t);
       await tapKey(t, 'payment_pay_btn');
-      expect(find.text('Payment received'), findsOneWidget);
+      expect(find.text('Payment successful'), findsOneWidget);
       expect(find.text('₹499'), findsOneWidget);
       expect(repo.verifyCalls, 1);
       expect(svc.calls, 1);
@@ -256,7 +256,7 @@ void main() {
       svc.gate!.complete();
       await settle(t);
       expect(repo.verifyCalls, 1);
-      expect(find.text('Payment received'), findsOneWidget);
+      expect(find.text('Payment successful'), findsOneWidget);
     });
 
     testWidgets(
@@ -273,7 +273,7 @@ void main() {
         expect(repo.verifyCalls, 0);
         svc.outcome = null;
         await tapKey(t, 'payment_pay_btn');
-        expect(find.text('Payment received'), findsOneWidget);
+        expect(find.text('Payment successful'), findsOneWidget);
         expect(repo.startCalls, 1); // never a second payment or booking
       },
     );
@@ -285,7 +285,7 @@ void main() {
         await open(t);
         await tapKey(t, 'payment_pay_btn');
         expect(find.text("Payment didn't go through"), findsOneWidget);
-        expect(find.text('Payment received'), findsNothing);
+        expect(find.text('Payment successful'), findsNothing);
         expect(repo.verifyCalls, 0);
         svc.outcome = null;
         await tapKey(t, 'payment_retry_btn');
@@ -293,7 +293,7 @@ void main() {
         expect(repo.startKeys.length, 2);
         expect(repo.startKeys[0], isNot(repo.startKeys[1]));
         await tapKey(t, 'payment_pay_btn');
-        expect(find.text('Payment received'), findsOneWidget);
+        expect(find.text('Payment successful'), findsOneWidget);
       },
     );
 
@@ -308,7 +308,7 @@ void main() {
         await open(t);
         await tapKey(t, 'payment_pay_btn');
         expect(find.text("Payment didn't go through"), findsOneWidget);
-        expect(find.text('Payment received'), findsNothing);
+        expect(find.text('Payment successful'), findsNothing);
         expect(
           (await t.runAsync(() => bookings.get(_bookingId)))!.status,
           BookingStatus.pendingPayment,
@@ -322,7 +322,7 @@ void main() {
         repo.loseVerifyAnswer = true;
         await open(t);
         await tapKey(t, 'payment_pay_btn');
-        expect(find.text('Payment received'), findsOneWidget);
+        expect(find.text('Payment successful'), findsOneWidget);
         expect(repo.verifyCalls, 1);
         expect(repo.getCalls, greaterThanOrEqualTo(1));
       },
@@ -367,7 +367,7 @@ void main() {
         ); // polled with a cap
         repo.forcedGet = null; // the server now says SUCCEEDED
         await tapKey(t, 'payment_refresh_btn');
-        expect(find.text('Payment received'), findsOneWidget);
+        expect(find.text('Payment successful'), findsOneWidget);
       },
     );
 
@@ -506,7 +506,7 @@ void main() {
       expect(env.where, '/payments/new');
       repo.verifyGate!.complete();
       await settle(t);
-      expect(find.text('Payment received'), findsOneWidget);
+      expect(find.text('Payment successful'), findsOneWidget);
     });
 
     testWidgets('Back from ready asks first, then lands on the booking', (

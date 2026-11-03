@@ -72,3 +72,29 @@ String? bookingBudgetLabel(AppLocalizations l, Booking b) {
       ? l.budgetRangePerHour(range)
       : l.budgetRangePerMonth(range);
 }
+
+/// The hero's bold line. Stages before payment keep the status itself; [name] is the worker.
+String bookingHeadline(AppLocalizations l, BookingStatus s, String? name) =>
+    switch (s) {
+      BookingStatus.pendingPayment => l.bookingHeadPay,
+      BookingStatus.confirmed => l.bookingHeadConfirmed,
+      BookingStatus.active => l.bookingHeadActive,
+      BookingStatus.completed when name != null => l.bookingHeadRate(name),
+      BookingStatus.cancelled => l.bookingHeadCancelled,
+      _ => bookingStatusLabel(l, s),
+    };
+
+/// 0..1 of the way from the request to a completed service (the hero's bar).
+double bookingProgress(BookingStatus s) => switch (s) {
+  BookingStatus.newRequest => 0.12,
+  BookingStatus.matched => 0.25,
+  BookingStatus.interviewTrialScheduled => 0.38,
+  BookingStatus.interviewTrialCompleted => 0.5,
+  BookingStatus.pendingPayment || BookingStatus.cancelled => 0.55,
+  BookingStatus.confirmed => 0.72,
+  BookingStatus.active ||
+  BookingStatus.replacementRequested ||
+  BookingStatus.replaced => 0.88,
+  BookingStatus.completed => 1,
+  BookingStatus.unknown => 0.12,
+};

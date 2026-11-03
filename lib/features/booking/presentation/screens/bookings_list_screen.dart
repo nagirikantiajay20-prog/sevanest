@@ -2,22 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
-import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_chip.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
-import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_navigation.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/booking/presentation/widgets/booking_list_parts.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_list_parts.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/paged_footer.dart';
-import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
 
@@ -49,188 +46,162 @@ class _State extends ConsumerState<BookingsListScreen> {
     super.dispose();
   }
 
+  List<Booking> _visible(PagedState<Booking> p, {required bool past}) => [
+    for (final b in p.items)
+      if (bookingIsPast(b.status) == past) b,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final notifier = ref.read(bookingListProvider.notifier);
+    return FindGlassPage(
+      title: l10n.bookingsTitle,
+      body: AsyncValueView<PagedState<Booking>>(
+        value: ref.watch(bookingListProvider),
+        onRetry: notifier.refresh,
+        data: (p) {
+          // The other tab may hold the rest of the page: keep loading until this one fills.
+          loadMoreIfShort(_scroll, p, notifier.loadMore);
+          final items = _visible(p, past: _past);
+          return RefreshIndicator(
+            onRefresh: notifier.refresh,
+            child: ListView(
+              controller: _scroll,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 110),
+              children: [
+                DiscoverRise(
+                  delayMs: 0,
+                  child: InterviewSegments(
+                    selected: _past ? 1 : 0,
+                    labels: [l10n.bookingsTabCurrent, l10n.bookingsTabPast],
+                    counts: [
+                      _visible(p, past: false).length,
+                      _visible(p, past: true).length,
+                    ],
+                    tabKey: (i) => Key(
+                      i == 0 ? 'bookings_tab_current' : 'bookings_tab_past',
+                    ),
+                    onChanged: (i) => setState(() => _past = i == 1),
+                  ),
+                ),
+                // Empty only when this tab has nothing AND there is no further page to look in.
+                if (items.isEmpty && !p.hasMore)
+                  SizedBox(
+                    height: 440,
+                    child: GlassEmpty(
+                      icon: Icons.event_note_rounded,
+                      iconColor: const Color(0xFF0F766E),
+                      discColors: const [Color(0xFFE2EEEC), Colors.white],
+                      title: _past
+                          ? l10n.bookingsPastEmpty
+                          : l10n.bookingsEmptyTitle,
+                      body: l10n.bookingsEmptyBody,
+                      actionLabel: l10n.bookingsFind,
+                      actionKey: const Key('bookings_empty_find_btn'),
+                      actionIcon: Icons.search_rounded,
+                      onAction: () => context.push(Routes.discoverCategory),
+                    ),
+                  ),
+                for (final (i, b) in items.indexed)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: DiscoverRise(
+                      delayMs: 80.0 + 60 * i.clamp(0, 5),
+                      child: _Tile(b),
+                    ),
+                  ),
+                PagedFooter(
+                  page: p,
+                  onRetry: notifier.loadMore,
+                  retryKey: const Key('bookings_load_more_retry_btn'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _Tile extends StatelessWidget {
+  const _Tile(this.booking);
+  final Booking booking;
+
+  /// Payment state the backend's status implies; nothing before a worker is confirmed.
+  String? _payment(AppLocalizations l10n) => switch (booking.status) {
+    BookingStatus.pendingPayment => l10n.bookingPayUnpaid,
+    BookingStatus.confirmed ||
+    BookingStatus.active ||
+    BookingStatus.replacementRequested ||
+    BookingStatus.replaced ||
+    BookingStatus.completed => l10n.bookingPayPaid,
+    _ => null,
+  };
+
+  String? _date(AppLocalizations l10n, String locale) {
+    final b = booking;
+    final cancelled = b.timeline
+        .where((e) => e.status == BookingStatus.cancelled)
+        .lastOrNull
+        ?.at;
+    final String? text = switch (b.status) {
+      BookingStatus.cancelled =>
+        cancelled == null
+            ? null
+            : l10n.bookingCancelledOn(formatDate(cancelled, locale)),
+      _ when b.startDate == null => null,
+      _ when bookingIsPast(b.status) => l10n.bookingStartedOn(
+        formatDate(b.startDate!, locale),
+      ),
+      _ => l10n.bookingStartsOn(formatDate(b.startDate!, locale)),
+    };
+    return text;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
-    final notifier = ref.read(bookingListProvider.notifier);
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
-        children: [
-          SnHeader(title: l10n.bookingsTitle),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              key: const Key('bookings_tabs'),
-              children: [
-                SnChip(
-                  key: const Key('bookings_tab_current'),
-                  label: l10n.bookingsTabCurrent,
-                  selected: !_past,
-                  onTap: () => setState(() => _past = false),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                SnChip(
-                  key: const Key('bookings_tab_past'),
-                  label: l10n.bookingsTabPast,
-                  selected: _past,
-                  onTap: () => setState(() => _past = true),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: AsyncValueView<PagedState<Booking>>(
-              value: ref.watch(bookingListProvider),
-              onRetry: notifier.refresh,
-              // Empty only when this tab has nothing AND there is no further page to look in.
-              isEmpty: (p) => _visible(p).isEmpty && !p.hasMore,
-              empty: _past
-                  ? SnEmptyState(title: l10n.bookingsPastEmpty)
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SnEmptyState(
-                          title: l10n.bookingsEmptyTitle,
-                          message: l10n.bookingsEmptyBody,
-                          actionLabel: l10n.bookingsFind,
-                          actionKey: const Key('bookings_empty_find_btn'),
-                          onAction: () => context.push(Routes.discoverCategory),
-                        ),
-                      ],
-                    ),
-              data: (p) {
-                final items = _visible(p);
-                // The other tab may hold the rest of the page: keep loading until this one fills.
-                loadMoreIfShort(_scroll, p, notifier.loadMore);
-                return RefreshIndicator(
-                  onRefresh: notifier.refresh,
-                  child: ListView.separated(
-                    controller: _scroll,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md,
-                      0,
-                      AppSpacing.md,
-                      AppSpacing.md,
-                    ),
-                    itemCount: items.length + 1,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (_, i) {
-                      if (i == items.length) {
-                        return PagedFooter(
-                          page: p,
-                          onRetry: notifier.loadMore,
-                          retryKey: const Key('bookings_load_more_retry_btn'),
-                        );
-                      }
-                      return _BookingCard(items[i], locale);
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Booking> _visible(PagedState<Booking> p) => [
-    for (final b in p.items)
-      if (bookingIsPast(b.status) == _past) b,
-  ];
-}
-
-class _BookingCard extends StatelessWidget {
-  const _BookingCard(this.booking, this.locale);
-  final Booking booking;
-  final String locale;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final b = booking;
-    final next = b.scheduledAt ?? b.startDate;
-    final workerName = b.identity?.displayName ?? b.worker?.name;
+    final name = b.identity?.displayName ?? b.worker?.title;
     final service =
         b.categoryName ??
         b.worker?.categories.firstOrNull ??
         b.categoryCode ??
         '';
-    return SnCard(
+    final kind = [
+      service,
+      if (b.engagement != null) engagementLabels(l10n, b.engagement!).name,
+    ].where((s) => s.isNotEmpty).join(' · ');
+    final date = _date(l10n, locale);
+    final payment = _payment(l10n);
+    final pay = b.actions.contains(BookingAction.pay);
+    // No worker yet (new request): the service leads instead of a blank title.
+    final title = name ?? (service.isEmpty ? '#${b.reference}' : service);
+    return InterviewTile(
       key: Key('booking_card_${b.id}'),
+      titleKey: Key('booking_card_worker_${b.id}'),
+      title: title,
+      initials: b.identity?.initials ?? b.worker?.initials,
+      photoUrl: b.identity?.photoUrl ?? b.worker?.photoUrl,
+      gradient: avatarGradientFor(b.workerId ?? b.id),
+      subtitle: name == null ? '#${b.reference}' : kind,
+      statusLabel: bookingStatusLabel(l10n, b.status),
+      look: bookingLook(b.status),
       onTap: () =>
           context.push(Routes.path(Routes.bookingDetail, {'id': b.id})),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Flexible(
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: SnBadge(
-                    label: bookingStatusLabel(l10n, b.status),
-                    tone: bookingStatusTone(b.status),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text('#${b.reference}', style: AppText.meta),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.s12),
-          Row(
-            children: [
-              if (b.worker != null) ...[
-                WorkerAvatar(b.worker!, radius: 22),
-                const SizedBox(width: AppSpacing.md),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (workerName != null)
-                      Text(
-                        workerName,
-                        key: Key('booking_card_worker_${b.id}'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.heading,
-                      ),
-                    // No worker yet (new request): the service leads instead of a blank title.
-                    Text(
-                      service,
-                      key: Key('booking_card_service_${b.id}'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: workerName == null
-                          ? AppText.heading
-                          : AppText.body,
-                    ),
-                    if (next != null)
-                      Text(formatDate(next, locale), style: AppText.body),
-                    if (b.areaName != null)
-                      Text(b.areaName!, style: AppText.meta),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (b.actions.contains(BookingAction.pay)) ...[
-            const SizedBox(height: AppSpacing.s12),
-            SnButton(
-              key: Key('booking_card_pay_btn_${b.id}'),
-              label: l10n.bookingsPay,
-              variant: SnButtonVariant.deep,
-              onPressed: () => context.push(paymentStartPath(b.id)),
+      footer: date == null && payment == null && !pay
+          ? null
+          : BookingTileFooter(
+              date: date,
+              payment: payment,
+              payLabel: l10n.bookingsPay,
+              payKey: Key('booking_card_pay_btn_${b.id}'),
+              onPay: pay ? () => context.push(paymentStartPath(b.id)) : null,
             ),
-          ],
-        ],
-      ),
     );
   }
 }

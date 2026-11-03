@@ -3559,7 +3559,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookingsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Bookings'**
+  /// **'My bookings'**
   String get bookingsTitle;
 
   /// No description provided for @bookingsTabCurrent.
@@ -3577,13 +3577,13 @@ abstract class AppLocalizations {
   /// No description provided for @bookingsEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No bookings yet'**
+  /// **'No current bookings'**
   String get bookingsEmptyTitle;
 
   /// No description provided for @bookingsEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'When you hire a worker, your booking appears here.'**
+  /// **'Find a verified worker and book them in a few steps.'**
   String get bookingsEmptyBody;
 
   /// No description provided for @bookingsPastEmpty.
@@ -3607,7 +3607,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookingDetailTitle.
   ///
   /// In en, this message translates to:
-  /// **'Booking'**
+  /// **'Booking details'**
   String get bookingDetailTitle;
 
   /// No description provided for @bookingStatusNewRequest.
@@ -3955,13 +3955,13 @@ abstract class AppLocalizations {
   /// No description provided for @confirmHeading.
   ///
   /// In en, this message translates to:
-  /// **'Confirm this worker?'**
+  /// **'Confirm your worker'**
   String get confirmHeading;
 
   /// No description provided for @confirmSub.
   ///
   /// In en, this message translates to:
-  /// **'Check the details, then confirm. You pay the booking fee next.'**
+  /// **'Check the details and pick a start date. You pay the booking fee next.'**
   String get confirmSub;
 
   /// No description provided for @confirmStartDate.
@@ -3985,7 +3985,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmFeeNote.
   ///
   /// In en, this message translates to:
-  /// **'Estimate. The final amount is shown at the payment step.'**
+  /// **'This is an estimate. The final fee is shown on the payment step.'**
   String get confirmFeeNote;
 
   /// No description provided for @confirmTaxRow.
@@ -3997,7 +3997,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmTotalRow.
   ///
   /// In en, this message translates to:
-  /// **'Total due today'**
+  /// **'Total today'**
   String get confirmTotalRow;
 
   /// No description provided for @confirmPriceDetails.
@@ -4009,7 +4009,7 @@ abstract class AppLocalizations {
   /// No description provided for @confirmSummary.
   ///
   /// In en, this message translates to:
-  /// **'Booking summary'**
+  /// **'Your requirement'**
   String get confirmSummary;
 
   /// No description provided for @confirmButton.
@@ -4041,6 +4041,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick today or a later date.'**
   String get confirmDateInvalid;
+
+  /// No description provided for @confirmEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier day'**
+  String get confirmEarlier;
+
+  /// No description provided for @confirmLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later day'**
+  String get confirmLater;
+
+  /// No description provided for @confirmContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to payment'**
+  String get confirmContinue;
+
+  /// No description provided for @confirmTkStarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get confirmTkStarts;
+
+  /// No description provided for @confirmTkAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount due'**
+  String get confirmTkAmount;
+
+  /// No description provided for @confirmSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will start on {date}. Pay the booking fee to lock it in.'**
+  String confirmSuccessBody(String name, String date);
+
+  /// No description provided for @bookingStartsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {date}'**
+  String bookingStartsOn(String date);
+
+  /// No description provided for @bookingStartedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {date}'**
+  String bookingStartedOn(String date);
+
+  /// No description provided for @bookingCancelledOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled {date}'**
+  String bookingCancelledOn(String date);
+
+  /// No description provided for @bookingPayPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get bookingPayPaid;
+
+  /// No description provided for @bookingPayUnpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid'**
+  String get bookingPayUnpaid;
+
+  /// No description provided for @bookingPayNowAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount} now'**
+  String bookingPayNowAmount(String amount);
+
+  /// No description provided for @bookingPayBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment pending'**
+  String get bookingPayBannerTitle;
+
+  /// No description provided for @bookingPayBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay the booking fee to lock it in'**
+  String get bookingPayBannerBody;
+
+  /// No description provided for @bookingHeadPay.
+  ///
+  /// In en, this message translates to:
+  /// **'One step left'**
+  String get bookingHeadPay;
+
+  /// No description provided for @bookingHeadConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are all set'**
+  String get bookingHeadConfirmed;
+
+  /// No description provided for @bookingHeadActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Service in progress'**
+  String get bookingHeadActive;
+
+  /// No description provided for @bookingHeadRate.
+  ///
+  /// In en, this message translates to:
+  /// **'How was {name}?'**
+  String bookingHeadRate(String name);
+
+  /// No description provided for @bookingHeadCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled'**
+  String get bookingHeadCancelled;
+
+  /// No description provided for @bookingCopyRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get bookingCopyRef;
+
+  /// No description provided for @bookingRefCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference copied'**
+  String get bookingRefCopied;
 
   /// No description provided for @bookingCopyScheduledAt.
   ///
@@ -4099,13 +4225,13 @@ abstract class AppLocalizations {
   /// No description provided for @payHeading.
   ///
   /// In en, this message translates to:
-  /// **'Complete your payment'**
+  /// **'Pay the booking fee'**
   String get payHeading;
 
   /// No description provided for @paySub.
   ///
   /// In en, this message translates to:
-  /// **'Pay securely with UPI, cards or net banking.'**
+  /// **'This locks in your worker and your start date.'**
   String get paySub;
 
   /// No description provided for @payAmountLabel.
@@ -4171,13 +4297,13 @@ abstract class AppLocalizations {
   /// No description provided for @paySuccessTitle.
   ///
   /// In en, this message translates to:
-  /// **'Payment received'**
+  /// **'Payment successful'**
   String get paySuccessTitle;
 
   /// No description provided for @paySuccessBody.
   ///
   /// In en, this message translates to:
-  /// **'Thank you. We\'re updating your booking.'**
+  /// **'Your booking is confirmed.'**
   String get paySuccessBody;
 
   /// No description provided for @payReceiptNumber.
@@ -4497,6 +4623,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refunds go back to your original payment method.'**
   String get txnRefundNote;
+
+  /// No description provided for @payPayWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay with'**
+  String get payPayWith;
+
+  /// No description provided for @payFastest.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest'**
+  String get payFastest;
+
+  /// No description provided for @payMethodUpiNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Pay, PhonePe, Paytm and more'**
+  String get payMethodUpiNote;
+
+  /// No description provided for @payMethodCardNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa, Mastercard, RuPay'**
+  String get payMethodCardNote;
+
+  /// No description provided for @payMethodNetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'All major Indian banks'**
+  String get payMethodNetNote;
+
+  /// No description provided for @payMethodWalletNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay from your wallet balance'**
+  String get payMethodWalletNote;
+
+  /// No description provided for @payMethodCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit or credit card'**
+  String get payMethodCardTitle;
+
+  /// No description provided for @paySecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You will choose how to pay on the next step. Payments are secure and encrypted.'**
+  String get paySecureNote;
+
+  /// No description provided for @payStartsRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts'**
+  String get payStartsRow;
+
+  /// No description provided for @payAmountPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount paid'**
+  String get payAmountPaid;
+
+  /// No description provided for @payReceiptRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get payReceiptRow;
+
+  /// No description provided for @txnTotalPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Total paid'**
+  String get txnTotalPaid;
+
+  /// No description provided for @txnCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get txnCopy;
+
+  /// No description provided for @txnCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get txnCopied;
+
+  /// No description provided for @txnCopyReceiptNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy receipt number'**
+  String get txnCopyReceiptNo;
+
+  /// No description provided for @txnCopyReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy payment reference'**
+  String get txnCopyReference;
+
+  /// No description provided for @txnCopyReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy receipt details'**
+  String get txnCopyReceipt;
+
+  /// No description provided for @txnReceiptCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt details copied'**
+  String get txnReceiptCopied;
+
+  /// No description provided for @txnRefundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund of {amount} on its way'**
+  String txnRefundTitle(String amount);
+
+  /// No description provided for @txnRefundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It usually reaches your original payment method within 5 to 7 working days.'**
+  String get txnRefundBody;
 
   /// No description provided for @serviceTitle.
   ///
