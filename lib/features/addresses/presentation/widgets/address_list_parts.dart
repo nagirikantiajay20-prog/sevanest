@@ -6,6 +6,8 @@ import 'package:sevanest_customer/features/authentication/presentation/widgets/a
 import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_detail_parts.dart'
     show DashedRule;
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart'
+    show showGlassSheet;
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Accent of a card (design: teal Home, blue Parents' home, amber Office), cycled by position.
@@ -204,69 +206,37 @@ Future<AddressAction?> showAddressActions(
     );
   }
 
-  return showModalBottomSheet<AddressAction>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    barrierColor: const Color(0x6B1B3354),
-    builder: (ctx) => Container(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        24 + MediaQuery.paddingOf(ctx).bottom,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAF8F5),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        boxShadow: [
-          BoxShadow(
-            color: dsNavy.withValues(alpha: 0.28),
-            blurRadius: 40,
-            offset: const Offset(0, -16),
-          ),
-        ],
-      ),
-      child: Semantics(
-        label: l10n.addressMenu,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: dsNavy.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
-            if (!address.isDefault) ...[
-              option(
-                AddressAction.setDefault,
-                Key('address_set_default_$id'),
-                Icons.check_rounded,
-                l10n.setAsDefault,
-              ),
-              const DashedRule(),
-            ],
+  return showGlassSheet<AddressAction>(
+    context,
+    builder: (_) => Semantics(
+      label: l10n.addressMenu,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (!address.isDefault) ...[
             option(
-              AddressAction.edit,
-              Key('address_edit_$id'),
-              Icons.edit_outlined,
-              l10n.edit,
+              AddressAction.setDefault,
+              Key('address_set_default_$id'),
+              Icons.check_rounded,
+              l10n.setAsDefault,
             ),
             const DashedRule(),
-            option(
-              AddressAction.delete,
-              Key('address_menu_delete_$id'),
-              Icons.delete_outline_rounded,
-              l10n.delete,
-            ),
           ],
-        ),
+          option(
+            AddressAction.edit,
+            Key('address_edit_$id'),
+            Icons.edit_outlined,
+            l10n.edit,
+          ),
+          const DashedRule(),
+          option(
+            AddressAction.delete,
+            Key('address_menu_delete_$id'),
+            Icons.delete_outline_rounded,
+            l10n.delete,
+          ),
+        ],
       ),
     ),
   );

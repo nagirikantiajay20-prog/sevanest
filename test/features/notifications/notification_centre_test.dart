@@ -133,20 +133,19 @@ void main() {
     ) async {
       await open(t);
       expect(find.text('Notifications'), findsOneWidget);
-      expect(find.text('Today'), findsOneWidget);
-      expect(find.text('Yesterday'), findsOneWidget);
+      expect(find.text('TODAY'), findsOneWidget);
+      expect(find.text('YESTERDAY'), findsOneWidget);
       for (final id in ['n1', 'n2', 'n3', 'n4', 'n5']) {
         expect(k('notification_row_$id'), findsOneWidget);
       }
-      // Unread rows have the dot and the New chip; read rows do not.
+      // Unread rows have the dot; read rows do not.
       for (final id in ['n1', 'n2', 'n3']) {
         expect(k('notification_dot_$id'), findsOneWidget);
-        expect(k('notification_new_$id'), findsOneWidget);
       }
       for (final id in ['n4', 'n5']) {
         expect(k('notification_dot_$id'), findsNothing);
       }
-      expect(find.text('New'), findsNWidgets(3));
+      expect(find.text('3 unread'), findsOneWidget);
       expect(
         find.descendant(of: k('notif_unread_count'), matching: find.text('3')),
         findsOneWidget,
@@ -193,7 +192,7 @@ void main() {
       await open(t);
       expect(k('notif_empty'), findsOneWidget);
       expect(find.text('No notifications yet'), findsOneWidget);
-      expect(markAllEnabled(t), isFalse);
+      expect(k('notif_mark_all_btn'), findsNothing);
     });
 
     testWidgets(

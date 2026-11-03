@@ -2809,13 +2809,13 @@ abstract class AppLocalizations {
   /// No description provided for @accountSectionDetails.
   ///
   /// In en, this message translates to:
-  /// **'My details'**
+  /// **'Payments & profile'**
   String get accountSectionDetails;
 
   /// No description provided for @accountSectionHelp.
   ///
   /// In en, this message translates to:
-  /// **'Help and legal'**
+  /// **'Help & legal'**
   String get accountSectionHelp;
 
   /// No description provided for @accountEditProfile.
@@ -2823,6 +2823,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit profile'**
   String get accountEditProfile;
+
+  /// No description provided for @accountNotifWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off. You may miss worker replies.'**
+  String get accountNotifWarn;
+
+  /// No description provided for @accountNotifTurnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on'**
+  String get accountNotifTurnOn;
+
+  /// No description provided for @accountStayLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay logged in'**
+  String get accountStayLoggedIn;
+
+  /// No description provided for @accountAboutTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Find verified home workers near you.'**
+  String get accountAboutTagline;
+
+  /// No description provided for @accountVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get accountVersionLabel;
 
   /// No description provided for @favsSubtitle.
   ///
@@ -3163,7 +3193,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'You will need to sign in again with your mobile number.'**
+  /// **'You will need your mobile number and a new code to log in again.'**
   String get logoutConfirmBody;
 
   /// No description provided for @devMenuLive.
@@ -3601,7 +3631,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountInterviews.
   ///
   /// In en, this message translates to:
-  /// **'Interviews'**
+  /// **'Interviews & trials'**
   String get accountInterviews;
 
   /// No description provided for @interviewCopyScheduled.
@@ -4489,7 +4519,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountTransactions.
   ///
   /// In en, this message translates to:
-  /// **'Transactions'**
+  /// **'Transactions & receipts'**
   String get accountTransactions;
 
   /// No description provided for @transactionsTitle.
@@ -6619,7 +6649,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifMarkAll.
   ///
   /// In en, this message translates to:
-  /// **'Mark all as read'**
+  /// **'Mark all read'**
   String get notifMarkAll;
 
   /// No description provided for @notifMarkedUnread.
@@ -6712,6 +6742,48 @@ abstract class AppLocalizations {
   /// **'Update'**
   String get notifFallbackTitle;
 
+  /// No description provided for @notifUnreadCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} unread'**
+  String notifUnreadCount(int count);
+
+  /// No description provided for @notifNoUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'No unread updates'**
+  String get notifNoUnread;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get backToHome;
+
+  /// No description provided for @serviceScheduleRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get serviceScheduleRow;
+
+  /// No description provided for @serviceLocationRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get serviceLocationRow;
+
+  /// No description provided for @serviceBookingRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get serviceBookingRow;
+
+  /// No description provided for @serviceViewBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'View booking details'**
+  String get serviceViewBooking;
+
   /// No description provided for @notifPromptTitle.
   ///
   /// In en, this message translates to:
@@ -6763,7 +6835,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountSupport.
   ///
   /// In en, this message translates to:
-  /// **'Help and support'**
+  /// **'Support'**
   String get accountSupport;
 
   /// No description provided for @notifBannerOpen.

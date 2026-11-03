@@ -289,9 +289,17 @@ class GlassCircleButton extends StatelessWidget {
 
 /// A soft white band that sweeps across the card it is stacked in (the design's `::after` sheen).
 class SheenSweep extends StatelessWidget {
-  const SheenSweep({this.periodMs = 6000, this.band = 0.26, super.key});
+  const SheenSweep({
+    this.periodMs = 6000,
+    this.band = 0.26,
+    this.peak = const Color(0x80FFFFFF),
+    super.key,
+  });
   final double periodMs;
   final double band;
+
+  /// Colour at the middle of the band (fainter on the navy cards).
+  final Color peak;
 
   @override
   Widget build(BuildContext context) {
@@ -311,13 +319,13 @@ class SheenSweep extends StatelessWidget {
                     top: 0,
                     bottom: 0,
                     width: w,
-                    child: const DecoratedBox(
+                    child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Color(0x00FFFFFF),
-                            Color(0x80FFFFFF),
-                            Color(0x00FFFFFF),
+                            const Color(0x00FFFFFF),
+                            peak,
+                            const Color(0x00FFFFFF),
                           ],
                         ),
                       ),

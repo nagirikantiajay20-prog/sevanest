@@ -4,50 +4,35 @@ import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
-import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
-import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/features/active_service/domain/attendance.dart';
 import 'package:sevanest_customer/features/active_service/presentation/providers/service_providers.dart';
+import 'package:sevanest_customer/features/active_service/presentation/widgets/attendance_list.dart';
 import 'package:sevanest_customer/features/active_service/presentation/widgets/raise_exception_sheet.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta, authSerif;
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
-import 'package:sevanest_customer/features/booking/presentation/widgets/worker_identity_tile.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_detail_parts.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_links.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/support/presentation/widgets/safety_actions.dart';
 import 'package:sevanest_customer/features/worker_profile/presentation/providers/worker_profile_providers.dart';
-import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart'
+    show experienceLabel, ratingText;
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-String attendanceLabel(AppLocalizations l, AttendanceStatus s) => switch (s) {
-  AttendanceStatus.present => l.attendancePresent,
-  AttendanceStatus.absent => l.attendanceAbsent,
-  AttendanceStatus.late => l.attendanceLate,
-  AttendanceStatus.leave => l.attendanceLeave,
-  AttendanceStatus.exception => l.attendanceException,
-  AttendanceStatus.unknown => l.attendanceUnknown,
-};
-
-SnBadgeTone _tone(AttendanceStatus s) => switch (s) {
-  AttendanceStatus.present => SnBadgeTone.success,
-  AttendanceStatus.absent => SnBadgeTone.error,
-  AttendanceStatus.late => SnBadgeTone.warning,
-  AttendanceStatus.leave => SnBadgeTone.neutral,
-  AttendanceStatus.exception => SnBadgeTone.warning,
-  AttendanceStatus.unknown => SnBadgeTone.neutral,
-};
-
-/// `/services/current?bookingId=` (module doc 10.1). Without an id: one active booking opens
-/// directly, several show a picker. Everything shown is what the backend sent.
+/// `/services/current?bookingId=` (module doc 10.1, design: Find a Worker > Active service).
+/// Without an id: one active booking opens directly, several show a picker. Everything shown is
+/// what the backend sent.
 class ActiveServiceScreen extends ConsumerStatefulWidget {
   const ActiveServiceScreen({this.bookingId, super.key});
   final String? bookingId;
@@ -73,7 +58,10 @@ class _State extends ConsumerState<ActiveServiceScreen>
   /// Attendance changes while the app is in the background.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) return;
+    if (state == AppLifecycleState.resumed) _reload();
+  }
+
+  void _reload() {
     final id = widget.bookingId;
     if (id == null) {
       ref.invalidate(bookingListProvider);
@@ -90,32 +78,19 @@ class _State extends ConsumerState<ActiveServiceScreen>
     final l10n = AppLocalizations.of(context);
     final id = widget.bookingId;
     // A notification arrived (attendance, replacement...): read the service again.
-    ref.listen(notificationTickProvider, (_, _) {
-      if (id == null) {
-        ref.invalidate(bookingListProvider);
-      } else {
-        ref
-          ..invalidate(bookingProvider(id))
-          ..invalidate(attendanceProvider(id))
-          ..invalidate(attendanceSummaryProvider(id));
-      }
-    });
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
-        children: [
-          SnHeader(
-            title: l10n.serviceTitle,
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go(Routes.home),
-            // Report / block the worker of this service (module 12), named by the booking.
-            trailing: id != null ? SafetyMenuButton(bookingId: id) : null,
-          ),
-          Expanded(
-            child: id == null ? const _Picker() : _Service(bookingId: id),
-          ),
-        ],
-      ),
+    ref.listen(notificationTickProvider, (_, _) => _reload());
+    return FindGlassPage(
+      title: l10n.serviceTitle,
+      backLabel: l10n.back,
+      onBack: () => context.canPop() ? context.pop() : context.go(Routes.home),
+      // Report / block the worker of this service (module 12), named by the booking.
+      trailing: id == null
+          ? null
+          : DiscoverGlass(
+              radius: 22,
+              child: SafetyMenuButton(bookingId: id, color: dsNavy),
+            ),
+      body: id == null ? const _Picker() : _Service(bookingId: id),
     );
   }
 }
@@ -124,18 +99,6 @@ class _State extends ConsumerState<ActiveServiceScreen>
 bool _isActive(Booking b) =>
     b.status == BookingStatus.active ||
     b.status == BookingStatus.replacementRequested;
-
-/// "8:02 AM" for a local time.
-String _clock(DateTime t) => formatTime(t.hour * 60 + t.minute);
-
-/// "In 8:02 AM · Out 12:05 PM", or null when the worker has not checked in or out.
-String? _checkTimes(AppLocalizations l, AttendanceEntry e) {
-  final parts = [
-    if (e.checkInAt != null) l.attendanceCheckIn(_clock(e.checkInAt!)),
-    if (e.checkOutAt != null) l.attendanceCheckOut(_clock(e.checkOutAt!)),
-  ];
-  return parts.isEmpty ? null : parts.join(' · ');
-}
 
 /// "8 AM – 12 PM" from the backend's `HH:mm` pair; null if it is not in that form.
 String? _window(AttendanceSummary? s) {
@@ -149,50 +112,77 @@ String? _window(AttendanceSummary? s) {
   return a == null || b == null ? null : formatTimeSpan(a, b);
 }
 
+/// "House Maid · Part-time".
+String _serviceName(AppLocalizations l10n, Booking b) => [
+  b.categoryName ?? b.categoryCode,
+  if (b.engagement != null) engagementLabels(l10n, b.engagement!).name,
+].whereType<String>().join(' · ');
+
 class _Picker extends ConsumerWidget {
   const _Picker();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final value = ref.watch(bookingListProvider);
     return AsyncValueView(
-      value: value,
+      value: ref.watch(bookingListProvider),
       onRetry: () => ref.invalidate(bookingListProvider),
       data: (list) {
         final active = list.items.where(_isActive).toList();
         if (active.isEmpty) {
-          return SnEmptyState(
+          return GlassEmpty(
+            icon: Icons.home_work_outlined,
+            iconColor: AppColors.teal,
+            discColors: const [Color(0xFFE2EEEC), Colors.white],
             title: l10n.serviceNoneTitle,
-            message: l10n.serviceNoneBody,
+            body: l10n.serviceNoneBody,
+            actionLabel: l10n.backToHome,
+            actionKey: const Key('service_home_btn'),
+            onAction: () => context.go(Routes.home),
           );
         }
         if (active.length == 1) return _Service(bookingId: active.single.id);
         return ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 36),
           children: [
-            Text(l10n.servicePickTitle, style: AppText.heading),
-            const SizedBox(height: AppSpacing.sm),
-            for (final b in active)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: SnCard(
-                  padding: EdgeInsets.zero,
-                  child: ListTile(
-                    key: Key('service_pick_${b.id}'),
-                    title: Text(
-                      [
-                        b.categoryName ?? b.categoryCode,
-                        if (b.engagement != null)
-                          engagementLabels(l10n, b.engagement!).name,
-                      ].whereType<String>().join(' · '),
-                    ),
-                    subtitle: Text(
-                      b.areaName ?? bookingStatusLabel(l10n, b.status),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push(
-                      '${Routes.serviceCurrent}?bookingId=${Uri.encodeComponent(b.id)}',
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 4),
+              child: Text(l10n.servicePickTitle, style: authSerif(20, 1.2)),
+            ),
+            for (final (i, b) in active.indexed)
+              DiscoverRise(
+                delayMs: 60.0 + 40 * i.clamp(0, 6),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: DiscoverGlass(
+                    radius: 22,
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        key: Key('service_pick_${b.id}'),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                        title: Text(
+                          _serviceName(l10n, b),
+                          style: AppText.body.copyWith(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w800,
+                            color: dsNavy,
+                          ),
+                        ),
+                        subtitle: Text(
+                          b.areaName ?? bookingStatusLabel(l10n, b.status),
+                          style: AppText.body.copyWith(color: dsText),
+                        ),
+                        trailing: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: dsMuted,
+                        ),
+                        onTap: () => context.push(
+                          '${Routes.serviceCurrent}?bookingId=${Uri.encodeComponent(b.id)}',
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -209,27 +199,24 @@ class _Service extends ConsumerWidget {
   final String bookingId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final value = ref.watch(bookingProvider(bookingId));
-    return AsyncValueView<Booking>(
-      value: value,
-      onRetry: () => ref.invalidate(bookingProvider(bookingId)),
-      data: (b) => RefreshIndicator(
-        onRefresh: () async {
-          ref
-            ..invalidate(bookingProvider(bookingId))
-            ..invalidate(attendanceProvider(bookingId))
-            ..invalidate(attendanceSummaryProvider(bookingId));
-          try {
-            await ref.read(bookingProvider(bookingId).future);
-          } on Object {
-            // shown by the view
-          }
-        },
-        child: _Body(booking: b),
-      ),
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => AsyncValueView<Booking>(
+    value: ref.watch(bookingProvider(bookingId)),
+    onRetry: () => ref.invalidate(bookingProvider(bookingId)),
+    data: (b) => RefreshIndicator(
+      onRefresh: () async {
+        ref
+          ..invalidate(bookingProvider(bookingId))
+          ..invalidate(attendanceProvider(bookingId))
+          ..invalidate(attendanceSummaryProvider(bookingId));
+        try {
+          await ref.read(bookingProvider(bookingId).future);
+        } on Object {
+          // shown by the view
+        }
+      },
+      child: _Body(booking: b),
+    ),
+  );
 }
 
 class _Body extends ConsumerWidget {
@@ -239,7 +226,6 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final locale = Localizations.localeOf(context).toString();
     final b = booking;
     final a = b.actions;
@@ -258,327 +244,252 @@ class _Body extends ConsumerWidget {
               (b.workerId == null
                   ? null
                   : ref.watch(workerDetailProvider(b.workerId!)).value);
-
-    Widget action(
-      String key,
-      String label,
-      VoidCallback onTap, {
-      SnButtonVariant variant = SnButtonVariant.secondary,
-    }) => Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
-      child: SnButton(
-        key: Key(key),
-        label: label,
-        variant: variant,
-        onPressed: onTap,
+    final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
+    final name = identity?.displayName ?? worker?.title;
+    final window = _window(summary);
+    final rows = <(String, String, Key?)>[
+      (
+        l10n.bookingServiceRow,
+        [
+          _serviceName(l10n, b),
+          if (b.startDate != null)
+            l10n.serviceSince(formatDate(b.startDate!, locale)),
+        ].join(' · '),
+        const Key('service_schedule'),
       ),
+      if (window != null)
+        (l10n.serviceScheduleRow, window, const Key('service_window')),
+      if (b.areaName != null)
+        (l10n.serviceLocationRow, b.areaName!, const Key('service_location')),
+      (
+        l10n.serviceBookingRow,
+        l10n.serviceViewBooking,
+        const Key('service_booking_link'),
+      ),
+    ];
+    final bookingRow = rows.length - 1;
+
+    void openWorker() =>
+        context.push(Routes.path(Routes.workerDetail, {'id': b.workerId!}));
+
+    Widget outline(String key, String label, VoidCallback onTap) => Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: OutlineAction(key: Key(key), label: label, onPressed: onTap),
     );
 
-    return ListView(
+    Future<void> reportMissing() async {
+      final messenger = ScaffoldMessenger.of(context);
+      final done = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) => RaiseExceptionSheet(
+          bookingId: b.id,
+          first: b.startDate ?? now,
+          today: DateTime(now.year, now.month, now.day),
+        ),
+      );
+      if (done ?? false) {
+        ref
+          ..invalidate(attendanceProvider(b.id))
+          ..invalidate(attendanceSummaryProvider(b.id));
+        messenger.showSnackBar(SnackBar(content: Text(l10n.exceptionSent)));
+      }
+    }
+
+    return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      children: [
-        if (identity != null && b.workerId != null)
-          WorkerIdentityTile(
-            key: const Key('service_worker_card'),
-            identity: identity,
-            onTap: () => context.push(
-              Routes.path(Routes.workerDetail, {'id': b.workerId!}),
-            ),
-          )
-        else if (worker != null)
-          WorkerCard(
-            key: const Key('service_worker_card'),
-            worker: worker,
-            onTap: () => context.push(
-              Routes.path(Routes.workerDetail, {'id': worker.id}),
-            ),
-          )
-        else if (b.workerId != null)
-          ListTile(
-            key: const Key('service_worker_card'),
-            leading: const Icon(Icons.person_outline),
-            title: Text(l10n.workerProfileTitle),
-            onTap: () => context.push(
-              Routes.path(Routes.workerDetail, {'id': b.workerId!}),
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            SnBadge(
-              key: const Key('service_status_chip'),
-              label: bookingStatusLabel(l10n, b.status),
-              tone: bookingStatusTone(b.status),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          [
-            b.categoryName ?? b.categoryCode,
-            if (b.engagement != null)
-              engagementLabels(l10n, b.engagement!).name,
-            if (b.startDate != null)
-              l10n.serviceSince(formatDate(b.startDate!, locale)),
-          ].whereType<String>().join(' · '),
-          key: const Key('service_schedule'),
-          style: text.titleMedium,
-        ),
-        if (b.areaName != null)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Row(
-              children: [
-                const Icon(Icons.location_on_outlined, size: 18),
-                const SizedBox(width: AppSpacing.xs),
-                Text(b.areaName!, key: const Key('service_location')),
-              ],
-            ),
-          ),
-        if (_window(summary) != null)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: Text(
-              l10n.serviceScheduled(_window(summary)!),
-              key: const Key('service_window'),
-              style: text.bodyMedium,
-            ),
-          ),
-        const SizedBox(height: AppSpacing.md),
-        SnCard(
-          key: const Key('service_today_card'),
-          child: SizedBox(
-            width: double.infinity,
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                Text(
-                  '${l10n.serviceTodayTitle} · ${formatDate(now, locale)}',
-                  style: text.bodyMedium,
-                ),
-                if (today != null)
-                  SnBadge(
-                    key: const Key('service_today_status'),
-                    label: attendanceLabel(l10n, today.status),
-                    tone: _tone(today.status),
-                  )
-                else
-                  Text(
-                    l10n.serviceTodayNone,
-                    key: const Key('service_today_status'),
-                    style: text.bodySmall,
-                  ),
-                if (today != null && _checkTimes(l10n, today) != null)
-                  Text(
-                    _checkTimes(l10n, today)!,
-                    key: const Key('service_today_times'),
-                    style: text.bodySmall,
-                  ),
-              ],
-            ),
-          ),
-        ),
-        if (summary != null)
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.md),
-            child: SnCard(
-              key: const Key('service_summary_card'),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.serviceMonthTitle, style: text.titleSmall),
-                  const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    alignment: WrapAlignment.spaceAround,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      _Count(l10n.attendancePresent, summary.present),
-                      _Count(l10n.attendanceLate, summary.late),
-                      _Count(l10n.attendanceAbsent, summary.absent),
-                      _Count(l10n.attendanceLeave, summary.leave),
-                      _Count(l10n.attendanceException, summary.exception),
-                    ],
-                  ),
-                ],
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 36),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DiscoverRise(
+            delayMs: 0,
+            child: KeyedSubtree(
+              key: const Key('service_today_card'),
+              child: InterviewHero(
+                statusLabel:
+                    '${l10n.serviceTodayTitle} · ${formatDate(now, locale)}',
+                headline: today == null
+                    ? l10n.serviceTodayNone
+                    : attendanceLabel(l10n, today.status),
+                headlineKey: const Key('service_today_status'),
+                copy: today == null ? '' : checkTimes(l10n, today) ?? '',
+                copyKey: const Key('service_today_times'),
+                progress: null,
+                showSteps: false,
+                tone: switch (today?.status) {
+                  AttendanceStatus.present => HeroTone.ok,
+                  AttendanceStatus.absent => HeroTone.bad,
+                  _ => HeroTone.waiting,
+                },
               ),
             ),
           ),
-        const SizedBox(height: AppSpacing.md),
-        Text(l10n.attendanceTitle, style: AppText.heading),
-        const SizedBox(height: AppSpacing.sm),
-        SnCard(child: _AttendanceList(bookingId: b.id)),
-        const Divider(height: AppSpacing.lg * 2),
-        action(
-          'service_booking_link',
-          l10n.serviceBookingLink,
-          () => context.push(Routes.path(Routes.bookingDetail, {'id': b.id})),
-        ),
-        if (a.contains(BookingAction.rate))
-          action(
-            'service_rate_btn',
-            l10n.bookingRate,
-            () => context.push(Routes.path(Routes.rating, {'id': b.id})),
-            variant: SnButtonVariant.deep,
-          ),
-        if (a.contains(BookingAction.replace))
-          action(
-            'service_replace_btn',
-            l10n.bookingReplace,
-            () => context.push(
-              '${Routes.replacementNew}?bookingId=${Uri.encodeComponent(b.id)}',
+          if (b.workerId != null) ...[
+            const SizedBox(height: 14),
+            DiscoverRise(
+              delayMs: 60,
+              child: KeyedSubtree(
+                key: const Key('service_worker_card'),
+                child: InterviewWorkerCard(
+                  title: name ?? l10n.workerProfileTitle,
+                  initials: identity?.initials ?? worker?.initials,
+                  photoUrl: identity?.photoUrl ?? worker?.photoUrl,
+                  gradient: name == null
+                      ? const [Color(0xFF475569), Color(0xFF94A3B8)]
+                      : avatarGradientFor(b.workerId!),
+                  verified: identity?.verified ?? worker?.verified ?? false,
+                  rating: worker != null && worker.hasRating
+                      ? ratingText(worker.ratingAverage!, scale)
+                      : null,
+                  extra: worker?.experienceMonths == null
+                      ? null
+                      : experienceLabel(l10n, worker!.experienceMonths),
+                  onTap: openWorker,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          DiscoverRise(
+            delayMs: 100,
+            child: InterviewInfoCard(
+              rows: [for (final r in rows) (r.$1, r.$2)],
+              valueKey: (i) => rows[i].$3,
+              valueColor: (i) => i == bookingRow ? AppColors.teal : null,
+              onTap: (i) => i == bookingRow
+                  ? () => context.push(
+                      Routes.path(Routes.bookingDetail, {'id': b.id}),
+                    )
+                  : null,
             ),
           ),
-        ReplacementLinks(booking: b),
-        if (b.status == BookingStatus.active)
-          action(
-            'service_report_missing_btn',
-            l10n.serviceReportMissing,
-            () async {
-              final messenger = ScaffoldMessenger.of(context);
-              final done = await showModalBottomSheet<bool>(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => RaiseExceptionSheet(
-                  bookingId: b.id,
-                  first: b.startDate ?? now,
-                  today: DateTime(now.year, now.month, now.day),
+          if (summary != null) ...[
+            const SizedBox(height: 14),
+            DiscoverRise(delayMs: 130, child: _MonthCard(summary: summary)),
+          ],
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 22, 4, 10),
+            child: DiscoverRise(
+              delayMs: 140,
+              child: Semantics(
+                header: true,
+                child: Text(l10n.attendanceTitle, style: authSerif(20, 1.2)),
+              ),
+            ),
+          ),
+          DiscoverRise(delayMs: 160, child: AttendanceList(bookingId: b.id)),
+          const SizedBox(height: 6),
+          DiscoverRise(
+            delayMs: 200,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (a.contains(BookingAction.rate))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: AuthCta(
+                      key: const Key('service_rate_btn'),
+                      clock: DiscoverClock.of(context),
+                      label: l10n.bookingRate,
+                      loadingLabel: l10n.bookingRate,
+                      loading: false,
+                      showArrow: false,
+                      height: 50,
+                      onPressed: () => context.push(
+                        Routes.path(Routes.rating, {'id': b.id}),
+                      ),
+                    ),
+                  ),
+                if (a.contains(BookingAction.replace))
+                  outline(
+                    'service_replace_btn',
+                    l10n.bookingReplace,
+                    () => context.push(
+                      '${Routes.replacementNew}?bookingId=${Uri.encodeComponent(b.id)}',
+                    ),
+                  ),
+                ReplacementLinks(booking: b),
+                if (b.status == BookingStatus.active)
+                  outline(
+                    'service_report_missing_btn',
+                    l10n.serviceReportMissing,
+                    reportMissing,
+                  ),
+                const SizedBox(height: 4),
+                QuietAction(
+                  key: const Key('service_support_btn'),
+                  label: l10n.serviceSupport,
+                  onPressed: () => context.push(
+                    '${Routes.supportNew}?bookingId=${Uri.encodeComponent(b.id)}',
+                  ),
                 ),
-              );
-              if (done ?? false) {
-                ref
-                  ..invalidate(attendanceProvider(b.id))
-                  ..invalidate(attendanceSummaryProvider(b.id));
-                messenger.showSnackBar(
-                  SnackBar(content: Text(l10n.exceptionSent)),
-                );
-              }
-            },
+              ],
+            ),
           ),
-        action(
-          'service_support_btn',
-          l10n.serviceSupport,
-          () => context.push(
-            '${Routes.supportNew}?bookingId=${Uri.encodeComponent(b.id)}',
-          ),
-          variant: SnButtonVariant.text,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-class _Count extends StatelessWidget {
-  const _Count(this.label, this.n);
-  final String label;
-  final int n;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Text('$n', style: Theme.of(context).textTheme.headlineSmall),
-      Text(label, style: Theme.of(context).textTheme.bodySmall),
-    ],
-  );
-}
-
-class _AttendanceList extends ConsumerWidget {
-  const _AttendanceList({required this.bookingId});
-  final String bookingId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final page = ref.watch(attendanceProvider(bookingId));
-    if (page.isLoading && !page.hasValue) {
-      return const Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: Center(child: CircularProgressIndicator()),
-      );
-    }
-    if (page.hasError && !page.hasValue) {
-      return SizedBox(
-        height: 220,
-        child: SnErrorState(
-          message: failureMessage(l10n, page.error!),
-          onRetry: () => ref.invalidate(attendanceProvider(bookingId)),
-        ),
-      );
-    }
-    final s = page.requireValue;
-    if (s.items.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-        child: Text(l10n.attendanceEmpty, key: const Key('attendance_empty')),
-      );
-    }
-    return Column(
-      children: [
-        for (final e in s.items) _Row(entry: e),
-        if (s.loadMoreError != null)
-          Text(failureMessage(l10n, s.loadMoreError!)),
-        if (s.hasMore || s.isLoadingMore)
-          SnButton(
-            key: const Key('attendance_load_more_btn'),
-            label: l10n.attendanceLoadMore,
-            variant: SnButtonVariant.text,
-            isLoading: s.isLoadingMore,
-            onPressed: () =>
-                ref.read(attendanceProvider(bookingId).notifier).loadMore(),
-          ),
-      ],
-    );
-  }
-}
-
-/// One day. Tapping a row with a note shows or hides the note.
-class _Row extends StatefulWidget {
-  const _Row({required this.entry});
-  final AttendanceEntry entry;
-
-  @override
-  State<_Row> createState() => _RowState();
-}
-
-class _RowState extends State<_Row> {
-  var _open = false;
+/// "This month": present / late / absent / leave / exception counts.
+class _MonthCard extends StatelessWidget {
+  const _MonthCard({required this.summary});
+  final AttendanceSummary summary;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final e = widget.entry;
-    final day = e.day;
-    return Column(
-      children: [
-        ListTile(
-          key: Key('attendance_row_${e.date}'),
-          contentPadding: EdgeInsets.zero,
-          title: Text(day == null ? e.date : formatDate(day, locale)),
-          subtitle: _checkTimes(l10n, e) == null
-              ? null
-              : Text(
-                  _checkTimes(l10n, e)!,
-                  key: Key('attendance_times_${e.date}'),
-                ),
-          trailing: SnBadge(
-            label: attendanceLabel(l10n, e.status),
-            tone: _tone(e.status),
-          ),
-          onTap: e.note == null ? null : () => setState(() => _open = !_open),
-        ),
-        if (_open && e.note != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Text(e.note!, key: Key('attendance_note_${e.date}')),
+    final counts = [
+      (l10n.attendancePresent, summary.present),
+      (l10n.attendanceLate, summary.late),
+      (l10n.attendanceAbsent, summary.absent),
+      (l10n.attendanceLeave, summary.leave),
+      (l10n.attendanceException, summary.exception),
+    ];
+    return DiscoverGlass(
+      key: const Key('service_summary_card'),
+      radius: 26,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.serviceMonthTitle,
+              style: AppText.body.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: dsMuted,
+              ),
             ),
-          ),
-      ],
+            const SizedBox(height: 10),
+            Wrap(
+              alignment: WrapAlignment.spaceAround,
+              spacing: 12,
+              runSpacing: 10,
+              children: [
+                for (final (label, n) in counts)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('$n', style: authSerif(22, 1.1)),
+                      Text(
+                        label,
+                        style: AppText.body.copyWith(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: dsMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

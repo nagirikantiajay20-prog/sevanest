@@ -294,7 +294,13 @@ void main() {
       );
       await t.tap(k('account_about_btn'));
       await t.pumpAndSettle();
-      expect(find.text('Version 2.3.4 (7)'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: k('account_about_version'),
+          matching: find.text('2.3.4 (7)'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Delete account is not offered (OPEN_QUESTIONS #18)', (

@@ -1532,13 +1532,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountSectionActivity => 'My activity';
 
   @override
-  String get accountSectionDetails => 'My details';
+  String get accountSectionDetails => 'Payments & profile';
 
   @override
-  String get accountSectionHelp => 'Help and legal';
+  String get accountSectionHelp => 'Help & legal';
 
   @override
   String get accountEditProfile => 'Edit profile';
+
+  @override
+  String get accountNotifWarn =>
+      'Notifications are off. You may miss worker replies.';
+
+  @override
+  String get accountNotifTurnOn => 'Turn on';
+
+  @override
+  String get accountStayLoggedIn => 'Stay logged in';
+
+  @override
+  String get accountAboutTagline => 'Find verified home workers near you.';
+
+  @override
+  String get accountVersionLabel => 'Version';
 
   @override
   String get favsSubtitle => 'Workers you have saved';
@@ -1728,7 +1744,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutConfirmBody =>
-      'You will need to sign in again with your mobile number.';
+      'You will need your mobile number and a new code to log in again.';
 
   @override
   String get devMenuLive => 'Backend data';
@@ -1958,7 +1974,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get interviewsFind => 'Find a worker';
 
   @override
-  String get accountInterviews => 'Interviews';
+  String get accountInterviews => 'Interviews & trials';
 
   @override
   String interviewCopyScheduled(String kind, String date, String time) {
@@ -2442,7 +2458,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payRecoveredView => 'View';
 
   @override
-  String get accountTransactions => 'Transactions';
+  String get accountTransactions => 'Transactions & receipts';
 
   @override
   String get transactionsTitle => 'Transactions';
@@ -3583,7 +3599,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifTabUnread => 'Unread';
 
   @override
-  String get notifMarkAll => 'Mark all as read';
+  String get notifMarkAll => 'Mark all read';
 
   @override
   String get notifMarkedUnread => 'Marked as unread';
@@ -3634,6 +3650,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifFallbackTitle => 'Update';
 
   @override
+  String notifUnreadCount(int count) {
+    return '$count unread';
+  }
+
+  @override
+  String get notifNoUnread => 'No unread updates';
+
+  @override
+  String get backToHome => 'Back to home';
+
+  @override
+  String get serviceScheduleRow => 'Schedule';
+
+  @override
+  String get serviceLocationRow => 'Location';
+
+  @override
+  String get serviceBookingRow => 'Booking';
+
+  @override
+  String get serviceViewBooking => 'View booking details';
+
+  @override
   String get notifPromptTitle => 'Stay in the loop';
 
   @override
@@ -3659,7 +3698,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifAccountNotAsked => 'Not turned on';
 
   @override
-  String get accountSupport => 'Help and support';
+  String get accountSupport => 'Support';
 
   @override
   String get notifBannerOpen => 'Open notification';

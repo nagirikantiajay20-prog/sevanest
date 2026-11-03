@@ -25,20 +25,22 @@ class InterviewHero extends StatelessWidget {
     this.showSteps = true,
     this.chipKey = const Key('interview_status_chip'),
     this.copyKey = const Key('interview_status_copy'),
+    this.headlineKey,
     super.key,
   });
   final String statusLabel;
   final String headline;
   final String copy;
 
-  /// 0..1 of the way from Requested to Decision.
-  final double progress;
+  /// 0..1 of the way from Requested to Decision; null hides the bar (Active service).
+  final double? progress;
   final HeroTone tone;
 
   /// The Requested / Scheduled / Done / Decision captions under the bar (interview flow only).
   final bool showSteps;
   final Key chipKey;
   final Key copyKey;
+  final Key? headlineKey;
 
   @override
   Widget build(BuildContext context) {
@@ -114,25 +116,30 @@ class InterviewHero extends StatelessWidget {
                   header: true,
                   child: Text(
                     headline,
+                    key: headlineKey,
                     style: authSerif(25, 1.2).copyWith(color: Colors.white),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  copy,
-                  key: copyKey,
-                  style: AppText.body.copyWith(
-                    fontSize: 15,
-                    height: 1.5,
-                    color: const Color(0xDBFFFFFF),
+                if (copy.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    copy,
+                    key: copyKey,
+                    style: AppText.body.copyWith(
+                      fontSize: 15,
+                      height: 1.5,
+                      color: const Color(0xDBFFFFFF),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Semantics(
-                  value: '${(progress * 100).round()}%',
-                  child: _ProgressBar(progress: progress, clock: clock),
-                ),
-                if (showSteps) ...[
+                ],
+                if (progress != null) ...[
+                  const SizedBox(height: 16),
+                  Semantics(
+                    value: '${(progress! * 100).round()}%',
+                    child: _ProgressBar(progress: progress!, clock: clock),
+                  ),
+                ],
+                if (showSteps && progress != null) ...[
                   const SizedBox(height: 6),
                   Row(
                     children: [
@@ -336,12 +343,16 @@ class InterviewWorkerCard extends StatelessWidget {
                                     color: Color(0xFF0B5A53),
                                   ),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    l10n.verified,
-                                    style: AppText.body.copyWith(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF0B5A53),
+                                  Flexible(
+                                    child: Text(
+                                      l10n.verified,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppText.body.copyWith(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF0B5A53),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -397,6 +408,8 @@ class InterviewInfoCard extends StatelessWidget {
     this.onCalendar,
     this.valueColor,
     this.trailing,
+    this.valueKey,
+    this.onTap,
     super.key,
   });
   final List<(String, String)> rows;
@@ -408,6 +421,12 @@ class InterviewInfoCard extends StatelessWidget {
 
   /// A small action after a row's value by index (Booking: copy the reference).
   final Widget? Function(int index)? trailing;
+
+  /// Key of a row's value by index (tests find rows by it).
+  final Key? Function(int index)? valueKey;
+
+  /// Makes a row's value a link by index (Active service: the booking).
+  final VoidCallback? Function(int index)? onTap;
 
   @override
   Widget build(BuildContext context) => DiscoverGlass(
@@ -443,13 +462,17 @@ class InterviewInfoCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 8,
                       children: [
-                        Text(
-                          r.$2,
-                          style: AppText.body.copyWith(
-                            fontSize: 15,
-                            height: 1.4,
-                            fontWeight: FontWeight.w700,
-                            color: valueColor?.call(i) ?? dsNavy,
+                        GestureDetector(
+                          onTap: onTap?.call(i),
+                          child: Text(
+                            r.$2,
+                            key: valueKey?.call(i),
+                            style: AppText.body.copyWith(
+                              fontSize: 15,
+                              height: 1.4,
+                              fontWeight: FontWeight.w700,
+                              color: valueColor?.call(i) ?? dsNavy,
+                            ),
                           ),
                         ),
                         ?trailing?.call(i),

@@ -308,7 +308,7 @@ void main() {
         ];
         await open(t, '/services/current?bookingId=a1');
         expect(find.text('Ramesh K.'), findsOneWidget);
-        expect(find.text('Scheduled 8 AM – 12 PM'), findsOneWidget);
+        expect(find.text('8 AM – 12 PM'), findsOneWidget);
         Finder inRow(String d, String s) =>
             find.descendant(of: k('attendance_row_$d'), matching: find.text(s));
         expect(inRow('2026-10-09', 'Late'), findsOneWidget);

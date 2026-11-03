@@ -2,45 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
-import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
-import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_card.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/account_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/screens/account_deletion_screen.dart';
-import 'package:sevanest_customer/features/customer_profile/presentation/widgets/profile_photo_avatar.dart';
+import 'package:sevanest_customer/features/customer_profile/presentation/widgets/account_parts.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// "+91 ••••••0002": the country code and the last four digits only.
-String maskMobile(String? mobile) {
-  final digits = (mobile ?? '').replaceAll(RegExp(r'\D'), '');
-  if (digits.length < 4) return '';
-  return '+91 ${'•' * 6}${digits.substring(digits.length - 4)}';
-}
+export 'package:sevanest_customer/features/customer_profile/presentation/widgets/account_parts.dart'
+    show maskMobile;
 
-String _initials(String name) => profileInitials(name);
-
-/// Screen 33. Every row is a plain push / tab switch to a screen another module owns; Log out
-/// resets the whole app. Delete account stays hidden until the policy exists (OPEN_QUESTIONS #18).
+/// Screen 33 (design: Find a Worker > Account). Every row is a plain push / tab switch to a
+/// screen another module owns; Log out resets the whole app. Delete account stays hidden until
+/// the policy exists (OPEN_QUESTIONS #18).
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final yes = await confirmDialog(
+    final yes = await showGlassConfirm(
       context,
       title: l10n.logoutConfirmTitle,
       body: l10n.logoutConfirmBody,
       confirmLabel: l10n.logout,
-      cancelLabel: l10n.cancel,
+      keepLabel: l10n.accountStayLoggedIn,
       confirmKey: const Key('account_logout_confirm_btn'),
-      cancelKey: const Key('account_logout_cancel_btn'),
+      keepKey: const Key('account_logout_cancel_btn'),
       destructive: true,
     );
     // Clears the session and every provider; the app restarts on /login.
@@ -49,14 +44,14 @@ class AccountScreen extends ConsumerWidget {
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
-    final yes = await confirmDialog(
+    final yes = await showGlassConfirm(
       context,
       title: l10n.deleteTitle,
       body: l10n.deleteConfirmBody,
       confirmLabel: l10n.deleteConfirmButton,
-      cancelLabel: l10n.cancel,
+      keepLabel: l10n.cancel,
       confirmKey: const Key('account_delete_confirm_btn'),
-      cancelKey: const Key('account_delete_cancel_btn'),
+      keepKey: const Key('account_delete_cancel_btn'),
       destructive: true,
     );
     if (!yes || !context.mounted) return;
@@ -93,26 +88,15 @@ class AccountScreen extends ConsumerWidget {
     }
   }
 
-  void _about(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (_) => const _AboutSheet(),
-    );
-  }
-
-  void _language(BuildContext context, AccountConfig config) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (_) => _LanguageSheet(codes: config.languages),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final config = ref.watch(accountConfigProvider).value;
     final perm = ref.watch(pushPermissionProvider).value;
     final denied = perm == PushPermission.denied;
+    // The floating nav pill sits over the page (Scaffold extendBody).
+    final navClear = MediaQuery.paddingOf(context).bottom + 16;
+    final version = ref.watch(appVersionProvider).value;
 
     Widget row(
       String key,
@@ -121,53 +105,14 @@ class AccountScreen extends ConsumerWidget {
       VoidCallback onTap, {
       String? subtitle,
       Key? subtitleKey,
-      Color? color,
-    }) => ListTile(
+    }) => KeyedSubtree(
       key: Key(key),
-      leading: DecoratedBox(
-        decoration: BoxDecoration(
-          color: color == null ? AppColors.tileWell : AppColors.dangerBgSoft,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: SizedBox(
-          width: 40,
-          height: 40,
-          child: Icon(icon, color: color ?? AppColors.teal),
-        ),
-      ),
-      title: Text(title, style: AppText.card.copyWith(color: color)),
-      subtitle: subtitle == null ? null : Text(subtitle, key: subtitleKey),
-      trailing: color == null
-          ? const Icon(Icons.chevron_right, color: AppColors.slate400)
-          : null,
-      onTap: onTap,
-    );
-
-    Widget group(String? label, List<Widget> rows) => Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (label != null)
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.xs,
-                bottom: AppSpacing.sm,
-              ),
-              child: Text(label.toUpperCase(), style: AppText.label),
-            ),
-          SnCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                for (var i = 0; i < rows.length; i++) ...[
-                  if (i > 0) const Divider(height: 1),
-                  rows[i],
-                ],
-              ],
-            ),
-          ),
-        ],
+      child: AccountRow(
+        icon: icon,
+        title: title,
+        onTap: onTap,
+        subtitle: subtitle,
+        subtitleKey: subtitleKey,
       ),
     );
 
@@ -178,201 +123,159 @@ class AccountScreen extends ConsumerWidget {
       _ => null,
     };
 
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
+    return FindGlassPage(
+      title: l10n.navAccount,
+      body: ListView(
+        padding: EdgeInsets.fromLTRB(16, 12, 16, navClear),
         children: [
-          SnHeader(title: l10n.navAccount),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              children: [
-                _Header(
-                  profile: ref.watch(profileProvider).value,
-                  onEdit: () => context.push(Routes.profile),
-                ),
-                group(l10n.accountSectionActivity, [
-                  row(
-                    'account_bookings_btn',
-                    Icons.receipt_long_outlined,
-                    l10n.accountBookings,
-                    () => context.go(Routes.bookings),
-                  ),
-                  row(
-                    'account_interviews_btn',
-                    Icons.event_available_outlined,
-                    l10n.accountInterviews,
-                    () => context.push(Routes.interviews),
-                  ),
-                  row(
-                    'account_history_btn',
-                    Icons.history,
-                    l10n.accountHistory,
-                    () => context.push(Routes.serviceHistory),
-                  ),
-                  row(
-                    'account_transactions_btn',
-                    Icons.payments_outlined,
-                    l10n.accountTransactions,
-                    () => context.push(Routes.transactions),
-                  ),
-                  row(
-                    'account_favourites_btn',
-                    Icons.favorite_border,
-                    l10n.accountShortlist,
-                    () => context.go(Routes.favourites),
-                  ),
-                ]),
-                group(l10n.accountSectionDetails, [
-                  row(
-                    'account_addresses_btn',
-                    Icons.location_on_outlined,
-                    l10n.addressesTitle,
-                    () => context.push(Routes.addresses),
-                  ),
-                  row(
-                    'account_notifications_btn',
-                    denied
-                        ? Icons.notifications_off_outlined
-                        : Icons.notifications_none,
-                    l10n.notifAccountTitle,
-                    () => context.push(Routes.notifications),
-                    subtitle: notifStatus,
-                    subtitleKey: const Key('account_notifications_status'),
-                  ),
-                  if (denied)
-                    ListTile(
-                      title: Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton(
-                          key: const Key('notif_open_settings_btn'),
-                          onPressed: () =>
-                              ref.read(pushServiceProvider).openSettings(),
-                          child: Text(l10n.notifOpenSettings),
-                        ),
-                      ),
-                    ),
-                  // Hidden while only English is enabled (V1).
-                  if (config != null && config.languages.length > 1)
-                    row(
-                      'account_language_btn',
-                      Icons.language,
-                      l10n.accountLanguage,
-                      () => _language(context, config),
-                    ),
-                ]),
-                group(l10n.accountSectionHelp, [
-                  row(
-                    'account_support_btn',
-                    Icons.headset_mic_outlined,
-                    l10n.accountSupport,
-                    () => context.push(Routes.support),
-                  ),
-                  row(
-                    'account_terms_btn',
-                    Icons.description_outlined,
-                    l10n.accountTerms,
-                    () => _openLegal(context, ref, config?.termsUrl),
-                  ),
-                  row(
-                    'account_privacy_btn',
-                    Icons.privacy_tip_outlined,
-                    l10n.accountPrivacy,
-                    () => _openLegal(context, ref, config?.privacyUrl),
-                  ),
-                  row(
-                    'account_about_btn',
-                    Icons.info_outline,
-                    l10n.accountAbout,
-                    () => _about(context),
-                  ),
-                ]),
-                group(null, [
-                  if (ref.watch(accountDeletionEnabledProvider))
-                    row(
-                      'account_delete_btn',
-                      Icons.delete_outline,
-                      l10n.accountDelete,
-                      () => _delete(context, ref),
-                      color: AppColors.danger,
-                    ),
-                  row(
-                    'account_logout_btn',
-                    Icons.logout,
-                    l10n.logout,
-                    () => _logout(context, ref),
-                    color: AppColors.danger,
-                  ),
-                ]),
-              ],
-            ),
+          AccountHeaderCard(
+            profile: ref.watch(profileProvider).value,
+            onEdit: () => context.push(Routes.profile),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({required this.profile, required this.onEdit});
-
-  final CustomerProfile? profile;
-  final VoidCallback onEdit;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final p = profile;
-    final mobile = maskMobile(p?.mobile);
-    return SnCard(
-      child: Column(
-        children: [
-          if (p != null)
-            Row(
-              children: [
-                ProfilePhotoAvatar(
-                  key: const Key('account_avatar'),
-                  initials: _initials(p.name),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        p.name,
-                        key: const Key('account_name'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppText.heading,
-                      ),
-                      if (mobile.isNotEmpty)
-                        Text(
-                          mobile,
-                          key: const Key('account_mobile'),
-                          style: AppText.body,
-                        ),
-                      // Read-only, backend-supplied status shown as-is (AGENTS 27).
-                      if (p.verificationStatus != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.xs),
-                          child: Chip(
-                            key: const Key('account_verification_chip'),
-                            label: Text(p.verificationStatus!),
-                          ),
-                        ),
-                    ],
+          if (denied)
+            AccountNotifWarning(
+              onTurnOn: () => ref.read(pushServiceProvider).openSettings(),
+            ),
+          AccountSection(
+            label: l10n.accountSectionActivity,
+            delayMs: 120,
+            rows: [
+              row(
+                'account_bookings_btn',
+                Icons.calendar_month_outlined,
+                l10n.accountBookings,
+                () => context.go(Routes.bookings),
+              ),
+              row(
+                'account_favourites_btn',
+                Icons.favorite_border_rounded,
+                l10n.accountShortlist,
+                () => context.go(Routes.favourites),
+              ),
+              row(
+                'account_interviews_btn',
+                Icons.event_available_outlined,
+                l10n.accountInterviews,
+                () => context.push(Routes.interviews),
+              ),
+              row(
+                'account_history_btn',
+                Icons.history_rounded,
+                l10n.accountHistory,
+                () => context.push(Routes.serviceHistory),
+              ),
+            ],
+          ),
+          AccountSection(
+            label: l10n.accountSectionDetails,
+            delayMs: 200,
+            rows: [
+              row(
+                'account_transactions_btn',
+                Icons.account_balance_wallet_outlined,
+                l10n.accountTransactions,
+                () => context.push(Routes.transactions),
+              ),
+              row(
+                'account_addresses_btn',
+                Icons.location_on_outlined,
+                l10n.myAddressesTitle,
+                () => context.push(Routes.addresses),
+              ),
+              // Hidden while only English is enabled (V1).
+              if (config != null && config.languages.length > 1)
+                row(
+                  'account_language_btn',
+                  Icons.language_rounded,
+                  l10n.accountLanguage,
+                  () => showGlassSheet<void>(
+                    context,
+                    builder: (_) => _LanguageSheet(codes: config.languages),
                   ),
                 ),
+            ],
+          ),
+          AccountSection(
+            label: l10n.accountSectionHelp,
+            delayMs: 280,
+            rows: [
+              row(
+                'account_support_btn',
+                Icons.help_outline_rounded,
+                l10n.accountSupport,
+                () => context.push(Routes.support),
+              ),
+              row(
+                'account_notifications_btn',
+                denied
+                    ? Icons.notifications_off_outlined
+                    : Icons.notifications_none_rounded,
+                l10n.notifAccountTitle,
+                () => context.push(Routes.notifications),
+                subtitle: notifStatus,
+                subtitleKey: const Key('account_notifications_status'),
+              ),
+              row(
+                'account_terms_btn',
+                Icons.description_outlined,
+                l10n.accountTerms,
+                () => _openLegal(context, ref, config?.termsUrl),
+              ),
+              row(
+                'account_privacy_btn',
+                Icons.shield_outlined,
+                l10n.accountPrivacy,
+                () => _openLegal(context, ref, config?.privacyUrl),
+              ),
+              row(
+                'account_about_btn',
+                Icons.info_outline_rounded,
+                l10n.accountAbout,
+                () => showGlassSheet<void>(
+                  context,
+                  builder: (_) => const _AboutSheet(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          DiscoverRise(
+            delayMs: 340,
+            child: Column(
+              children: [
+                if (ref.watch(accountDeletionEnabledProvider)) ...[
+                  KeyedSubtree(
+                    key: const Key('account_delete_btn'),
+                    child: AccountDangerButton(
+                      icon: Icons.delete_outline_rounded,
+                      label: l10n.accountDelete,
+                      onPressed: () => _delete(context, ref),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                KeyedSubtree(
+                  key: const Key('account_logout_btn'),
+                  child: AccountDangerButton(
+                    icon: Icons.logout_rounded,
+                    label: l10n.logout,
+                    onPressed: () => _logout(context, ref),
+                  ),
+                ),
+                if (version != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Text(
+                      'SevaNest · ${l10n.accountVersion(version)}',
+                      textAlign: TextAlign.center,
+                      style: AppText.body.copyWith(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600,
+                        color: dsMuted,
+                      ),
+                    ),
+                  ),
               ],
-            ),
-          if (p != null) const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              key: const Key('account_profile_btn'),
-              onPressed: onEdit,
-              child: Text(l10n.accountEditProfile),
             ),
           ),
         ],
@@ -388,25 +291,63 @@ class _AboutSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final version = ref.watch(appVersionProvider).value;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              l10n.accountAbout,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            if (version != null)
-              Text(
-                l10n.accountVersion(version),
-                key: const Key('account_about_version'),
-              ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.accountAbout, style: authSerif(24, 1.15)),
+        const SizedBox(height: 10),
+        Text(
+          l10n.accountAboutTagline,
+          style: AppText.body.copyWith(
+            fontSize: 15.5,
+            height: 1.55,
+            color: dsText,
+          ),
         ),
-      ),
+        if (version != null)
+          Container(
+            key: const Key('account_about_version'),
+            margin: const EdgeInsets.only(top: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: dsNavy.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final t in [l10n.accountVersionLabel, version])
+                  Text(
+                    t,
+                    style: AppText.body.copyWith(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
+                      color: dsNavy,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 54,
+          child: FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: FilledButton.styleFrom(
+              backgroundColor: dsNavy,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: AppText.body.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            child: Text(MaterialLocalizations.of(context).closeButtonLabel),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -453,21 +394,26 @@ class _LanguageSheet extends ConsumerWidget {
           );
     }
 
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final l in profileLanguages.where((l) => codes.contains(l.code)))
-            ListTile(
-              key: Key('account_language_${l.code}'),
-              title: Text(l.label),
-              trailing: l.code == profile?.preferredLanguage
-                  ? const Icon(Icons.check)
-                  : null,
-              onTap: profile == null ? null : () => pick(l.code),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final l in profileLanguages.where((l) => codes.contains(l.code)))
+          ListTile(
+            key: Key('account_language_${l.code}'),
+            title: Text(
+              l.label,
+              style: AppText.body.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: dsNavy,
+              ),
             ),
-        ],
-      ),
+            trailing: l.code == profile?.preferredLanguage
+                ? const Icon(Icons.check_rounded, color: dsNavy)
+                : null,
+            onTap: profile == null ? null : () => pick(l.code),
+          ),
+      ],
     );
   }
 }

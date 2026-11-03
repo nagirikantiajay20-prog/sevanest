@@ -183,8 +183,60 @@ class GlassEmpty extends StatelessWidget {
   }
 }
 
-/// Bottom sheet that asks "are you sure?": grab handle, serif title, body, a big confirm button
-/// and a plain "keep" text button. True only when confirm is tapped.
+/// Cream bottom sheet of the glass screens: rounded top, grab handle, then [builder]'s content.
+Future<T?> showGlassSheet<T>(
+  BuildContext context, {
+  required WidgetBuilder builder,
+}) => showModalBottomSheet<T>(
+  context: context,
+  isScrollControlled: true,
+  backgroundColor: Colors.transparent,
+  barrierColor: const Color(0x611B3354),
+  builder: (ctx) => Container(
+    padding: EdgeInsets.fromLTRB(
+      20,
+      12,
+      20,
+      24 + MediaQuery.paddingOf(ctx).bottom,
+    ),
+    decoration: BoxDecoration(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xF7FFFFFF), Color(0xF7FAF8F5)],
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: dsNavy.withValues(alpha: 0.25),
+          blurRadius: 40,
+          offset: const Offset(0, -16),
+        ),
+      ],
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: Container(
+            width: 44,
+            height: 5,
+            decoration: BoxDecoration(
+              color: dsNavy.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        builder(ctx),
+      ],
+    ),
+  ),
+);
+
+/// Bottom sheet that asks "are you sure?": serif title, body, a big confirm button and a plain
+/// "keep" text button. True only when confirm is tapped.
 Future<bool> showGlassConfirm(
   BuildContext context, {
   required String title,
@@ -195,95 +247,58 @@ Future<bool> showGlassConfirm(
   Key keepKey = const Key('dialog_cancel_btn'),
   bool destructive = false,
 }) async {
-  final yes = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: const Color(0x611B3354),
-    builder: (ctx) => Container(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        24 + MediaQuery.paddingOf(ctx).bottom,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xF7FFFFFF), Color(0xF7FAF8F5)],
+  final yes = await showGlassSheet<bool>(
+    context,
+    builder: (ctx) => Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(title, style: authSerif(24, 1.15)),
+        const SizedBox(height: 12),
+        Text(
+          body,
+          style: AppText.body.copyWith(
+            fontSize: 15.5,
+            height: 1.55,
+            color: dsText,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: dsNavy.withValues(alpha: 0.25),
-            blurRadius: 40,
-            offset: const Offset(0, -16),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
-                color: dsNavy.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(3),
+        const SizedBox(height: 20),
+        SizedBox(
+          height: 58,
+          child: FilledButton(
+            key: confirmKey,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: destructive ? const Color(0xFFBE123C) : dsNavy,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              textStyle: AppText.body.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
             ),
+            child: Text(confirmLabel),
           ),
-          const SizedBox(height: 16),
-          Text(title, style: authSerif(24, 1.15)),
-          const SizedBox(height: 12),
-          Text(
-            body,
-            style: AppText.body.copyWith(
-              fontSize: 15.5,
-              height: 1.55,
-              color: dsText,
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: 58,
-            child: FilledButton(
-              key: confirmKey,
-              onPressed: () => Navigator.of(ctx).pop(true),
-              style: FilledButton.styleFrom(
-                backgroundColor: destructive ? const Color(0xFFBE123C) : dsNavy,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                textStyle: AppText.body.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
+        ),
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 48,
+          child: TextButton(
+            key: keepKey,
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(
+              foregroundColor: dsMuted,
+              textStyle: AppText.body.copyWith(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
-              child: Text(confirmLabel),
             ),
+            child: Text(keepLabel),
           ),
-          const SizedBox(height: 6),
-          SizedBox(
-            height: 48,
-            child: TextButton(
-              key: keepKey,
-              onPressed: () => Navigator.of(ctx).pop(false),
-              style: TextButton.styleFrom(
-                foregroundColor: dsMuted,
-                textStyle: AppText.body.copyWith(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              child: Text(keepLabel),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
   return yes ?? false;
