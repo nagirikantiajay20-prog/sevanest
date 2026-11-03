@@ -6,14 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
-import 'package:sevanest_customer/core/widgets/sn_states.dart';
 import 'package:sevanest_customer/core/widgets/sn_timeline.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta;
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
@@ -21,10 +19,13 @@ import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
 import 'package:sevanest_customer/features/replacement/presentation/providers/replacement_providers.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_labels.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_widgets.dart';
-import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/support_glass_parts.dart';
 import 'package:sevanest_customer/features/worker_search/domain/worker_search.dart';
-import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -144,12 +145,12 @@ class _State extends ConsumerState<ReplacementStatusScreen>
 
   Future<void> _withdraw(Replacement r) async {
     final l10n = AppLocalizations.of(context);
-    final ok = await confirmDialog(
+    final ok = await showGlassConfirm(
       context,
       title: l10n.repWithdrawTitle,
       body: l10n.repWithdrawBody,
       confirmLabel: l10n.repWithdrawYes,
-      cancelLabel: l10n.repKeep,
+      keepLabel: l10n.repKeep,
       confirmKey: const Key('replacement_withdraw_confirm_btn'),
       destructive: true,
     );
@@ -180,12 +181,12 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     final worker = _picked;
     if (worker == null || _busy) return;
     final l10n = AppLocalizations.of(context);
-    final ok = await confirmDialog(
+    final ok = await showGlassConfirm(
       context,
       title: l10n.repSelectTitle,
       body: l10n.repSelectBody,
       confirmLabel: l10n.repSelectYes,
-      cancelLabel: l10n.repGoBack,
+      keepLabel: l10n.repGoBack,
       confirmKey: const Key('replacement_select_confirm_btn'),
     );
     if (ok && mounted) await _select(r, worker);
@@ -248,31 +249,41 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     final value = ref.watch(replacementProvider(_id));
     // "Alternatives ready" and similar arrive as notifications: read the request again.
     ref.listen(notificationTickProvider, (_, _) => _reload());
-    return Scaffold(
-      backgroundColor: AppColors.canvasCool,
-      body: Column(
-        children: [
-          SnHeader(
-            title: l10n.repStatusTitle,
-            onBack: () =>
-                context.canPop() ? context.pop() : context.go(Routes.bookings),
-          ),
-          Expanded(
-            child: value.hasValue
-                ? _content(l10n, value.requireValue, stale: value.hasError)
-                : value.hasError
-                ? _LoadError(onRetry: _refresh)
-                : const SnSkeletonList(count: 3),
-          ),
-        ],
+    final r = value.value;
+    final ready = r != null && _viewOf(r) == ReplacementView.ready;
+    return FindGlassPage(
+      title: ready ? l10n.repChooseWorkerTitle : l10n.repStatusTitle,
+      backLabel: l10n.back,
+      onBack: () =>
+          context.canPop() ? context.pop() : context.go(Routes.bookings),
+      bottom: ready ? _bottom(l10n, r) : null,
+      body: GlassAsyncView<Replacement>(
+        value: value,
+        onRetry: _refresh,
+        data: (r) => _content(l10n, r, stale: value.hasError),
       ),
+    );
+  }
+
+  /// What the request looks like now: its status, the alternatives the backend lists and the start
+  /// date of the replacement booking.
+  ReplacementView _viewOf(Replacement r) {
+    final now = ref.read(nowProvider)();
+    final fresh = r.replacementBookingId == null
+        ? null
+        : ref.watch(bookingProvider(r.replacementBookingId!)).value;
+    return replacementView(
+      r,
+      alternatives: r.status == ReplacementStatus.approved
+          ? ref.watch(replacementAlternativesProvider(_id)).value ?? const []
+          : const [],
+      replacementBooking: fresh,
+      today: DateTime(now.year, now.month, now.day),
     );
   }
 
   Widget _content(AppLocalizations l10n, Replacement r, {required bool stale}) {
     final locale = Localizations.localeOf(context).toString();
-    final now = ref.read(nowProvider)();
-    final today = DateTime(now.year, now.month, now.day);
     final old = ref.watch(bookingProvider(r.bookingId)).value;
     final fresh = r.replacementBookingId == null
         ? null
@@ -281,246 +292,223 @@ class _State extends ConsumerState<ReplacementStatusScreen>
         ? ref.watch(replacementAlternativesProvider(_id))
         : null;
     final choices = alts?.value ?? const <WorkerSummary>[];
-    final view = replacementView(
-      r,
-      alternatives: choices,
-      replacementBooking: fresh,
-      today: today,
-    );
-    final text = Theme.of(context).textTheme;
+    final view = _viewOf(r);
 
     String when(DateTime d) =>
         '${formatDayMonth(d, locale)}, ${formatTime(d.hour * 60 + d.minute)}';
 
     final start = fresh?.startDate;
-    final banner = switch (view) {
+    final oldName = old == null ? null : bookingWorkerName(old);
+    final (title, body, tone) = switch (view) {
       ReplacementView.review => (
-        Icons.schedule,
         l10n.repBannerReviewTitle,
         l10n.repBannerReviewBody,
-        AppColors.warnBg,
-        AppColors.warn,
+        ReplacementTone.review,
       ),
       ReplacementView.finding => (
-        Icons.hourglass_top,
         l10n.repBannerFindingTitle,
         l10n.repBannerFindingBody,
-        AppColors.warnBg,
-        AppColors.warn,
+        ReplacementTone.review,
       ),
       ReplacementView.ready => (
-        Icons.groups_outlined,
-        l10n.repBannerReadyTitle(choices.length),
-        l10n.repBannerReadyBody,
-        AppColors.tealMist,
-        AppColors.teal,
+        l10n.repBannerReadyTitle,
+        oldName == null
+            ? l10n.repBannerReadyBody
+            : l10n.repBannerReadyFor(oldName),
+        ReplacementTone.good,
       ),
       ReplacementView.scheduled => (
-        Icons.check_circle_outline,
         l10n.repBannerScheduledTitle,
         start == null
             ? null
             : l10n.repBannerScheduledBody(formatDate(start, locale)),
-        AppColors.successBg,
-        AppColors.success,
+        ReplacementTone.good,
       ),
       ReplacementView.complete => (
-        Icons.check_circle_outline,
         l10n.repBannerCompleteTitle,
         l10n.repBannerCompleteBody,
-        AppColors.successBg,
-        AppColors.success,
+        ReplacementTone.good,
       ),
       ReplacementView.rejected => (
-        Icons.cancel_outlined,
         l10n.repBannerRejectedTitle,
         l10n.repBannerRejectedBody,
-        AppColors.dangerBg,
-        AppColors.danger,
+        ReplacementTone.bad,
       ),
       ReplacementView.cancelled => (
-        Icons.block,
         l10n.repBannerCancelledTitle,
         null,
-        AppColors.fieldBg,
-        AppColors.slate,
+        ReplacementTone.neutral,
       ),
       ReplacementView.unknown => (
-        Icons.info_outline,
         l10n.repBannerUnknownTitle,
         null,
-        AppColors.fieldBg,
-        AppColors.slate,
+        ReplacementTone.neutral,
       ),
     };
 
-    final steps = _timeline(l10n, r, view, when);
-    final engagement = old?.engagement == null
-        ? null
-        : engagementLabels(l10n, old!.engagement!).name;
-
-    final body = <Widget>[
-      if (stale || _offline || (alts?.hasError ?? false))
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: ReplacementNotice(
-            key: const Key('replacement_offline_banner'),
-            icon: Icons.wifi_off,
-            title: l10n.repOfflineBanner,
-            trailing: TextButton(
-              key: const Key('replacement_offline_retry_btn'),
-              onPressed: _busy
-                  ? null
-                  : _offline && _picked != null
-                  ? () => _select(r, _picked!)
-                  : _refresh,
-              child: Text(l10n.retry),
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 36),
+        children: [
+          if (stale || _offline || (alts?.hasError ?? false))
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: SupportNotice(
+                key: const Key('replacement_offline_banner'),
+                icon: Icons.wifi_off_rounded,
+                iconColor: const Color(0xFF8A4B06),
+                tint: supportWarnTint,
+                title: l10n.repOfflineBanner,
+                trailing: TextButton(
+                  key: const Key('replacement_offline_retry_btn'),
+                  onPressed: _busy
+                      ? null
+                      : _offline && _picked != null
+                      ? () => _select(r, _picked!)
+                      : _refresh,
+                  child: Text(l10n.retry),
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: DiscoverRise(
+              delayMs: 0,
+              child: ReplacementBanner(
+                key: Key('replacement_banner_${view.name}'),
+                label: replacementStatusLabel(l10n, r.status),
+                title: title,
+                body: body,
+                tone: tone,
+              ),
             ),
           ),
-        ),
-      ReplacementNotice(
-        key: Key('replacement_banner_${view.name}'),
-        icon: banner.$1,
-        title: banner.$2,
-        body: banner.$3,
-        color: banner.$4,
-        iconColor: banner.$5,
+          if (view == ReplacementView.ready) ..._choices(l10n, choices),
+          ...[
+            _requestCard(l10n, r, old, when),
+            SupportSection(
+              title: l10n.repProgress,
+              delayMs: 100,
+              child: ReplacementProgress(
+                key: const Key('replacement_timeline'),
+                items: _timeline(l10n, r, view, when),
+              ),
+            ),
+          ],
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: SupportNotice(
+                key: const Key('replacement_select_error'),
+                icon: Icons.error_outline_rounded,
+                iconColor: supportDanger,
+                title: _error!,
+              ),
+            ),
+          ..._actions(l10n, r, view),
+        ],
       ),
-      const SizedBox(height: AppSpacing.lg),
-      Card(
-        key: const Key('replacement_request_card'),
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    );
+  }
+
+  /// The request: the worker being replaced, its number, the reason and what the team wrote.
+  Widget _requestCard(
+    AppLocalizations l10n,
+    Replacement r,
+    Booking? old,
+    String Function(DateTime) when,
+  ) {
+    final line = AppText.body.copyWith(
+      fontSize: 14.5,
+      height: 1.45,
+      color: dsText,
+    );
+    return SupportSection(
+      key: const Key('replacement_request_card'),
+      delayMs: 60,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (old != null) ...[
+            ReplacementWorker(
+              booking: old,
+              muted: true,
+              tag: old.status == BookingStatus.replaced
+                  ? l10n.repTagPrevious
+                  : l10n.repTagCurrent,
+            ),
+            const SizedBox(height: 12),
+          ],
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.repRequestNo(r.reference),
-                      key: const Key('replacement_request_no'),
-                      style: text.titleLarge,
-                    ),
+              Expanded(
+                child: Text(
+                  l10n.repRequestNo(r.reference),
+                  key: const Key('replacement_request_no'),
+                  style: AppText.body.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: dsNavy,
                   ),
-                  IconButton(
-                    key: const Key('replacement_copy_btn'),
-                    tooltip: l10n.repCopyId,
-                    icon: const Icon(
-                      Icons.copy_outlined,
-                      color: AppColors.teal,
-                    ),
-                    onPressed: () {
-                      unawaited(Clipboard.setData(ClipboardData(text: r.id)));
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(l10n.repCopied)));
-                    },
-                  ),
-                ],
+                ),
               ),
-              Wrap(
-                spacing: AppSpacing.sm,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    [
-                      ?(old?.categoryName ?? old?.categoryCode),
-                      ?engagement,
-                      if (old != null) '#${old.reference}',
-                    ].join(' · '),
-                    key: const Key('replacement_previous_line'),
-                    style: text.bodyMedium,
-                  ),
-                  if (old != null)
-                    SnBadge(
-                      key: const Key('replacement_previous_tag'),
-                      label: old.status == BookingStatus.replaced
-                          ? l10n.repTagPrevious
-                          : l10n.repTagCurrent,
-                    ),
-                ],
+              IconButton(
+                key: const Key('replacement_copy_btn'),
+                tooltip: l10n.repCopyId,
+                icon: const Icon(Icons.copy_outlined, color: AppColors.teal),
+                onPressed: () {
+                  unawaited(Clipboard.setData(ClipboardData(text: r.id)));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.repCopied)));
+                },
               ),
-              const Divider(height: AppSpacing.lg),
-              Text(l10n.repRowReason, style: text.bodySmall),
+            ],
+          ),
+          Wrap(
+            spacing: 4,
+            children: [
+              Text(
+                '${l10n.repRowReason}:',
+                style: line.copyWith(fontWeight: FontWeight.w800),
+              ),
               Text(
                 replacementReasonText(l10n, r.reason),
                 key: const Key('replacement_reason_value'),
-                style: text.titleMedium,
+                style: line,
               ),
-              if (r.notes != null) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(r.notes!, style: text.bodyMedium),
-              ],
-              if (r.decisionRemarks != null) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(l10n.repTeamNote, style: text.bodySmall),
-                Text(
-                  r.decisionRemarks!,
-                  key: const Key('replacement_team_note'),
-                  style: text.bodyMedium,
-                ),
-              ],
-              if (r.createdAt != null) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  l10n.repSubmitted(when(r.createdAt!)),
-                  key: const Key('replacement_submitted'),
-                  style: text.bodySmall,
-                ),
-              ],
             ],
           ),
-        ),
-      ),
-      const SizedBox(height: AppSpacing.lg),
-      Text(l10n.repProgress, style: text.titleLarge),
-      const SizedBox(height: AppSpacing.sm),
-      Card(
-        key: const Key('replacement_timeline'),
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: SnTimeline(items: steps),
-        ),
-      ),
-      if (view == ReplacementView.ready) ..._choices(l10n, choices),
-      if (_error != null)
-        Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.md),
-          child: Text(
-            _error!,
-            key: const Key('replacement_select_error'),
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
-          ),
-        ),
-      if (view == ReplacementView.ready ||
-          view == ReplacementView.cancelled) ...[
-        const SizedBox(height: AppSpacing.md),
-        _HelpRow(
-          onSupport: () => _support(r),
-          onWithdraw: view == ReplacementView.ready && !_busy
-              ? () => _withdraw(r)
-              : null,
-        ),
-      ],
-    ];
-
-    return Column(
-      children: [
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _refresh,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppSpacing.md),
-              children: body,
+          if (r.notes != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(r.notes!, style: line),
             ),
-          ),
-        ),
-        _bar(l10n, r, view),
-      ],
+          if (r.decisionRemarks != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.repTeamNote,
+              style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
+            ),
+            Text(
+              r.decisionRemarks!,
+              key: const Key('replacement_team_note'),
+              style: line,
+            ),
+          ],
+          if (r.createdAt != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                l10n.repSubmitted(when(r.createdAt!)),
+                key: const Key('replacement_submitted'),
+                style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -618,15 +606,19 @@ class _State extends ConsumerState<ReplacementStatusScreen>
   }
 
   List<Widget> _choices(AppLocalizations l10n, List<WorkerSummary> workers) {
-    final text = Theme.of(context).textTheme;
+    final scale = ref.watch(ratingScaleMaxProvider).value ?? 5;
     return [
-      const SizedBox(height: AppSpacing.lg),
-      Text(l10n.repChooseTitle, style: text.titleLarge),
-      Text(l10n.repChooseSub, style: text.bodyMedium),
-      const SizedBox(height: AppSpacing.sm),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(4, 14, 4, 0),
+        child: Text(
+          l10n.repChooseSub,
+          style: AppText.body.copyWith(fontSize: 14, color: dsMuted),
+        ),
+      ),
       for (final w in workers)
-        _Alternative(
+        AlternativePick(
           worker: w,
+          scale: scale,
           selected: _picked == w.id,
           enabled: !_busy,
           onSelect: () => setState(() {
@@ -640,265 +632,108 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     ];
   }
 
-  Widget _bar(AppLocalizations l10n, Replacement r, ReplacementView view) {
-    SnButton btn(
+  /// Buttons under the content, by what the request is now.
+  List<Widget> _actions(
+    AppLocalizations l10n,
+    Replacement r,
+    ReplacementView view,
+  ) {
+    ReplacementAction act(
       String key,
       String label,
       VoidCallback? onTap, {
-      SnButtonVariant variant = SnButtonVariant.deep,
-      bool loading = false,
-    }) => SnButton(
+      bool danger = false,
+    }) => ReplacementAction(
       key: Key(key),
       label: label,
-      variant: variant,
-      isLoading: loading,
+      danger: danger,
       onPressed: onTap,
     );
-    const gap = SizedBox(height: AppSpacing.sm);
-    final kids = switch (view) {
-      ReplacementView.review || ReplacementView.finding => <Widget>[
-        Row(
-          children: [
-            Expanded(
-              child: btn(
-                'replacement_support_btn',
-                l10n.contactSupport,
-                () => _support(r),
-                variant: SnButtonVariant.secondary,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            TextButton(
-              key: const Key('replacement_withdraw_btn'),
-              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-              onPressed: _busy ? null : () => _withdraw(r),
-              child: Text(l10n.repWithdraw),
-            ),
-          ],
-        ),
-      ],
-      ReplacementView.ready => <Widget>[
-        if (_picked == null || _offline)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: Text(
-              _offline ? l10n.repOfflineContinue : l10n.repSelectHint,
-              key: const Key('replacement_select_hint'),
-            ),
-          ),
-        btn(
-          'replacement_select_btn',
-          l10n.repConfirm,
-          _picked == null || _offline ? null : () => _confirmSelection(r),
-          loading: _busy,
-        ),
-      ],
-      ReplacementView.scheduled => <Widget>[
-        btn(
-          'replacement_view_booking_btn',
-          l10n.repViewBooking,
-          () => _toBooking(r.replacementBookingId ?? r.bookingId),
-          variant: SnButtonVariant.secondary,
-        ),
-        TextButton(
-          key: const Key('replacement_view_old_btn'),
-          onPressed: () => context.push(
-            Routes.path(Routes.bookingDetail, {'id': r.bookingId}),
-          ),
-          child: Text(l10n.repViewOld),
-        ),
-      ],
-      ReplacementView.complete => <Widget>[
-        btn(
+    final support = act(
+      view == ReplacementView.ready || view == ReplacementView.cancelled
+          ? 'replacement_help_support_btn'
+          : 'replacement_support_btn',
+      l10n.contactSupport,
+      () => _support(r),
+    );
+    final withdraw = act(
+      'replacement_withdraw_btn',
+      l10n.repWithdraw,
+      _busy ? null : () => _withdraw(r),
+      danger: true,
+    );
+    final back = act(
+      'replacement_back_booking_btn',
+      l10n.repBackBooking,
+      () => _toBooking(r.bookingId),
+    );
+    return switch (view) {
+      ReplacementView.review ||
+      ReplacementView.finding ||
+      ReplacementView.ready => [support, withdraw],
+      ReplacementView.scheduled || ReplacementView.complete => [
+        act(
           'replacement_view_booking_btn',
           l10n.repViewBooking,
           () => _toBooking(r.replacementBookingId ?? r.bookingId),
         ),
-        TextButton(
-          key: const Key('replacement_view_old_btn'),
-          onPressed: () => context.push(
+        act(
+          'replacement_view_old_btn',
+          l10n.repViewOld,
+          () => context.push(
             Routes.path(Routes.bookingDetail, {'id': r.bookingId}),
           ),
-          child: Text(l10n.repViewOld),
         ),
       ],
-      ReplacementView.rejected => <Widget>[
-        btn(
+      ReplacementView.rejected => [
+        act(
           'replacement_again_btn',
           l10n.repRequestAgain,
           () => context.pushReplacement(
             '${Routes.replacementNew}?bookingId=${Uri.encodeComponent(r.bookingId)}',
           ),
         ),
-        gap,
-        btn(
-          'replacement_support_btn',
-          l10n.contactSupport,
-          () => _support(r),
-          variant: SnButtonVariant.secondary,
-        ),
-        gap,
-        btn(
+        support,
+        act(
           'replacement_find_worker_btn',
           l10n.repFindWorker,
           () => context.go(Routes.discoverCategory),
-          variant: SnButtonVariant.secondary,
         ),
-        TextButton(
-          key: const Key('replacement_back_booking_btn'),
-          onPressed: () => _toBooking(r.bookingId),
-          child: Text(l10n.repBackBooking),
-        ),
+        back,
       ],
-      ReplacementView.cancelled || ReplacementView.unknown => <Widget>[
-        btn(
-          'replacement_back_booking_btn',
-          l10n.repBackBooking,
-          () => _toBooking(r.bookingId),
-        ),
-      ],
+      ReplacementView.cancelled || ReplacementView.unknown => [support, back],
     };
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.hairline)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(mainAxisSize: MainAxisSize.min, children: kids),
-        ),
-      ),
-    );
   }
-}
 
-class _HelpRow extends StatelessWidget {
-  const _HelpRow({required this.onSupport, this.onWithdraw});
-  final VoidCallback onSupport;
-  final VoidCallback? onWithdraw;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        TextButton.icon(
-          key: const Key('replacement_help_support_btn'),
-          onPressed: onSupport,
-          icon: const Icon(Icons.headset_mic_outlined),
-          label: Text('${l10n.repNeedHelp} ${l10n.contactSupport}'),
-        ),
-        if (onWithdraw != null)
-          TextButton(
-            key: const Key('replacement_withdraw_btn'),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            onPressed: onWithdraw,
-            child: Text(l10n.repWithdraw),
-          ),
-      ],
-    );
-  }
-}
-
-/// One alternative: the shared [WorkerCard], a select mark and a link to the full profile.
-class _Alternative extends StatelessWidget {
-  const _Alternative({
-    required this.worker,
-    required this.selected,
-    required this.enabled,
-    required this.onSelect,
-    required this.onProfile,
-  });
-  final WorkerSummary worker;
-  final bool selected;
-  final bool enabled;
-  final VoidCallback onSelect;
-  final VoidCallback onProfile;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: selected ? AppColors.teal : Colors.transparent,
-            width: 2,
+  /// Confirm bar of the "Choose a worker" view.
+  Widget _bottom(AppLocalizations l10n, Replacement r) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      if (_picked == null || _offline)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Text(
+            _offline ? l10n.repOfflineContinue : l10n.repSelectHint,
+            key: const Key('replacement_select_hint'),
+            style: AppText.body.copyWith(fontSize: 14, color: dsMuted),
           ),
         ),
-        child: Column(
-          children: [
-            WorkerCard(
-              key: Key('replacement_alt_${worker.id}'),
-              worker: worker,
-              onTap: enabled ? onSelect : () {},
-              trailing: Icon(
-                selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                color: selected ? AppColors.teal : AppColors.slate,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                key: Key('replacement_alt_profile_${worker.id}'),
-                onPressed: onProfile,
-                child: Text('${l10n.repViewProfile} ›'),
-              ),
-            ),
-          ],
+      Builder(
+        builder: (ctx) => AuthCta(
+          key: const Key('replacement_select_btn'),
+          clock: DiscoverClock.of(ctx),
+          label: l10n.repConfirm,
+          loadingLabel: l10n.repConfirm,
+          loading: _busy,
+          breathe: true,
+          showArrow: false,
+          radius: 18,
+          height: 58,
+          onPressed: _picked == null || _offline
+              ? null
+              : () => _confirmSelection(r),
         ),
       ),
-    );
-  }
-}
-
-/// Design "Error": the request could not be read at all.
-class _LoadError extends StatelessWidget {
-  const _LoadError({required this.onRetry});
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Card(
-        margin: EdgeInsets.zero,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircleAvatar(
-                radius: 32,
-                backgroundColor: AppColors.dangerBg,
-                child: Icon(Icons.error_outline, color: AppColors.danger),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                l10n.repLoadErrTitle,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(l10n.repLoadErrBody, textAlign: TextAlign.center),
-              const SizedBox(height: AppSpacing.lg),
-              SnButton(
-                key: const Key('error_retry_btn'),
-                label: l10n.repTryAgain,
-                icon: Icons.refresh,
-                onPressed: onRetry,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+    ],
+  );
 }

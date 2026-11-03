@@ -3,14 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
+import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
-import 'package:sevanest_customer/core/widgets/async_value_view.dart';
-import 'package:sevanest_customer/core/widgets/labeled_field.dart';
-import 'package:sevanest_customer/core/widgets/sn_badge.dart';
-import 'package:sevanest_customer/core/widgets/sn_button.dart';
-import 'package:sevanest_customer/core/widgets/sn_header.dart';
+import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
+    show AuthCta, authSerif;
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/replacement/domain/replacement.dart';
@@ -18,6 +16,11 @@ import 'package:sevanest_customer/features/replacement/presentation/providers/re
 import 'package:sevanest_customer/features/replacement/presentation/replacement_labels.dart';
 import 'package:sevanest_customer/features/replacement/presentation/replacement_widgets.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/support/presentation/widgets/support_glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_success_overlay.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:uuid/uuid.dart';
 
@@ -25,20 +28,10 @@ import 'package:uuid/uuid.dart';
 /// BACKEND_REQUESTS 37); tests and a future config override this provider.
 final replacementNotesMaxProvider = Provider<int>((ref) => 2000);
 
-IconData _reasonIcon(ReplacementReason r) => switch (r) {
-  ReplacementReason.notOnTime => Icons.schedule,
-  ReplacementReason.frequentAbsences => Icons.event_busy_outlined,
-  ReplacementReason.workQuality => Icons.assignment_late_outlined,
-  ReplacementReason.behaviour => Icons.feedback_outlined,
-  ReplacementReason.scheduleChanged => Icons.edit_calendar_outlined,
-  ReplacementReason.workerLeft => Icons.person_off_outlined,
-  ReplacementReason.safety => Icons.gpp_maybe_outlined,
-  ReplacementReason.other => Icons.more_horiz,
-};
-
 /// `/replacements/new?bookingId=` (module doc 11.1, design screen 25). Create is one
 /// `POST /replacement-requests` with one Idempotency-Key per form content; the server decides
-/// eligibility, so 403 / 422 lock the form and 409 opens the request that already exists.
+/// eligibility, so 403 / 422 lock the form and 409 opens the request that already exists. A made
+/// request opens its status screen.
 class ReplacementRequestScreen extends ConsumerStatefulWidget {
   const ReplacementRequestScreen({this.bookingId, super.key});
   final String? bookingId;
@@ -111,13 +104,14 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
 
   Future<void> _confirmLeave() async {
     final l10n = AppLocalizations.of(context);
-    final discard = await confirmDialog(
+    final discard = await showGlassConfirm(
       context,
       title: l10n.discardTitle,
       body: l10n.discardBody,
       confirmLabel: l10n.discard,
-      cancelLabel: l10n.keepEditing,
+      keepLabel: l10n.keepEditing,
       confirmKey: const Key('replacement_discard_confirm_btn'),
+      destructive: true,
     );
     if (discard && mounted) context.pop();
   }
@@ -125,17 +119,18 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
   Future<void> _submit() async {
     if (!_canSubmit) return;
     final l10n = AppLocalizations.of(context);
-    final ok = await confirmDialog(
+    final ok = await showGlassConfirm(
       context,
       title: l10n.repConfirmTitle,
       body: l10n.repConfirmBody,
       confirmLabel: l10n.repConfirmYes,
-      cancelLabel: l10n.repGoBack,
+      keepLabel: l10n.repRequestCancel,
       confirmKey: const Key('replacement_confirm_btn'),
     );
     if (ok && mounted) await _send();
   }
 
+  /// The request is made: open its status.
   void _markCreated(Replacement r) {
     ref
       ..invalidate(bookingProvider(_id))
@@ -259,67 +254,70 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final booking = _id.isEmpty ? null : ref.watch(bookingProvider(_id));
-    final created = _created;
+    final b = booking?.value;
+    final form =
+        b != null &&
+        !_locked &&
+        b.status != BookingStatus.replacementRequested &&
+        b.actions.contains(BookingAction.replace);
     return PopScope(
       canPop: !_dirty || _sending,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _confirmLeave();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.canvasCool,
-        body: Column(
-          children: [
-            SnHeader(
-              title: l10n.repRequestTitle,
-              onBack: () => Navigator.of(context).maybePop(),
-            ),
-            Expanded(
-              child: created != null
-                  ? _Received(
-                      replacement: created,
-                      onTrack: () => context.pushReplacement(
-                        Routes.path(Routes.replacementDetail, {
-                          'id': created.id,
-                        }),
-                      ),
-                      onBack: () => context.go(
-                        Routes.path(Routes.bookingDetail, {'id': _id}),
-                      ),
-                    )
-                  : booking == null
-                  ? _NotEligible(onSupport: _openSupport)
-                  : AsyncValueView<Booking>(
-                      value: booking,
-                      onRetry: () => ref.invalidate(bookingProvider(_id)),
-                      data: (b) {
-                        if (b.status == BookingStatus.replacementRequested) {
-                          _redirectToOpen();
-                          if (!_locked) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                        }
-                        if (_locked ||
-                            !b.actions.contains(BookingAction.replace)) {
-                          return _NotEligible(
-                            booking: b,
-                            onSupport: _openSupport,
-                          );
-                        }
-                        return _form(l10n, b);
-                      },
-                    ),
-            ),
-          ],
-        ),
+      child: FindGlassPage(
+        title: l10n.repRequestTitle,
+        backLabel: l10n.back,
+        onBack: () => Navigator.of(context).maybePop(),
+        overlay: _created == null ? null : _receivedOverlay(l10n, _created!),
+        bottom: form && _created == null ? _bottom(l10n) : null,
+        body: booking == null
+            ? _NotEligible(onSupport: _openSupport)
+            : GlassAsyncView<Booking>(
+                value: booking,
+                onRetry: () => ref.invalidate(bookingProvider(_id)),
+                data: (b) {
+                  if (b.status == BookingStatus.replacementRequested) {
+                    _redirectToOpen();
+                    if (!_locked) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                  }
+                  if (_locked || !b.actions.contains(BookingAction.replace)) {
+                    return _NotEligible(booking: b, onSupport: _openSupport);
+                  }
+                  return _form(l10n, b);
+                },
+              ),
       ),
     );
   }
 
-  Widget _form(AppLocalizations l10n, Booking b) {
-    final text = Theme.of(context).textTheme;
-    final max = ref.watch(replacementNotesMaxProvider);
+  Widget _receivedOverlay(AppLocalizations l10n, Replacement r) => KeyedSubtree(
+    key: const Key('replacement_received'),
+    child: GlassSuccessOverlay(
+      title: l10n.repReceivedTitle,
+      body: l10n.repReceivedBody,
+      rows: [
+        (l10n.repRowRequest, '#${r.reference}'),
+        (l10n.repRowReason, replacementReasonText(l10n, r.reason)),
+        (l10n.repRowStatus, replacementStatusLabel(l10n, r.status)),
+      ],
+      ctaKey: const Key('replacement_track_btn'),
+      ctaLabel: l10n.repTrack,
+      onPressed: () => context.pushReplacement(
+        Routes.path(Routes.replacementDetail, {'id': r.id}),
+      ),
+      secondary: TextButton(
+        key: const Key('replacement_back_booking_btn'),
+        onPressed: () =>
+            context.go(Routes.path(Routes.bookingDetail, {'id': _id})),
+        child: Text(l10n.repBackBooking),
+      ),
+    ),
+  );
+
+  Widget _bottom(AppLocalizations l10n) {
     final hint = _reason == null
         ? l10n.repChooseReasonHint
         : _needsNote
@@ -328,171 +326,207 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
         ? l10n.repOfflineHint
         : null;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: ListView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(AppSpacing.md),
+        if (_failed || _error != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SupportNotice(
+              key: const Key('replacement_error_card'),
+              icon: Icons.error_outline_rounded,
+              iconColor: supportDanger,
+              title: l10n.repErrTitle,
+              body: _error ?? l10n.repErrBody,
+            ),
+          ),
+        if (hint != null && !_failed)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              hint,
+              key: const Key('replacement_submit_hint'),
+              style: AppText.body.copyWith(fontSize: 14, color: dsMuted),
+            ),
+          ),
+        Builder(
+          builder: (ctx) => AuthCta(
+            key: const Key('replacement_submit_btn'),
+            clock: DiscoverClock.of(ctx),
+            label: _failed ? l10n.repTryAgain : l10n.repSubmit,
+            loadingLabel: l10n.repSubmitting,
+            loading: _sending,
+            breathe: true,
+            showArrow: false,
+            radius: 18,
+            height: 58,
+            onPressed: _canSubmit ? _submit : null,
+          ),
+        ),
+        TextButton(
+          key: const Key('replacement_cancel_btn'),
+          onPressed: _sending ? null : () => Navigator.of(context).maybePop(),
+          child: Text(l10n.cancel),
+        ),
+      ],
+    );
+  }
+
+  Widget _form(AppLocalizations l10n, Booking b) {
+    final max = ref.watch(replacementNotesMaxProvider);
+    final locale = Localizations.localeOf(context).toString();
+    return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        if (_offline)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: SupportNotice(
+              key: const Key('replacement_offline_banner'),
+              icon: Icons.wifi_off_rounded,
+              iconColor: const Color(0xFF8A4B06),
+              tint: supportWarnTint,
+              title: l10n.repOfflineBanner,
+              trailing: TextButton(
+                key: const Key('replacement_offline_retry_btn'),
+                onPressed: _sending ? null : _send,
+                child: Text(l10n.retry),
+              ),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 10, 4, 0),
+          child: Text(l10n.repHeadline, style: authSerif(26, 1.2)),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: DiscoverRise(delayMs: 0, child: ReplacementInfo(l10n.repInfo)),
+        ),
+        SupportSection(delayMs: 60, child: ReplacementWorker(booking: b)),
+        SupportSection(
+          title: l10n.repWhy,
+          delayMs: 100,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (_offline)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: ReplacementNotice(
-                    key: const Key('replacement_offline_banner'),
-                    icon: Icons.wifi_off,
-                    title: l10n.repOfflineBanner,
-                    trailing: TextButton(
-                      key: const Key('replacement_offline_retry_btn'),
-                      onPressed: _sending ? null : _send,
-                      child: Text(l10n.retry),
-                    ),
-                  ),
-                ),
-              ReplacementBookingCard(booking: b),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                l10n.repHeadline,
-                style: text.headlineMedium?.copyWith(
-                  color: AppColors.navy,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(l10n.repIntro, style: text.bodyLarge),
-              const SizedBox(height: AppSpacing.lg),
-              Text.rich(
-                TextSpan(
-                  text: l10n.repWhy,
-                  style: text.titleMedium,
-                  children: [
-                    TextSpan(
-                      text: '  ${l10n.repRequired}',
-                      style: text.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
               for (final r in ReplacementReason.values)
-                _ReasonTile(
-                  reason: r,
+                ReasonRadio(
+                  key: Key('replacement_reason_${r.name}'),
+                  label: replacementReasonLabel(l10n, r),
                   selected: _reason == r,
                   enabled: !_sending,
                   onTap: () => _edited(() => _reason = r),
                 ),
               if (_reason == ReplacementReason.safety)
                 Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm),
-                  child: DecoratedBox(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: SupportNotice(
                     key: const Key('replacement_safety_card'),
-                    decoration: BoxDecoration(
-                      color: AppColors.dangerBg,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(
-                                Icons.gpp_maybe_outlined,
-                                color: AppColors.danger,
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.repSafetyTitle,
-                                      style: text.titleMedium,
-                                    ),
-                                    Text(l10n.repSafetyBody),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          SnButton(
-                            key: const Key('replacement_safety_support_btn'),
-                            label: l10n.repSafetyBtn,
-                            variant: SnButtonVariant.secondary,
-                            icon: Icons.headset_mic_outlined,
-                            onPressed: _openSupport,
-                          ),
-                        ],
-                      ),
+                    icon: Icons.gpp_maybe_outlined,
+                    iconColor: supportDanger,
+                    tint: supportDangerTint,
+                    title: l10n.repSafetyTitle,
+                    body: l10n.repSafetyBody,
+                    trailing: TextButton.icon(
+                      key: const Key('replacement_safety_support_btn'),
+                      onPressed: _openSupport,
+                      icon: const Icon(Icons.headset_mic_outlined),
+                      label: Text(l10n.repSafetyBtn),
                     ),
                   ),
                 ),
-              const SizedBox(height: AppSpacing.lg),
-              Text.rich(
-                TextSpan(
-                  text: l10n.repMore,
-                  style: text.titleMedium,
-                  children: [
-                    TextSpan(
-                      text:
-                          '  ${_reason == ReplacementReason.other ? l10n.repRequired : l10n.repOptional}',
-                      style: text.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
+            ],
+          ),
+        ),
+        SupportSection(
+          title: l10n.repNotesTitle,
+          hint: _reason == ReplacementReason.other
+              ? l10n.hintRequired
+              : l10n.hintOptional,
+          delayMs: 140,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GlassNoteField(
                 key: const Key('replacement_notes_field'),
                 controller: _notes,
                 enabled: !_sending,
                 maxLength: max,
-                maxLines: 4,
+                hint: l10n.repNotesHint,
                 onChanged: (_) => _edited(() {}),
-                decoration: InputDecoration(
-                  hintText: l10n.repNotesHint,
-                  errorText: _reason == ReplacementReason.other && _needsNote
-                      ? l10n.repNotesRequired
-                      : null,
-                  helperText: l10n.repNotesNote,
-                  helperMaxLines: 2,
-                ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              Text(l10n.repNeededFrom, style: text.titleSmall),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    key: const Key('replacement_needed_from_btn'),
-                    onPressed: _sending ? null : _pickNeededFrom,
-                    icon: const Icon(Icons.calendar_today_outlined),
-                    label: Text(
-                      _neededFrom == null
-                          ? l10n.repNeededFromPick
-                          : formatDate(
-                              _neededFrom!,
-                              Localizations.localeOf(context).toString(),
-                            ),
+              if (_reason == ReplacementReason.other && _needsNote)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    l10n.repNotesRequired,
+                    style: AppText.body.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: supportDanger,
                     ),
                   ),
-                  if (_neededFrom != null)
-                    IconButton(
-                      key: const Key('replacement_needed_from_clear'),
-                      tooltip: l10n.repNeededFromClear,
-                      icon: const Icon(Icons.close),
-                      onPressed: _sending
-                          ? null
-                          : () => _edited(() => _neededFrom = null),
-                    ),
-                ],
+                ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.repNotesNote,
+                style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
               ),
-              Text(l10n.repNeededFromNote, style: text.bodySmall),
-              const SizedBox(height: AppSpacing.md),
-              _NextSteps(),
-              const SizedBox(height: AppSpacing.md),
+            ],
+          ),
+        ),
+        SupportSection(
+          title: l10n.repNeededFrom,
+          delayMs: 180,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NeededFromField(
+                text: _neededFrom == null
+                    ? l10n.repNeededFromPick
+                    : formatDate(_neededFrom!, locale),
+                onPick: _sending ? null : _pickNeededFrom,
+                onClear: _neededFrom == null || _sending
+                    ? null
+                    : () => _edited(() => _neededFrom = null),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.repNeededFromNote,
+                style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
+              ),
+            ],
+          ),
+        ),
+        SupportSection(
+          title: l10n.repNextTitle,
+          delayMs: 220,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final (i, s) in [
+                l10n.repNext1,
+                l10n.repNext2,
+                l10n.repNext3,
+              ].indexed)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor: AppColors.teal,
+                        child: Text(
+                          '${i + 1}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(s)),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -501,197 +535,14 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
                     size: 20,
                     color: AppColors.teal,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(l10n.repStaysActive, style: text.bodyMedium),
-                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(l10n.repStaysActive)),
                 ],
               ),
             ],
           ),
         ),
-        DecoratedBox(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.hairline)),
-          ),
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                AppSpacing.sm,
-                AppSpacing.md,
-                AppSpacing.sm,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_failed || _error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: ReplacementNotice(
-                        key: const Key('replacement_error_card'),
-                        icon: Icons.error_outline,
-                        iconColor: AppColors.danger,
-                        color: AppColors.surface,
-                        title: l10n.repErrTitle,
-                        body: _error ?? l10n.repErrBody,
-                      ),
-                    ),
-                  if (hint != null && !_failed)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: Text(
-                        hint,
-                        key: const Key('replacement_submit_hint'),
-                        style: text.bodyMedium,
-                      ),
-                    ),
-                  SnButton(
-                    key: const Key('replacement_submit_btn'),
-                    variant: SnButtonVariant.deep,
-                    label: _failed ? l10n.repTryAgain : l10n.repSubmit,
-                    isLoading: _sending,
-                    loadingLabel: l10n.repSubmitting,
-                    onPressed: _canSubmit ? _submit : null,
-                  ),
-                  TextButton(
-                    key: const Key('replacement_cancel_btn'),
-                    onPressed: _sending
-                        ? null
-                        : () => Navigator.of(context).maybePop(),
-                    child: Text(l10n.cancel),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ],
-    );
-  }
-}
-
-class _ReasonTile extends StatelessWidget {
-  const _ReasonTile({
-    required this.reason,
-    required this.selected,
-    required this.enabled,
-    required this.onTap,
-  });
-  final ReplacementReason reason;
-  final bool selected;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Semantics(
-        selected: selected,
-        inMutuallyExclusiveGroup: true,
-        child: Material(
-          color: selected ? AppColors.tealMist : AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            side: BorderSide(
-              color: selected ? AppColors.teal : AppColors.slate,
-              width: selected ? 2 : 1,
-            ),
-          ),
-          child: InkWell(
-            key: Key('replacement_reason_${reason.name}'),
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            onTap: enabled ? onTap : null,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: kMinTapTarget + 8),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm + 4,
-                  vertical: AppSpacing.sm,
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColors.tealSoft,
-                      child: Icon(
-                        _reasonIcon(reason),
-                        size: 22,
-                        color: reason == ReplacementReason.safety
-                            ? AppColors.danger
-                            : AppColors.teal,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        replacementReasonLabel(l10n, reason),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ),
-                    Icon(
-                      selected
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color: selected ? AppColors.teal : AppColors.slate,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NextSteps extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final steps = [l10n.repNext1, l10n.repNext2, l10n.repNext3];
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.tealMist,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.tealLine),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.repNextTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            for (var i = 0; i < steps.length; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundColor: AppColors.teal,
-                      child: Text(
-                        '${i + 1}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(child: Text(steps[i])),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -707,153 +558,25 @@ class _NotEligible extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return ListView(
       key: const Key('replacement_not_eligible'),
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        if (booking != null) ReplacementBookingCard(booking: booking!),
-        const SizedBox(height: AppSpacing.md),
-        ReplacementNotice(
+        if (booking != null)
+          SupportSection(child: ReplacementWorker(booking: booking!)),
+        const SizedBox(height: 14),
+        SupportNotice(
           icon: Icons.warning_amber_rounded,
+          iconColor: const Color(0xFF8A4B06),
+          tint: supportWarnTint,
           title: l10n.repNotEligibleTitle,
           body: l10n.repNotEligibleBody,
-          trailing: Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-            child: SnButton(
-              key: const Key('replacement_support_btn'),
-              label: l10n.contactSupport,
-              variant: SnButtonVariant.secondary,
-              icon: Icons.headset_mic_outlined,
-              onPressed: onSupport,
-            ),
+          trailing: TextButton.icon(
+            key: const Key('replacement_support_btn'),
+            onPressed: onSupport,
+            icon: const Icon(Icons.headset_mic_outlined),
+            label: Text(l10n.contactSupport),
           ),
         ),
       ],
-    );
-  }
-}
-
-/// "Request received" (design screen 25): the request is made; Track opens its status.
-class _Received extends ConsumerWidget {
-  const _Received({
-    required this.replacement,
-    required this.onTrack,
-    required this.onBack,
-  });
-  final Replacement replacement;
-  final VoidCallback onTrack;
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
-    Widget row(String k, Widget v) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        children: [
-          Expanded(child: Text(k, style: text.bodyMedium)),
-          Flexible(child: v),
-        ],
-      ),
-    );
-    return SafeArea(
-      key: const Key('replacement_received'),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: AppSpacing.lg),
-                    const CircleAvatar(
-                      radius: 48,
-                      backgroundColor: AppColors.successBg,
-                      child: Icon(
-                        Icons.check_circle_outline,
-                        size: 48,
-                        color: AppColors.success,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      l10n.repReceivedTitle,
-                      style: text.headlineMedium?.copyWith(
-                        color: AppColors.navy,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      l10n.repReceivedBody,
-                      textAlign: TextAlign.center,
-                      style: text.bodyLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Card(
-                      margin: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                        ),
-                        child: Column(
-                          children: [
-                            row(
-                              l10n.repRowRequest,
-                              Text(
-                                '#${replacement.reference}',
-                                key: const Key('replacement_received_ref'),
-                                style: text.titleSmall,
-                              ),
-                            ),
-                            const Divider(height: 1),
-                            row(
-                              l10n.repRowReason,
-                              Text(
-                                replacementReasonText(l10n, replacement.reason),
-                                textAlign: TextAlign.end,
-                                style: text.titleSmall,
-                              ),
-                            ),
-                            const Divider(height: 1),
-                            row(
-                              l10n.repRowStatus,
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: SnBadge(
-                                  key: const Key('replacement_received_status'),
-                                  label: replacementStatusLabel(
-                                    l10n,
-                                    replacement.status,
-                                  ),
-                                  tone: replacementStatusTone(
-                                    replacement.status,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SnButton(
-              key: const Key('replacement_track_btn'),
-              variant: SnButtonVariant.deep,
-              label: l10n.repTrack,
-              onPressed: onTrack,
-            ),
-            TextButton(
-              key: const Key('replacement_back_booking_btn'),
-              onPressed: onBack,
-              child: Text(l10n.repBackBooking),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

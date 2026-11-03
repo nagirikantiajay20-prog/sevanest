@@ -322,6 +322,9 @@ void main() {
   }) async {
     await tapKey(t, reasonKey);
     if (note != null) {
+      await t.ensureVisible(k('replacement_notes_field'));
+      await t.tap(k('replacement_notes_field'));
+      await t.pump();
       await t.enterText(k('replacement_notes_field'), note);
       await t.pump();
     }
@@ -344,13 +347,12 @@ void main() {
     ) async {
       await open(t, '/replacements/new?bookingId=b1');
       expect(k('replacement_booking_card'), findsOneWidget);
-      expect(find.text("Let's find you a better match"), findsOneWidget);
+      expect(find.textContaining('Tell us what went wrong'), findsOneWidget);
       for (final r in ReplacementReason.values) {
         expect(k('replacement_reason_${r.name}'), findsOneWidget);
       }
       expect(find.text('Choose a reason to continue'), findsOneWidget);
       expect(submitEnabled(t), isFalse);
-      expect(k('replacement_cancel_btn'), findsOneWidget);
       // The backend has no needed-from field, so the design's date question is not offered.
       expect(find.text('From a date'), findsNothing);
       expect(find.text('When do you need someone?'), findsNothing);
@@ -364,7 +366,7 @@ void main() {
       expect(submitEnabled(t), isTrue);
       expect(find.text('Choose a reason to continue'), findsNothing);
       expect(
-        find.textContaining('Optional', findRichText: true),
+        find.text('Notes  (optional)', findRichText: true),
         findsOneWidget,
       );
     });
@@ -377,6 +379,9 @@ void main() {
       expect(find.text('Please tell us what happened'), findsOneWidget);
       expect(find.text('Tell us what happened to continue'), findsOneWidget);
       expect(submitEnabled(t), isFalse);
+      await t.ensureVisible(k('replacement_notes_field'));
+      await t.tap(k('replacement_notes_field'));
+      await t.pump();
       await t.enterText(k('replacement_notes_field'), 'He broke my plates');
       await t.pumpAndSettle();
       expect(find.text('Please tell us what happened'), findsNothing);
@@ -416,7 +421,7 @@ void main() {
       expect(where(t), '/support/new?bookingId=b1');
     });
 
-    testWidgets('REP-03 Submit -> dialog -> one request -> Request received', (
+    testWidgets('REP-03 Submit -> dialog -> one request -> its status', (
       t,
     ) async {
       await open(t, '/replacements/new?bookingId=b1');
@@ -426,7 +431,7 @@ void main() {
         note: '  Food is undercooked ',
       );
       await tapKey(t, 'replacement_submit_btn');
-      expect(find.text('Submit replacement request?'), findsOneWidget);
+      expect(find.text('Request a replacement?'), findsOneWidget);
       expect(rep.createCalls, 0);
       await tapKey(t, 'replacement_confirm_btn');
       expect(rep.createCalls, 1);
@@ -434,13 +439,12 @@ void main() {
       expect(rep.lastNotes?.trim(), 'Food is undercooked');
       expect(k('replacement_received'), findsOneWidget);
       expect(find.text('Request received'), findsOneWidget);
-      expect(k('replacement_received_ref'), findsOneWidget);
-      expect(find.text('Work quality is not good'), findsOneWidget);
+      expect(find.text('#P_3104'), findsOneWidget);
+      expect(find.text('Work quality is not good'), findsWidgets);
       expect(find.text('Under review'), findsOneWidget);
-      expect(find.text('Request sent'), findsOneWidget);
     });
 
-    testWidgets('REP-03 Track request replaces the form: back skips it', (
+    testWidgets('REP-03 The status replaces the form: back skips it', (
       t,
     ) async {
       final env = await open(t, '/bookings/b1');
@@ -462,7 +466,6 @@ void main() {
       await submitReason(t, 'replacement_reason_notOnTime');
       await tapKey(t, 'replacement_submit_btn');
       await tapKey(t, 'replacement_confirm_btn');
-      // The "Request sent" snackbar floats over the buttons for a few seconds.
       await t.pump(const Duration(seconds: 6));
       await t.pumpAndSettle();
       await tapKey(t, 'replacement_back_booking_btn');
@@ -630,7 +633,7 @@ void main() {
       expect(find.text('Discard changes?'), findsOneWidget);
       await tapKey(t, 'dialog_cancel_btn');
       expect(where(t), '/replacements/new?bookingId=b1');
-      await tapKey(t, 'replacement_cancel_btn');
+      await tapKey(t, 'app_back_btn');
       await tapKey(t, 'replacement_discard_confirm_btn');
       expect(where(t), '/bookings/b1');
       expect(rep.createCalls, 0);
@@ -639,7 +642,7 @@ void main() {
     testWidgets('leaving an untouched form needs no dialog', (t) async {
       await open(t, '/bookings/b1');
       await tapKey(t, 'booking_replace_btn');
-      await tapKey(t, 'replacement_cancel_btn');
+      await tapKey(t, 'app_back_btn');
       expect(where(t), '/bookings/b1');
     });
 
@@ -655,7 +658,7 @@ void main() {
       rep.getFails = null;
       final gate = rep.getGate = Completer<void>();
       await open(t, '/replacements/rp1');
-      expect(find.bySemanticsLabel('Loading'), findsWidgets);
+      expect(k('glass_loading'), findsOneWidget);
       expect(k('replacement_request_card'), findsNothing);
       gate.complete();
       await settle(t);
@@ -666,7 +669,7 @@ void main() {
       rep.items['rp1'] = _r(id: 'rp1');
       rep.getFails = const ServerFailure('RAW');
       await open(t, '/replacements/rp1');
-      expect(find.text("We couldn't load this request"), findsOneWidget);
+      expect(k('error_retry_btn'), findsOneWidget);
       expect(find.text('RAW'), findsNothing);
       rep.getFails = null;
       await tapKey(t, 'error_retry_btn');
@@ -827,7 +830,6 @@ void main() {
       expect(k('replacement_request_no'), findsOneWidget);
       expect(k('replacement_previous_tag'), findsOneWidget);
       expect(find.text('Current engagement'), findsOneWidget);
-      expect(find.textContaining('Cook'), findsWidgets);
       expect(find.text('Work quality is not good'), findsOneWidget);
       expect(find.text('Undercooked food'), findsOneWidget);
       expect(find.textContaining('Submitted'), findsOneWidget);
@@ -861,15 +863,15 @@ void main() {
       rep.items['rp1'] = _r(id: 'rp1');
       await open(t, '/replacements/rp1');
       for (final s in [
-        'Request received',
-        'Under review',
-        'Alternatives ready',
+        'Request sent',
+        'Team review',
+        'New workers for you',
         'You choose a worker',
         'Replacement starts',
       ]) {
         expect(find.text(s), findsWidgets);
       }
-      expect(find.text('Now'), findsOneWidget);
+      expect(find.text('In progress'), findsOneWidget);
       expect(find.text('Upcoming'), findsNWidgets(3));
     });
 
@@ -933,7 +935,7 @@ void main() {
       await t.drag(k('replacement_request_card'), const Offset(0, 1400));
       await settle(t);
       expect(k('replacement_banner_ready'), findsOneWidget);
-      expect(find.text('2 alternatives are ready'), findsOneWidget);
+      expect(find.text('Workers ready for you'), findsOneWidget);
     });
   });
 
@@ -948,7 +950,10 @@ void main() {
       expect(rep.cancelCalls, 1);
       expect(k('replacement_banner_cancelled'), findsOneWidget);
       expect(k('replacement_withdraw_btn'), findsNothing);
-      expect(find.text('Your current worker continues.'), findsOneWidget);
+      expect(
+        find.textContaining('Your current worker continues.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Keep request does nothing', (t) async {
@@ -999,7 +1004,7 @@ void main() {
     ) async {
       rep.items['rp1'] = ready();
       await open(t, '/replacements/rp1');
-      expect(find.text('3 alternatives are ready'), findsOneWidget);
+      expect(find.text('Workers ready for you'), findsOneWidget);
       for (final w in ['cook-2', 'cook-5', 'cook-8']) {
         expect(k('replacement_alt_$w'), findsOneWidget);
       }
@@ -1118,7 +1123,7 @@ void main() {
         );
         expect(k('replacement_alt_cook-5'), findsNothing);
         expect(k('replacement_alt_cook-2'), findsOneWidget);
-        expect(find.text('2 alternatives are ready'), findsOneWidget);
+        expect(find.text('Workers ready for you'), findsOneWidget);
         expect(find.text('Select a worker to continue'), findsOneWidget);
       },
     );
@@ -1369,7 +1374,7 @@ void main() {
         env.container.invalidate(replacementProvider('rp_3104'));
         await settle(t);
         expect(k('replacement_banner_ready'), findsOneWidget);
-        expect(find.text('3 alternatives are ready'), findsOneWidget);
+        expect(find.text('Workers ready for you'), findsOneWidget);
         await tapKey(t, 'replacement_alt_cook-5');
         await tapKey(t, 'replacement_select_btn');
         await tapKey(t, 'replacement_select_confirm_btn');
