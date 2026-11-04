@@ -120,7 +120,11 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
       if (e.code == 'WORKER_NOT_ELIGIBLE') {
         gone = true;
       } else if (mounted) {
-        setState(() => _error = e.message ?? l10n.confirmDateInvalid);
+        setState(
+          () => _error = isNotServiceable(e)
+              ? failureMessage(l10n, e)
+              : e.message ?? l10n.confirmDateInvalid,
+        );
       }
     } on ConflictFailure {
       // Not a state this can be confirmed from any more: show what the server holds now.

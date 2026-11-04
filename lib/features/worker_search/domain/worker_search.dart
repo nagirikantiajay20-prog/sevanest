@@ -207,10 +207,11 @@ class WorkerSummary {
     String? text(Object? v) => v is String && v.trim().isNotEmpty ? v : null;
     return WorkerSummary(
       id: id,
-      name: text(j['name']),
+      name: text(j['displayName']) ?? text(j['name']),
       initials: text(j['initials']),
       experienceMonths: exp is num ? exp.toInt() : null,
-      categories: names(j['categories'], 'name'),
+      // Some backend builds send the offered services as `skills` instead of `categories`.
+      categories: names(j['categories'] ?? j['skills'], 'name'),
       languages: j['languages'] is List
           ? [
               for (final e in j['languages'] as List)

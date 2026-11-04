@@ -143,8 +143,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Targets Home links to; each is replaced by its real screen in its own module.
       GoRoute(
         path: Routes.discoverCategory,
-        builder: (context, state) =>
-            ServiceScreen(edit: state.uri.queryParameters['edit'] == 'true'),
+        builder: (context, state) => ServiceScreen(
+          edit: state.uri.queryParameters['edit'] == 'true',
+          searchFirst: state.uri.queryParameters['search'] == 'true',
+        ),
       ),
       GoRoute(
         path: Routes.discoverEngagement,

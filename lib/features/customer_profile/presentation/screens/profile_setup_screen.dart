@@ -83,7 +83,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
   /// Home address typed on this screen; saved right after the profile (it needs the profile first).
   AddressInput? _address;
   PickedPhoto? _homePhoto;
-  bool _addressTouched = false;
   bool _profileSaved = false;
 
   /// Photo chosen on this screen; uploaded after the profile is saved.
@@ -148,14 +147,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
     setState(() {
       _nameTouched = true;
       _emailTouched = true;
-      _addressTouched = true;
     });
     final address = _address;
-    if (!isValidName(_name.text) ||
-        !isValidEmail(_email.text) ||
-        address == null) {
-      return;
-    }
+    if (!isValidName(_name.text) || !isValidEmail(_email.text)) return;
     setState(() {
       _saving = true;
       _addressFailure = null;
@@ -178,9 +172,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
       }
       _profileSaved = true;
     }
-    final Address created;
+    // Address is optional: skipping it goes straight to home (booking asks for one later).
+    Address? created;
     try {
-      created = await ref.read(addressRepositoryProvider).create(address);
+      if (address != null) {
+        created = await ref.read(addressRepositoryProvider).create(address);
+      }
     } on AppFailure catch (f) {
       if (mounted) {
         setState(() {
@@ -192,7 +189,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
     }
     // Home photo: best effort too; it can be added again by editing the address.
     final homePhoto = _homePhoto;
-    if (homePhoto != null) {
+    if (homePhoto != null && created != null) {
       try {
         await ref
             .read(addressRepositoryProvider)
@@ -233,7 +230,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
         ? l10n.nameInvalid
         : fieldErrors['name'];
     final emailError = _emailTouched && !emailOk
-        ? l10n.emailInvalid
+        ? (_email.text.trim().isEmpty ? l10n.emailRequired : l10n.emailInvalid)
         : fieldErrors['email'];
     final busy = form.busy || _saving;
     final addressFailure = _addressFailure;
@@ -253,10 +250,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
     );
     final hint = !nameOk
         ? l10n.profileHintName
-        : _address == null
-        ? l10n.profileHintAddress
         : !filledEmail
         ? l10n.profileHintEmail
+        : _address == null
+        ? l10n.profileHintAddress
         : l10n.profileHintDone;
 
     return PopScope(
@@ -463,7 +460,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                   label: l10n.emailLabel,
                   hint: l10n.emailHint,
                   helper: l10n.emailHelp,
-                  optionalInline: l10n.repOptional,
+                  requiredMark: true,
                   error: emailError,
                   enabled: !busy,
                   fill: fill,
@@ -502,11 +499,19 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                     child: ProfileAddressCard(
                       clock: _clock,
                       address: _address,
-                      showError: _addressTouched && _address == null,
+                      showError: false,
                       onTap: busy ? null : _pickAddress,
                     ),
                   ),
                 ),
+                if (_address == null)
+                  Align(
+                    child: TextButton(
+                      key: const Key('profile_skip_address_btn'),
+                      onPressed: busy ? null : _submit,
+                      child: Text(l10n.skipForNow),
+                    ),
+                  ),
                 if (generalError != null) ...[
                   const SizedBox(height: AppSpacing.md),
                   FormErrorBanner(

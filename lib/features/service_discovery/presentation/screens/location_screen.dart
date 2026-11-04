@@ -103,9 +103,11 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
 
   /// An area outside `GET /service-areas` is not served; no list (call failed or empty) = no block.
   bool _served(Address a, List<ServiceArea>? areas) =>
-      areas == null ||
-      areas.isEmpty ||
-      areas.any((s) => s.name.toLowerCase() == a.area.toLowerCase());
+      a.isServiceable ??
+      isServiceableCity(a.city) &&
+          (areas == null ||
+              areas.isEmpty ||
+              areas.any((s) => s.name.toLowerCase() == a.area.toLowerCase()));
 
   Future<void> _changeService() async {
     await context.push<Object?>('${Routes.discoverCategory}?edit=true');

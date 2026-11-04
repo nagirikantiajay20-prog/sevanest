@@ -73,8 +73,13 @@ void main() {
     );
   }
 
-  Future<void> start(WidgetTester t) async {
-    await t.tap(find.byKey(const Key('home_find_worker_btn')));
+  /// Opens the full service list (the Home search bar opens it empty, see the search-first group).
+  Future<void> start(
+    WidgetTester t, {
+    String route = '/discover/category',
+  }) async {
+    // ignore: discarded_futures, unawaited_futures
+    GoRouter.of(t.element(find.byType(Scaffold).first)).push<Object?>(route);
     await t.pumpAndSettle();
   }
 
@@ -132,7 +137,11 @@ void main() {
         ),
       );
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const Key('home_find_worker_btn')));
+      unawaited(
+        GoRouter.of(
+          t.element(find.byType(Scaffold).first),
+        ).push<Object?>('/discover/category'),
+      );
       await t.pump();
       await t.pump(const Duration(milliseconds: 400));
       expect(find.bySemanticsLabel('Loading'), findsOneWidget);
@@ -179,6 +188,46 @@ void main() {
         expect(where(t), '/discover/engagement');
       },
     );
+
+    testWidgets('search-first: empty, focused, filters, no result, cleared', (
+      t,
+    ) async {
+      await launch(t);
+      await t.tap(find.byKey(const Key('home_find_worker_btn')));
+      await t.pumpAndSettle();
+      const field = Key('discover_search_field');
+      const cook = Key('discover_category_tile_cook');
+      expect(find.byKey(cook), findsNothing);
+      expect(
+        t.widget<TextField>(find.byKey(field)).focusNode!.hasFocus,
+        isTrue,
+      );
+
+      await t.enterText(find.byKey(field), 'cook');
+      await t.pump(const Duration(milliseconds: 100));
+      expect(find.byKey(cook), findsNothing); // still inside the debounce
+      await t.pump(const Duration(milliseconds: 300));
+      await t.pumpAndSettle();
+      expect(find.byKey(cook), findsOneWidget);
+
+      await t.enterText(find.byKey(field), 'xyz');
+      await t.pump(const Duration(milliseconds: 400));
+      await t.pumpAndSettle();
+      expect(
+        find.text('No services found. Try another search.'),
+        findsOneWidget,
+      );
+
+      await t.enterText(find.byKey(field), '');
+      await t.pump();
+      expect(find.byKey(cook), findsNothing);
+      expect(find.byKey(const Key('discover_no_result')), findsNothing);
+    });
+
+    testWidgets('search-first: Home label reads YOUR SPOT', (t) async {
+      await launch(t);
+      expect(find.text('YOUR SPOT'), findsOneWidget);
+    });
 
     testWidgets('search filters, no-result offers Clear search', (t) async {
       await launch(t);
@@ -395,6 +444,42 @@ void main() {
         await toLocation(t);
         expect(find.byKey(const Key('discover_not_served')), findsOneWidget);
         expect(nextEnabled(t), isFalse);
+      },
+    );
+
+    testWidgets(
+      'non-Hyderabad address blocks Continue; switching to Hyderabad enables it',
+      (t) async {
+        await launch(
+          t,
+          addrs: const [
+            Address(
+              id: 'm1',
+              line: '1 MG Road',
+              area: 'Andheri',
+              city: 'Mumbai',
+              pincode: '400053',
+              isDefault: true,
+            ),
+            Address(
+              id: 'h2',
+              line: '2 Lake View',
+              area: 'Madhapur',
+              city: 'Hyderabad',
+              pincode: '500081',
+            ),
+          ],
+        );
+        await toLocation(t);
+        expect(find.byKey(const Key('discover_not_served')), findsOneWidget);
+        expect(
+          find.textContaining('available only in Hyderabad'),
+          findsOneWidget,
+        );
+        expect(nextEnabled(t), isFalse);
+        await tapKey(t, 'discover_address_h2');
+        expect(find.byKey(const Key('discover_not_served')), findsNothing);
+        expect(nextEnabled(t), isTrue);
       },
     );
 

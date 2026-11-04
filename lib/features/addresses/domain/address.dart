@@ -15,6 +15,8 @@ class Address {
     this.longitude,
     this.isDefault = false,
     this.photoUrl,
+    this.isServiceable,
+    this.unserviceableReason,
   });
 
   final String id;
@@ -37,6 +39,12 @@ class Address {
 
   /// Short-lived link to the home photo, when one was uploaded.
   final String? photoUrl;
+
+  /// Server verdict from the enabled service areas; null when the backend sent none (older API).
+  final bool? isServiceable;
+
+  /// `CITY_NOT_SERVICEABLE` or `AREA_NOT_SERVICEABLE` when [isServiceable] is false.
+  final String? unserviceableReason;
 
   /// House and street on one line.
   String get fullLine =>
@@ -119,4 +127,18 @@ abstract interface class AddressRepository {
     String? name,
     String? city,
   });
+}
+
+/// Fallback only, for a backend that sends no `isServiceable` (the server flag wins).
+bool isServiceableCity(String city) => city.trim().toLowerCase() == 'hyderabad';
+
+/// The backend has no address photo route or column (Q-138, still open), so the photo field is
+/// hidden and not required. Flip when the backend ships it. Tests set it true (test/flutter_test_config.dart).
+bool addressPhotoEnabled = false;
+
+/// The enabled service area's id for an address's area name (trimmed, case-insensitive), or null.
+/// Backend area names are edited by staff, so an exact `==` silently dropped customers' searches.
+String? serviceAreaIdFor(List<ServiceArea> areas, String name) {
+  final n = name.trim().toLowerCase();
+  return areas.where((a) => a.name.trim().toLowerCase() == n).firstOrNull?.id;
 }

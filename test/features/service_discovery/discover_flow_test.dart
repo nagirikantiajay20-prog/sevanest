@@ -20,6 +20,7 @@ void main() {
     final env = await launchDiscover(t, height: 1600);
     await env.tapKey('home_find_worker_btn');
     expect(env.where, '/discover/category');
+    await env.search('cook');
     await env.tapKey('discover_category_tile_cook');
     await env.tapKey('discover_next_btn');
     expect(env.where, '/discover/engagement');
@@ -51,6 +52,7 @@ void main() {
   testWidgets('Back walks the steps and keeps every value', (t) async {
     final env = await launchDiscover(t, height: 1600);
     await env.tapKey('home_find_worker_btn');
+    await env.search('cook');
     await env.tapKey('discover_category_tile_cook');
     await env.tapKey('discover_next_btn');
     await env.tapKey('discover_engagement_daily');
@@ -82,6 +84,7 @@ void main() {
   testWidgets('Hourly skips the Start date step in both directions', (t) async {
     final env = await launchDiscover(t, height: 1600);
     await env.tapKey('home_find_worker_btn');
+    await env.search('cook');
     await env.tapKey('discover_category_tile_cook');
     await env.tapKey('discover_next_btn');
     await env.tapKey('discover_engagement_hourly');

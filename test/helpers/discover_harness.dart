@@ -65,6 +65,16 @@ class DiscoverEnv {
     await tester.pumpAndSettle();
   }
 
+  /// Types into the search-first service screen and waits out the debounce.
+  Future<void> search(String text) async {
+    await tester.enterText(
+      find.byKey(const Key('discover_search_field')),
+      text,
+    );
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+  }
+
   bool get nextEnabled {
     final b = find.descendant(
       of: find.byKey(const Key('discover_next_btn')),

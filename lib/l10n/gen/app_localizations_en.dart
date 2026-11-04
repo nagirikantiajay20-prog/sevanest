@@ -74,10 +74,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashLoading => 'Getting things ready...';
 
   @override
-  String get proceedCustomerApp => 'Proceed with Customer App';
+  String get getStarted => 'Get Started';
 
   @override
-  String get moveToWorkerApp => 'Move to Worker App';
+  String get workerAppShort => 'Worker App';
 
   @override
   String get workerAppUnavailable =>
@@ -362,6 +362,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailHelp => 'For receipts and booking updates.';
 
   @override
+  String get emailRequired => 'Email is required';
+
+  @override
+  String get skipForNow => 'Skip for now';
+
+  @override
   String get emailInvalid => 'Enter a valid email like name@example.com';
 
   @override
@@ -481,9 +487,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileAddressRequired =>
       'Please add your home address to continue.';
-
-  @override
-  String get skipForNow => 'Skip for now';
 
   @override
   String get deleteAddress => 'Delete address';
@@ -862,6 +865,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try a different word or choose something else.';
 
   @override
+  String get serviceSearchNoResults => 'No services found. Try another search.';
+
+  @override
   String get serviceClearSearch => 'Clear search';
 
   @override
@@ -962,7 +968,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationNotServed =>
-      'We do not serve this area yet. Please choose another address.';
+      'Currently, SevaNest services are available only in Hyderabad. We\'re expanding to more locations soon. Stay tuned!';
 
   @override
   String get locationUseCurrent => 'Use my current location';
@@ -4003,7 +4009,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t update your deletion request. Please try again.';
 
   @override
-  String get homeDeliveringTo => 'DELIVERING TO';
+  String get homeDeliveringTo => 'YOUR SPOT';
 
   @override
   String get homeSearchHint => 'Search \'Cook\', \'House maid\'';

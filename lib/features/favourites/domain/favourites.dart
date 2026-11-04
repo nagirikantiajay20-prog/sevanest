@@ -12,7 +12,9 @@ class FavouriteEntry {
   static FavouriteEntry? fromJson(Object? j) {
     if (j is! Map) return null;
     final card =
-        j['card'] ?? j['worker'] ?? (j['categories'] != null ? j : null);
+        j['card'] ??
+        j['worker'] ??
+        (j['categories'] != null || j['skills'] != null ? j : null);
     final worker = j['available'] == false
         ? null
         : WorkerSummary.fromJson(card);

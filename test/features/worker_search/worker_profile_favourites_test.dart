@@ -389,6 +389,7 @@ void main() {
           ],
         );
         await env.tapKey('home_find_worker_btn');
+        await env.search('cook');
         await env.tapKey('discover_category_tile_cook');
         await env.tapKey('discover_next_btn');
         await env.tapKey('discover_engagement_partTime');

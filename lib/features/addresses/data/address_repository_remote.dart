@@ -191,5 +191,9 @@ Address? parseAddress(Object? body) {
     longitude: n('longitude'),
     isDefault: body['isDefault'] == true,
     photoUrl: _nullIfBlank(body['photoUrl'] as String?),
+    isServiceable: body['isServiceable'] is bool
+        ? body['isServiceable'] as bool
+        : null,
+    unserviceableReason: _nullIfBlank(body['unserviceableReason'] as String?),
   );
 }

@@ -220,17 +220,17 @@ abstract class AppLocalizations {
   /// **'Getting things ready...'**
   String get splashLoading;
 
-  /// No description provided for @proceedCustomerApp.
+  /// No description provided for @getStarted.
   ///
   /// In en, this message translates to:
-  /// **'Proceed with Customer App'**
-  String get proceedCustomerApp;
+  /// **'Get Started'**
+  String get getStarted;
 
-  /// No description provided for @moveToWorkerApp.
+  /// No description provided for @workerAppShort.
   ///
   /// In en, this message translates to:
-  /// **'Move to Worker App'**
-  String get moveToWorkerApp;
+  /// **'Worker App'**
+  String get workerAppShort;
 
   /// No description provided for @workerAppUnavailable.
   ///
@@ -754,6 +754,18 @@ abstract class AppLocalizations {
   /// **'For receipts and booking updates.'**
   String get emailHelp;
 
+  /// No description provided for @emailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get emailRequired;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get skipForNow;
+
   /// No description provided for @emailInvalid.
   ///
   /// In en, this message translates to:
@@ -987,12 +999,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please add your home address to continue.'**
   String get profileAddressRequired;
-
-  /// No description provided for @skipForNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip for now'**
-  String get skipForNow;
 
   /// No description provided for @deleteAddress.
   ///
@@ -1636,6 +1642,12 @@ abstract class AppLocalizations {
   /// **'Try a different word or choose something else.'**
   String get serviceNoMatchBody;
 
+  /// No description provided for @serviceSearchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No services found. Try another search.'**
+  String get serviceSearchNoResults;
+
   /// No description provided for @serviceClearSearch.
   ///
   /// In en, this message translates to:
@@ -1831,7 +1843,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationNotServed.
   ///
   /// In en, this message translates to:
-  /// **'We do not serve this area yet. Please choose another address.'**
+  /// **'Currently, SevaNest services are available only in Hyderabad. We\'re expanding to more locations soon. Stay tuned!'**
   String get locationNotServed;
 
   /// No description provided for @locationUseCurrent.
@@ -7357,7 +7369,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeDeliveringTo.
   ///
   /// In en, this message translates to:
-  /// **'DELIVERING TO'**
+  /// **'YOUR SPOT'**
   String get homeDeliveringTo;
 
   /// No description provided for @homeSearchHint.

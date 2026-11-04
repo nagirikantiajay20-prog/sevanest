@@ -1089,18 +1089,25 @@ class _EntryButtons extends StatelessWidget {
       children: [
         pill(
           key: const Key('splash_customer_btn'),
-          label: l10n.proceedCustomerApp,
+          label: l10n.getStarted,
           icon: Icons.person_outline_rounded,
           onTap: onCustomer,
           filled: true,
         ),
-        const SizedBox(height: 10),
-        pill(
+        const SizedBox(height: 6),
+        TextButton.icon(
           key: const Key('splash_worker_btn'),
-          label: l10n.moveToWorkerApp,
-          icon: Icons.work_outline_rounded,
-          onTap: onWorker,
-          filled: false,
+          onPressed: onWorker,
+          icon: const Icon(Icons.work_outline_rounded, size: 14),
+          label: Text(l10n.workerAppShort),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.navyDeep,
+            minimumSize: const Size(48, 40),
+            textStyle: AppText.body.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );

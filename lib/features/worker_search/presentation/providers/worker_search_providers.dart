@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
+import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 import 'package:sevanest_customer/features/worker_search/data/worker_search_repository_mock.dart';
@@ -40,7 +41,7 @@ final workerQueryProvider = Provider.autoDispose<WorkerQuery?>((ref) {
   if (d.serviceId == null || address == null) return null;
   // The address stores the area name; the search wants the service-area id.
   final areas = ref.watch(serviceAreasProvider).asData?.value ?? const [];
-  final areaId = areas.where((a) => a.name == address.area).firstOrNull?.id;
+  final areaId = serviceAreaIdFor(areas, address.area);
   return WorkerQuery(
     category: d.serviceId!,
     areaId: areaId ?? address.area,
@@ -134,7 +135,14 @@ class WorkerSearchNotifier extends AsyncNotifier<PagedState<WorkerSummary>> {
           .read(workerSearchRepositoryProvider)
           .search(q, cursor: cur.nextCursor, cancel: token);
       if (token.isCancelled) return;
-      state = AsyncData(cur.appended(page.items, page.nextCursor));
+      // Pages are numbered: a worker added or removed between requests shifts rows, so drop repeats.
+      final seen = {for (final w in cur.items) w.id};
+      state = AsyncData(
+        cur.appended([
+          for (final w in page.items)
+            if (seen.add(w.id)) w,
+        ], page.nextCursor),
+      );
     } on Object catch (e) {
       if (token.isCancelled) return;
       state = AsyncData(cur.failedMore(e));

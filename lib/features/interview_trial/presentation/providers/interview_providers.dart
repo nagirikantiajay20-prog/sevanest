@@ -4,6 +4,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
+import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/interview_trial/data/interview_repository_over_bookings.dart';
@@ -21,7 +22,7 @@ final interviewRepositoryProvider = Provider<InterviewRepository>((ref) {
     if (name == null) throw const ValidationFailure('Address is missing');
     try {
       final areas = await ref.read(serviceAreasProvider.future);
-      return areas.where((a) => a.name == name).firstOrNull?.id ?? name;
+      return serviceAreaIdFor(areas, name) ?? name;
     } on Object {
       return name;
     }

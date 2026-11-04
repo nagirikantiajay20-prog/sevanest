@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
@@ -15,10 +17,13 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 /// `/discover/category` (screen 06, step 1 of 6): pick the service.
 /// States: loading skeleton, list, searching, no result, error, empty, selected.
 class ServiceScreen extends ConsumerStatefulWidget {
-  const ServiceScreen({this.edit = false, super.key});
+  const ServiceScreen({this.edit = false, this.searchFirst = false, super.key});
 
   /// Opened from a "Change" chip / Review: Continue returns instead of moving on.
   final bool edit;
+
+  /// Opened from the Home search bar: keyboard up, no services listed until the customer types.
+  final bool searchFirst;
 
   @override
   ConsumerState<ServiceScreen> createState() => _ServiceScreenState();
@@ -27,22 +32,40 @@ class ServiceScreen extends ConsumerStatefulWidget {
 class _ServiceScreenState extends ConsumerState<ServiceScreen> {
   final _search = TextEditingController();
   final _focus = FocusNode();
+  Timer? _debounce;
   String _query = '';
 
   @override
   void initState() {
     super.initState();
     _focus.addListener(() => setState(() {}));
+    if (widget.searchFirst) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focus.requestFocus();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _search.dispose();
     _focus.dispose();
     super.dispose();
   }
 
-  void _setQuery(String q) => setState(() => _query = q);
+  /// Search-first lists are filtered after a short pause in typing; clearing is immediate.
+  void _setQuery(String q) {
+    _debounce?.cancel();
+    if (!widget.searchFirst || q.trim().isEmpty) {
+      setState(() => _query = q);
+      return;
+    }
+    setState(() {}); // keeps the clear button in step with the text
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) setState(() => _query = q);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +76,9 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
 
     final list = categories.value;
     Widget results;
-    if (categories.hasError && list == null) {
+    if (widget.searchFirst && _query.trim().isEmpty) {
+      results = const SliverToBoxAdapter(child: SizedBox.shrink());
+    } else if (categories.hasError && list == null) {
       results = SliverToBoxAdapter(
         child: StepErrorCard(
           title: l10n.serviceLoadFailedTitle,
@@ -81,6 +106,7 @@ class _ServiceScreenState extends ConsumerState<ServiceScreen> {
           ? SliverToBoxAdapter(
               child: _NoResult(
                 query: _query,
+                searchFirst: widget.searchFirst,
                 onClear: () {
                   _search.clear();
                   _setQuery('');
@@ -495,8 +521,13 @@ class _ServiceSkeleton extends StatelessWidget {
 }
 
 class _NoResult extends StatelessWidget {
-  const _NoResult({required this.query, required this.onClear});
+  const _NoResult({
+    required this.query,
+    required this.onClear,
+    this.searchFirst = false,
+  });
   final String query;
+  final bool searchFirst;
   final VoidCallback onClear;
 
   @override
@@ -529,18 +560,22 @@ class _NoResult extends StatelessWidget {
                 Semantics(
                   liveRegion: true,
                   child: Text(
-                    l10n.serviceNoMatch(query.trim()),
+                    searchFirst
+                        ? l10n.serviceSearchNoResults
+                        : l10n.serviceNoMatch(query.trim()),
                     key: const Key('discover_no_result'),
                     textAlign: TextAlign.center,
                     style: authSerif(20, 1.25),
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  l10n.serviceNoMatchBody,
-                  textAlign: TextAlign.center,
-                  style: AppText.body.copyWith(fontSize: 14, color: dsText),
-                ),
+                if (!searchFirst) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.serviceNoMatchBody,
+                    textAlign: TextAlign.center,
+                    style: AppText.body.copyWith(fontSize: 14, color: dsText),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 OutlinedButton(
                   key: const Key('discover_clear_search_btn'),

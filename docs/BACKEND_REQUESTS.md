@@ -427,3 +427,25 @@ Numbers match our message.
 
 - The deployed OpenAPI has no address photo: `AddressResponse` has no photo field and the only photo routes are `/workers/me/photo`. The app is built on an **assumed** contract that mirrors `/customers/me/photo`: `POST /customers/me/addresses/{id}/photo {contentType,sizeBytes}` -> `{photoId,url,method}`, `PUT` bytes to `url`, `POST .../photo/{photoId}/confirm`, `DELETE .../photo`, and a short-lived `photoUrl` on `AddressResponse`. Until the backend ships these, saving a photo returns an error and the app says the address saved but the photo did not; nothing is stored locally.
 - Limits enforced client-side: JPEG or PNG, 5 MB.
+
+## Backend reply 2026-11-04: Hyderabad-only serviceability, email, address-less customers
+
+- **Address flag (1, 6):** `AddressResponse` will add `isServiceable: boolean` and `unserviceableReason` (`CITY_NOT_SERVICEABLE` | `AREA_NOT_SERVICEABLE`), computed from enabled service areas. `POST /customers/me/addresses` stays open to any city (Option A). The app reads the flag when present (`Address.isServiceable`) and falls back to the client city check only when it is absent. PROPOSAL until deployed.
+- **Booking rejection (2):** `POST /bookings` returns 422 `OUTSIDE_SERVICE_AREA` (address city differs from the area city) or `AREA_NOT_AVAILABLE` (area disabled). Rebook re-checks the area. There is no address on the fee quote or `/interviews`. Note: it compares the address city with the chosen area's city, not the area name.
+- **Service area contract (3):** schema published; outside every area = 404 `AREA_NOT_FOUND` (not 200 null); `city` always present; `?city=` is case-insensitive. The app treats a 404 as "no area".
+- **Email (4):** required with format check on create (400 `VALIDATION_FAILED`, `details[].field`); `PATCH` may omit it, but a blank or invalid value is rejected.
+- **No address (5):** `GET /customers/me/addresses` returns 200 `[]`; `/customers/me` and `/customers/me/home` work without one; `/search/workers` still needs `areaId`; `POST /bookings` takes an optional `addressId`, mandatory `areaId`.
+- Client to-do: show the `OUTSIDE_SERVICE_AREA` message on the booking confirm screen; confirm `details[].field` is what the inline email error reads (the reply says `details`, not `fieldErrors`).
+
+## Backend follow-up 2026-11-04 (audit of 8 items)
+
+- **Error shape:** `details: [{field, messages}]` only, no `fieldErrors`. Already read by `lib/core/network/error_mapper.dart`; no change needed.
+- **isServiceable:** built, not deployed (D-98). Reasons `CITY_NOT_SERVICEABLE` | `AREA_NOT_SERVICEABLE` | null on list, detail, create, update, set-default. App already reads it.
+- **Booking:** `OUTSIDE_SERVICE_AREA` now also checks area/coordinates (when deployed). App already maps it. `addressId` stays optional for now.
+- **Legacy email:** PATCH does not require it; the app prompts. Service area outside = 404 `AREA_NOT_FOUND`; OpenAPI published.
+- **Still missing:** `POST /bookings/quote` (needs wage formula), address photo endpoints, `customerStoreUrl` unset (ops config). Optional: `topRatedAreaFiltered` on Home.
+
+## Address photo (backend reply 2026-11-04, Q-138)
+
+- Backend has no column, route or `photoUrl` for address photos, and it is not in the SRS. Registered as backend Q-138; they build nothing until product answers scope, one-or-many, malware scan, who may read, size and types.
+- App: `addressPhotoEnabled` (address.dart) is **false**, so the field is hidden and no longer required to save an address. Flip it when the backend ships the routes.

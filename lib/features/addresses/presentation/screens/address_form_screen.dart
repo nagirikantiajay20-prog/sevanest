@@ -273,8 +273,9 @@ class _AddressFormState extends ConsumerState<_AddressForm>
         _photoRemoved;
   }
 
-  /// The home photo is mandatory: a new pick, or the saved one not removed.
+  /// The home photo is mandatory while [addressPhotoEnabled]: a new pick, or the saved one not removed.
   bool get _hasPhoto =>
+      !addressPhotoEnabled ||
       _photo != null ||
       (!_photoRemoved && (_initial?.photoUrl?.isNotEmpty ?? false));
 
@@ -625,7 +626,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
                     ],
                   ),
                   const SizedBox(height: 18),
-                  ...[
+                  if (addressPhotoEnabled) ...[
                     HomePhotoField(
                       showRequired: _fieldsValid,
                       photo: _photo,

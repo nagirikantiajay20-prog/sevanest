@@ -4,6 +4,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/localization/failure_message.dart'
+    show isNotServiceable;
+import 'package:sevanest_customer/features/addresses/data/address_repository_remote.dart';
+import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_profile_providers.dart';
@@ -154,22 +158,53 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Continue without a home address shows the error and sends nothing',
-      (t) async {
-        await launch(t, complete: false);
-        await t.enterText(find.byKey(_name), 'Priya Sharma');
-        await t.enterText(find.byKey(_email), 'priya@example.com');
-        await t.pump();
-        await t.tap(find.byKey(_continue));
-        await t.pumpAndSettle();
+    testWidgets('Skip for now saves the profile without an address', (t) async {
+      await launch(t, complete: false);
+      await t.enterText(find.byKey(_name), 'Priya Sharma');
+      await t.enterText(find.byKey(_email), 'priya@example.com');
+      await t.pump();
+      await t.ensureVisible(find.byKey(const Key('profile_skip_address_btn')));
+      await t.tap(find.byKey(const Key('profile_skip_address_btn')));
+      await t.pumpAndSettle();
 
-        expect(find.byKey(const Key('profile_address_error')), findsOneWidget);
-        expect(profiles.createCalls, 0);
-        expect(addresses.createCalls, 0);
+      expect(profiles.createCalls, 1);
+      expect(addresses.createCalls, 0);
+    });
 
-        await addHomeAddress(t);
-        expect(find.byKey(const Key('profile_address_error')), findsNothing);
+    testWidgets('empty email shows "required"; Skip is blocked too', (t) async {
+      await launch(t, complete: false);
+      await t.enterText(find.byKey(_name), 'Priya Sharma');
+      await t.pump();
+      await t.ensureVisible(find.byKey(const Key('profile_skip_address_btn')));
+      await t.tap(find.byKey(const Key('profile_skip_address_btn')));
+      await t.pump();
+      expect(find.text('Email is required'), findsOneWidget);
+      expect(profiles.createCalls, 0);
+    });
+
+    test('only Hyderabad addresses are serviceable', () {
+      expect(isServiceableCity(' hyderabad '), isTrue);
+      expect(isServiceableCity('Mumbai'), isFalse);
+    });
+
+    test(
+      'server isServiceable is parsed and OUTSIDE_SERVICE_AREA is recognised',
+      () {
+        final a = parseAddress({
+          'id': '1',
+          'city': 'Hyderabad',
+          'isServiceable': false,
+          'unserviceableReason': 'AREA_NOT_SERVICEABLE',
+        })!;
+        expect(a.isServiceable, isFalse);
+        expect(a.unserviceableReason, 'AREA_NOT_SERVICEABLE');
+        expect(parseAddress({'id': '2'})!.isServiceable, isNull);
+        expect(
+          isNotServiceable(
+            const ValidationFailure(null, {}, 'OUTSIDE_SERVICE_AREA'),
+          ),
+          isTrue,
+        );
       },
     );
 

@@ -60,6 +60,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     context.push(Routes.discoverCategory);
   }
 
+  /// Home search bar: same fresh draft, but the service step opens empty with the keyboard up.
+  void _startSearch() {
+    ref.read(requirementDraftProvider.notifier).reset();
+    context.push('${Routes.discoverCategory}?search=true');
+  }
+
   /// Service tile: fresh draft with the service preset; the service step is skipped (HOME-03).
   void _startWithService(String id) {
     ref.read(requirementDraftProvider.notifier).startWithService(id);
@@ -160,7 +166,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ctaEnabled: !loading && !offline,
                   onAddress: () => _pickAddress(list),
                   onBell: () => context.push(Routes.notifications),
-                  onFind: _startHire,
+                  onFind: _startSearch,
                 ),
                 Padding(
                   // Bottom: clear of the floating nav pill (Scaffold extendBody).

@@ -872,12 +872,6 @@ class _MobileField extends StatelessWidget {
       child: Row(
         children: [
           const Text('+91', style: fieldText),
-          const SizedBox(width: 4),
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: AppColors.slate400,
-          ),
           Container(
             width: 1,
             height: 28,

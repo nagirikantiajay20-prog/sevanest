@@ -6,6 +6,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
+import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
@@ -67,7 +68,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       engagement: d.engagement!,
       area: d.address!.area,
       city: d.address!.city,
-      areaId: areas.where((a) => a.name == d.address!.area).firstOrNull?.id,
+      areaId: serviceAreaIdFor(areas, d.address!.area),
     );
   }
 
