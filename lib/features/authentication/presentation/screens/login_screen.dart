@@ -268,7 +268,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 }
 
-const _fieldBorder = Color(0xFF94A3B8);
+const _fieldBorder = AppColors.slate400Light;
 
 /// Room photo drifting under a wash from the left, plus three glows.
 final _backdropStyle = RoomBackdropStyle(
@@ -295,9 +295,15 @@ final _backdropStyle = RoomBackdropStyle(
     ),
   ],
   glows: const [
-    AuthGlow(Color(0x570F766E), 260, top: -70, right: -80),
-    AuthGlow(Color(0x4DF59E0B), 240, top: 300, left: -100, delayMs: 5000),
-    AuthGlow(Color(0x4D38BDF8), 260, top: 560, right: -90, delayMs: 9000),
+    AuthGlow(AppColors.teal0F766EA34, 260, top: -70, right: -80),
+    AuthGlow(
+      AppColors.orangeF59E0BA30,
+      240,
+      top: 300,
+      left: -100,
+      delayMs: 5000,
+    ),
+    AuthGlow(AppColors.cyan38BDF8A30, 260, top: 560, right: -90, delayMs: 9000),
   ],
 );
 
@@ -405,7 +411,10 @@ class _Brand extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
-                                colors: [Color(0x570F766E), Color(0x000F766E)],
+                                colors: [
+                                  AppColors.teal0F766EA34,
+                                  AppColors.teal0F766EA0,
+                                ],
                                 stops: [0, 0.7],
                               ),
                             ),
@@ -573,10 +582,10 @@ class _Marquee extends StatelessWidget {
             blendMode: BlendMode.dstIn,
             shaderCallback: (r) => const LinearGradient(
               colors: [
-                Color(0x00000000),
-                Color(0xFF000000),
-                Color(0xFF000000),
-                Color(0x00000000),
+                AppColors.transparentBlack,
+                AppColors.blackA100xFF,
+                AppColors.blackA100xFF,
+                AppColors.transparentBlack,
               ],
               stops: [0, 0.06, 0.94, 1],
             ).createShader(r),
@@ -609,11 +618,11 @@ class _ServiceTile extends StatelessWidget {
     height: 136,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: Colors.white, width: 3),
+      border: Border.all(color: AppColors.surface, width: 3),
       color: AppColors.tileWell,
       boxShadow: const [
         BoxShadow(
-          color: Color(0x381B3354),
+          color: AppColors.sky1B3354A22,
           blurRadius: 22,
           offset: Offset(0, 10),
         ),
@@ -634,7 +643,7 @@ class _ServiceTile extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0x000F2340), Color(0x8C0F2340)],
+                colors: [AppColors.blue0F2340A0, AppColors.blue0F2340A55],
                 stops: [0.5, 1],
               ),
             ),
@@ -650,10 +659,10 @@ class _ServiceTile extends StatelessWidget {
                 fontSize: 11,
                 height: 1.2,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.surface,
                 shadows: const [
                   Shadow(
-                    color: Color(0x66000000),
+                    color: AppColors.blackA40x66,
                     blurRadius: 4,
                     offset: Offset(0, 1),
                   ),
@@ -732,10 +741,10 @@ class _TrustStrip extends StatelessWidget {
     return AuthGlass(
       radius: BorderRadius.circular(22),
       blur: 16,
-      tint: const Color(0x9EFFFFFF),
+      tint: AppColors.whiteA62x9E,
       shadow: const [
         BoxShadow(
-          color: Color(0x1F1B3354),
+          color: AppColors.sky1B3354A12,
           blurRadius: 24,
           offset: Offset(0, 8),
         ),
@@ -791,10 +800,10 @@ class _Sheet extends StatelessWidget {
   Widget build(BuildContext context) => AuthGlass(
     radius: const BorderRadius.vertical(top: Radius.circular(32)),
     blur: 28,
-    tint: const Color(0x99FFFFFF),
+    tint: AppColors.whiteA60x99,
     shadow: const [
       BoxShadow(
-        color: Color(0x331B3354),
+        color: AppColors.sky1B3354A20,
         blurRadius: 44,
         offset: Offset(0, -16),
       ),
@@ -812,7 +821,7 @@ class _Sheet extends StatelessWidget {
                 height: 5,
                 margin: const EdgeInsets.only(bottom: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0x381B3354),
+                  color: AppColors.sky1B3354A22,
                   borderRadius: BorderRadius.circular(99),
                 ),
               ),
@@ -862,11 +871,11 @@ class _MobileField extends StatelessWidget {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: const Color(0xB8FFFFFF),
+        color: AppColors.whiteA72xB8,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: borderColor, width: 1.5),
         boxShadow: focused && !hasError
-            ? const [BoxShadow(color: Color(0x290F766E), spreadRadius: 4)]
+            ? const [BoxShadow(color: AppColors.teal0F766EA16, spreadRadius: 4)]
             : null,
       ),
       child: Row(
@@ -944,7 +953,7 @@ class _Feedback extends StatelessWidget {
                   key: const Key('login_mobile_error'),
                   style: AppText.body.copyWith(
                     fontSize: 13.5,
-                    color: const Color(0xFFB91C1C),
+                    color: AppColors.red700,
                   ),
                 ),
               ),

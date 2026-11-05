@@ -194,14 +194,14 @@ class GuidanceCard extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
+                        color: AppColors.surface.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: const _Spark(
                         child: Icon(
                           Icons.trending_up,
                           size: 26,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),
@@ -219,7 +219,7 @@ class GuidanceCard extends StatelessWidget {
                             style: AppText.body.copyWith(
                               fontSize: 13,
                               height: 1.35,
-                              color: Colors.white.withValues(alpha: 0.82),
+                              color: AppColors.surface.withValues(alpha: 0.82),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -231,14 +231,14 @@ class GuidanceCard extends StatelessWidget {
                             style: authSerif(
                               22,
                               1.25,
-                            ).copyWith(color: Colors.white),
+                            ).copyWith(color: AppColors.surface),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             g.basis,
                             style: AppText.body.copyWith(
                               fontSize: 12.5,
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: AppColors.surface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -251,7 +251,7 @@ class GuidanceCard extends StatelessWidget {
                   key: const Key('discover_use_range_btn'),
                   onPressed: () => onUse(g),
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppColors.surface,
                     foregroundColor: dsNavy,
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
@@ -331,9 +331,9 @@ class BudgetReadout extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.7),
+          color: AppColors.surface.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xF2FFFFFF)),
+          border: Border.all(color: AppColors.whiteA95xF2),
           boxShadow: [
             BoxShadow(
               color: dsNavy.withValues(alpha: 0.08),
@@ -640,7 +640,7 @@ class _BudgetThumb extends RangeSliderThumbShape {
         ..color = dsNavy.withValues(alpha: 0.35)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
     );
-    canvas.drawCircle(center, 14 * scale, Paint()..color = Colors.white);
+    canvas.drawCircle(center, 14 * scale, Paint()..color = AppColors.surface);
     canvas.drawCircle(
       center,
       12.5 * scale,
@@ -701,7 +701,7 @@ class AmountField extends StatelessWidget {
           style: AppText.body.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: dim ? const Color(0xFF94A3B8) : dsNavy,
+            color: dim ? AppColors.slate400Light : dsNavy,
           ),
           decoration: InputDecoration(
             isDense: true,
@@ -713,7 +713,7 @@ class AmountField extends StatelessWidget {
             ),
             hintText: '0',
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.8),
+            fillColor: AppColors.surface.withValues(alpha: 0.8),
             constraints: const BoxConstraints(minHeight: 44),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 10,
@@ -788,7 +788,7 @@ class FlexibleCard extends StatelessWidget {
                       height: 32,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
-                        color: value ? dsNavy : const Color(0xFF94A3B8),
+                        color: value ? dsNavy : AppColors.slate400Light,
                       ),
                       child: AnimatedAlign(
                         duration: const Duration(milliseconds: 350),
@@ -802,10 +802,10 @@ class FlexibleCard extends StatelessWidget {
                           margin: const EdgeInsets.symmetric(horizontal: 3),
                           decoration: const BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white,
+                            color: AppColors.surface,
                             boxShadow: [
                               BoxShadow(
-                                color: Color(0x4D000000),
+                                color: AppColors.blackA30x4D,
                                 blurRadius: 6,
                                 offset: Offset(0, 2),
                               ),

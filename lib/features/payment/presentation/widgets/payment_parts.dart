@@ -11,7 +11,7 @@ import 'package:sevanest_customer/features/worker_search/presentation/widgets/gl
 
 /// Building blocks of "Payment" (design 9.1 - 9.2) and "Receipt" (9.4).
 
-const _teal = Color(0xFF0F766E);
+const _teal = AppColors.teal;
 
 /// Navy-to-teal "Amount to pay" card with the sheen sweeping across it.
 class PayAmountCard extends StatelessWidget {
@@ -33,7 +33,7 @@ class PayAmountCard extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [dsNavy, Color(0xFF124E52)],
+        colors: [dsNavy, AppColors.actionDeepTeal],
       ),
       boxShadow: [
         BoxShadow(
@@ -58,14 +58,14 @@ class PayAmountCard extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.6,
-                    color: const Color(0xC7FFFFFF),
+                    color: AppColors.whiteA78xC7,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   amount,
                   key: amountKey,
-                  style: authSerif(52, 1.05).copyWith(color: Colors.white),
+                  style: authSerif(52, 1.05).copyWith(color: AppColors.surface),
                 ),
               ],
             ),
@@ -98,7 +98,7 @@ class PayMethodTile extends StatelessWidget {
     padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
     constraints: const BoxConstraints(minHeight: 68),
     decoration: BoxDecoration(
-      color: const Color(0xB3FFFFFF),
+      color: AppColors.whiteA70xB3,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: dsNavy.withValues(alpha: 0.14), width: 1.5),
     ),
@@ -108,7 +108,7 @@ class PayMethodTile extends StatelessWidget {
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: const Color(0xFFE2EEEC),
+            color: AppColors.pillActive,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(icon, size: 22, color: _teal),
@@ -140,16 +140,16 @@ class PayMethodTile extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(999),
                         gradient: const LinearGradient(
-                          colors: [AppColors.amber, Color(0xFFFBBF24)],
+                          colors: [AppColors.amber, AppColors.amber400],
                         ),
                       ),
                       child: Text(
                         badge!.toUpperCase(),
                         style: AppText.body.copyWith(
-                          fontSize: 10.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.4,
-                          color: const Color(0xFF4A2C00),
+                          color: AppColors.orange4A2C00,
                         ),
                       ),
                     ),
@@ -191,7 +191,7 @@ class PaySecureNote extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 13.5,
               height: 1.4,
-              color: const Color(0xFF124E52),
+              color: AppColors.actionDeepTeal,
             ),
           ),
         ),
@@ -274,7 +274,7 @@ class PayResult extends StatelessWidget {
                       height: 104,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppColors.surface,
                         boxShadow: [
                           BoxShadow(
                             color: dsNavy.withValues(alpha: 0.2),
@@ -317,7 +317,7 @@ class PayResult extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Icon(icon, size: 50, color: Colors.white),
+                      child: Icon(icon, size: 50, color: AppColors.surface),
                     ),
             ),
             const SizedBox(height: 24),
@@ -374,7 +374,7 @@ class PayButton extends StatelessWidget {
         child: FilledButton(
           onPressed: onPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFFBE123C),
+            backgroundColor: AppColors.rose700,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
             ),
@@ -421,7 +421,7 @@ class PayOutline extends StatelessWidget {
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: quiet ? dsMuted : _teal,
-        backgroundColor: quiet ? Colors.transparent : const Color(0xCCFFFFFF),
+        backgroundColor: quiet ? Colors.transparent : AppColors.whiteA80xCC,
         side: quiet
             ? BorderSide.none
             : BorderSide(color: _teal.withValues(alpha: 0.5), width: 1.5),

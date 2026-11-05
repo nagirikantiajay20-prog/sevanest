@@ -384,7 +384,7 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
             child: SupportNotice(
               key: const Key('replacement_offline_banner'),
               icon: Icons.wifi_off_rounded,
-              iconColor: const Color(0xFF8A4B06),
+              iconColor: AppColors.orange8A4B06,
               tint: supportWarnTint,
               title: l10n.repOfflineBanner,
               trailing: TextButton(
@@ -518,7 +518,7 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
                         backgroundColor: AppColors.teal,
                         child: Text(
                           '${i + 1}',
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: AppColors.surface),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -565,7 +565,7 @@ class _NotEligible extends StatelessWidget {
         const SizedBox(height: 14),
         SupportNotice(
           icon: Icons.warning_amber_rounded,
-          iconColor: const Color(0xFF8A4B06),
+          iconColor: AppColors.orange8A4B06,
           tint: supportWarnTint,
           title: l10n.repNotEligibleTitle,
           body: l10n.repNotEligibleBody,

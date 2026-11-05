@@ -28,37 +28,37 @@ LinearGradient _sky(List<Color> c, {bool horizontal = false}) => LinearGradient(
 );
 
 final _scenes = <TimeWindow?, LinearGradient>{
-  null: _sky(const [Color(0xFFBAE6FD), Color(0xFFFEF3C7)]),
+  null: _sky(const [AppColors.skyBAE6FD, AppColors.warnBg]),
   TimeWindow.earlyMorning: _sky(const [
-    Color(0xFF312E81),
-    Color(0xFFF472B6),
-    Color(0xFFFDBA74),
+    AppColors.blue312E81,
+    AppColors.roseF472B6,
+    AppColors.orangeFDBA74,
   ]),
   TimeWindow.morning: _sky(const [
-    Color(0xFF38BDF8),
-    Color(0xFFBAE6FD),
-    Color(0xFFFEF3C7),
+    AppColors.sky400,
+    AppColors.skyBAE6FD,
+    AppColors.warnBg,
   ]),
   TimeWindow.afternoon: _sky(const [
-    Color(0xFF0EA5E9),
-    Color(0xFF7DD3FC),
-    Color(0xFFFDE68A),
+    AppColors.cyan0EA5E9,
+    AppColors.cyan7DD3FC,
+    AppColors.warnLine,
   ]),
   TimeWindow.evening: _sky(const [
-    Color(0xFF4C1D95),
-    Color(0xFFF97316),
-    Color(0xFFFDBA74),
+    AppColors.indigo4C1D95,
+    AppColors.orangeF97316,
+    AppColors.orangeFDBA74,
   ]),
   TimeWindow.night: _sky(const [
-    Color(0xFF020617),
-    Color(0xFF1E1B4B),
-    Color(0xFF312E81),
+    AppColors.blue020617,
+    AppColors.blue1E1B4B,
+    AppColors.blue312E81,
   ]),
   TimeWindow.flexible: _sky(const [
-    Color(0xFFFDBA74),
-    Color(0xFF7DD3FC),
-    Color(0xFFC4B5FD),
-    Color(0xFF1E1B4B),
+    AppColors.orangeFDBA74,
+    AppColors.cyan7DD3FC,
+    AppColors.indigoC4B5FD,
+    AppColors.blue1E1B4B,
   ], horizontal: true),
 };
 
@@ -112,7 +112,7 @@ class SkyScene extends StatelessWidget {
         height: 132,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white, width: 2),
+          border: Border.all(color: AppColors.surface, width: 2),
           boxShadow: [
             BoxShadow(
               color: dsNavy.withValues(alpha: 0.24),
@@ -150,9 +150,12 @@ class SkyScene extends StatelessWidget {
                               height: 5,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 boxShadow: [
-                                  BoxShadow(color: Colors.white, blurRadius: 6),
+                                  BoxShadow(
+                                    color: AppColors.surface,
+                                    blurRadius: 6,
+                                  ),
                                 ],
                               ),
                             ),
@@ -191,10 +194,10 @@ class SkyScene extends StatelessWidget {
                               ? const RadialGradient(
                                   center: Alignment(0.3, -0.2),
                                   colors: [
-                                    Color(0xFFF8FAFC),
-                                    Color(0xFFF8FAFC),
-                                    Color(0xFFCBD5E1),
-                                    Color(0xFFCBD5E1),
+                                    AppColors.fieldBg,
+                                    AppColors.fieldBg,
+                                    AppColors.slate300,
+                                    AppColors.slate300,
                                   ],
                                   stops: [0, 0.55, 0.56, 1],
                                 )
@@ -202,28 +205,30 @@ class SkyScene extends StatelessWidget {
                                   center: const Alignment(-0.3, -0.3),
                                   colors: early
                                       ? const [
-                                          Color(0xFFFFE4B5),
-                                          Color(0xFFFB923C),
+                                          AppColors.orangeFFE4B5,
+                                          AppColors.orangeFB923C,
                                         ]
                                       : const [
-                                          Color(0xFFFFF7CC),
-                                          Color(0xFFFDE047),
+                                          AppColors.amberFFF7CC,
+                                          AppColors.amberFDE047,
                                         ],
                                 ),
                           boxShadow: night
                               ? [
                                   BoxShadow(
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                    color: AppColors.surface.withValues(
+                                      alpha: 0.8,
+                                    ),
                                     blurRadius: 22,
                                   ),
                                 ]
                               : [
                                   const BoxShadow(
-                                    color: Color(0xF2FFD666),
+                                    color: AppColors.amberFFD666A95,
                                     blurRadius: 26,
                                   ),
                                   const BoxShadow(
-                                    color: Color(0x40FFD666),
+                                    color: AppColors.amberFFD666A25,
                                     spreadRadius: 8,
                                   ),
                                 ],
@@ -285,7 +290,7 @@ class _Cloud extends StatelessWidget {
       width: w,
       height: h,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: a),
+        color: AppColors.surface.withValues(alpha: a),
         borderRadius: BorderRadius.circular(999),
       ),
     ),
@@ -317,7 +322,7 @@ class _ArcPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round
-      ..color = Colors.white.withValues(alpha: 0.7);
+      ..color = AppColors.surface.withValues(alpha: 0.7);
     for (final m in path.computeMetrics()) {
       for (var d = 0.0; d < m.length; d += 11) {
         canvas.drawPath(m.extractPath(d, d + 3), paint);
@@ -345,7 +350,7 @@ class _HillsPainter extends CustomPainter {
         ..lineTo(358, 60)
         ..lineTo(0, 60)
         ..close(),
-      Paint()..color = const Color(0x8C0F766E),
+      Paint()..color = AppColors.teal0F766EA55,
     );
     canvas.drawPath(
       Path()
@@ -356,7 +361,7 @@ class _HillsPainter extends CustomPainter {
         ..lineTo(358, 60)
         ..lineTo(0, 60)
         ..close(),
-      Paint()..color = const Color(0xD90F3942),
+      Paint()..color = AppColors.cyan0F3942A85,
     );
     canvas.restore();
     // The house keeps its own proportions.
@@ -372,7 +377,7 @@ class _HillsPainter extends CustomPainter {
         ..close(),
       Paint()..color = dsNavy,
     );
-    final lit = Paint()..color = const Color(0xFFFDE68A);
+    final lit = Paint()..color = AppColors.warnLine;
     canvas.drawRect(const Rect.fromLTWH(11, 20, 6, 12), lit);
     canvas.drawRect(const Rect.fromLTWH(19, 16, 5, 5), lit);
     canvas.restore();
@@ -404,7 +409,7 @@ class WindowCard extends StatelessWidget {
     Widget icon = Icon(
       windowIcons[window],
       size: 24,
-      color: selected ? Colors.white : const Color(0xFF64748B),
+      color: selected ? AppColors.surface : AppColors.slate400,
     );
     if (selected) {
       icon = ValueListenableBuilder<double>(
@@ -433,7 +438,7 @@ class WindowCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
-              color: selected ? null : const Color(0xFFEEF2F6),
+              color: selected ? null : AppColors.grayEEF2F6,
               gradient: selected
                   ? const LinearGradient(
                       begin: Alignment.topLeft,
@@ -514,7 +519,7 @@ class TimeField extends StatelessWidget {
         DiscoverGlass(
           radius: 18,
           borderWidth: 2,
-          borderColor: error ? AppColors.danger : const Color(0xE6FFFFFF),
+          borderColor: error ? AppColors.danger : AppColors.whiteA90xE6,
           child: Material(
             type: MaterialType.transparency,
             child: InkWell(
@@ -543,7 +548,7 @@ class TimeField extends StatelessWidget {
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
                             color: minutes == null
-                                ? const Color(0xFF64748B)
+                                ? AppColors.slate400
                                 : dsNavy,
                           ),
                         ),
@@ -598,14 +603,14 @@ class DateField extends StatelessWidget {
                     style: AppText.body.copyWith(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: filled ? dsNavy : const Color(0xFF64748B),
+                      color: filled ? dsNavy : AppColors.slate400,
                     ),
                   ),
                 ),
                 const Icon(
                   Icons.chevron_right_rounded,
                   size: 22,
-                  color: Color(0xFF64748B),
+                  color: AppColors.slate400,
                 ),
               ],
             ),
@@ -730,7 +735,7 @@ class _DayTile extends StatelessWidget {
               : null,
         ),
         child: Material(
-          color: on ? dsNavy : Colors.white.withValues(alpha: 0.75),
+          color: on ? dsNavy : AppColors.surface.withValues(alpha: 0.75),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
@@ -749,7 +754,7 @@ class _DayTile extends StatelessWidget {
                   style: AppText.body.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: on ? Colors.white : dsNavy,
+                    color: on ? AppColors.surface : dsNavy,
                   ),
                 ),
               ),

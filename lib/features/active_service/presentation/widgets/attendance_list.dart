@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/features/active_service/domain/attendance.dart';
@@ -21,17 +22,12 @@ String attendanceLabel(AppLocalizations l, AttendanceStatus s) => switch (s) {
 
 /// Badge fill and text colour of a status (design: teal done, amber late, rose absent).
 (Color, Color) _badge(AttendanceStatus s) => switch (s) {
-  AttendanceStatus.present => (
-    const Color(0xFFD6EFEA),
-    const Color(0xFF0B5A53),
-  ),
-  AttendanceStatus.late || AttendanceStatus.exception => (
-    const Color(0xFFFEF3C7),
-    const Color(0xFF8A4B06),
-  ),
-  AttendanceStatus.absent => (const Color(0xFFFFE4E6), const Color(0xFF9F1239)),
+  AttendanceStatus.present => (AppColors.tealD6EFEA, AppColors.teal0B5A53),
+  AttendanceStatus.late ||
+  AttendanceStatus.exception => (AppColors.warnBg, AppColors.orange8A4B06),
+  AttendanceStatus.absent => (AppColors.rose100, AppColors.rose800),
   AttendanceStatus.leave ||
-  AttendanceStatus.unknown => (const Color(0xFFE2E8F0), dsText),
+  AttendanceStatus.unknown => (AppColors.hairline, dsText),
 };
 
 /// "8:02 AM" for a local time.

@@ -17,7 +17,7 @@ class StarRow extends StatelessWidget {
     required this.rating,
     this.scale = 5,
     this.size = 14,
-    this.empty = const Color(0xE6CBD5E1),
+    this.empty = AppColors.skyCBD5E1A90,
     this.full = AppColors.amber,
     super.key,
   });
@@ -100,7 +100,7 @@ class ReviewTile extends ConsumerWidget {
                 end: Alignment.bottomRight,
                 colors: gradient,
               ),
-              border: Border.all(color: Colors.white, width: 2),
+              border: Border.all(color: AppColors.surface, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: dsNavy.withValues(alpha: 0.2),
@@ -114,7 +114,7 @@ class ReviewTile extends ConsumerWidget {
               style: AppText.body.copyWith(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
           ),

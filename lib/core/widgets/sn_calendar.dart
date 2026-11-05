@@ -165,7 +165,7 @@ class _SnCalendarState extends State<SnCalendar> {
         ? null
         : AppColors.navyMistAlt;
     final Color fg = isSelected
-        ? Colors.white
+        ? AppColors.surface
         : enabled
         ? AppColors.ink
         : AppColors.slate;
@@ -213,7 +213,7 @@ class _SnCalendarState extends State<SnCalendar> {
                       margin: const EdgeInsets.only(top: 1),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isSelected ? Colors.white : AppColors.slate,
+                        color: isSelected ? AppColors.surface : AppColors.slate,
                       ),
                     ),
                 ],

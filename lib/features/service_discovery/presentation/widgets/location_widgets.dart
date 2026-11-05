@@ -13,7 +13,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Widgets of the Location step (design: Find a Worker 3).
 
-const _slate = Color(0xFF64748B);
+const _slate = AppColors.slate400;
 
 /// "Use my current location": frosted row with radar rings while idle, a spinner while finding.
 class CurrentLocationButton extends StatelessWidget {
@@ -32,7 +32,7 @@ class CurrentLocationButton extends StatelessWidget {
     return DiscoverGlass(
       radius: 22,
       borderWidth: 2,
-      borderColor: finding ? AppColors.teal : const Color(0xE6FFFFFF),
+      borderColor: finding ? AppColors.teal : AppColors.whiteA90xE6,
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
@@ -49,7 +49,7 @@ class CurrentLocationButton extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       boxShadow: [
                         BoxShadow(
                           color: dsNavy.withValues(alpha: 0.14),
@@ -280,7 +280,7 @@ class NotServedNote extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 14.5,
               height: 1.45,
-              color: const Color(0xFFB91C1C),
+              color: AppColors.red700,
             ),
           ),
         ),
@@ -310,7 +310,7 @@ class NoAddressCard extends StatelessWidget {
                 height: 64,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFE2EEEC),
+                  color: AppColors.pillActive,
                 ),
                 child: const Icon(
                   Icons.add_home_outlined,
@@ -357,7 +357,7 @@ class AddAddressButton extends StatelessWidget {
   Widget build(BuildContext context) => CustomPaint(
     foregroundPainter: const _DashedBorder(),
     child: Material(
-      color: const Color(0x8CFFFFFF),
+      color: AppColors.whiteA55x8C,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         key: const Key('discover_add_address_btn'),
@@ -455,16 +455,14 @@ class AddressCard extends StatelessWidget {
           child: DiscoverGlass(
             radius: 24,
             borderWidth: 2,
-            borderColor: selected ? accent : const Color(0xE6FFFFFF),
+            borderColor: selected ? accent : AppColors.whiteA90xE6,
             gradient: selected
                 ? LinearGradient(
                     begin: const Alignment(-0.6, -1),
                     end: const Alignment(0.6, 1),
                     colors: [
-                      served
-                          ? const Color(0xF2E2EEEC)
-                          : const Color(0xE6FEE2E2),
-                      const Color(0xB8FFFFFF),
+                      served ? AppColors.grayE2EEECA95 : AppColors.redFEE2E2A90,
+                      AppColors.whiteA72xB8,
                     ],
                   )
                 : null,
@@ -537,7 +535,7 @@ class AddressCard extends StatelessWidget {
                               width: 44,
                               height: 40,
                             ),
-                            color: const Color(0xF7FFFFFF),
+                            color: AppColors.whiteA97xF7,
                             elevation: 12,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18),
@@ -609,14 +607,14 @@ class _Radio extends StatelessWidget {
       height: 28,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: on ? color : const Color(0xB3FFFFFF),
+        color: on ? color : AppColors.whiteA70xB3,
         border: Border.all(
-          color: on ? color : const Color(0xFF94A3B8),
+          color: on ? color : AppColors.slate400Light,
           width: 2,
         ),
       ),
       child: on
-          ? const Icon(Icons.check_rounded, size: 17, color: Colors.white)
+          ? const Icon(Icons.check_rounded, size: 17, color: AppColors.surface)
           : null,
     ),
   );
@@ -646,7 +644,7 @@ class _MapTile extends StatelessWidget {
       height: 68,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: AppColors.surface, width: 2),
         boxShadow: [
           BoxShadow(
             color: dsNavy.withValues(alpha: 0.2),
@@ -696,8 +694,8 @@ class _MapPainter extends CustomPainter {
   const _MapPainter(this.view);
   final Offset view;
 
-  static const _block = Color(0xFFF7F2E8);
-  static const _park = Color(0xFFCDEBD6);
+  static const _block = AppColors.grayF7F2E8;
+  static const _park = AppColors.greenCDEBD6;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -712,7 +710,7 @@ class _MapPainter extends CustomPainter {
         );
     canvas.drawRect(
       const Rect.fromLTWH(0, 0, 300, 220),
-      p..color = const Color(0xFFEAF4F1),
+      p..color = AppColors.grayEAF4F1,
     );
     rect(12, 14, 64, 40, _block);
     rect(96, 14, 70, 40, _block);
@@ -725,7 +723,7 @@ class _MapPainter extends CustomPainter {
     rect(132, 160, 70, 48, _block);
     rect(222, 160, 64, 48, _block);
     final road = Paint()
-      ..color = Colors.white
+      ..color = AppColors.surface
       ..style = PaintingStyle.stroke;
     road.strokeWidth = 12;
     for (final y in [69.0, 146.0]) {

@@ -236,7 +236,7 @@ class _Hold extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(
     key: Key('gate_hold'),
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surface,
     body: SizedBox.expand(
       child: Image(
         image: AssetImage('assets/splash/boot.jpg'),

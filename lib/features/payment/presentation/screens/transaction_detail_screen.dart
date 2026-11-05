@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
@@ -336,8 +337,8 @@ class _LinkButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          foregroundColor: quiet ? const Color(0xFF0F766E) : dsNavy,
-          backgroundColor: quiet ? Colors.transparent : const Color(0xCCFFFFFF),
+          foregroundColor: quiet ? AppColors.teal : dsNavy,
+          backgroundColor: quiet ? Colors.transparent : AppColors.whiteA80xCC,
           side: quiet
               ? BorderSide.none
               : BorderSide(color: dsNavy.withValues(alpha: 0.22), width: 1.5),

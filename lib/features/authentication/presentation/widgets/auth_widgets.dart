@@ -29,7 +29,7 @@ class AuthNoticeCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(color: AppColors.hairline),
           boxShadow: [
@@ -100,7 +100,7 @@ class AuthLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = onDark ? Colors.white : AppColors.teal;
+    final color = onDark ? AppColors.surface : AppColors.teal;
     final style = TextStyle(
       color: color,
       fontWeight: FontWeight.w600,

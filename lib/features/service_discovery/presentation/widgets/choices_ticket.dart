@@ -59,9 +59,9 @@ class ChoicesTicket extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Color(0x00FFFFFF),
-                                      Color(0x99FFFFFF),
-                                      Color(0x00FFFFFF),
+                                      AppColors.whiteClear,
+                                      AppColors.whiteA60x99,
+                                      AppColors.whiteClear,
                                     ],
                                   ),
                                 ),
@@ -116,7 +116,7 @@ class _Notch extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFF7F4EE),
+            color: AppColors.grayF7F4EE,
           ),
           child: SizedBox(width: 18, height: 18),
         ),
@@ -183,8 +183,8 @@ class _Cell extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: const Color(0xFFE2EEEC),
-        border: Border.all(color: Colors.white, width: 2),
+        color: AppColors.pillActive,
+        border: Border.all(color: AppColors.surface, width: 2),
         boxShadow: [
           BoxShadow(
             color: dsNavy.withValues(alpha: 0.18),
@@ -368,7 +368,7 @@ class _SideNotch extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFF7F4EE),
+            color: AppColors.grayF7F4EE,
           ),
           child: SizedBox(width: 18, height: 18),
         ),

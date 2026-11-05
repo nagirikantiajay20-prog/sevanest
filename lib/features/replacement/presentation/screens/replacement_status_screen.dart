@@ -358,7 +358,7 @@ class _State extends ConsumerState<ReplacementStatusScreen>
               child: SupportNotice(
                 key: const Key('replacement_offline_banner'),
                 icon: Icons.wifi_off_rounded,
-                iconColor: const Color(0xFF8A4B06),
+                iconColor: AppColors.orange8A4B06,
                 tint: supportWarnTint,
                 title: l10n.repOfflineBanner,
                 trailing: TextButton(

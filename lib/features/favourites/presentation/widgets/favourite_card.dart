@@ -120,15 +120,15 @@ class FavouriteCard extends ConsumerWidget {
                                         _Pill(
                                           label: l10n.verified,
                                           icon: Icons.check_rounded,
-                                          bg: const Color(0xFFD6EFEA),
-                                          fg: const Color(0xFF0B5A53),
+                                          bg: AppColors.tealD6EFEA,
+                                          fg: AppColors.teal0B5A53,
                                         )
                                       else if (worker.verificationPending)
                                         _Pill(
                                           label:
                                               l10n.workerVerificationInProgress,
-                                          bg: const Color(0xFFFEF3C7),
-                                          fg: const Color(0xFF8A4B06),
+                                          bg: AppColors.warnBg,
+                                          fg: AppColors.orange8A4B06,
                                         ),
                                       if (category != null)
                                         _Pill(
@@ -190,9 +190,9 @@ class FavouriteCard extends ConsumerWidget {
                     onPressed: onInterview,
                     style: FilledButton.styleFrom(
                       backgroundColor: dsNavy,
-                      disabledBackgroundColor: const Color(0xFF94A3B8),
-                      foregroundColor: Colors.white,
-                      disabledForegroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.slate400Light,
+                      foregroundColor: AppColors.surface,
+                      disabledForegroundColor: AppColors.surface,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -215,7 +215,7 @@ class FavouriteCard extends ConsumerWidget {
                       style: AppText.body.copyWith(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF8A4B06),
+                        color: AppColors.orange8A4B06,
                       ),
                     ),
                   ),
@@ -253,12 +253,12 @@ class UnavailableFavouriteCard extends StatelessWidget {
               height: 58,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFE2E8F0),
+                color: AppColors.hairline,
               ),
               child: const Icon(
                 Icons.person_off_outlined,
                 size: 26,
-                color: Color(0xFF64748B),
+                color: AppColors.slate400,
               ),
             ),
             const SizedBox(width: 12),
@@ -272,7 +272,7 @@ class UnavailableFavouriteCard extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE2E8F0),
+                    color: AppColors.hairline,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(

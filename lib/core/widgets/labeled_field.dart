@@ -71,7 +71,7 @@ class LabeledField extends StatelessWidget {
       borderRadius: BorderRadius.circular(glass ? 15 : AppRadius.field),
       borderSide: BorderSide(color: c, width: glass ? 1.5 : w),
     );
-    final edge = glass ? const Color(0xFFCBD5E1) : AppColors.hairline;
+    final edge = glass ? AppColors.slate300 : AppColors.hairline;
     final idle = hasError ? AppColors.danger : edge;
     final labelStyle = AppText.label.copyWith(fontSize: 15);
     return Column(
@@ -146,7 +146,7 @@ class LabeledField extends StatelessWidget {
             hintText: hint,
             hintStyle: AppText.card.copyWith(
               fontWeight: FontWeight.w400,
-              color: glass ? const Color(0xFF64748B) : AppColors.slate400,
+              color: glass ? AppColors.slate400 : AppColors.slate400,
             ),
             counterText: '',
             prefixIcon: prefixIcon == null
@@ -202,7 +202,7 @@ class LabeledField extends StatelessWidget {
             child: Text(
               helper!,
               style: TextStyle(
-                color: glass ? const Color(0xFF475569) : AppColors.slate,
+                color: glass ? AppColors.slate : AppColors.slate,
                 fontSize: glass ? 13 : 15,
               ),
             ),

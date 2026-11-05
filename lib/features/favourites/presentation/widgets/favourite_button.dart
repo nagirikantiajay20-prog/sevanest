@@ -52,13 +52,11 @@ class FavouriteButton extends ConsumerWidget {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(0, 58),
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          backgroundColor: isFav
-              ? const Color(0xFFFFE4EA)
-              : const Color(0xCCFFFFFF),
-          foregroundColor: isFav ? const Color(0xFF9F1239) : AppColors.navyDeep,
+          backgroundColor: isFav ? AppColors.redFFE4EA : AppColors.whiteA80xCC,
+          foregroundColor: isFav ? AppColors.rose800 : AppColors.navyDeep,
           side: BorderSide(
             color: isFav
-                ? const Color(0x80E11D48)
+                ? AppColors.redE11D48A50
                 : AppColors.navyDeep.withValues(alpha: 0.22),
             width: 1.5,
           ),
@@ -70,7 +68,7 @@ class FavouriteButton extends ConsumerWidget {
         onPressed: s == null || busy ? null : tap,
         icon: Icon(
           isFav ? Icons.favorite : Icons.favorite_border,
-          color: isFav ? const Color(0xFFE11D48) : null,
+          color: isFav ? AppColors.rose600 : null,
         ),
         label: Text(isFav ? l10n.workerShortlisted : l10n.workerShortlist),
       );
@@ -84,11 +82,11 @@ class FavouriteButton extends ConsumerWidget {
       onPressed: s == null || busy ? null : tap,
       style: IconButton.styleFrom(
         minimumSize: const Size(44, 44),
-        backgroundColor: const Color(0xD9FFFFFF),
-        side: const BorderSide(color: Color(0xF2FFFFFF)),
+        backgroundColor: AppColors.whiteA85xD9,
+        side: const BorderSide(color: AppColors.whiteA95xF2),
       ),
       icon: const Icon(Icons.favorite_border, color: AppColors.navyDeep),
-      selectedIcon: const Icon(Icons.favorite, color: Color(0xFFE11D48)),
+      selectedIcon: const Icon(Icons.favorite, color: AppColors.rose600),
     );
   }
 }

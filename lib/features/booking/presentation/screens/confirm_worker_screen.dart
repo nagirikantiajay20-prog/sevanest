@@ -200,35 +200,36 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
   Widget _bottomBar(
     AppLocalizations l10n,
     AsyncValue<Booking> value,
-    BookingQuote quote,
+    BookingQuote? quote,
   ) => Column(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Expanded(
-              child: Text(
-                l10n.confirmTotalRow,
-                style: AppText.body.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: dsText,
+      if (quote != null)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.confirmTotalRow,
+                  style: AppText.body.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: dsText,
+                  ),
                 ),
               ),
-            ),
-            Text(
-              minorAmount(quote.totalMinor),
-              key: const Key('confirm_total'),
-              style: authSerif(26, 1.2),
-            ),
-          ],
+              Text(
+                minorAmount(quote.totalMinor),
+                key: const Key('confirm_total'),
+                style: authSerif(26, 1.2),
+              ),
+            ],
+          ),
         ),
-      ),
-      const SizedBox(height: 8),
+      if (quote != null) const SizedBox(height: 8),
       Builder(
         builder: (ctx) => AuthCta(
           key: const Key('confirm_pay_btn'),
@@ -247,7 +248,7 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
     ],
   );
 
-  Widget _content(AppLocalizations l10n, Booking b, BookingQuote quote) {
+  Widget _content(AppLocalizations l10n, Booking b, BookingQuote? quote) {
     final locale = Localizations.localeOf(context).toString();
     final start = _effectiveStart(b);
     final budget = bookingBudgetLabel(l10n, b);
@@ -366,17 +367,14 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
             delayMs: 260,
             child: ConfirmPrice(
               lines: [
-                (l10n.confirmFeeRow, minorAmount(quote.feeMinor)),
-                if (quote.taxMinor != null)
-                  (l10n.confirmTaxRow, minorAmount(quote.taxMinor!)),
+                if (quote != null)
+                  (l10n.confirmFeeRow, minorAmount(quote.feeMinor)),
               ],
               totalLabel: l10n.confirmTotalRow,
-              total: minorAmount(quote.totalMinor),
-              note: quote.isEstimate
+              total: quote == null ? null : minorAmount(quote.totalMinor),
+              note: quote == null
                   ? l10n.confirmFeeNote
-                  : quote.taxPending
-                  ? l10n.confirmFeeTaxNote
-                  : null,
+                  : l10n.confirmFeeTaxNote,
             ),
           ),
           if (policy != null && !policy.isEmpty)
@@ -405,7 +403,7 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
   }
 
   /// "Worker confirmed": the ticket of what was booked and the way on to payment.
-  Widget _success(AppLocalizations l10n, Booking b, BookingQuote quote) {
+  Widget _success(AppLocalizations l10n, Booking b, BookingQuote? quote) {
     final locale = Localizations.localeOf(context).toString();
     final name = b.identity?.displayName ?? b.worker?.title ?? '';
     final date = formatDate(_confirmedFor!, locale);
@@ -415,7 +413,8 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
       rows: [
         (l10n.interviewTkWorker, name),
         (l10n.confirmTkStarts, date),
-        (l10n.confirmTkAmount, minorAmount(quote.totalMinor)),
+        if (quote != null)
+          (l10n.confirmTkAmount, minorAmount(quote.totalMinor)),
         (l10n.interviewTkStatus, l10n.bookingPayBannerTitle),
       ],
       ctaKey: const Key('confirm_continue_btn'),

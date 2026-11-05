@@ -222,7 +222,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   Expanded(
                     child: ConstrainedBox(
                       // The failure card needs the room; the photo then just fills the screen.
-                      constraints: BoxConstraints(minHeight: failed ? 0 : 190),
+                      // Short phones (about 640 dp) shrink the photo so Get Started stays on screen.
+                      constraints: BoxConstraints(
+                        minHeight: failed
+                            ? 0
+                            : (box.maxHeight < 700 ? 96 : 190),
+                      ),
                       child: SizedBox(key: _heroKey, width: double.infinity),
                     ),
                   ),
@@ -240,7 +245,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       l10n.versionLabel(version),
                       style: AppText.body.copyWith(
                         fontSize: 12,
-                        color: const Color(0xFF64748B),
+                        color: AppColors.slate400,
                       ),
                     )
                   else
@@ -360,7 +365,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [Color(0x38F59E0B), Color(0x00F59E0B)],
+                    colors: [
+                      AppColors.orangeF59E0BA22,
+                      AppColors.orangeF59E0BA0,
+                    ],
                     stops: [0, 0.68],
                   ),
                 ),
@@ -375,7 +383,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         rect: o,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(rt),
               topRight: Radius.circular(rt),
@@ -384,7 +392,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x421B3354),
+                color: AppColors.sky1B3354A26,
                 blurRadius: 44,
                 offset: Offset(0, 22),
               ),
@@ -431,11 +439,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       ph.sc * 180,
       ph.sc * 190,
     );
-    const m = 20.0, bw = 66.0, bh = 78.0;
+    // Labels are wider than the 66 dp avatar; the right-hand ones are inset so they stay on screen.
+    const m = 20.0, bw = 66.0, bh = 78.0, labelInset = 14.0;
     return [
       for (final b in _badgeData)
         () {
-          final x = b.left ? hero.left + 4 : hero.right - 4 - bw;
+          final x = b.left ? hero.left + 4 : hero.right - 4 - bw - labelInset;
           var y = hero.top + hero.height * b.top;
           final hit =
               x < face.right + m &&
@@ -480,7 +489,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
 /// Below this the hero is too short for the arch and badges (failure card showing).
 const _minHero = 120.0;
-const _cream = Color(0xFFFBF9F6);
+const _cream = AppColors.whiteFBF9F6;
 const _photoW = 884.0;
 const _photoH = 1779.0;
 const _photoZoom = 1.054;
@@ -504,7 +513,7 @@ class _Backdrop extends StatelessWidget {
       gradient: LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFFFFFFFF), _cream, Color(0xFFF4EFE8)],
+        colors: [AppColors.surface, _cream, AppColors.grayF4EFE8],
         stops: [0, 0.6, 1],
       ),
     ),
@@ -540,10 +549,10 @@ class _Badge extends StatelessWidget {
         height: 58,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3),
+          border: Border.all(color: AppColors.surface, width: 3),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x4D1B3354),
+              color: AppColors.sky1B3354A30,
               blurRadius: 20,
               offset: Offset(0, 10),
             ),
@@ -564,11 +573,11 @@ class _Badge extends StatelessWidget {
           maxWidth: 200,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: const Color(0xE0FFFFFF),
+              color: AppColors.whiteA88xE0,
               borderRadius: BorderRadius.circular(99),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x241B3354),
+                  color: AppColors.sky1B3354A14,
                   blurRadius: 8,
                   offset: Offset(0, 2),
                 ),
@@ -654,7 +663,10 @@ class _Decor extends StatelessWidget {
                   shaderCallback: (r) => const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0x00000000), Color(0xFF000000)],
+                    colors: [
+                      AppColors.transparentBlack,
+                      AppColors.blackA100xFF,
+                    ],
                     stops: [0, 0.75],
                   ).createShader(r),
                   child: Image.asset(
@@ -665,8 +677,8 @@ class _Decor extends StatelessWidget {
                 ),
               ),
             ),
-            blob(const Color(0x380F766E), top: -160, right: -200),
-            blob(const Color(0x3CF59E0B), top: 270, left: -210, delay: -5),
+            blob(AppColors.teal0F766EA22, top: -160, right: -200),
+            blob(AppColors.orangeF59E0BA24, top: 270, left: -210, delay: -5),
           ],
         ),
       ),
@@ -703,7 +715,7 @@ class _DashedRing extends CustomPainter {
     final p = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
-      ..color = const Color(0x470F766E);
+      ..color = AppColors.teal0F766EA28;
     final circle = Path()..addOval(Offset.zero & size);
     for (final m in circle.computeMetrics()) {
       for (var d = 0.0; d < m.length; d += 10) {
@@ -736,9 +748,9 @@ class _Scrim extends StatelessWidget {
             begin: top ? Alignment.topCenter : Alignment.bottomCenter,
             end: top ? Alignment.bottomCenter : Alignment.topCenter,
             colors: const [
-              Color(0xE0FBF9F6),
-              Color(0x9EFBF9F6),
-              Color(0x00FBF9F6),
+              AppColors.whiteFBF9F6A88,
+              AppColors.whiteFBF9F6A62,
+              AppColors.whiteFBF9F6A0,
             ],
             stops: [0, 120 / h, 1],
           ),
@@ -776,7 +788,7 @@ class _BootCover extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFFFFFFFF), _cream, Color(0xFFF4EFE8)],
+                  colors: [AppColors.surface, _cream, AppColors.grayF4EFE8],
                   stops: [0, 0.6, 1],
                 ),
               ),
@@ -855,7 +867,10 @@ class _Header extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
-                                colors: [Color(0x4D0F766E), Color(0x000F766E)],
+                                colors: [
+                                  AppColors.teal0F766EA30,
+                                  AppColors.teal0F766EA0,
+                                ],
                                 stops: [0, 0.7],
                               ),
                             ),
@@ -921,7 +936,7 @@ class _TrustRow extends StatelessWidget {
         decoration: BoxDecoration(
           border: first
               ? null
-              : const Border(left: BorderSide(color: Color(0xFFE2E8F0))),
+              : const Border(left: BorderSide(color: AppColors.hairline)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -981,18 +996,18 @@ class _EntryButtons extends StatelessWidget {
       required VoidCallback onTap,
       required bool filled,
     }) {
-      final fg = filled ? Colors.white : AppColors.navyDeep;
+      final fg = filled ? AppColors.surface : AppColors.navyDeep;
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          color: filled ? AppColors.navyDeep : const Color(0xE6FFFFFF),
+          color: filled ? AppColors.navyDeep : AppColors.whiteA90xE6,
           border: filled
               ? null
               : Border.all(color: AppColors.navyDeep, width: 2),
           boxShadow: filled
               ? const [
                   BoxShadow(
-                    color: Color(0x521B3354),
+                    color: AppColors.sky1B3354A32,
                     blurRadius: 24,
                     offset: Offset(0, 12),
                   ),
@@ -1031,9 +1046,9 @@ class _EntryButtons extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
-                                          Color(0x00FFFFFF),
-                                          Color(0x59FFFFFF),
-                                          Color(0x00FFFFFF),
+                                          AppColors.whiteClear,
+                                          AppColors.whiteA35x59,
+                                          AppColors.whiteClear,
                                         ],
                                       ),
                                     ),

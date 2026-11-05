@@ -275,7 +275,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE2EEEC),
+                    color: AppColors.pillActive,
                     borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
                   child: Text(
@@ -424,7 +424,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                       child: Icon(
                         Icons.info_outline,
                         size: 22,
-                        color: Color(0xFFB45309),
+                        color: AppColors.warnIcon,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -434,7 +434,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                         style: AppText.body.copyWith(
                           fontSize: 14,
                           height: 1.45,
-                          color: const Color(0xFF92400E),
+                          color: AppColors.warnText,
                         ),
                       ),
                     ),

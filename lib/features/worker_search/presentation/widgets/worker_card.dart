@@ -71,7 +71,7 @@ class WorkerAvatar extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 10,
                   backgroundColor: AppColors.teal,
-                  child: Icon(Icons.check, size: 13, color: Colors.white),
+                  child: Icon(Icons.check, size: 13, color: AppColors.surface),
                 ),
               ),
           ],

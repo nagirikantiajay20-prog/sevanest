@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/time_format.dart';
@@ -313,7 +314,7 @@ class _State extends ConsumerState<TicketDetailScreen>
               child: SupportNotice(
                 key: const Key('ticket_offline_banner'),
                 icon: Icons.wifi_off_rounded,
-                iconColor: const Color(0xFF8A4B06),
+                iconColor: AppColors.orange8A4B06,
                 tint: supportWarnTint,
                 title: l10n.tkdOffline,
                 trailing: TextButton(
@@ -361,7 +362,7 @@ class _State extends ConsumerState<TicketDetailScreen>
                                         : bookingId)
                                     .toUpperCase(),
                           ),
-                          style: infoValue(const Color(0xFF0F766E)),
+                          style: infoValue(AppColors.teal),
                         ),
                       ),
                     ),

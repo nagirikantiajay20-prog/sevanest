@@ -125,7 +125,7 @@ class _Card extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: AppText.body.copyWith(
                             fontSize: 12,
-                            color: const Color(0xFF475569),
+                            color: AppColors.slate,
                           ),
                         ),
                         Row(

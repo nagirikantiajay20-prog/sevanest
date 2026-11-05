@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/booking_labels.dart';
@@ -92,8 +93,11 @@ class _State extends ConsumerState<BookingsListScreen> {
                     height: 440,
                     child: GlassEmpty(
                       icon: Icons.event_note_rounded,
-                      iconColor: const Color(0xFF0F766E),
-                      discColors: const [Color(0xFFE2EEEC), Colors.white],
+                      iconColor: AppColors.teal,
+                      discColors: const [
+                        AppColors.pillActive,
+                        AppColors.surface,
+                      ],
                       title: _past
                           ? l10n.bookingsPastEmpty
                           : l10n.bookingsEmptyTitle,

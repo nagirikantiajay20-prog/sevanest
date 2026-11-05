@@ -15,26 +15,26 @@ typedef _Accent = ({Color bar, Color icon, Color tile, IconData glyph});
 
 const List<_Accent> _accents = [
   (
-    bar: Color(0xFF0F766E),
-    icon: Color(0xFF0F766E),
-    tile: Color(0xFFE2EEEC),
+    bar: AppColors.teal,
+    icon: AppColors.teal,
+    tile: AppColors.pillActive,
     glyph: Icons.home_outlined,
   ),
   (
-    bar: Color(0xFF2563EB),
-    icon: Color(0xFF1E40AF),
-    tile: Color(0xFFDBEAFE),
+    bar: AppColors.blue600,
+    icon: AppColors.blue800,
+    tile: AppColors.blue100,
     glyph: Icons.home_outlined,
   ),
   (
-    bar: Color(0xFFF59E0B),
-    icon: Color(0xFF8A4B06),
-    tile: Color(0xFFFEF3C7),
+    bar: AppColors.amber,
+    icon: AppColors.orange8A4B06,
+    tile: AppColors.warnBg,
     glyph: Icons.apartment_outlined,
   ),
 ];
 
-const _danger = Color(0xFFBE123C);
+const _danger = AppColors.rose700;
 
 /// Frosted address card: coloured edge, icon tile, serif label with the Default pill, full
 /// address, and a kebab that opens [onMenu].
@@ -118,7 +118,7 @@ class AddressCard extends StatelessWidget {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFD6EFEA),
+                                    color: AppColors.tealD6EFEA,
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(
@@ -126,7 +126,7 @@ class AddressCard extends StatelessWidget {
                                     style: AppText.body.copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF0B5A53),
+                                      color: AppColors.teal0B5A53,
                                     ),
                                   ),
                                 ),

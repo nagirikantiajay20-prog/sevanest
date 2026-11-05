@@ -15,28 +15,28 @@ typedef InterviewLook = ({Color accent, Color badgeBg, Color badgeFg});
 InterviewLook interviewLook(InterviewStatus s) => switch (s) {
   InterviewStatus.scheduled => (
     accent: AppColors.teal,
-    badgeBg: const Color(0xFFD6EFEA),
-    badgeFg: const Color(0xFF0B5A53),
+    badgeBg: AppColors.tealD6EFEA,
+    badgeFg: AppColors.teal0B5A53,
   ),
   InterviewStatus.requested || InterviewStatus.rescheduleProposed => (
     accent: AppColors.amber,
-    badgeBg: const Color(0xFFFEF3C7),
-    badgeFg: const Color(0xFF8A4B06),
+    badgeBg: AppColors.warnBg,
+    badgeFg: AppColors.orange8A4B06,
   ),
   InterviewStatus.completed || InterviewStatus.confirmed => (
-    accent: const Color(0xFF2563EB),
-    badgeBg: const Color(0xFFDBEAFE),
-    badgeFg: const Color(0xFF1E40AF),
+    accent: AppColors.blue600,
+    badgeBg: AppColors.blue100,
+    badgeFg: AppColors.blue800,
   ),
   InterviewStatus.cancelled || InterviewStatus.declined => (
-    accent: const Color(0xFFE11D48),
-    badgeBg: const Color(0xFFFFE4E6),
-    badgeFg: const Color(0xFF9F1239),
+    accent: AppColors.rose600,
+    badgeBg: AppColors.rose100,
+    badgeFg: AppColors.rose800,
   ),
   InterviewStatus.notAFit || InterviewStatus.unknown => (
-    accent: const Color(0xFF64748B),
-    badgeBg: const Color(0xFFE2E8F0),
-    badgeFg: const Color(0xFF475569),
+    accent: AppColors.slate400,
+    badgeBg: AppColors.hairline,
+    badgeFg: AppColors.slate,
   ),
 };
 
@@ -139,7 +139,7 @@ class InterviewSegments extends StatelessWidget {
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
                                       color: selected == i
-                                          ? Colors.white
+                                          ? AppColors.surface
                                           : dsText,
                                     ),
                                     child: Text(labels[i]),
@@ -153,16 +153,16 @@ class InterviewSegments extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(999),
                                       color: selected == i
-                                          ? const Color(0x38FFFFFF)
+                                          ? AppColors.whiteA22x38
                                           : dsNavy.withValues(alpha: 0.1),
                                     ),
                                     child: Text(
                                       '${counts[i]}',
                                       style: AppText.body.copyWith(
-                                        fontSize: 11.5,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w700,
                                         color: selected == i
-                                            ? Colors.white
+                                            ? AppColors.surface
                                             : dsText,
                                       ),
                                     ),
@@ -252,8 +252,8 @@ class NextInterviewCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.fromLTRB(10, 5, 12, 5),
                         decoration: BoxDecoration(
-                          color: const Color(0x2EFFFFFF),
-                          border: Border.all(color: const Color(0x52FFFFFF)),
+                          color: AppColors.whiteA18x2E,
+                          border: Border.all(color: AppColors.whiteA32x52),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Row(
@@ -266,7 +266,7 @@ class NextInterviewCard extends StatelessWidget {
                               style: AppText.body.copyWith(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.white,
+                                color: AppColors.surface,
                               ),
                             ),
                           ],
@@ -280,7 +280,7 @@ class NextInterviewCard extends StatelessWidget {
                             height: 52,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               shape: BoxShape.circle,
                               image: photoUrl == null
                                   ? null
@@ -290,7 +290,7 @@ class NextInterviewCard extends StatelessWidget {
                                     ),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color(0x33000000),
+                                  color: AppColors.blackA20x33,
                                   blurRadius: 14,
                                   offset: Offset(0, 6),
                                 ),
@@ -319,14 +319,14 @@ class NextInterviewCard extends StatelessWidget {
                                   style: authSerif(
                                     22,
                                     1.2,
-                                  ).copyWith(color: Colors.white),
+                                  ).copyWith(color: AppColors.surface),
                                 ),
                                 Text(
                                   when,
                                   style: AppText.body.copyWith(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                   ),
                                 ),
                               ],
@@ -348,9 +348,9 @@ class NextInterviewCard extends StatelessWidget {
                                     horizontal: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0x24FFFFFF),
+                                    color: AppColors.whiteA14x24,
                                     border: Border.all(
-                                      color: const Color(0x38FFFFFF),
+                                      color: AppColors.whiteA22x38,
                                     ),
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -361,14 +361,14 @@ class NextInterviewCard extends StatelessWidget {
                                         style: authSerif(
                                           22,
                                           1.1,
-                                        ).copyWith(color: Colors.white),
+                                        ).copyWith(color: AppColors.surface),
                                       ),
                                       Text(
                                         u.$2,
                                         style: AppText.body.copyWith(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w700,
-                                          color: Colors.white,
+                                          color: AppColors.surface,
                                         ),
                                       ),
                                     ],
@@ -416,7 +416,7 @@ class _LiveDot extends StatelessWidget {
                     child: const DecoratedBox(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xFF34D399),
+                        color: AppColors.emerald400,
                       ),
                     ),
                   ),
@@ -426,7 +426,7 @@ class _LiveDot extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFF34D399),
+                    color: AppColors.emerald400,
                   ),
                 ),
               ),

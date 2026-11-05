@@ -1141,7 +1141,7 @@
   "confirmStartDate": "Start date",
   "confirmEditRequirement": "Edit requirement",
   "confirmFeeRow": "Booking fee",
-  "confirmFeeNote": "This is an estimate. The final fee is shown on the payment step.",
+  "confirmFeeNote": "The fee is shown on the payment step.",
   "confirmFeeTaxNote": "Taxes, if any, are confirmed on the payment step.",
   "confirmTaxRow": "Taxes",
   "confirmTotalRow": "Total today",

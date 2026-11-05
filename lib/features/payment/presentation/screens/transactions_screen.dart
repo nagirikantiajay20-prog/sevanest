@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
     show authSerif;
@@ -65,8 +66,8 @@ class _State extends ConsumerState<TransactionsScreen> {
             p.items.isEmpty && filter == TransactionFilter.all && !p.hasMore,
         empty: GlassEmpty(
           icon: Icons.account_balance_wallet_outlined,
-          iconColor: const Color(0xFF0F766E),
-          discColors: const [Color(0xFFE2EEEC), Colors.white],
+          iconColor: AppColors.teal,
+          discColors: const [AppColors.pillActive, AppColors.surface],
           title: l10n.transactionsEmpty,
           body: l10n.transactionsEmptyBody,
           actionLabel: l10n.bookingsFind,

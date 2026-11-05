@@ -9,9 +9,9 @@ import 'package:sevanest_customer/features/authentication/presentation/widgets/m
 /// frosted bars, a node progress track. Animations are functions of the scaffold's clock.
 
 const dsNavy = AppColors.navyDeep;
-const dsText = Color(0xFF334155);
-const dsMuted = Color(0xFF475569);
-const dsSky = Color(0xFF38BDF8);
+const dsText = AppColors.slate700;
+const dsMuted = AppColors.slate;
+const dsSky = AppColors.sky400;
 
 /// The scaffold's clock for descendants (frozen in tests / reduced motion).
 class DiscoverClock extends InheritedWidget {
@@ -40,8 +40,14 @@ final discoverBackdrop = RoomBackdropStyle(
     ),
   ],
   glows: const [
-    AuthGlow(Color(0x4D0F766E), 260, top: -70, right: -80),
-    AuthGlow(Color(0x47F59E0B), 260, top: 480, left: -100, delayMs: 6000),
+    AuthGlow(AppColors.teal0F766EA30, 260, top: -70, right: -80),
+    AuthGlow(
+      AppColors.orangeF59E0BA28,
+      260,
+      top: 480,
+      left: -100,
+      delayMs: 6000,
+    ),
   ],
 );
 
@@ -51,7 +57,7 @@ class DiscoverGlass extends StatelessWidget {
     required this.child,
     this.radius = 24,
     this.corners,
-    this.borderColor = const Color(0xE6FFFFFF),
+    this.borderColor = AppColors.whiteA90xE6,
     this.borderWidth = 1,
     this.gradient,
     super.key,
@@ -74,7 +80,7 @@ class DiscoverGlass extends StatelessWidget {
         const LinearGradient(
           begin: Alignment(-0.6, -1),
           end: Alignment(0.6, 1),
-          colors: [Color(0xB8FFFFFF), Color(0x6BFFFFFF)],
+          colors: [AppColors.whiteA72xB8, AppColors.whiteA42x6B],
         ),
     border: Border.all(color: borderColor, width: borderWidth),
     shadow: [
@@ -146,9 +152,9 @@ class DiscoverHeader extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xD1FFFFFF), Color(0x94FFFFFF)],
+        colors: [AppColors.whiteA82xD1, AppColors.whiteA58x94],
       ),
-      border: const Border(bottom: BorderSide(color: Color(0xE6FFFFFF))),
+      border: const Border(bottom: BorderSide(color: AppColors.whiteA90xE6)),
       shadow: [
         BoxShadow(
           color: dsNavy.withValues(alpha: 0.1),
@@ -372,13 +378,11 @@ class _Node extends StatelessWidget {
                         ? null
                         : done
                         ? AppColors.teal
-                        : const Color(0xD9FFFFFF),
+                        : AppColors.whiteA85xD9,
                     border: active
                         ? null
                         : Border.all(
-                            color: done
-                                ? AppColors.teal
-                                : const Color(0xFFCBD5E1),
+                            color: done ? AppColors.teal : AppColors.slate300,
                             width: 2,
                           ),
                     boxShadow: [
@@ -395,8 +399,8 @@ class _Node extends StatelessWidget {
                     done ? Icons.check_rounded : icon,
                     size: active ? 17 : 14,
                     color: active || done
-                        ? Colors.white
-                        : const Color(0xFF64748B),
+                        ? AppColors.surface
+                        : AppColors.slate400,
                   ),
                 ),
               ],
@@ -420,7 +424,7 @@ Future<bool> showDiscoverDiscard(
     context: context,
     barrierDismissible: true,
     barrierLabel: keep,
-    barrierColor: const Color(0x730F2340),
+    barrierColor: AppColors.blue0F2340A45,
     transitionDuration: const Duration(milliseconds: 300),
     transitionBuilder: (_, a, _, child) {
       final c = CurvedAnimation(parent: a, curve: Curves.easeOutBack);
@@ -442,7 +446,7 @@ Future<bool> showDiscoverDiscard(
             gradient: const LinearGradient(
               begin: Alignment(-0.5, -1),
               end: Alignment(0.5, 1),
-              colors: [Color(0xF2FFFFFF), Color(0xD1FFFFFF)],
+              colors: [AppColors.whiteA95xF2, AppColors.whiteA82xD1],
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
@@ -454,12 +458,12 @@ Future<bool> showDiscoverDiscard(
                     height: 52,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFFFEF3C7),
+                      color: AppColors.warnBg,
                     ),
                     child: const Icon(
                       Icons.warning_amber_rounded,
                       size: 26,
-                      color: Color(0xFFB45309),
+                      color: AppColors.warnIcon,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -502,7 +506,7 @@ Future<bool> showDiscoverDiscard(
                       key: const Key('discover_discard_confirm_btn'),
                       onPressed: () => Navigator.of(ctx).pop(true),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFFB91C1C),
+                        foregroundColor: AppColors.red700,
                         textStyle: AppText.body.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -570,9 +574,9 @@ class ServiceTicket extends StatelessWidget {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Color(0x00FFFFFF),
-                                  Color(0x99FFFFFF),
-                                  Color(0x00FFFFFF),
+                                  AppColors.whiteClear,
+                                  AppColors.whiteA60x99,
+                                  AppColors.whiteClear,
                                 ],
                               ),
                             ),
@@ -605,8 +609,11 @@ class ServiceTicket extends StatelessWidget {
                           height: 44,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFFE2EEEC),
-                            border: Border.all(color: Colors.white, width: 2),
+                            color: AppColors.pillActive,
+                            border: Border.all(
+                              color: AppColors.surface,
+                              width: 2,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: dsNavy.withValues(alpha: 0.18),

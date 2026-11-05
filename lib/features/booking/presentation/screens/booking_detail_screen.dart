@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
@@ -492,7 +493,10 @@ class _Body extends ConsumerWidget {
                         title: l10n.workerProfileTitle,
                         initials: null,
                         photoUrl: null,
-                        gradient: const [Color(0xFF475569), Color(0xFF94A3B8)],
+                        gradient: const [
+                          AppColors.slate,
+                          AppColors.slate400Light,
+                        ],
                         verified: false,
                         rating: null,
                         onTap: openWorker,
@@ -522,9 +526,9 @@ class _Body extends ConsumerWidget {
               valueColor: (i) => i != payIndex
                   ? null
                   : due
-                  ? const Color(0xFFB45309)
+                  ? AppColors.warnIcon
                   : paid
-                  ? const Color(0xFF0F766E)
+                  ? AppColors.teal
                   : dsMuted,
               trailing: (i) => i == refIndex
                   ? CopyPill(label: l10n.bookingCopyRef, onTap: onCopy)

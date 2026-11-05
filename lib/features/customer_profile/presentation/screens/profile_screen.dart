@@ -408,7 +408,7 @@ class _Input extends StatelessWidget {
   final String? error;
   final TextInputType? keyboardType;
 
-  static const _danger = Color(0xFFBE123C);
+  static const _danger = AppColors.rose700;
 
   @override
   Widget build(BuildContext context) {
@@ -437,7 +437,7 @@ class _Input extends StatelessWidget {
             decoration: InputDecoration(
               isDense: true,
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 14,
@@ -476,20 +476,20 @@ class _Pill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     decoration: BoxDecoration(
-      color: const Color(0xFFD6EFEA),
+      color: AppColors.tealD6EFEA,
       borderRadius: BorderRadius.circular(999),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: const Color(0xFF0B5A53)),
+        Icon(icon, size: 14, color: AppColors.teal0B5A53),
         const SizedBox(width: 5),
         Text(
           label,
           style: AppText.body.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF0B5A53),
+            color: AppColors.teal0B5A53,
           ),
         ),
       ],
@@ -513,7 +513,7 @@ class _EditPill extends StatelessWidget {
       minimumSize: const Size(0, 44),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       foregroundColor: AppColors.teal,
-      backgroundColor: Colors.white.withValues(alpha: 0.8),
+      backgroundColor: AppColors.surface.withValues(alpha: 0.8),
       shape: const StadiumBorder(),
       side: BorderSide(
         color: AppColors.teal.withValues(alpha: 0.45),
@@ -544,7 +544,7 @@ class _OutlineButton extends StatelessWidget {
       minimumSize: const Size(0, 58),
       padding: const EdgeInsets.symmetric(horizontal: 22),
       foregroundColor: dsNavy,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       side: BorderSide(color: dsNavy.withValues(alpha: 0.25), width: 1.5),
       textStyle: AppText.body.copyWith(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
     show authSerif;
@@ -11,19 +12,19 @@ import 'package:sevanest_customer/features/support/domain/support.dart';
 (Color, Color, Color) ticketStatusColors(TicketStatus s) =>
     switch (ticketStatusForCustomer(s)) {
       TicketStatus.open => (
-        const Color(0xFFF59E0B),
-        const Color(0xFFFEF3C7),
-        const Color(0xFF8A4B06),
+        AppColors.amber,
+        AppColors.warnBg,
+        AppColors.orange8A4B06,
       ),
       TicketStatus.inProgress || TicketStatus.escalated => (
-        const Color(0xFF2563EB),
-        const Color(0xFFDBEAFE),
-        const Color(0xFF1E40AF),
+        AppColors.blue600,
+        AppColors.blue100,
+        AppColors.blue800,
       ),
       TicketStatus.closed || TicketStatus.unknown => (
-        const Color(0xFF64748B),
-        const Color(0xFFE2E8F0),
-        const Color(0xFF334155),
+        AppColors.slate400,
+        AppColors.hairline,
+        AppColors.slate700,
       ),
     };
 
@@ -145,7 +146,7 @@ class SupportNotice extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.title,
-    this.tint = const Color(0xF2FFFFFF),
+    this.tint = AppColors.whiteA95xF2,
     this.body,
     this.trailing,
     super.key,
@@ -201,6 +202,6 @@ class SupportNotice extends StatelessWidget {
 }
 
 /// Amber / rose tints used by [SupportNotice].
-const supportWarnTint = Color(0xFFFEF3C7);
-const supportDangerTint = Color(0xFFFFE4E6);
-const supportDanger = Color(0xFFBE123C);
+const supportWarnTint = AppColors.warnBg;
+const supportDangerTint = AppColors.rose100;
+const supportDanger = AppColors.rose700;

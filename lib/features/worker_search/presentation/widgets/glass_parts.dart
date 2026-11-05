@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
@@ -43,7 +44,7 @@ class GlassAvatar extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: AppColors.surface, width: 2),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -70,7 +71,7 @@ class GlassAvatar extends StatelessWidget {
               style: AppText.body.copyWith(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w800,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
     ),
@@ -196,7 +197,7 @@ Future<T?> showGlassSheet<T>(
   context: context,
   isScrollControlled: true,
   backgroundColor: Colors.transparent,
-  barrierColor: const Color(0x611B3354),
+  barrierColor: AppColors.sky1B3354A38,
   builder: (ctx) => Container(
     padding: EdgeInsets.fromLTRB(
       20,
@@ -209,7 +210,7 @@ Future<T?> showGlassSheet<T>(
       gradient: const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xF7FFFFFF), Color(0xF7FAF8F5)],
+        colors: [AppColors.whiteA97xF7, AppColors.whiteFAF8F5A97],
       ),
       boxShadow: [
         BoxShadow(
@@ -275,7 +276,7 @@ Future<bool> showGlassConfirm(
             key: confirmKey,
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: destructive ? const Color(0xFFBE123C) : dsNavy,
+              backgroundColor: destructive ? AppColors.rose700 : dsNavy,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
@@ -354,7 +355,7 @@ class GlassAsyncView<T> extends StatelessWidget {
                 height: 92,
                 margin: const EdgeInsets.only(bottom: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0x99FFFFFF),
+                  color: AppColors.whiteA60x99,
                   borderRadius: BorderRadius.circular(26),
                 ),
               ),
@@ -378,7 +379,7 @@ class GlassAsyncView<T> extends StatelessWidget {
                       ? Icons.wifi_off_rounded
                       : Icons.error_outline_rounded,
                   size: 36,
-                  color: const Color(0xFFBE123C),
+                  color: AppColors.rose700,
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -441,13 +442,13 @@ class GlassNoteField extends StatelessWidget {
         errorText: errorText,
         counterText: '',
         filled: true,
-        fillColor: const Color(0xD9FFFFFF),
+        fillColor: AppColors.whiteA85xD9,
         contentPadding: const EdgeInsets.all(12),
-        enabledBorder: line(const Color(0x2E1B3354)),
-        disabledBorder: line(const Color(0x2E1B3354)),
+        enabledBorder: line(AppColors.sky1B3354A18),
+        disabledBorder: line(AppColors.sky1B3354A18),
         focusedBorder: line(dsNavy),
-        errorBorder: line(const Color(0xFFBE123C)),
-        focusedErrorBorder: line(const Color(0xFFBE123C)),
+        errorBorder: line(AppColors.rose700),
+        focusedErrorBorder: line(AppColors.rose700),
       ),
     );
   }

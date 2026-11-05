@@ -155,7 +155,7 @@ class _PromoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x59000000),
+            color: AppColors.blackA35x59,
             blurRadius: 28,
             offset: Offset(0, 12),
           ),
@@ -179,9 +179,9 @@ class _PromoCard extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xE608182B),
-                    Color(0x8008182B),
-                    Color(0x0D08182B),
+                    AppColors.sky08182BA90,
+                    AppColors.sky08182BA50,
+                    AppColors.sky08182BA5,
                   ],
                   stops: [0, 0.55, 1],
                 ),
@@ -213,10 +213,10 @@ class _PromoCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 10.5,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.7,
-                                color: Colors.white,
+                                color: AppColors.surface,
                               ),
                             ),
                           ),
@@ -231,7 +231,7 @@ class _PromoCard extends StatelessWidget {
                             style: AppText.title.copyWith(
                               fontSize: 18,
                               height: 1.2,
-                              color: Colors.white,
+                              color: AppColors.surface,
                             ),
                           ),
                         ),
@@ -243,7 +243,7 @@ class _PromoCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 12,
                             height: 1.4,
-                            color: Color(0xE6FFFFFF),
+                            color: AppColors.whiteA90xE6,
                           ),
                         ),
                       ],
@@ -251,7 +251,7 @@ class _PromoCard extends StatelessWidget {
                     FilledButton(
                       onPressed: onCta,
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.surface,
                         foregroundColor: AppColors.actionDeepTeal,
                         minimumSize: const Size(0, 44),
                         padding: const EdgeInsets.symmetric(horizontal: 16),

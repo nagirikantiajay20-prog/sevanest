@@ -76,7 +76,7 @@ class _SentState extends State<GlassSuccessOverlay>
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: ColoredBox(
-            color: const Color(0xD1FAF8F5),
+            color: AppColors.whiteFAF8F5A82,
             child: Material(
               type: MaterialType.transparency,
               child: AnimatedBuilder(
@@ -101,10 +101,10 @@ class _SentState extends State<GlassSuccessOverlay>
                               clipBehavior: Clip.none,
                               children: [
                                 for (final (i, c) in const [
-                                  (Color(0xFFF59E0B), -70.0, 0.5),
-                                  (Color(0xFF38BDF8), -30.0, 0.6),
-                                  (Color(0xFF0F766E), 20.0, 0.55),
-                                  (Color(0xFFE11D48), 70.0, 0.65),
+                                  (AppColors.amber, -70.0, 0.5),
+                                  (AppColors.sky400, -30.0, 0.6),
+                                  (AppColors.teal, 20.0, 0.55),
+                                  (AppColors.rose600, 70.0, 0.65),
                                 ].indexed)
                                   _Confetti(
                                     t: t,
@@ -220,7 +220,7 @@ class _Ticket extends StatelessWidget {
     margin: const EdgeInsets.only(top: 20),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: dsNavy.withValues(alpha: 0.3)),
       boxShadow: [
@@ -256,9 +256,7 @@ class _Ticket extends StatelessWidget {
                     style: AppText.body.copyWith(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
-                      color: i == rows.length - 1
-                          ? const Color(0xFFB45309)
-                          : dsNavy,
+                      color: i == rows.length - 1 ? AppColors.warnIcon : dsNavy,
                     ),
                   ),
                 ),
@@ -333,7 +331,7 @@ class _TickPainter extends CustomPainter {
         ..strokeWidth = 6
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
-        ..color = Colors.white,
+        ..color = AppColors.surface,
     );
   }
 

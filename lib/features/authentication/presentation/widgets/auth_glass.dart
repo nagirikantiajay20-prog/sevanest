@@ -116,7 +116,7 @@ class RoomBackdrop extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [AppColors.ivory, Colors.white],
+                  colors: [AppColors.ivory, AppColors.surface],
                 ),
               ),
             ),
@@ -238,7 +238,7 @@ class AuthCta extends StatelessWidget {
   final double radius;
   final double height;
 
-  static const _idle = Color(0xFF8D9BB3);
+  static const _idle = AppColors.blue8D9BB3;
 
   @override
   Widget build(BuildContext context) {
@@ -282,8 +282,8 @@ class AuthCta extends StatelessWidget {
                     : loading
                     ? authNavy
                     : _idle,
-                foregroundColor: Colors.white,
-                disabledForegroundColor: Colors.white,
+                foregroundColor: AppColors.surface,
+                disabledForegroundColor: AppColors.surface,
                 minimumSize: Size.fromHeight(height),
                 padding: EdgeInsets.zero,
                 elevation: 0,
@@ -312,9 +312,9 @@ class AuthCta extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        Color(0x00FFFFFF),
-                                        Color(0x66FFFFFF),
-                                        Color(0x00FFFFFF),
+                                        AppColors.whiteClear,
+                                        AppColors.whiteA40x66,
+                                        AppColors.whiteClear,
                                       ],
                                     ),
                                   ),
@@ -334,7 +334,7 @@ class AuthCta extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.6,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                         const SizedBox(width: 10),

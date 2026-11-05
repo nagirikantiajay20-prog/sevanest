@@ -67,7 +67,7 @@ class SnAvatar extends StatelessWidget {
                   child: Icon(
                     Icons.check,
                     size: size * 0.2,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
               ),

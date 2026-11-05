@@ -115,9 +115,9 @@ class PushDiagnosticsScreen extends ConsumerWidget {
   const PushDiagnosticsScreen({super.key});
 
   Color _color(DiagStatus s) => switch (s) {
-    DiagStatus.pass => const Color(0xFF15803D),
-    DiagStatus.fail => const Color(0xFFBE123C),
-    DiagStatus.skipped => const Color(0xFF64748B),
+    DiagStatus.pass => AppColors.green15803D,
+    DiagStatus.fail => AppColors.rose700,
+    DiagStatus.skipped => AppColors.slate400,
   };
 
   IconData _icon(DiagStatus s) => switch (s) {

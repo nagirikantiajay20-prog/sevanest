@@ -15,37 +15,33 @@ import 'package:sevanest_customer/features/worker_search/presentation/widgets/gl
 
 /// Building blocks of "Transactions" (design 9.3) and "Receipt" (9.4).
 
-const _teal = Color(0xFF0F766E);
+const _teal = AppColors.teal;
 
 /// Accent bar, badge background and badge text of a payment status.
 ({Color bar, Color bg, Color fg}) txnTone(PaymentStatus s) => switch (s) {
   PaymentStatus.succeeded => (
     bar: _teal,
-    bg: const Color(0xFFD6EFEA),
-    fg: const Color(0xFF0B5A53),
+    bg: AppColors.tealD6EFEA,
+    fg: AppColors.teal0B5A53,
   ),
   PaymentStatus.pending ||
   PaymentStatus.created ||
   PaymentStatus.refundPending => (
     bar: AppColors.amber,
-    bg: const Color(0xFFFEF3C7),
-    fg: const Color(0xFF8A4B06),
+    bg: AppColors.warnBg,
+    fg: AppColors.orange8A4B06,
   ),
   PaymentStatus.refunded => (
-    bar: const Color(0xFF2563EB),
-    bg: const Color(0xFFDBEAFE),
-    fg: const Color(0xFF1E40AF),
+    bar: AppColors.blue600,
+    bg: AppColors.blue100,
+    fg: AppColors.blue800,
   ),
   PaymentStatus.failed || PaymentStatus.refundFailed => (
-    bar: const Color(0xFFE11D48),
-    bg: const Color(0xFFFFE4E6),
-    fg: const Color(0xFF9F1239),
+    bar: AppColors.rose600,
+    bg: AppColors.rose100,
+    fg: AppColors.rose800,
   ),
-  PaymentStatus.unknown => (
-    bar: dsMuted,
-    bg: const Color(0xFFE2E8F0),
-    fg: dsText,
-  ),
+  PaymentStatus.unknown => (bar: dsMuted, bg: AppColors.hairline, fg: dsText),
 };
 
 /// "House Maid · Sunita K." from the booking, or [fallback] while it has not loaded.
@@ -118,7 +114,7 @@ class TxnFilterChips extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               decoration: BoxDecoration(
-                color: i == selected ? dsNavy : const Color(0xCCFFFFFF),
+                color: i == selected ? dsNavy : AppColors.whiteA80xCC,
                 borderRadius: BorderRadius.circular(999),
                 border: Border.all(
                   color: i == selected ? dsNavy : dsNavy.withValues(alpha: 0.2),
@@ -139,7 +135,7 @@ class TxnFilterChips extends StatelessWidget {
                         style: AppText.body.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: i == selected ? Colors.white : dsNavy,
+                          color: i == selected ? AppColors.surface : dsNavy,
                         ),
                       ),
                     ),
@@ -297,7 +293,7 @@ class TxnTile extends StatelessWidget {
                         amount,
                         style: authSerif(21, 1.2).copyWith(
                           color: status == PaymentStatus.failed
-                              ? const Color(0xFF64748B)
+                              ? AppColors.slate400
                               : dsNavy,
                         ),
                       ),
@@ -349,7 +345,7 @@ class ReceiptHero extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             dsNavy,
-            refund ? const Color(0xFF1E40AF) : const Color(0xFF124E52),
+            refund ? AppColors.blue800 : AppColors.actionDeepTeal,
           ],
         ),
         boxShadow: [
@@ -389,7 +385,7 @@ class ReceiptHero extends StatelessWidget {
                             fontSize: 16,
                             height: 1.25,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                         if (subtitle.isNotEmpty) ...[
@@ -402,7 +398,7 @@ class ReceiptHero extends StatelessWidget {
                               fontSize: 13.5,
                               height: 1.3,
                               fontWeight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.82),
+                              color: AppColors.surface.withValues(alpha: 0.82),
                             ),
                           ),
                         ],
@@ -452,7 +448,7 @@ class ReceiptHero extends StatelessWidget {
                             style: authSerif(
                               30,
                               1,
-                            ).copyWith(color: Colors.white),
+                            ).copyWith(color: AppColors.surface),
                           ),
                         ),
                       ),
@@ -496,7 +492,7 @@ class ReceiptBody extends StatelessWidget {
   const ReceiptBody({required this.rows, super.key});
   final List<ReceiptRow> rows;
 
-  static const _ivory = Color(0xFFF7F4EE);
+  static const _ivory = AppColors.grayF7F4EE;
 
   @override
   Widget build(BuildContext context) {
@@ -555,7 +551,7 @@ class _RowTile extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: const BoxDecoration(
-            color: Color(0xFFE2EEEC),
+            color: AppColors.pillActive,
             shape: BoxShape.circle,
           ),
           child: Icon(r.icon, size: 16, color: _teal),
@@ -631,10 +627,10 @@ class ReceiptRefundBox extends StatelessWidget {
     margin: const EdgeInsets.only(top: 14),
     padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
     decoration: BoxDecoration(
-      color: const Color(0xFFDBEAFE),
+      color: AppColors.blue100,
       borderRadius: BorderRadius.circular(24),
       border: Border.all(
-        color: const Color(0xFF1E40AF).withValues(alpha: 0.3),
+        color: AppColors.blue800.withValues(alpha: 0.3),
         width: 1.5,
       ),
     ),
@@ -646,7 +642,7 @@ class ReceiptRefundBox extends StatelessWidget {
           style: AppText.body.copyWith(
             fontSize: 15.5,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF1E3A8A),
+            color: AppColors.blue1E3A8A,
           ),
         ),
         const SizedBox(height: 4),
@@ -655,7 +651,7 @@ class ReceiptRefundBox extends StatelessWidget {
           style: AppText.body.copyWith(
             fontSize: 14.5,
             height: 1.45,
-            color: const Color(0xFF1E3A8A),
+            color: AppColors.blue1E3A8A,
           ),
         ),
       ],

@@ -35,8 +35,8 @@ class TicketHero extends StatelessWidget {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: closed
-            ? const [Color(0xFF334155), Color(0xFF475569)]
-            : const [dsNavy, Color(0xFF124E52)],
+            ? const [AppColors.slate700, AppColors.slate]
+            : const [dsNavy, AppColors.actionDeepTeal],
       ),
       boxShadow: [
         BoxShadow(
@@ -53,16 +53,16 @@ class TicketHero extends StatelessWidget {
           key: const Key('ticket_status_chip'),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0x33FFFFFF),
+            color: AppColors.whiteA20x33,
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0x59FFFFFF)),
+            border: Border.all(color: AppColors.whiteA35x59),
           ),
           child: Text(
             statusLabel,
             style: AppText.body.copyWith(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.surface,
             ),
           ),
         ),
@@ -74,13 +74,16 @@ class TicketHero extends StatelessWidget {
             key: const Key('ticket_title'),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: authSerif(23, 1.25).copyWith(color: Colors.white),
+            style: authSerif(23, 1.25).copyWith(color: AppColors.surface),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           line,
-          style: AppText.body.copyWith(fontSize: 13.5, color: Colors.white),
+          style: AppText.body.copyWith(
+            fontSize: 13.5,
+            color: AppColors.surface,
+          ),
         ),
       ],
     ),
@@ -165,7 +168,7 @@ class TicketBubble extends StatelessWidget {
         : message.from == MessageAuthor.worker
         ? l10n.tkdWorkerName
         : l10n.tkdSupportName;
-    final fg = mine ? Colors.white : dsNavy;
+    final fg = mine ? AppColors.surface : dsNavy;
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -175,14 +178,14 @@ class TicketBubble extends StatelessWidget {
         margin: const EdgeInsets.only(top: 12),
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         decoration: BoxDecoration(
-          color: mine ? dsNavy : const Color(0xE6FFFFFF),
+          color: mine ? dsNavy : AppColors.whiteA90xE6,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
             bottomLeft: Radius.circular(mine ? 20 : 6),
             bottomRight: Radius.circular(mine ? 6 : 20),
           ),
-          border: mine ? null : Border.all(color: const Color(0xF2FFFFFF)),
+          border: mine ? null : Border.all(color: AppColors.whiteA95xF2),
           boxShadow: mine
               ? null
               : [
@@ -232,7 +235,7 @@ class TicketDayChip extends StatelessWidget {
       margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xB3FFFFFF),
+        color: AppColors.whiteA70xB3,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -290,7 +293,7 @@ class TicketResolution extends StatelessWidget {
       margin: const EdgeInsets.only(top: 14),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFD6EFEA),
+        color: AppColors.tealD6EFEA,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: AppColors.teal.withValues(alpha: 0.35),
@@ -305,7 +308,7 @@ class TicketResolution extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 15.5,
               fontWeight: FontWeight.w800,
-              color: const Color(0xFF0B5A53),
+              color: AppColors.teal0B5A53,
             ),
           ),
           const SizedBox(height: 4),
@@ -314,7 +317,7 @@ class TicketResolution extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 14.5,
               height: 1.5,
-              color: const Color(0xFF0B5A53),
+              color: AppColors.teal0B5A53,
             ),
           ),
         ],
@@ -361,14 +364,14 @@ class FailedBubble extends StatelessWidget {
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(6),
                 ),
-                border: Border.all(color: const Color(0xFFE11D48), width: 2),
+                border: Border.all(color: AppColors.rose600, width: 2),
               ),
               child: Text(
                 body,
                 style: AppText.body.copyWith(
                   fontSize: 14.5,
                   height: 1.5,
-                  color: Colors.white,
+                  color: AppColors.surface,
                 ),
               ),
             ),
@@ -378,7 +381,7 @@ class FailedBubble extends StatelessWidget {
                 const Icon(
                   Icons.error_outline_rounded,
                   size: 16,
-                  color: Color(0xFFBE123C),
+                  color: AppColors.rose700,
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -440,11 +443,11 @@ class TicketComposer extends StatelessWidget {
               hintStyle: AppText.body.copyWith(fontSize: 15, color: dsMuted),
               counterText: '',
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.all(14),
-              border: _line(const Color(0x331B3354), 1.5),
-              enabledBorder: _line(const Color(0x331B3354), 1.5),
-              disabledBorder: _line(const Color(0x331B3354), 1.5),
+              border: _line(AppColors.sky1B3354A20, 1.5),
+              enabledBorder: _line(AppColors.sky1B3354A20, 1.5),
+              disabledBorder: _line(AppColors.sky1B3354A20, 1.5),
               focusedBorder: _line(dsNavy, 2),
             ),
           ),
@@ -476,13 +479,13 @@ class TicketComposer extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         )
                       : const Icon(
                           Icons.arrow_forward_rounded,
                           size: 22,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                 ),
               ),
@@ -563,7 +566,7 @@ class TicketSkeleton extends StatelessWidget {
             height: h,
             margin: const EdgeInsets.only(top: 14),
             decoration: BoxDecoration(
-              color: const Color(0x99FFFFFF),
+              color: AppColors.whiteA60x99,
               borderRadius: BorderRadius.circular(22),
             ),
           ),

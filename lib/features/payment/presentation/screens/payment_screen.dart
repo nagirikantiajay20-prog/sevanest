@@ -324,8 +324,8 @@ class _State extends ConsumerState<PaymentScreen> {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final p = _p;
-    const bad = [Color(0xFFBE123C), Color(0xFFF43F5E)];
-    const wait = [Color(0xFFB45309), AppColors.amber];
+    const bad = [AppColors.rose700, AppColors.redF43F5E];
+    const wait = [AppColors.warnIcon, AppColors.amber];
 
     Widget viewBooking({bool outline = false}) => outline
         ? PayOutline(

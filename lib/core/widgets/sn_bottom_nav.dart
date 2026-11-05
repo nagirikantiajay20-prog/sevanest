@@ -40,12 +40,14 @@ class SnBottomNav extends StatelessWidget {
           heightFactor: 1,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: const Color(0xE6152A48),
+              color: AppColors.blue152A48A90,
               borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+              border: Border.all(
+                color: AppColors.surface.withValues(alpha: 0.28),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF0F2340).withValues(alpha: 0.35),
+                  color: AppColors.blue0F2340.withValues(alpha: 0.35),
                   blurRadius: 32,
                   offset: const Offset(0, 12),
                 ),
@@ -88,7 +90,7 @@ class _NavPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = selected
         ? AppColors.navyDeep
-        : Colors.white.withValues(alpha: 0.88);
+        : AppColors.surface.withValues(alpha: 0.88);
     return Semantics(
       button: true,
       selected: selected,
@@ -105,12 +107,12 @@ class _NavPill extends StatelessWidget {
           constraints: const BoxConstraints(minWidth: 46),
           padding: EdgeInsets.symmetric(horizontal: selected ? 16 : 12),
           decoration: BoxDecoration(
-            color: selected ? Colors.white : Colors.transparent,
+            color: selected ? AppColors.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(23),
             boxShadow: selected
                 ? const [
                     BoxShadow(
-                      color: Color(0x59000000),
+                      color: AppColors.blackA35x59,
                       blurRadius: 16,
                       offset: Offset(0, 6),
                     ),

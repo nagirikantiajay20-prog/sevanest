@@ -11,9 +11,9 @@ import 'package:sevanest_customer/features/worker_search/presentation/widgets/gl
     show SheenSweep;
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-const _danger = Color(0xFFBE123C);
-const _mint = Color(0xFFD6EFEA);
-const _mintInk = Color(0xFF0B5A53);
+const _danger = AppColors.rose700;
+const _mint = AppColors.tealD6EFEA;
+const _mintInk = AppColors.teal0B5A53;
 
 /// "+91 ••••••0002": the country code and the last four digits only.
 String maskMobile(String? mobile) {
@@ -47,7 +47,7 @@ class AccountHeaderCard extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [dsNavy, Color(0xFF124E52)],
+            colors: [dsNavy, AppColors.actionDeepTeal],
           ),
           boxShadow: [
             BoxShadow(
@@ -93,7 +93,7 @@ class AccountHeaderCard extends StatelessWidget {
                                       style: authSerif(
                                         23,
                                         1.2,
-                                      ).copyWith(color: Colors.white),
+                                      ).copyWith(color: AppColors.surface),
                                     ),
                                     if (mobile.isNotEmpty)
                                       Padding(
@@ -103,7 +103,7 @@ class AccountHeaderCard extends StatelessWidget {
                                           key: const Key('account_mobile'),
                                           style: AppText.body.copyWith(
                                             fontSize: 14,
-                                            color: Colors.white,
+                                            color: AppColors.surface,
                                           ),
                                         ),
                                       ),
@@ -150,7 +150,7 @@ class AccountHeaderCard extends StatelessWidget {
                 const SheenSweep(
                   periodMs: 5000,
                   band: 0.3,
-                  peak: Color(0x29FFFFFF),
+                  peak: AppColors.whiteA16x29,
                 ),
               ],
             ),
@@ -170,21 +170,21 @@ class _EditPill extends StatelessWidget {
     height: 36,
     padding: const EdgeInsets.symmetric(horizontal: 12),
     decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.18),
+      color: AppColors.surface.withValues(alpha: 0.18),
       borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+      border: Border.all(color: AppColors.surface.withValues(alpha: 0.4)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.edit_outlined, size: 13, color: Colors.white),
+        const Icon(Icons.edit_outlined, size: 13, color: AppColors.surface),
         const SizedBox(width: 5),
         Text(
           label,
           style: AppText.body.copyWith(
             fontSize: 13.5,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: AppColors.surface,
           ),
         ),
       ],
@@ -200,17 +200,17 @@ class AccountNotifWarning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    const ink = Color(0xFF7A4A06);
+    const ink = AppColors.orange7A4A06;
     return DiscoverRise(
       delayMs: 60,
       child: Container(
         margin: const EdgeInsets.only(top: 14),
         padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEF3C7),
+          color: AppColors.warnBg,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFFD97706).withValues(alpha: 0.4),
+            color: AppColors.warn.withValues(alpha: 0.4),
             width: 1.5,
           ),
         ),
@@ -234,7 +234,7 @@ class AccountNotifWarning extends StatelessWidget {
               onPressed: onTurnOn,
               style: TextButton.styleFrom(
                 minimumSize: const Size(0, 44),
-                backgroundColor: Colors.white,
+                backgroundColor: AppColors.surface,
                 foregroundColor: ink,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -333,7 +333,7 @@ class AccountRow extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: const Color(0xFFE2EEEC),
+                color: AppColors.pillActive,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, size: 20, color: AppColors.teal),
@@ -393,7 +393,7 @@ class AccountDangerButton extends StatelessWidget {
     style: OutlinedButton.styleFrom(
       minimumSize: const Size.fromHeight(54),
       foregroundColor: _danger,
-      backgroundColor: Colors.white.withValues(alpha: 0.8),
+      backgroundColor: AppColors.surface.withValues(alpha: 0.8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       side: BorderSide(color: _danger.withValues(alpha: 0.4), width: 1.5),
       textStyle: AppText.body.copyWith(

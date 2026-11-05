@@ -216,9 +216,9 @@ class _Footer extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xD1FFFFFF), Color(0x94FFFFFF)],
+        colors: [AppColors.whiteA82xD1, AppColors.whiteA58x94],
       ),
-      border: const Border(top: BorderSide(color: Color(0xE6FFFFFF))),
+      border: const Border(top: BorderSide(color: AppColors.whiteA90xE6)),
       shadow: [
         BoxShadow(
           color: dsNavy.withValues(alpha: 0.1),

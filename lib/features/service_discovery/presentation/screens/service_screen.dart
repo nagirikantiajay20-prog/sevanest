@@ -218,7 +218,7 @@ class _SearchField extends StatelessWidget {
       ),
       child: DiscoverGlass(
         radius: 18,
-        borderColor: on ? AppColors.teal : const Color(0xE6FFFFFF),
+        borderColor: on ? AppColors.teal : AppColors.whiteA90xE6,
         child: SizedBox(
           height: 54,
           child: Row(
@@ -238,7 +238,7 @@ class _SearchField extends StatelessWidget {
                     hintText: hint,
                     hintStyle: AppText.body.copyWith(
                       fontSize: 16,
-                      color: const Color(0xFF64748B),
+                      color: AppColors.slate400,
                     ),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
@@ -305,13 +305,13 @@ class _ServiceRow extends StatelessWidget {
           offset: Offset(0, selected ? -3 / 92 : 0),
           child: DiscoverGlass(
             radius: 24,
-            borderColor: selected ? AppColors.teal : const Color(0xE6FFFFFF),
+            borderColor: selected ? AppColors.teal : AppColors.whiteA90xE6,
             borderWidth: 2,
             gradient: selected
                 ? const LinearGradient(
                     begin: Alignment(-0.6, -1),
                     end: Alignment(0.6, 1),
-                    colors: [Color(0xF2E2EEEC), Color(0xB3FFFFFF)],
+                    colors: [AppColors.grayE2EEECA95, AppColors.whiteA70xB3],
                   )
                 : null,
             child: Material(
@@ -355,7 +355,7 @@ class _ServiceRow extends StatelessWidget {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFE2EEEC),
+                                    color: AppColors.pillActive,
                                     borderRadius: BorderRadius.circular(
                                       AppRadius.pill,
                                     ),
@@ -382,12 +382,12 @@ class _ServiceRow extends StatelessWidget {
                             shape: BoxShape.circle,
                             color: selected
                                 ? AppColors.teal
-                                : const Color(0xB3FFFFFF),
+                                : AppColors.whiteA70xB3,
                             border: Border.all(
                               width: 2,
                               color: selected
                                   ? AppColors.teal
-                                  : const Color(0xFF94A3B8),
+                                  : AppColors.slate400Light,
                             ),
                           ),
                           child: selected
@@ -395,7 +395,7 @@ class _ServiceRow extends StatelessWidget {
                                   Icons.check_rounded,
                                   key: Key('discover_category_check'),
                                   size: 17,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 )
                               : null,
                         ),
@@ -436,7 +436,7 @@ class _Thumb extends StatelessWidget {
     clipBehavior: Clip.antiAlias,
     child: photo == null
         ? ColoredBox(
-            color: const Color(0xFFE2EEEC),
+            color: AppColors.pillActive,
             child: Icon(icon, color: AppColors.teal),
           )
         : AnimatedScale(
@@ -448,7 +448,7 @@ class _Thumb extends StatelessWidget {
               cacheWidth: 200,
               excludeFromSemantics: true,
               errorBuilder: (_, _, _) => ColoredBox(
-                color: const Color(0xFFE2EEEC),
+                color: AppColors.pillActive,
                 child: Icon(icon, color: AppColors.teal),
               ),
             ),
@@ -548,7 +548,7 @@ class _NoResult extends StatelessWidget {
                   height: 56,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color(0xFFE2EEEC),
+                    color: AppColors.pillActive,
                   ),
                   child: const Icon(
                     Icons.search_rounded,
@@ -584,7 +584,7 @@ class _NoResult extends StatelessWidget {
                     minimumSize: const Size(0, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     foregroundColor: dsNavy,
-                    backgroundColor: const Color(0xCCFFFFFF),
+                    backgroundColor: AppColors.whiteA80xCC,
                     side: const BorderSide(color: dsNavy, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),

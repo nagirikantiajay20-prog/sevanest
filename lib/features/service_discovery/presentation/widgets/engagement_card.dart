@@ -57,13 +57,13 @@ class EngagementCard extends StatelessWidget {
             offset: Offset(0, selected ? -0.015 : 0),
             child: DiscoverGlass(
               radius: 26,
-              borderColor: selected ? AppColors.teal : const Color(0xE6FFFFFF),
+              borderColor: selected ? AppColors.teal : AppColors.whiteA90xE6,
               borderWidth: 2,
               gradient: selected
                   ? const LinearGradient(
                       begin: Alignment(-0.6, -1),
                       end: Alignment(0.6, 1),
-                      colors: [Color(0xF2E2EEEC), Color(0xB3FFFFFF)],
+                      colors: [AppColors.grayE2EEECA95, AppColors.whiteA70xB3],
                     )
                   : null,
               child: Material(
@@ -143,7 +143,7 @@ class _Well extends StatelessWidget {
     height: 52,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(17),
-      color: on ? null : const Color(0xFFE9F4F2),
+      color: on ? null : AppColors.tileWell,
       gradient: on
           ? const LinearGradient(
               begin: Alignment.topLeft,
@@ -152,7 +152,7 @@ class _Well extends StatelessWidget {
             )
           : null,
     ),
-    child: Icon(icon, size: 26, color: on ? Colors.white : AppColors.teal),
+    child: Icon(icon, size: 26, color: on ? AppColors.surface : AppColors.teal),
   );
 }
 
@@ -176,10 +176,10 @@ class _Meta extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.pill),
         color: off
-            ? const Color(0x4094A3B8)
+            ? AppColors.blue94A3B8A25
             : on
-            ? const Color(0xFFCCEFE9)
-            : const Color(0xFFE2EEEC),
+            ? AppColors.tealLine
+            : AppColors.pillActive,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -219,14 +219,14 @@ class _Radio extends StatelessWidget {
     height: 30,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
-      color: on ? AppColors.teal : const Color(0xB3FFFFFF),
+      color: on ? AppColors.teal : AppColors.whiteA70xB3,
       border: Border.all(
         width: 2,
-        color: on ? AppColors.teal : const Color(0xFF94A3B8),
+        color: on ? AppColors.teal : AppColors.slate400Light,
       ),
     ),
     child: on
-        ? const Icon(Icons.check_rounded, size: 17, color: Colors.white)
+        ? const Icon(Icons.check_rounded, size: 17, color: AppColors.surface)
         : null,
   );
 }
@@ -266,7 +266,7 @@ class _Week extends StatelessWidget {
                             top: Radius.circular(6),
                             bottom: Radius.circular(3),
                           ),
-                          color: on ? null : const Color(0x7364748B),
+                          color: on ? null : AppColors.blue64748BA45,
                           gradient: on
                               ? const LinearGradient(
                                   begin: Alignment.topCenter,

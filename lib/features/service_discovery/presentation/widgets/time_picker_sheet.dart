@@ -17,7 +17,7 @@ Future<int?> showTimePickerSheet(
   context: context,
   isScrollControlled: true,
   backgroundColor: Colors.transparent,
-  barrierColor: const Color(0x730F2340),
+  barrierColor: AppColors.blue0F2340A45,
   elevation: 0,
   builder: (_) => _TimeSheet(title: title, initialMinutes: initialMinutes),
 );
@@ -95,7 +95,7 @@ class _TimeSheetState extends State<_TimeSheet> {
       gradient: const LinearGradient(
         begin: Alignment(-0.5, -1),
         end: Alignment(0.5, 1),
-        colors: [Color(0xF2FFFFFF), Color(0xD6FFFFFF)],
+        colors: [AppColors.whiteA95xF2, AppColors.whiteA84xD6],
       ),
       child: SafeArea(
         top: false,
@@ -199,10 +199,10 @@ class _TimeSheetState extends State<_TimeSheet> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Color(0xE6FFFFFF),
-                                Color(0x00FFFFFF),
-                                Color(0x00FFFFFF),
-                                Color(0xE6FFFFFF),
+                                AppColors.whiteA90xE6,
+                                AppColors.whiteClear,
+                                AppColors.whiteClear,
+                                AppColors.whiteA90xE6,
                               ],
                               stops: [0, 0.32, 0.68, 1],
                             ),

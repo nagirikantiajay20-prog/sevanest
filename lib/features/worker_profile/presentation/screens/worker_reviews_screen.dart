@@ -169,7 +169,10 @@ class _Summary extends ConsumerWidget {
                   children: [
                     Text(
                       ratingText(avg, scale),
-                      style: authSerif(60, 1).copyWith(color: Colors.white),
+                      style: authSerif(
+                        60,
+                        1,
+                      ).copyWith(color: AppColors.surface),
                     ),
                     const SizedBox(width: 18),
                     Expanded(
@@ -180,8 +183,8 @@ class _Summary extends ConsumerWidget {
                             rating: avg,
                             scale: scale,
                             size: 21,
-                            full: const Color(0xFFFBBF24),
-                            empty: const Color(0x4DFFFFFF),
+                            full: AppColors.amber400,
+                            empty: AppColors.whiteA30x4D,
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -189,7 +192,7 @@ class _Summary extends ConsumerWidget {
                             style: AppText.body.copyWith(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: AppColors.surface,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -204,7 +207,7 @@ class _Summary extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: AppText.body.copyWith(
                               fontSize: 13,
-                              color: const Color(0xCCFFFFFF),
+                              color: AppColors.whiteA80xCC,
                             ),
                           ),
                         ],
@@ -249,7 +252,7 @@ class _BreakdownRow extends StatelessWidget {
     final style = AppText.body.copyWith(
       fontSize: 13,
       fontWeight: FontWeight.w700,
-      color: Colors.white,
+      color: AppColors.surface,
     );
     return Semantics(
       label: label,
@@ -269,8 +272,10 @@ class _BreakdownRow extends StatelessWidget {
                   builder: (_, v, _) => LinearProgressIndicator(
                     value: v,
                     minHeight: 8,
-                    backgroundColor: const Color(0x26FFFFFF),
-                    valueColor: const AlwaysStoppedAnimation(Color(0xFFFBBF24)),
+                    backgroundColor: AppColors.whiteA15x26,
+                    valueColor: const AlwaysStoppedAnimation(
+                      AppColors.amber400,
+                    ),
                   ),
                 ),
               ),
@@ -326,9 +331,13 @@ class _Shimmer extends StatelessWidget {
     margin: const EdgeInsets.only(top: 12),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: const Color(0xE6FFFFFF)),
+      border: Border.all(color: AppColors.whiteA90xE6),
       gradient: const LinearGradient(
-        colors: [Color(0x59FFFFFF), Color(0xBFFFFFFF), Color(0x59FFFFFF)],
+        colors: [
+          AppColors.whiteA35x59,
+          AppColors.whiteA75xBF,
+          AppColors.whiteA35x59,
+        ],
       ),
     ),
   );
@@ -358,7 +367,7 @@ class _Empty extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFFE2EEEC), Colors.white],
+                    colors: [AppColors.pillActive, AppColors.surface],
                   ),
                   boxShadow: [
                     BoxShadow(

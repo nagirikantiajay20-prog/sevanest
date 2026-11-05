@@ -55,7 +55,7 @@ class LanguageChips extends StatelessWidget {
               height: h,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE2EEEC),
+                  color: AppColors.pillActive,
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(color: AppColors.teal, width: 1.5),
                   boxShadow: [
@@ -98,10 +98,10 @@ class LanguageChips extends StatelessWidget {
           decoration: ShapeDecoration(
             color: on
                 ? Colors.transparent
-                : Colors.white.withValues(alpha: 0.72),
+                : AppColors.surface.withValues(alpha: 0.72),
             shape: StadiumBorder(
               side: BorderSide(
-                color: on ? Colors.transparent : const Color(0xFFCBD5E1),
+                color: on ? Colors.transparent : AppColors.slate300,
                 width: 1.5,
               ),
             ),
@@ -136,7 +136,7 @@ class LanguageChips extends StatelessWidget {
       checkmarkColor: AppColors.teal,
       selectedColor: AppColors.tealWash,
       backgroundColor: threeColumns
-          ? Colors.white.withValues(alpha: 0.72)
+          ? AppColors.surface.withValues(alpha: 0.72)
           : AppColors.surface,
       labelStyle: AppText.label.copyWith(
         fontSize: 15,

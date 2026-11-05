@@ -91,18 +91,18 @@ class _Tile extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x4D000000),
+            color: AppColors.blackA30x4D,
             blurRadius: 24,
             offset: Offset(0, 10),
           ),
         ],
       ),
       child: Material(
-        color: const Color(0xFF12263F),
+        color: AppColors.sky12263F,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
           side: BorderSide(
-            color: Colors.white.withValues(alpha: 0.85),
+            color: AppColors.surface.withValues(alpha: 0.85),
             width: 3,
           ),
         ),
@@ -114,21 +114,22 @@ class _Tile extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               if (photo == null)
-                Center(child: Icon(category.icon, color: Colors.white))
+                Center(child: Icon(category.icon, color: AppColors.surface))
               else
                 Image.asset(
                   photo,
                   fit: BoxFit.cover,
                   cacheWidth: 600,
-                  errorBuilder: (_, _, _) =>
-                      Center(child: Icon(category.icon, color: Colors.white)),
+                  errorBuilder: (_, _, _) => Center(
+                    child: Icon(category.icon, color: AppColors.surface),
+                  ),
                 ),
               const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment(0, -0.1),
                     end: Alignment.bottomCenter,
-                    colors: [Color(0x0008182B), Color(0x9908182B)],
+                    colors: [AppColors.sky08182BA0, AppColors.sky08182BA60],
                   ),
                 ),
               ),
@@ -143,7 +144,7 @@ class _Tile extends StatelessWidget {
                       color: AppColors.navyDeep.withValues(alpha: 0.55),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.28),
+                        color: AppColors.surface.withValues(alpha: 0.28),
                       ),
                     ),
                     child: Padding(
@@ -159,7 +160,7 @@ class _Tile extends StatelessWidget {
                           fontSize: 13,
                           height: 1.2,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),

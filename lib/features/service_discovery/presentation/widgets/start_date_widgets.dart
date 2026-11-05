@@ -15,7 +15,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 String _ymd(DateTime d) =>
     '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
 
-const _washNavy = [Color(0xF2E4E9F2), Color(0xB8FFFFFF)];
+const _washNavy = [AppColors.grayE4E9F2A95, AppColors.whiteA72xB8];
 
 /// Two cards per row, equal height (Tomorrow / In 3 days / Next Monday / Pick another).
 class ShortcutGrid extends StatelessWidget {
@@ -361,11 +361,11 @@ class _GlassCalendarState extends State<GlassCalendar> {
     final marked =
         enabled && !isSelected && (widget.marked?.call(day) ?? false);
     final fg = isSelected
-        ? Colors.white
+        ? AppColors.surface
         : !enabled
-        ? const Color(0xFFB6C0CE)
+        ? AppColors.blueB6C0CE
         : marked
-        ? const Color(0xFF92400E)
+        ? AppColors.warnText
         : dsNavy;
     return Semantics(
       button: true,
@@ -423,7 +423,9 @@ class _GlassCalendarState extends State<GlassCalendar> {
                             height: 5,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isSelected ? Colors.white : AppColors.teal,
+                              color: isSelected
+                                  ? AppColors.surface
+                                  : AppColors.teal,
                             ),
                           ),
                         ),
@@ -506,7 +508,7 @@ class OutsideDaysWarning extends StatelessWidget {
               child: Icon(
                 Icons.info_outline,
                 size: 24,
-                color: Color(0xFFB45309),
+                color: AppColors.warnIcon,
               ),
             ),
             const SizedBox(width: 12),
@@ -519,7 +521,7 @@ class OutsideDaysWarning extends StatelessWidget {
                     style: authSerif(
                       18,
                       1.25,
-                    ).copyWith(color: const Color(0xFF78350F)),
+                    ).copyWith(color: AppColors.orange78350F),
                   ),
                   const SizedBox(height: 3),
                   Text(
@@ -527,7 +529,7 @@ class OutsideDaysWarning extends StatelessWidget {
                     style: AppText.body.copyWith(
                       fontSize: 14,
                       height: 1.45,
-                      color: const Color(0xFF92400E),
+                      color: AppColors.warnText,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -538,7 +540,7 @@ class OutsideDaysWarning extends StatelessWidget {
                       minimumSize: const Size(0, 44),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       foregroundColor: dsNavy,
-                      backgroundColor: Colors.white.withValues(alpha: 0.7),
+                      backgroundColor: AppColors.surface.withValues(alpha: 0.7),
                       side: const BorderSide(color: dsNavy, width: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

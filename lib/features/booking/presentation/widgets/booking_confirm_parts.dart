@@ -88,7 +88,7 @@ class ConfirmDatePager extends StatelessWidget {
           width: 44,
           height: 44,
           child: Material(
-            color: const Color(0xD9FFFFFF),
+            color: AppColors.whiteA85xD9,
             shape: CircleBorder(
               side: BorderSide(
                 color: dsNavy.withValues(alpha: 0.18),
@@ -155,25 +155,32 @@ class ConfirmDatePager extends StatelessWidget {
                             color: AppColors.teal,
                           ),
                           const SizedBox(width: 10),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (c, a) => FadeTransition(
-                              opacity: a,
-                              child: SlideTransition(
-                                position: Tween(
-                                  begin: const Offset(0, 0.4),
-                                  end: Offset.zero,
-                                ).animate(a),
-                                child: c,
+                          Flexible(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              transitionBuilder: (c, a) => FadeTransition(
+                                opacity: a,
+                                child: SlideTransition(
+                                  position: Tween(
+                                    begin: const Offset(0, 0.4),
+                                    end: Offset.zero,
+                                  ).animate(a),
+                                  child: c,
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              date,
-                              key: ValueKey(date),
-                              style: AppText.body.copyWith(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w800,
-                                color: dsNavy,
+                              // Scales down instead of overflowing at large text sizes.
+                              child: FittedBox(
+                                key: ValueKey(date),
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  date,
+                                  maxLines: 1,
+                                  style: AppText.body.copyWith(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: dsNavy,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -203,13 +210,15 @@ class ConfirmPrice extends StatelessWidget {
   const ConfirmPrice({
     required this.lines,
     required this.totalLabel,
-    required this.total,
+    this.total,
     this.note,
     super.key,
   });
   final List<(String, String)> lines;
   final String totalLabel;
-  final String total;
+
+  /// Null when the backend has not served a fee: only the note is shown, never an invented amount.
+  final String? total;
   final String? note;
 
   @override
@@ -234,27 +243,29 @@ class ConfirmPrice extends StatelessWidget {
               ],
             ),
           ),
-        const SizedBox(height: 6),
-        const DashedRule(),
-        Padding(
-          padding: const EdgeInsets.only(top: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                totalLabel,
-                style: line.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: dsNavy,
+        if (total != null) ...[
+          const SizedBox(height: 6),
+          const DashedRule(),
+          Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  totalLabel,
+                  style: line.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: dsNavy,
+                  ),
                 ),
-              ),
-              Text(total, style: authSerif(24, 1)),
-            ],
+                Text(total!, style: authSerif(24, 1)),
+              ],
+            ),
           ),
-        ),
+        ],
         if (note != null)
           Container(
             key: const Key('confirm_fee_note'),
@@ -272,7 +283,7 @@ class ConfirmPrice extends StatelessWidget {
                   child: Icon(
                     Icons.info_outline_rounded,
                     size: 18,
-                    color: Color(0xFFB45309),
+                    color: AppColors.warnIcon,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -282,7 +293,7 @@ class ConfirmPrice extends StatelessWidget {
                     style: AppText.body.copyWith(
                       fontSize: 13,
                       height: 1.45,
-                      color: const Color(0xFF7A4300),
+                      color: AppColors.orange7A4300,
                     ),
                   ),
                 ),

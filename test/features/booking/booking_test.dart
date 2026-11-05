@@ -421,10 +421,10 @@ void main() {
       expect(find.byKey(const Key('confirm_worker_card')), findsOneWidget);
       expect(find.byKey(const Key('confirm_start_date_btn')), findsOneWidget);
       expect(find.byKey(const Key('confirm_fee_note')), findsOneWidget);
-      // No quote endpoint yet: the marked BookingQuote mock fills the rows (fee 500 + tax 90).
-      expect(find.text('₹500'), findsOneWidget);
-      expect(find.text('₹90'), findsOneWidget);
-      expect(find.byKey(const Key('confirm_total')), findsOneWidget);
+      // No backend fee served: no invented amount, only the note.
+      expect(find.text('₹500'), findsNothing);
+      expect(find.text('₹90'), findsNothing);
+      expect(find.byKey(const Key('confirm_total')), findsNothing);
     });
 
     testWidgets('the backend fee is shown as is, with no invented tax', (

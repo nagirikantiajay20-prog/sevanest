@@ -54,7 +54,7 @@ class InterviewHero extends StatelessWidget {
     final small = AppText.body.copyWith(
       fontSize: 12,
       fontWeight: FontWeight.w700,
-      color: const Color(0xC7FFFFFF),
+      color: AppColors.whiteA78xC7,
     );
     final clock = DiscoverClock.of(context);
     return DecoratedBox(
@@ -64,7 +64,7 @@ class InterviewHero extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: tone == HeroTone.bad
-              ? const [Color(0xFF7F1D1D), Color(0xFF9F1239)]
+              ? const [AppColors.dangerText, AppColors.rose800]
               : const [dsNavy, AppColors.actionDeepTeal],
         ),
         boxShadow: [
@@ -87,8 +87,8 @@ class InterviewHero extends StatelessWidget {
                   key: chipKey,
                   padding: const EdgeInsets.fromLTRB(12, 6, 14, 6),
                   decoration: BoxDecoration(
-                    color: const Color(0x2EFFFFFF),
-                    border: Border.all(color: const Color(0x52FFFFFF)),
+                    color: AppColors.whiteA18x2E,
+                    border: Border.all(color: AppColors.whiteA32x52),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -104,7 +104,7 @@ class InterviewHero extends StatelessWidget {
                           style: AppText.body.copyWith(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                       ),
@@ -117,7 +117,10 @@ class InterviewHero extends StatelessWidget {
                   child: Text(
                     headline,
                     key: headlineKey,
-                    style: authSerif(25, 1.2).copyWith(color: Colors.white),
+                    style: authSerif(
+                      25,
+                      1.2,
+                    ).copyWith(color: AppColors.surface),
                   ),
                 ),
                 if (copy.isNotEmpty) ...[
@@ -128,7 +131,7 @@ class InterviewHero extends StatelessWidget {
                     style: AppText.body.copyWith(
                       fontSize: 15,
                       height: 1.5,
-                      color: const Color(0xDBFFFFFF),
+                      color: AppColors.whiteA86xDB,
                     ),
                   ),
                 ],
@@ -169,9 +172,9 @@ class InterviewHero extends StatelessWidget {
 
 /// Chip dot colour of the hero.
 enum HeroTone {
-  waiting(Color(0xFFFBBF24)),
-  ok(Color(0xFF34D399)),
-  bad(Color(0xFFFCA5A5));
+  waiting(AppColors.amber400),
+  ok(AppColors.emerald400),
+  bad(AppColors.dangerLine);
 
   const HeroTone(this.dot);
   final Color dot;
@@ -229,7 +232,7 @@ class _ProgressBar extends StatelessWidget {
     borderRadius: BorderRadius.circular(6),
     child: Container(
       height: 6,
-      color: const Color(0x33FFFFFF),
+      color: AppColors.whiteA20x33,
       alignment: Alignment.centerLeft,
       child: ValueListenableBuilder<double>(
         valueListenable: clock,
@@ -243,9 +246,9 @@ class _ProgressBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
                 gradient: LinearGradient(
                   colors: const [
-                    Color(0xFF34D399),
-                    Color(0xFF38BDF8),
-                    Color(0xFF34D399),
+                    AppColors.emerald400,
+                    AppColors.sky400,
+                    AppColors.emerald400,
                   ],
                   begin: Alignment(-1 + 2 * glow, 0),
                   end: Alignment(1 + 2 * glow, 0),
@@ -331,7 +334,7 @@ class InterviewWorkerCard extends StatelessWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFD6EFEA),
+                                color: AppColors.tealD6EFEA,
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Row(
@@ -340,7 +343,7 @@ class InterviewWorkerCard extends StatelessWidget {
                                   const Icon(
                                     Icons.check_rounded,
                                     size: 12,
-                                    color: Color(0xFF0B5A53),
+                                    color: AppColors.teal0B5A53,
                                   ),
                                   const SizedBox(width: 4),
                                   Flexible(
@@ -351,7 +354,7 @@ class InterviewWorkerCard extends StatelessWidget {
                                       style: AppText.body.copyWith(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF0B5A53),
+                                        color: AppColors.teal0B5A53,
                                       ),
                                     ),
                                   ),
@@ -463,15 +466,22 @@ class InterviewInfoCard extends StatelessWidget {
                       spacing: 8,
                       children: [
                         GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onTap: onTap?.call(i),
-                          child: Text(
-                            r.$2,
-                            key: valueKey?.call(i),
-                            style: AppText.body.copyWith(
-                              fontSize: 15,
-                              height: 1.4,
-                              fontWeight: FontWeight.w700,
-                              color: valueColor?.call(i) ?? dsNavy,
+                          // A tappable value gets a 44 dp target; a plain one keeps its tight row.
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: onTap?.call(i) == null ? 0 : 12,
+                            ),
+                            child: Text(
+                              r.$2,
+                              key: valueKey?.call(i),
+                              style: AppText.body.copyWith(
+                                fontSize: 15,
+                                height: 1.4,
+                                fontWeight: FontWeight.w700,
+                                color: valueColor?.call(i) ?? dsNavy,
+                              ),
                             ),
                           ),
                         ),
@@ -494,7 +504,7 @@ class InterviewInfoCard extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(0, 44),
                   foregroundColor: AppColors.teal,
-                  backgroundColor: const Color(0xCCFFFFFF),
+                  backgroundColor: AppColors.whiteA80xCC,
                   side: BorderSide(
                     color: AppColors.teal.withValues(alpha: 0.45),
                     width: 1.5,
@@ -671,16 +681,16 @@ class _Step extends StatelessWidget {
                                 : done
                                 ? AppColors.teal
                                 : bad
-                                ? const Color(0xFFE11D48)
-                                : const Color(0xE6FFFFFF),
+                                ? AppColors.rose600
+                                : AppColors.whiteA90xE6,
                             border: cur
                                 ? null
                                 : Border.all(
                                     color: done
                                         ? AppColors.teal
                                         : bad
-                                        ? const Color(0xFFE11D48)
-                                        : const Color(0xFFCBD5E1),
+                                        ? AppColors.rose600
+                                        : AppColors.slate300,
                                     width: 2,
                                   ),
                             boxShadow: [
@@ -697,19 +707,19 @@ class _Step extends StatelessWidget {
                               ? const Icon(
                                   Icons.check_rounded,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 )
                               : bad
                               ? const Icon(
                                   Icons.close_rounded,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 )
                               : cur
                               ? const Icon(
                                   Icons.circle,
                                   size: 8,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 )
                               : null,
                         ),
@@ -734,7 +744,7 @@ class _Step extends StatelessWidget {
                               : FontWeight.w800,
                           height: 1.3,
                           color: s == TimelineState.upcoming
-                              ? const Color(0xFF64748B)
+                              ? AppColors.slate400
                               : dsNavy,
                         ),
                       ),
@@ -778,7 +788,7 @@ class OutlineAction extends StatelessWidget {
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.teal,
-        backgroundColor: const Color(0xC7FFFFFF),
+        backgroundColor: AppColors.whiteA78xC7,
         side: BorderSide(
           color: AppColors.teal.withValues(
             alpha: onPressed == null ? 0.25 : 0.5,
@@ -814,7 +824,7 @@ class QuietAction extends StatelessWidget {
     child: TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        foregroundColor: danger ? const Color(0xFFBE123C) : dsMuted,
+        foregroundColor: danger ? AppColors.rose700 : dsMuted,
         textStyle: AppText.body.copyWith(
           fontSize: 15,
           fontWeight: FontWeight.w700,

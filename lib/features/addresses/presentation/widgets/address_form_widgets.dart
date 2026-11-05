@@ -7,8 +7,8 @@ import 'package:sevanest_customer/features/authentication/presentation/widgets/a
 import 'package:sevanest_customer/features/authentication/presentation/widgets/motion.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-const _slate300 = Color(0xFFCBD5E1);
-const _mint = Color(0xFFE2EEEC);
+const _slate300 = AppColors.slate300;
+const _mint = AppColors.pillActive;
 
 /// Frosted bottom sheet of the add-address design: grabber, serif title, round close button.
 class AddressSheetFrame extends StatelessWidget {
@@ -28,12 +28,12 @@ class AddressSheetFrame extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment(-0.5, -1),
         end: Alignment(0.5, 1),
-        colors: [Color(0xE0FFFFFF), Color(0xA8FFFFFF)],
+        colors: [AppColors.whiteA88xE0, AppColors.whiteA66xA8],
       ),
-      border: const Border(top: BorderSide(color: Color(0xF2FFFFFF))),
+      border: const Border(top: BorderSide(color: AppColors.whiteA95xF2)),
       shadow: const [
         BoxShadow(
-          color: Color(0x570F2340),
+          color: AppColors.blue0F2340A34,
           blurRadius: 50,
           offset: Offset(0, -18),
         ),
@@ -68,9 +68,11 @@ class AddressSheetFrame extends StatelessWidget {
                       ).closeButtonLabel,
                       style: IconButton.styleFrom(
                         minimumSize: const Size(44, 44),
-                        backgroundColor: Colors.white.withValues(alpha: 0.75),
+                        backgroundColor: AppColors.surface.withValues(
+                          alpha: 0.75,
+                        ),
                         foregroundColor: authNavy,
-                        side: const BorderSide(color: Color(0xE6FFFFFF)),
+                        side: const BorderSide(color: AppColors.whiteA90xE6),
                         shadowColor: authNavy,
                         elevation: 3,
                       ),
@@ -139,8 +141,8 @@ class AddressLocationCard extends StatelessWidget {
                     color: found
                         ? AppColors.successLine
                         : failed
-                        ? const Color(0xFFFCA5A5)
-                        : const Color(0xFF99E6DC),
+                        ? AppColors.dangerLine
+                        : AppColors.teal99E6DC,
                     width: 1.5,
                   ),
                 ),
@@ -160,9 +162,7 @@ class AddressLocationCard extends StatelessWidget {
                           : Icon(
                               found ? Icons.check_circle : Icons.my_location,
                               size: 26,
-                              color: found
-                                  ? const Color(0xFF16A34A)
-                                  : AppColors.teal,
+                              color: found ? AppColors.success : AppColors.teal,
                             ),
                     ),
                     const SizedBox(width: 14),
@@ -213,9 +213,9 @@ class AddressLocationCard extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Color(0x00FFFFFF),
-                                      Color(0xA6FFFFFF),
-                                      Color(0x00FFFFFF),
+                                      AppColors.whiteClear,
+                                      AppColors.whiteA65xA6,
+                                      AppColors.whiteClear,
                                     ],
                                   ),
                                 ),
@@ -273,7 +273,7 @@ class _Radar extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -317,7 +317,7 @@ class AddressFoundMap extends StatelessWidget {
       height: 130,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: AppColors.surface, width: 2),
         boxShadow: [
           BoxShadow(
             color: authNavy.withValues(alpha: 0.2),
@@ -355,9 +355,9 @@ class AddressFoundMap extends StatelessWidget {
                 radius: BorderRadius.circular(99),
                 blur: 18,
                 gradient: const LinearGradient(
-                  colors: [Color(0xB3FFFFFF), Color(0x66FFFFFF)],
+                  colors: [AppColors.whiteA70xB3, AppColors.whiteA40x66],
                 ),
-                border: Border.all(color: const Color(0xE6FFFFFF)),
+                border: Border.all(color: AppColors.whiteA90xE6),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -399,9 +399,9 @@ class AddressAreaList extends StatelessWidget {
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
+        color: AppColors.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xE6FFFFFF)),
+        border: Border.all(color: AppColors.whiteA90xE6),
         boxShadow: [
           BoxShadow(
             color: authNavy.withValues(alpha: 0.12),
@@ -483,7 +483,7 @@ class AddressLabelChips extends StatelessWidget {
     selected: on,
     showCheckmark: false,
     selectedColor: _mint,
-    backgroundColor: Colors.white.withValues(alpha: 0.72),
+    backgroundColor: AppColors.surface.withValues(alpha: 0.72),
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
     labelStyle: AppText.label.copyWith(
       fontSize: 14,

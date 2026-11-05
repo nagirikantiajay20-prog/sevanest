@@ -121,7 +121,7 @@ class _WorkerTile extends StatelessWidget {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.92),
+                        color: AppColors.surface.withValues(alpha: 0.92),
                         shape: BoxShape.circle,
                       ),
                       child: FavouriteButton(

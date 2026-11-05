@@ -92,9 +92,9 @@ class SnButton extends StatelessWidget {
         onPressed: tap,
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.actionDeepTeal,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.surface,
           disabledBackgroundColor: isLoading ? AppColors.actionDeepTeal : null,
-          disabledForegroundColor: isLoading ? Colors.white : null,
+          disabledForegroundColor: isLoading ? AppColors.surface : null,
         ),
         child: child,
       ),

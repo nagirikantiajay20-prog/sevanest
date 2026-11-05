@@ -16,7 +16,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Pieces of the New ticket screen.
 
-const _fieldLine = Color(0x331B3354);
+const _fieldLine = AppColors.sky1B3354A20;
 
 /// White 52 px field that looks like the design's `select` and opens a sheet when tapped.
 class SelectField extends StatelessWidget {
@@ -36,7 +36,7 @@ class SelectField extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     button: true,
     child: Material(
-      color: Colors.white,
+      color: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: const BorderSide(color: _fieldLine, width: 1.5),
@@ -118,7 +118,7 @@ class DescriptionBox extends StatelessWidget {
             hintStyle: AppText.body.copyWith(fontSize: 15, color: dsMuted),
             counterText: '',
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.surface,
             contentPadding: const EdgeInsets.all(12),
             border: line(_fieldLine, 1.5),
             enabledBorder: line(_fieldLine, 1.5),
@@ -138,7 +138,7 @@ class DescriptionBox extends StatelessWidget {
                   style: AppText.body.copyWith(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFFBE123C),
+                    color: AppColors.rose700,
                   ),
                 ),
               ),
@@ -202,7 +202,7 @@ class RelatedChip extends ConsumerWidget {
               style: AppText.body.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF0B5A53),
+                color: AppColors.teal0B5A53,
               ),
             ),
           ),
@@ -213,7 +213,7 @@ class RelatedChip extends ConsumerWidget {
             icon: const Icon(
               Icons.close_rounded,
               size: 18,
-              color: Color(0xFF0B5A53),
+              color: AppColors.teal0B5A53,
             ),
           ),
         ],
@@ -279,7 +279,7 @@ class _SheetRow extends StatelessWidget {
       selected: selected,
       inMutuallyExclusiveGroup: true,
       child: Material(
-        color: selected ? const Color(0xFFD6EFEA) : Colors.white,
+        color: selected ? AppColors.tealD6EFEA : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
@@ -300,15 +300,13 @@ class _SheetRow extends StatelessWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: safety
-                          ? const Color(0xFFFFE4E6)
-                          : const Color(0xFFD6EFEA),
+                      color: safety ? AppColors.rose100 : AppColors.tealD6EFEA,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       icon,
                       size: 22,
-                      color: safety ? const Color(0xFFBE123C) : AppColors.teal,
+                      color: safety ? AppColors.rose700 : AppColors.teal,
                     ),
                   ),
                   const SizedBox(width: 12),

@@ -13,7 +13,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 /// Pieces of the Rating screen (design: Find a Worker > Rating).
 
 const _starOn = AppColors.amber;
-const _starOff = Color(0xFF94A3B8);
+const _starOff = AppColors.slate400Light;
 
 /// "Poor" .. "Excellent" under the stars; other scales read "3 out of 7".
 String ratingWord(AppLocalizations l10n, int score, int scale) => scale != 5
@@ -213,7 +213,7 @@ class RatingMessage extends StatelessWidget {
                       colors: [AppColors.teal, dsSky],
                     ),
                   ),
-                  child: Icon(icon, size: 42, color: Colors.white),
+                  child: Icon(icon, size: 42, color: AppColors.surface),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -284,10 +284,10 @@ class RatingChip extends StatelessWidget {
     button: true,
     selected: selected,
     child: Material(
-      color: selected ? const Color(0x1F0F766E) : Colors.white,
+      color: selected ? AppColors.teal0F766EA12 : AppColors.surface,
       shape: StadiumBorder(
         side: BorderSide(
-          color: selected ? AppColors.teal : const Color(0x331B3354),
+          color: selected ? AppColors.teal : AppColors.sky1B3354A20,
           width: 1.5,
         ),
       ),
@@ -303,7 +303,7 @@ class RatingChip extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 14.5,
               fontWeight: FontWeight.w700,
-              color: selected ? const Color(0xFF0B5A53) : dsNavy,
+              color: selected ? AppColors.teal0B5A53 : dsNavy,
             ),
           ),
         ),

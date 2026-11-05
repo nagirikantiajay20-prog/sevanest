@@ -35,10 +35,10 @@ class HomeCard extends StatelessWidget {
       ],
     ),
     child: Material(
-      color: Colors.white.withValues(alpha: 0.74),
+      color: AppColors.surface.withValues(alpha: 0.74),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radius),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.9)),
+        side: BorderSide(color: AppColors.surface.withValues(alpha: 0.9)),
       ),
       child: Padding(padding: padding, child: child),
     ),
@@ -233,7 +233,7 @@ class OnboardingCard extends StatelessWidget {
             ),
             child: const Icon(
               Icons.home_outlined,
-              color: Colors.white,
+              color: AppColors.surface,
               size: 44,
             ),
           ),
@@ -313,9 +313,7 @@ class ActivityCard extends StatelessWidget {
               ),
               TextButton(
                 key: const Key('home_view_bookings_btn'),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF475569),
-                ),
+                style: TextButton.styleFrom(foregroundColor: AppColors.slate),
                 onPressed: () => context.go(Routes.bookings),
                 child: Text(l10n.homeViewAll),
               ),
@@ -402,7 +400,7 @@ class _BookingTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall?.copyWith(
-                        color: const Color(0xFF475569),
+                        color: AppColors.slate,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -473,7 +471,7 @@ class _BookingTile extends StatelessWidget {
                             booking.startLabel,
                           ].where((e) => e.trim().isNotEmpty).join(' · '),
                           style: text.bodyMedium?.copyWith(
-                            color: const Color(0xFF475569),
+                            color: AppColors.slate,
                           ),
                         ),
                       ],
@@ -501,7 +499,7 @@ class _BookingTile extends StatelessWidget {
                 onPressed: () => _open(context),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.navyDeep,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.surface,
                   minimumSize: const Size.fromHeight(46),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -539,10 +537,10 @@ class _StageNode extends StatelessWidget {
     final done = index < current;
     final isCurrent = index == current;
     final ink = done
-        ? const Color(0xFF166534)
+        ? AppColors.successText
         : isCurrent
         ? AppColors.actionDeepTeal
-        : const Color(0xFF475569);
+        : AppColors.slate;
     return Column(
       children: [
         Container(
@@ -551,23 +549,23 @@ class _StageNode extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: done
-                ? const Color(0xFF16A34A)
+                ? AppColors.success
                 : isCurrent
                 ? AppColors.teal
-                : const Color(0xFFE2E8F0),
+                : AppColors.hairline,
             border: isCurrent
-                ? Border.all(color: const Color(0xFFCCEFE9), width: 4)
+                ? Border.all(color: AppColors.tealLine, width: 4)
                 : null,
           ),
           child: done
-              ? const Icon(Icons.check, size: 14, color: Colors.white)
+              ? const Icon(Icons.check, size: 14, color: AppColors.surface)
               : null,
         ),
         const SizedBox(height: 5),
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             color: ink,
             fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w700,
           ),
@@ -603,7 +601,7 @@ class _InterviewTile extends StatelessWidget {
               Container(
                 width: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -617,7 +615,7 @@ class _InterviewTile extends StatelessWidget {
                         DateFormat('EEE').format(iv.startsAt).toUpperCase(),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -747,7 +745,7 @@ class ResumeCard extends StatelessWidget {
               l10n.resumeBody(what, step, _steps),
               style: AppText.body.copyWith(
                 fontSize: 12,
-                color: const Color(0xFF475569),
+                color: AppColors.slate,
               ),
             ),
             const SizedBox(height: 10),
@@ -761,7 +759,7 @@ class ResumeCard extends StatelessWidget {
                   value: v,
                   minHeight: 6,
                   color: AppColors.teal,
-                  backgroundColor: const Color(0xFFE2E8F0),
+                  backgroundColor: AppColors.hairline,
                 ),
               ),
             ),

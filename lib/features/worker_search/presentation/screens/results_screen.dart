@@ -262,7 +262,7 @@ class _RequirementChip extends StatelessWidget {
     label: label,
     excludeSemantics: true,
     child: Material(
-      color: const Color(0xC7FFFFFF),
+      color: AppColors.whiteA78xC7,
       shape: StadiumBorder(
         side: BorderSide(
           color: AppColors.teal.withValues(alpha: 0.4),
@@ -373,7 +373,9 @@ class _SortSegments extends StatelessWidget {
                                 style: AppText.body.copyWith(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
-                                  color: selected == i ? Colors.white : dsText,
+                                  color: selected == i
+                                      ? AppColors.surface
+                                      : dsText,
                                 ),
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
@@ -518,7 +520,7 @@ class _SkeletonCards extends StatelessWidget {
               children: [
                 const CircleAvatar(
                   radius: 34,
-                  backgroundColor: Color(0x401B3354),
+                  backgroundColor: AppColors.sky1B3354A25,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -578,7 +580,7 @@ class _Empty extends StatelessWidget {
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [Color(0xFFE2EEEC), Colors.white],
+                        colors: [AppColors.pillActive, AppColors.surface],
                       ),
                     ),
                     child: const Icon(

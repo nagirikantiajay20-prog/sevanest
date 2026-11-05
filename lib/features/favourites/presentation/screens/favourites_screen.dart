@@ -69,7 +69,7 @@ class _FavouritesScreenState extends ConsumerState<FavouritesScreen> {
           ),
           action: SnackBarAction(
             label: l10n.favouriteUndo,
-            textColor: const Color(0xFF5EEAD4),
+            textColor: AppColors.teal5EEAD4,
             key: const Key('fav_undo_btn'),
             onPressed: () async {
               final ok = await ref
@@ -106,8 +106,8 @@ class _FavouritesScreenState extends ConsumerState<FavouritesScreen> {
         isEmpty: (p) => p.items.where(shown).isEmpty && !p.hasMore,
         empty: GlassEmpty(
           icon: Icons.favorite_border_rounded,
-          iconColor: const Color(0xFFE11D48),
-          discColors: const [Color(0xFFFFE4EA), Colors.white],
+          iconColor: AppColors.rose600,
+          discColors: const [AppColors.redFFE4EA, AppColors.surface],
           title: l10n.favsEmptyTitle,
           body: l10n.favsEmptyBody,
           actionLabel: l10n.favsFindWorker,
@@ -227,7 +227,7 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? Colors.white : dsNavy;
+    final fg = selected ? AppColors.surface : dsNavy;
     return Semantics(
       button: true,
       selected: selected,
@@ -238,7 +238,7 @@ class _FilterChip extends StatelessWidget {
           gradient: selected
               ? const LinearGradient(colors: [dsNavy, AppColors.actionDeepTeal])
               : null,
-          color: selected ? null : const Color(0xC7FFFFFF),
+          color: selected ? null : AppColors.whiteA78xC7,
           border: Border.all(
             color: selected
                 ? Colors.transparent
@@ -283,7 +283,7 @@ class _FilterChip extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: selected
-                            ? const Color(0x38FFFFFF)
+                            ? AppColors.whiteA22x38
                             : dsNavy.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),

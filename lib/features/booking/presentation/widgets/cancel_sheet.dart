@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
@@ -8,7 +9,7 @@ import 'package:sevanest_customer/features/authentication/presentation/widgets/a
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-const _rose = Color(0xFFBE123C);
+const _rose = AppColors.rose700;
 
 /// Opens the cancel sheet. [onConfirm] gets the reason text and runs the API call; the sheet
 /// closes with `true` only after it succeeds, and shows the failure inline (and stays) otherwise.
@@ -20,7 +21,7 @@ Future<bool?> showCancelSheet(
   isScrollControlled: true,
   useSafeArea: true,
   backgroundColor: Colors.transparent,
-  barrierColor: const Color(0x611B3354),
+  barrierColor: AppColors.sky1B3354A38,
   builder: (ctx) => Padding(
     padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
     child: _CancelSheet(onConfirm),
@@ -91,7 +92,7 @@ class _CancelSheetState extends State<_CancelSheet> {
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xF7FFFFFF), Color(0xF7FAF8F5)],
+          colors: [AppColors.whiteA97xF7, AppColors.whiteFAF8F5A97],
         ),
         boxShadow: [
           BoxShadow(
@@ -147,7 +148,7 @@ class _CancelSheetState extends State<_CancelSheet> {
               decoration: InputDecoration(
                 hintText: l10n.cancelNoteHint,
                 filled: true,
-                fillColor: const Color(0xCCFFFFFF),
+                fillColor: AppColors.whiteA80xCC,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
@@ -183,7 +184,7 @@ class _CancelSheetState extends State<_CancelSheet> {
                         height: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       )
                     : Text(l10n.cancelConfirm),
@@ -239,7 +240,7 @@ class _Reason extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           color: selected
               ? _rose.withValues(alpha: 0.08)
-              : const Color(0xCCFFFFFF),
+              : AppColors.whiteA80xCC,
           border: Border.all(
             color: selected ? _rose : dsNavy.withValues(alpha: 0.16),
             width: 1.5,
@@ -262,7 +263,7 @@ class _Reason extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: selected ? _rose : const Color(0xFF94A3B8),
+                        color: selected ? _rose : AppColors.slate400Light,
                         width: selected ? 6 : 2,
                       ),
                     ),

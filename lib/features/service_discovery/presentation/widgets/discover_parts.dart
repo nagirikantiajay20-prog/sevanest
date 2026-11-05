@@ -59,9 +59,9 @@ class DiscoverSheen extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withValues(alpha: 0),
-                            Colors.white.withValues(alpha: alpha),
-                            Colors.white.withValues(alpha: 0),
+                            AppColors.surface.withValues(alpha: 0),
+                            AppColors.surface.withValues(alpha: alpha),
+                            AppColors.surface.withValues(alpha: 0),
                           ],
                         ),
                       ),
@@ -105,13 +105,13 @@ class DiscoverShimmer extends StatelessWidget {
           borderRadius: BorderRadius.circular(radius),
           gradient: LinearGradient(
             colors: [
-              (light ? Colors.white : dsNavy).withValues(
+              (light ? AppColors.surface : dsNavy).withValues(
                 alpha: light ? 0.12 : 0.07,
               ),
-              (light ? Colors.white : dsNavy).withValues(
+              (light ? AppColors.surface : dsNavy).withValues(
                 alpha: light ? 0.3 : 0.15,
               ),
-              (light ? Colors.white : dsNavy).withValues(
+              (light ? AppColors.surface : dsNavy).withValues(
                 alpha: light ? 0.12 : 0.07,
               ),
             ],
@@ -143,7 +143,7 @@ class GlassChoice extends StatelessWidget {
     this.radius = 22,
     this.minHeight = 76,
     this.selectedColor = AppColors.teal,
-    this.selectedWash = const [Color(0xF2E2EEEC), Color(0xB8FFFFFF)],
+    this.selectedWash = const [AppColors.grayE2EEECA95, AppColors.whiteA72xB8],
     this.padding = const EdgeInsets.all(12),
     super.key,
   });
@@ -169,7 +169,7 @@ class GlassChoice extends StatelessWidget {
       child: DiscoverGlass(
         radius: radius,
         borderWidth: 2,
-        borderColor: selected ? selectedColor : const Color(0xE6FFFFFF),
+        borderColor: selected ? selectedColor : AppColors.whiteA90xE6,
         gradient: selected
             ? LinearGradient(
                 begin: const Alignment(-0.6, -1),
@@ -222,7 +222,7 @@ class DiscoverInlineError extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 14.5,
               height: 1.4,
-              color: const Color(0xFFB91C1C),
+              color: AppColors.red700,
             ),
           ),
         ),
@@ -340,7 +340,7 @@ class DiscoverPill extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.accent = dsNavy,
-    this.selectedFill = const Color(0xFFE4E9F2),
+    this.selectedFill = AppColors.grayE4E9F2,
     this.weight = FontWeight.w600,
     super.key,
   });
@@ -358,7 +358,9 @@ class DiscoverPill extends StatelessWidget {
     child: DiscoverPop(
       active: selected,
       child: Material(
-        color: selected ? selectedFill : Colors.white.withValues(alpha: 0.72),
+        color: selected
+            ? selectedFill
+            : AppColors.surface.withValues(alpha: 0.72),
         shape: StadiumBorder(
           side: BorderSide(
             color: selected ? accent : AppColors.slate300,

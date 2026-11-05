@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 
 /// Stylised street map from the add-address design (318 x 130 artwork, scaled to cover): blocks,
 /// white roads, a dashed amber route, a pulsing ring and a navy pin that drops in.
@@ -25,7 +26,7 @@ class AddressMapPainter extends CustomPainter {
       ..scale(scale);
     canvas.drawRect(
       const Rect.fromLTWH(0, 0, _w, _h),
-      Paint()..color = const Color(0xFFEAF4F1),
+      Paint()..color = AppColors.grayEAF4F1,
     );
     void block(double x, double y, double w, double h, Color c) =>
         canvas.drawRRect(
@@ -35,7 +36,7 @@ class AddressMapPainter extends CustomPainter {
           ),
           Paint()..color = c,
         );
-    const sand = Color(0xFFF7F2E8);
+    const sand = AppColors.grayF7F2E8;
     for (final b in const [
       [10.0, 12.0, 70.0, 38.0],
       [96.0, 12.0, 64.0, 38.0],
@@ -46,10 +47,10 @@ class AddressMapPainter extends CustomPainter {
     ]) {
       block(b[0], b[1], b[2], b[3], sand);
     }
-    block(10, 74, 70, 44, const Color(0xFFCDEBD6));
+    block(10, 74, 70, 44, AppColors.greenCDEBD6);
 
     Paint road(double w) => Paint()
-      ..color = Colors.white
+      ..color = AppColors.surface
       ..strokeWidth = w
       ..style = PaintingStyle.stroke;
     canvas
@@ -58,7 +59,7 @@ class AddressMapPainter extends CustomPainter {
       ..drawLine(const Offset(180, 0), const Offset(180, _h), road(9))
       ..drawLine(const Offset(244, 0), const Offset(244, _h), road(7));
     final dash = Paint()
-      ..color = const Color(0xB3F59E0B)
+      ..color = AppColors.orangeF59E0BA70
       ..strokeWidth = 2;
     for (var x = 0.0; x < _w; x += 14) {
       canvas.drawLine(Offset(x, 62), Offset(x + 6, 62), dash);
@@ -70,7 +71,7 @@ class AddressMapPainter extends CustomPainter {
         pin,
         14 * (0.4 + 2.0 * ring),
         Paint()
-          ..color = const Color(0xFF0F766E).withValues(alpha: 0.8 * (1 - ring))
+          ..color = AppColors.teal.withValues(alpha: 0.8 * (1 - ring))
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2,
       );
@@ -81,7 +82,7 @@ class AddressMapPainter extends CustomPainter {
         ..translate(0, -70 * (1 - drop));
       canvas.drawOval(
         Rect.fromCenter(center: const Offset(180, 66), width: 18, height: 6),
-        Paint()..color = const Color(0x400F2340),
+        Paint()..color = AppColors.blue0F2340A25,
       );
       final body = Path()
         ..moveTo(180, 64)
@@ -90,8 +91,12 @@ class AddressMapPainter extends CustomPainter {
         ..cubicTo(194, 47, 189, 53, 180, 64)
         ..close();
       canvas
-        ..drawPath(body, Paint()..color = const Color(0xFF1B3354))
-        ..drawCircle(const Offset(180, 40), 5.5, Paint()..color = Colors.white)
+        ..drawPath(body, Paint()..color = AppColors.navyDeep)
+        ..drawCircle(
+          const Offset(180, 40),
+          5.5,
+          Paint()..color = AppColors.surface,
+        )
         ..restore();
     }
     canvas.restore();

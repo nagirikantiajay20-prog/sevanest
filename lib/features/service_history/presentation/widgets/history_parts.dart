@@ -21,25 +21,25 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 (Color, Color, Color) historyStatusColors(BookingStatus s) => switch (s) {
   BookingStatus.active || BookingStatus.confirmed => (
     AppColors.teal,
-    const Color(0xFFD6EFEA),
-    const Color(0xFF0B5A53),
+    AppColors.tealD6EFEA,
+    AppColors.teal0B5A53,
   ),
   BookingStatus.completed => (
-    const Color(0xFF2563EB),
-    const Color(0xFFDBEAFE),
-    const Color(0xFF1E40AF),
+    AppColors.blue600,
+    AppColors.blue100,
+    AppColors.blue800,
   ),
   BookingStatus.cancelled => (
-    const Color(0xFFE11D48),
-    const Color(0xFFFFE4E6),
-    const Color(0xFF9F1239),
+    AppColors.rose600,
+    AppColors.rose100,
+    AppColors.rose800,
   ),
   BookingStatus.unknown => (
-    const Color(0xFF64748B),
-    const Color(0xFFE2E8F0),
-    const Color(0xFF334155),
+    AppColors.slate400,
+    AppColors.hairline,
+    AppColors.slate700,
   ),
-  _ => (AppColors.amber, const Color(0xFFFEF3C7), const Color(0xFF8A4B06)),
+  _ => (AppColors.amber, AppColors.warnBg, AppColors.orange8A4B06),
 };
 
 /// Small caps heading of a group of cards (`.hd`).
@@ -246,7 +246,7 @@ class _RatingRow extends StatelessWidget {
     final style = AppText.body.copyWith(
       fontSize: 13.5,
       fontWeight: FontWeight.w600,
-      color: const Color(0xFF334155),
+      color: AppColors.slate700,
     );
     return Padding(
       padding: const EdgeInsets.only(top: 10),
@@ -301,7 +301,7 @@ class _RatingRow extends StatelessWidget {
                         style: AppText.body.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),
@@ -357,15 +357,15 @@ class HistorySearchField extends StatelessWidget {
       hintStyle: AppText.body.copyWith(fontSize: 15, color: dsMuted),
       prefixIcon: const Icon(Icons.search_rounded, color: dsNavy),
       filled: true,
-      fillColor: const Color(0xD9FFFFFF),
+      fillColor: AppColors.whiteA85xD9,
       contentPadding: const EdgeInsets.symmetric(vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(999),
-        borderSide: const BorderSide(color: Color(0xE6FFFFFF)),
+        borderSide: const BorderSide(color: AppColors.whiteA90xE6),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(999),
-        borderSide: const BorderSide(color: Color(0xE6FFFFFF)),
+        borderSide: const BorderSide(color: AppColors.whiteA90xE6),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(999),
@@ -407,10 +407,10 @@ class HistoryFilterPill<T> extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 44),
         padding: const EdgeInsets.only(left: 14, right: 8),
         decoration: BoxDecoration(
-          color: on ? const Color(0x1F0F766E) : const Color(0xD9FFFFFF),
+          color: on ? AppColors.teal0F766EA12 : AppColors.whiteA85xD9,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
-            color: on ? AppColors.teal : const Color(0x331B3354),
+            color: on ? AppColors.teal : AppColors.sky1B3354A20,
             width: 1.5,
           ),
         ),

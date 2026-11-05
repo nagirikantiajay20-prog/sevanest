@@ -176,10 +176,10 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                           end: Alignment.bottomRight,
                           colors: gradient,
                         ),
-                        border: Border.all(color: Colors.white, width: 3),
+                        border: Border.all(color: AppColors.surface, width: 3),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color(0x471B3354),
+                            color: AppColors.sky1B3354A28,
                             blurRadius: 24,
                             offset: Offset(0, 10),
                           ),
@@ -190,11 +190,11 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                   backgroundColor: gradient != null
                       ? Colors.transparent
                       : r > 40
-                      ? const Color(0xFFE2EEEC)
+                      ? AppColors.pillActive
                       : AppColors.tealWash,
                   foregroundColor: gradient == null
                       ? AppColors.teal
-                      : Colors.white,
+                      : AppColors.surface,
                   foregroundImage: image,
                   // An expired link just leaves the initials showing.
                   onForegroundImageError: image == null ? null : (_, _) {},
@@ -232,7 +232,7 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                     color: AppColors.teal,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: big ? Colors.white : AppColors.surface,
+                      color: big ? AppColors.surface : AppColors.surface,
                       width: big ? 3 : 2,
                     ),
                     boxShadow: big
@@ -248,7 +248,7 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
                   child: Icon(
                     Icons.photo_camera_outlined,
                     size: big ? 19 : (r * 0.5).clamp(14, 20),
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
               ),

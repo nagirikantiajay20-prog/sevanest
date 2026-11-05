@@ -18,30 +18,30 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
     switch ((type ?? '').toLowerCase().replaceAll(RegExp(r'_update$'), '')) {
       'interview' || 'trial' => (
         Icons.event_available_rounded,
-        const Color(0xFFD6EFEA),
+        AppColors.tealD6EFEA,
         AppColors.teal,
       ),
       'booking' => (
         Icons.calendar_month_outlined,
-        const Color(0xFFDBEAFE),
-        const Color(0xFF1E40AF),
+        AppColors.blue100,
+        AppColors.blue800,
       ),
       'payment' || 'transaction' => (
         Icons.account_balance_wallet_outlined,
-        const Color(0xFFFEF3C7),
-        const Color(0xFF8A4B06),
+        AppColors.warnBg,
+        AppColors.orange8A4B06,
       ),
       'replacement' || 'replacement_request' => (
         Icons.swap_horiz_rounded,
-        const Color(0xFFFFE4E6),
-        const Color(0xFF9F1239),
+        AppColors.rose100,
+        AppColors.rose800,
       ),
       'ticket' || 'support' || 'support_ticket' => (
         Icons.chat_bubble_outline_rounded,
-        const Color(0xFFD6EFEA),
+        AppColors.tealD6EFEA,
         AppColors.teal,
       ),
-      _ => (Icons.notifications_none_rounded, const Color(0xFFE2E8F0), dsText),
+      _ => (Icons.notifications_none_rounded, AppColors.hairline, dsText),
     };
 
 /// "TODAY" / "YESTERDAY" / date over a group of cards.
@@ -93,13 +93,13 @@ class NotificationCard extends StatelessWidget {
         radius: 22,
         borderColor: unread
             ? AppColors.teal.withValues(alpha: 0.35)
-            : const Color(0xEBFFFFFF),
+            : AppColors.whiteA92xEB,
         gradient: LinearGradient(
           begin: const Alignment(-0.6, -1),
           end: const Alignment(0.6, 1),
           colors: unread
-              ? const [Color(0xF2FFFFFF), Color(0xD9ECF8F6)]
-              : const [Color(0xB3FFFFFF), Color(0x61FFFFFF)],
+              ? const [AppColors.whiteA95xF2, AppColors.grayECF8F6A85]
+              : const [AppColors.whiteA70xB3, AppColors.whiteA38x61],
         ),
         child: Material(
           type: MaterialType.transparency,
@@ -171,7 +171,7 @@ class NotificationCard extends StatelessWidget {
                         height: 10,
                         margin: const EdgeInsets.only(top: 6, left: 4),
                         decoration: const BoxDecoration(
-                          color: Color(0xFFE11D48),
+                          color: AppColors.rose600,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -201,8 +201,8 @@ class MarkAllButton extends StatelessWidget {
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 14),
         backgroundColor: AppColors.teal.withValues(alpha: 0.12),
-        foregroundColor: const Color(0xFF0B5A53),
-        disabledForegroundColor: const Color(0xFF0B5A53),
+        foregroundColor: AppColors.teal0B5A53,
+        disabledForegroundColor: AppColors.teal0B5A53,
         shape: const StadiumBorder(),
         textStyle: AppText.body.copyWith(
           fontSize: 13.5,
@@ -268,12 +268,12 @@ class _TabPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? Colors.white : dsNavy;
+    final fg = selected ? AppColors.surface : dsNavy;
     return Semantics(
       selected: selected,
       button: true,
       child: Material(
-        color: selected ? dsNavy : const Color(0xB3FFFFFF),
+        color: selected ? dsNavy : AppColors.whiteA70xB3,
         shape: StadiumBorder(
           side: BorderSide(
             color: selected ? dsNavy : dsNavy.withValues(alpha: 0.14),
@@ -307,15 +307,15 @@ class _TabPill extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE11D48),
+                      color: AppColors.rose600,
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       '$count',
                       style: AppText.body.copyWith(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                   ),

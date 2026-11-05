@@ -24,7 +24,7 @@ Future<WorkerFilters?> showFilterSheet(
   context: context,
   isScrollControlled: true,
   backgroundColor: Colors.transparent,
-  barrierColor: const Color(0x6B1B3354),
+  barrierColor: AppColors.sky1B3354A42,
   elevation: 0,
   builder: (_) => _FilterSheet(current),
 );
@@ -123,7 +123,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet>
           gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xF7FFFFFF), Color(0xF7FAF8F5)],
+            colors: [AppColors.whiteA97xF7, AppColors.whiteFAF8F5A97],
           ),
           boxShadow: [
             BoxShadow(
@@ -271,7 +271,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet>
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: const Color(0xB3FFFFFF),
+                color: AppColors.whiteA70xB3,
                 border: Border(
                   top: BorderSide(color: dsNavy.withValues(alpha: 0.1)),
                 ),
@@ -300,7 +300,7 @@ class _FilterSheetState extends ConsumerState<_FilterSheet>
                         minimumSize: const Size(0, 56),
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         foregroundColor: dsNavy,
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.surface,
                         side: BorderSide(
                           color: dsNavy.withValues(
                             alpha: active == 0 ? 0.12 : 0.25,
@@ -428,7 +428,9 @@ class FilterChoice extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOut,
       decoration: BoxDecoration(
-        color: selected ? AppColors.teal.withValues(alpha: 0.12) : Colors.white,
+        color: selected
+            ? AppColors.teal.withValues(alpha: 0.12)
+            : AppColors.surface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: selected ? AppColors.teal : dsNavy.withValues(alpha: 0.2),
@@ -469,7 +471,7 @@ class FilterChoice extends StatelessWidget {
                     style: AppText.body.copyWith(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w700,
-                      color: selected ? const Color(0xFF0B5A53) : dsText,
+                      color: selected ? AppColors.teal0B5A53 : dsText,
                     ),
                   ),
                   AnimatedSize(
@@ -515,7 +517,7 @@ class _CountBadge extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient: const LinearGradient(
-          colors: [AppColors.teal, Color(0xFF38BDF8)],
+          colors: [AppColors.teal, AppColors.sky400],
         ),
       ),
       child: Text(
@@ -524,7 +526,7 @@ class _CountBadge extends StatelessWidget {
           fontSize: 13,
           fontWeight: FontWeight.w800,
           height: 1,
-          color: Colors.white,
+          color: AppColors.surface,
         ),
       ),
     ),

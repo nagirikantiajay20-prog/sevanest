@@ -130,14 +130,14 @@ class ResultWorkerCard extends ConsumerWidget {
                                     _Badge(
                                       icon: Icons.check_rounded,
                                       label: l10n.verified,
-                                      bg: const Color(0xFFD6EFEA),
-                                      fg: const Color(0xFF0B5A53),
+                                      bg: AppColors.tealD6EFEA,
+                                      fg: AppColors.teal0B5A53,
                                     )
                                   else if (worker.verificationPending)
                                     _Badge(
                                       label: l10n.workerVerificationInProgress,
-                                      bg: const Color(0xFFFEF3C7),
-                                      fg: const Color(0xFF8A4B06),
+                                      bg: AppColors.warnBg,
+                                      fg: AppColors.orange8A4B06,
                                     ),
                                   if (worker.engagement != null)
                                     _Tag(
@@ -228,7 +228,7 @@ class ResultWorkerCard extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(12, 5, 12, 6),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [AppColors.amber, Color(0xFFFBBF24)],
+                    colors: [AppColors.amber, AppColors.amber400],
                   ),
                   borderRadius: const BorderRadius.vertical(
                     bottom: Radius.circular(12),
@@ -247,16 +247,16 @@ class ResultWorkerCard extends ConsumerWidget {
                     const Icon(
                       Icons.star_rounded,
                       size: 13,
-                      color: Color(0xFF4A2C00),
+                      color: AppColors.orange4A2C00,
                     ),
                     const SizedBox(width: 5),
                     Text(
                       AppLocalizations.of(context).resultsSortBest,
                       style: AppText.body.copyWith(
-                        fontSize: 11.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.4,
-                        color: const Color(0xFF4A2C00),
+                        color: AppColors.orange4A2C00,
                       ),
                     ),
                   ],
@@ -277,7 +277,7 @@ class _RatingPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(999),
       boxShadow: [
         BoxShadow(
@@ -290,7 +290,7 @@ class _RatingPill extends StatelessWidget {
     child: Text(
       label,
       style: AppText.body.copyWith(
-        fontSize: 11.5,
+        fontSize: 12,
         fontWeight: FontWeight.w800,
         height: 1.3,
         color: AppColors.teal,
@@ -375,9 +375,9 @@ class _Stat extends StatelessWidget {
     child: Container(
       padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 6),
       decoration: BoxDecoration(
-        color: const Color(0x9EFFFFFF),
+        color: AppColors.whiteA62x9E,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xF2FFFFFF)),
+        border: Border.all(color: AppColors.whiteA95xF2),
       ),
       child: Column(
         children: [
@@ -406,7 +406,7 @@ class _Stat extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: AppText.body.copyWith(
-              fontSize: 11.5,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               height: 1.3,
               color: dsMuted,
@@ -508,7 +508,7 @@ class _InterviewButton extends StatelessWidget {
     onPressed: onPressed,
     style: OutlinedButton.styleFrom(
       minimumSize: const Size.fromHeight(50),
-      backgroundColor: const Color(0xBFFFFFFF),
+      backgroundColor: AppColors.whiteA75xBF,
       foregroundColor: AppColors.teal,
       side: BorderSide(
         color: AppColors.teal.withValues(alpha: onPressed == null ? 0.25 : 0.5),

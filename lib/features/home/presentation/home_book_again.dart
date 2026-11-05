@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/widgets/sn_avatar.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
@@ -96,7 +97,7 @@ class _Card extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: AppText.body.copyWith(
                     fontSize: 12,
-                    color: const Color(0xFF475569),
+                    color: AppColors.slate,
                   ),
                 ),
                 const SizedBox(height: 8),

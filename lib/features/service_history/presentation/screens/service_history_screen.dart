@@ -198,7 +198,7 @@ class _State extends ConsumerState<ServiceHistoryScreen> {
                     height: 92,
                     margin: const EdgeInsets.only(top: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0x99FFFFFF),
+                      color: AppColors.whiteA60x99,
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
@@ -276,7 +276,7 @@ class _State extends ConsumerState<ServiceHistoryScreen> {
                 child: GlassEmpty(
                   icon: Icons.history_rounded,
                   iconColor: AppColors.teal,
-                  discColors: const [Color(0xFFE2EEEC), Colors.white],
+                  discColors: const [AppColors.pillActive, AppColors.surface],
                   title: l10n.historyEmptyTitle,
                   body: l10n.historyEmptyBody,
                   actionLabel: l10n.repFindWorker,

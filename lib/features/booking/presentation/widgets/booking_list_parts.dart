@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
@@ -62,7 +63,7 @@ class BookingTileFooter extends StatelessWidget {
               onPressed: onPay,
               style: FilledButton.styleFrom(
                 backgroundColor: dsNavy,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.surface,
                 minimumSize: const Size.fromHeight(46),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),

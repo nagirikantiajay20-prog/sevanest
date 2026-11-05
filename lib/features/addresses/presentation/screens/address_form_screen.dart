@@ -111,7 +111,7 @@ Future<CollectedAddress?> showCollectAddressSheet(
 );
 
 /// What the profile-setup address sheet hands back.
-typedef CollectedAddress = ({AddressInput input, PickedPhoto photo});
+typedef CollectedAddress = ({AddressInput input, PickedPhoto? photo});
 
 Future<T?> _showAddressSheet<T>(
   BuildContext context, {
@@ -126,7 +126,7 @@ Future<T?> _showAddressSheet<T>(
     useSafeArea: true,
     backgroundColor: Colors.transparent,
     elevation: 0,
-    barrierColor: const Color(0x610F2340),
+    barrierColor: AppColors.blue0F2340A38,
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
       child: SizedBox(
@@ -172,7 +172,7 @@ class _AddressForm extends ConsumerStatefulWidget {
 
 class _AddressFormState extends ConsumerState<_AddressForm>
     with SingleTickerProviderStateMixin {
-  static final _fill = Colors.white.withValues(alpha: 0.8);
+  static final _fill = AppColors.surface.withValues(alpha: 0.8);
   late final _clock = ScreenClock(
     this,
     motion: ref.read(splashHoldProvider) > Duration.zero,
@@ -359,7 +359,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
           latitude: _lat,
           longitude: _lng,
         ),
-        photo: _photo!,
+        photo: _photo,
       ));
       return;
     }
@@ -486,7 +486,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
                           l10n.addressLocationFailed,
                           key: const Key('address_location_error'),
                           style: const TextStyle(
-                            color: Color(0xFFB91C1C),
+                            color: AppColors.red700,
                             fontSize: 13,
                             height: 1.45,
                           ),
@@ -647,8 +647,8 @@ class _AddressFormState extends ConsumerState<_AddressForm>
                     key: const Key('address_default_switch'),
                     contentPadding: EdgeInsets.zero,
                     activeTrackColor: AppColors.teal,
-                    inactiveTrackColor: const Color(0xFF94A3B8),
-                    thumbColor: const WidgetStatePropertyAll(Colors.white),
+                    inactiveTrackColor: AppColors.slate400Light,
+                    thumbColor: const WidgetStatePropertyAll(AppColors.surface),
                     trackOutlineColor: const WidgetStatePropertyAll(
                       Colors.transparent,
                     ),
@@ -702,7 +702,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
           ),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppColors.surface.withValues(alpha: 0.6),
               border: Border(
                 top: BorderSide(color: authNavy.withValues(alpha: 0.08)),
               ),

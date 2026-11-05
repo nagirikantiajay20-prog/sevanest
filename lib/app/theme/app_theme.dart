@@ -16,7 +16,7 @@ abstract final class AppTheme {
           error: AppColors.danger,
         ).copyWith(
           primary: AppColors.teal,
-          onPrimary: Colors.white,
+          onPrimary: AppColors.surface,
           surface: AppColors.surface,
           onSurface: AppColors.brandInk,
           onSurfaceVariant: AppColors.slate,
@@ -149,7 +149,7 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.brandInk,
-        contentTextStyle: AppText.body.copyWith(color: Colors.white),
+        contentTextStyle: AppText.body.copyWith(color: AppColors.surface),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),

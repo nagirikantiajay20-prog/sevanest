@@ -76,12 +76,12 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? Colors.white : dsNavy;
+    final fg = selected ? AppColors.surface : dsNavy;
     return Semantics(
       selected: selected,
       button: true,
       child: Material(
-        color: selected ? dsNavy : const Color(0xCCFFFFFF),
+        color: selected ? dsNavy : AppColors.whiteA80xCC,
         shape: StadiumBorder(
           side: BorderSide(
             color: selected ? dsNavy : dsNavy.withValues(alpha: 0.2),
@@ -114,7 +114,7 @@ class _Chip extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: selected
-                        ? const Color(0x38FFFFFF)
+                        ? AppColors.whiteA22x38
                         : dsNavy.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -263,7 +263,7 @@ class EmptyTickets extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFE2EEEC), Colors.white],
+                colors: [AppColors.pillActive, AppColors.surface],
               ),
               boxShadow: [
                 BoxShadow(
@@ -317,7 +317,7 @@ class GlassSkeleton extends StatelessWidget {
           height: 92,
           margin: const EdgeInsets.only(top: 12),
           decoration: BoxDecoration(
-            color: const Color(0x99FFFFFF),
+            color: AppColors.whiteA60x99,
             borderRadius: BorderRadius.circular(22),
           ),
         ),
@@ -351,7 +351,7 @@ class TopicTile extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: safety ? supportDangerTint : const Color(0xFFD6EFEA),
+                    color: safety ? supportDangerTint : AppColors.tealD6EFEA,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
@@ -396,7 +396,7 @@ class SafetyCard extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment(-0.6, -1),
         end: Alignment(0.6, 1),
-        colors: [Color(0xF2FFF1F2), Color(0xD9FFE4E6)],
+        colors: [AppColors.whiteFFF1F2A95, AppColors.redFFE4E6A85],
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -497,7 +497,7 @@ class ContactCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFD6EFEA),
+                color: AppColors.tealD6EFEA,
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(

@@ -69,7 +69,7 @@ class RequestSection extends StatelessWidget {
                         style: AppText.body.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),
@@ -195,7 +195,7 @@ class TypeOption extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         color: selected
             ? AppColors.teal.withValues(alpha: 0.12)
-            : const Color(0xB3FFFFFF),
+            : AppColors.whiteA70xB3,
         border: Border.all(
           color: selected ? AppColors.teal : dsNavy.withValues(alpha: 0.14),
           width: 1.5,
@@ -255,7 +255,7 @@ class TypeOption extends StatelessWidget {
                       border: Border.all(
                         color: selected
                             ? AppColors.teal
-                            : const Color(0xFF94A3B8),
+                            : AppColors.slate400Light,
                         width: 2,
                       ),
                     ),
@@ -317,7 +317,7 @@ class DateStrip extends StatelessWidget {
           final top = i == 0
               ? l10n.interviewDateToday
               : DateFormat.E(locale).format(d);
-          final fg = on ? Colors.white : dsText;
+          final fg = on ? AppColors.surface : dsText;
           final small = AppText.body.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w700,
@@ -345,7 +345,7 @@ class DateStrip extends StatelessWidget {
                         colors: [dsNavy, AppColors.actionDeepTeal],
                       )
                     : null,
-                color: on ? null : const Color(0xB3FFFFFF),
+                color: on ? null : AppColors.whiteA70xB3,
                 border: Border.all(
                   color: on
                       ? Colors.transparent
@@ -422,7 +422,7 @@ class InterviewTimeField extends StatelessWidget {
     final m = minutes;
     final bad = m != null && check != TimeCheck.ok;
     final hasTime = m != null;
-    final accent = bad ? const Color(0xFFB3261E) : AppColors.teal;
+    final accent = bad ? AppColors.error : AppColors.teal;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -432,7 +432,7 @@ class InterviewTimeField extends StatelessWidget {
           label: hasTime ? formatTime(m) : l10n.interviewTimeChoose,
           excludeSemantics: true,
           child: Material(
-            color: const Color(0xBFFFFFFF),
+            color: AppColors.whiteA75xBF,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
               side: BorderSide(
@@ -455,7 +455,7 @@ class InterviewTimeField extends StatelessWidget {
                         height: 44,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFE2EEEC),
+                          color: AppColors.pillActive,
                         ),
                         child: Icon(
                           Icons.schedule_rounded,
@@ -563,7 +563,7 @@ class SlotHint extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: const Color(0x80FFFFFF),
+      color: AppColors.whiteA50x80,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(color: dsNavy.withValues(alpha: 0.25), width: 1.5),
     ),
@@ -574,7 +574,7 @@ class SlotHint extends StatelessWidget {
           height: 44,
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFE2EEEC),
+            color: AppColors.pillActive,
           ),
           child: const Icon(
             Icons.schedule_rounded,
@@ -650,7 +650,7 @@ class RequestSubmitBar extends StatelessWidget {
                       const Icon(
                         Icons.event_rounded,
                         size: 14,
-                        color: Color(0xFF0B5A53),
+                        color: AppColors.teal0B5A53,
                       ),
                       const SizedBox(width: 8),
                       Flexible(
@@ -661,7 +661,7 @@ class RequestSubmitBar extends StatelessWidget {
                           style: AppText.body.copyWith(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0B5A53),
+                            color: AppColors.teal0B5A53,
                           ),
                         ),
                       ),
@@ -725,11 +725,11 @@ class RequestNoteField extends StatelessWidget {
         hintMaxLines: 3,
         floatingLabelBehavior: FloatingLabelBehavior.never,
         filled: true,
-        fillColor: const Color(0xCCFFFFFF),
+        fillColor: AppColors.whiteA80xCC,
         contentPadding: const EdgeInsets.all(14),
         hintStyle: AppText.body.copyWith(
           fontSize: 15,
-          color: const Color(0xFF64748B),
+          color: AppColors.slate400,
         ),
         enabledBorder: border(dsNavy.withValues(alpha: 0.16), 1.5),
         disabledBorder: border(dsNavy.withValues(alpha: 0.1), 1.5),

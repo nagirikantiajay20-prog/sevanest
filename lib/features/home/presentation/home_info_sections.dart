@@ -35,7 +35,7 @@ class WhyFamiliesBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x59000000),
+            color: AppColors.blackA35x59,
             blurRadius: 30,
             offset: Offset(0, 14),
           ),
@@ -62,7 +62,7 @@ class WhyFamiliesBanner extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0x1A08182B), Color(0xD908182B)],
+                    colors: [AppColors.sky08182BA10, AppColors.sky08182BA85],
                   ),
                 ),
               ),
@@ -82,7 +82,7 @@ class WhyFamiliesBanner extends StatelessWidget {
                           l10n.homeWhyTitle,
                           style: AppText.title.copyWith(
                             fontSize: 17,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -95,7 +95,7 @@ class WhyFamiliesBanner extends StatelessWidget {
                                 const Icon(
                                   Icons.check,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: AppColors.surface,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -104,7 +104,7 @@ class WhyFamiliesBanner extends StatelessWidget {
                                     style: const TextStyle(
                                       fontSize: 13,
                                       height: 1.35,
-                                      color: Colors.white,
+                                      color: AppColors.surface,
                                     ),
                                   ),
                                 ),
@@ -162,7 +162,7 @@ class HowItWorks extends StatelessWidget {
                       style: AppText.title.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: AppColors.surface,
                       ),
                     ),
                   ),
@@ -184,7 +184,7 @@ class HowItWorks extends StatelessWidget {
                           style: AppText.body.copyWith(
                             fontSize: 12,
                             height: 1.4,
-                            color: const Color(0xFF475569),
+                            color: AppColors.slate,
                           ),
                         ),
                       ],

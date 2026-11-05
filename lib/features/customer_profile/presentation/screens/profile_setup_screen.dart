@@ -49,8 +49,14 @@ final _backdropStyle = RoomBackdropStyle(
     ),
   ],
   glows: const [
-    AuthGlow(Color(0x520F766E), 260, top: -70, right: -80),
-    AuthGlow(Color(0x4DF59E0B), 260, top: 560, left: -100, delayMs: 6000),
+    AuthGlow(AppColors.teal0F766EA32, 260, top: -70, right: -80),
+    AuthGlow(
+      AppColors.orangeF59E0BA30,
+      260,
+      top: 560,
+      left: -100,
+      delayMs: 6000,
+    ),
   ],
 );
 
@@ -346,14 +352,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                         gradient: const LinearGradient(
                           begin: Alignment(-0.34, -0.94),
                           end: Alignment(0.34, 0.94),
-                          colors: [Color(0xCCFFFFFF), Color(0x8CFFFFFF)],
+                          colors: [
+                            AppColors.whiteA80xCC,
+                            AppColors.whiteA55x8C,
+                          ],
                         ),
                         border: const Border(
-                          top: BorderSide(color: Color(0xF2FFFFFF)),
+                          top: BorderSide(color: AppColors.whiteA95xF2),
                         ),
                         shadow: const [
                           BoxShadow(
-                            color: Color(0x331B3354),
+                            color: AppColors.sky1B3354A20,
                             blurRadius: 44,
                             offset: Offset(0, -16),
                           ),
@@ -407,7 +416,11 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
             child: const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0x00FFFFFF), Colors.white, Color(0x00FFFFFF)],
+                  colors: [
+                    AppColors.whiteClear,
+                    AppColors.surface,
+                    AppColors.whiteClear,
+                  ],
                 ),
               ),
             ),
@@ -425,7 +438,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
     required String? emailError,
     required String? generalError,
   }) {
-    final fill = Colors.white.withValues(alpha: 0.8);
+    final fill = AppColors.surface.withValues(alpha: 0.8);
     return Column(
       children: [
         Expanded(
@@ -447,7 +460,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
                   prefixIcon: Icons.person_outline,
                   requiredMark: true,
                   suffixIcon: nameOk
-                      ? const Icon(Icons.check_circle, color: Color(0xFF16A34A))
+                      ? const Icon(Icons.check_circle, color: AppColors.success)
                       : null,
                   textInputAction: TextInputAction.next,
                   autofillHints: const [AutofillHints.name],
@@ -526,7 +539,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen>
         ),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.55),
+            color: AppColors.surface.withValues(alpha: 0.55),
             border: Border(
               top: BorderSide(color: authNavy.withValues(alpha: 0.08)),
             ),

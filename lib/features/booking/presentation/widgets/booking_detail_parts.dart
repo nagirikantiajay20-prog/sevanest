@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/motion.dart'
     show pingPong;
@@ -11,8 +12,8 @@ class BookingPayBanner extends StatelessWidget {
   final String title;
   final String body;
 
-  static const _ink = Color(0xFF6B3A00);
-  static const _warn = Color(0xFFD97706);
+  static const _ink = AppColors.orange6B3A00;
+  static const _warn = AppColors.warn;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class BookingPayBanner extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+              colors: [AppColors.warnBg, AppColors.warnLine],
             ),
             border: Border.all(
               color: _warn.withValues(alpha: 0.45),
@@ -57,12 +58,12 @@ class BookingPayBanner extends StatelessWidget {
               height: 40,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
               child: const Icon(
                 Icons.schedule_rounded,
                 size: 22,
-                color: Color(0xFFB45309),
+                color: AppColors.warnIcon,
               ),
             ),
             const SizedBox(width: 12),
@@ -109,12 +110,12 @@ class CopyPill extends StatelessWidget {
       key: const Key('booking_copy_ref_btn'),
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF0F766E),
-        backgroundColor: const Color(0xCCFFFFFF),
+        foregroundColor: AppColors.teal,
+        backgroundColor: AppColors.whiteA80xCC,
         minimumSize: const Size(0, 44),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         tapTargetSize: MaterialTapTargetSize.padded,
-        side: BorderSide(color: const Color(0xFF0F766E).withValues(alpha: 0.4)),
+        side: BorderSide(color: AppColors.teal.withValues(alpha: 0.4)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: AppText.body.copyWith(
           fontSize: 12,

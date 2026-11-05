@@ -133,7 +133,7 @@ class _Picker extends ConsumerWidget {
           return GlassEmpty(
             icon: Icons.home_work_outlined,
             iconColor: AppColors.teal,
-            discColors: const [Color(0xFFE2EEEC), Colors.white],
+            discColors: const [AppColors.pillActive, AppColors.surface],
             title: l10n.serviceNoneTitle,
             body: l10n.serviceNoneBody,
             actionLabel: l10n.backToHome,
@@ -336,7 +336,7 @@ class _Body extends ConsumerWidget {
                   initials: identity?.initials ?? worker?.initials,
                   photoUrl: identity?.photoUrl ?? worker?.photoUrl,
                   gradient: name == null
-                      ? const [Color(0xFF475569), Color(0xFF94A3B8)]
+                      ? const [AppColors.slate, AppColors.slate400Light]
                       : avatarGradientFor(b.workerId!),
                   verified: identity?.verified ?? worker?.verified ?? false,
                   rating: worker != null && worker.hasRating

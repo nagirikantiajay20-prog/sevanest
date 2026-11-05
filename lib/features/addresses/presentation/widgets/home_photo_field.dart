@@ -163,7 +163,7 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: AppColors.surface.withValues(alpha: 0.55),
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Row(
@@ -173,7 +173,7 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
                         width: 44,
                         height: 44,
                         decoration: const BoxDecoration(
-                          color: Color(0xFFE2EEEC),
+                          color: AppColors.pillActive,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -217,7 +217,7 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
             height: 130,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white, width: 2),
+              border: Border.all(color: AppColors.surface, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: _navy.withValues(alpha: 0.2),
@@ -241,7 +241,10 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
                       gradient: LinearGradient(
                         begin: Alignment(0, -0.1),
                         end: Alignment.bottomCenter,
-                        colors: [Color(0x000F2340), Color(0x990F2340)],
+                        colors: [
+                          AppColors.blue0F2340A0,
+                          AppColors.blue0F2340A60,
+                        ],
                       ),
                     ),
                   ),
@@ -261,7 +264,7 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
                         _GlassAction(
                           key: const Key('home_photo_remove'),
                           label: l10n.homePhotoRemove,
-                          color: const Color(0xFFB91C1C),
+                          color: AppColors.red700,
                           onTap: widget.enabled
                               ? () {
                                   setState(() => _error = null);
@@ -282,7 +285,7 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
             child: Text(
               l10n.homePhotoRequired,
               key: const Key('home_photo_required'),
-              style: const TextStyle(fontSize: 13, color: Color(0xFFB91C1C)),
+              style: const TextStyle(fontSize: 13, color: AppColors.red700),
             ),
           ),
         if (_error != null)
@@ -315,10 +318,10 @@ class _GlassAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: Colors.white.withValues(alpha: 0.72),
+    color: AppColors.surface.withValues(alpha: 0.72),
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(14),
-      side: const BorderSide(color: Color(0xE6FFFFFF)),
+      side: const BorderSide(color: AppColors.whiteA90xE6),
     ),
     child: InkWell(
       borderRadius: BorderRadius.circular(14),

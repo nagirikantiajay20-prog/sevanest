@@ -11,13 +11,17 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 const setupGlassGradient = LinearGradient(
   begin: Alignment(-0.64, -0.77),
   end: Alignment(0.64, 0.77),
-  colors: [Color(0xA8FFFFFF), Color(0x5CFFFFFF)],
+  colors: [AppColors.whiteA66xA8, AppColors.whiteA36x5C],
 );
 const setupGlassBorder = Border.fromBorderSide(
-  BorderSide(color: Color(0xD9FFFFFF)),
+  BorderSide(color: AppColors.whiteA85xD9),
 );
 const setupGlassShadow = [
-  BoxShadow(color: Color(0x291B3354), blurRadius: 36, offset: Offset(0, 14)),
+  BoxShadow(
+    color: AppColors.sky1B3354A16,
+    blurRadius: 36,
+    offset: Offset(0, 14),
+  ),
 ];
 
 /// Share of the profile that is filled in: name 35, valid email 15, language 10, address 30, photo 10.
@@ -146,7 +150,7 @@ class _RingPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.teal, Color(0xFF38BDF8)],
+          colors: [AppColors.teal, AppColors.sky400],
         ).createShader(Offset.zero & size),
     );
   }
@@ -198,7 +202,7 @@ class ProfileAvatarHalo extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
@@ -263,7 +267,7 @@ class ProfileAddressCard extends StatelessWidget {
                   color: showError
                       ? AppColors.danger
                       : a == null
-                      ? const Color(0xFF99E6DC)
+                      ? AppColors.teal99E6DC
                       : AppColors.successLine,
                   width: 1.5,
                 ),
@@ -277,7 +281,7 @@ class ProfileAddressCard extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
@@ -391,9 +395,9 @@ class _Sheen extends StatelessWidget {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Color(0x00FFFFFF),
-                                  Color(0xA6FFFFFF),
-                                  Color(0x00FFFFFF),
+                                  AppColors.whiteClear,
+                                  AppColors.whiteA65xA6,
+                                  AppColors.whiteClear,
                                 ],
                               ),
                             ),
@@ -441,12 +445,12 @@ class _ConfettiPainter extends CustomPainter {
 
   static const _colors = [
     AppColors.teal,
-    Color(0xFF38BDF8),
+    AppColors.sky400,
     AppColors.amber,
     authNavy,
     AppColors.danger,
-    Color(0xFF16A34A),
-    Color(0xFFA78BFA),
+    AppColors.success,
+    AppColors.indigoA78BFA,
   ];
   static const _count = 44;
 

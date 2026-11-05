@@ -17,7 +17,7 @@ import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Pieces shared by the replacement screens (design: Find a Worker > Replacement).
 
-const _rose = Color(0xFFBE123C);
+const _rose = AppColors.rose700;
 
 /// Teal "what happens" note at the top of the request form.
 class ReplacementInfo extends StatelessWidget {
@@ -28,7 +28,7 @@ class ReplacementInfo extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     decoration: BoxDecoration(
-      color: const Color(0x1A0F766E),
+      color: AppColors.teal0F766EA10,
       borderRadius: BorderRadius.circular(18),
     ),
     child: Row(
@@ -42,7 +42,7 @@ class ReplacementInfo extends StatelessWidget {
             style: AppText.body.copyWith(
               fontSize: 13.5,
               height: 1.45,
-              color: const Color(0xFF124E52),
+              color: AppColors.actionDeepTeal,
             ),
           ),
         ),
@@ -116,7 +116,7 @@ class ReplacementWorker extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0x141B3354),
+                    color: AppColors.sky1B3354A8,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -162,11 +162,11 @@ class ReasonRadio extends StatelessWidget {
       selected: selected,
       inMutuallyExclusiveGroup: true,
       child: Material(
-        color: selected ? const Color(0x140F766E) : Colors.white,
+        color: selected ? AppColors.teal0F766EA8 : AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: selected ? AppColors.teal : const Color(0x2E1B3354),
+            color: selected ? AppColors.teal : AppColors.sky1B3354A18,
             width: 1.5,
           ),
         ),
@@ -188,9 +188,7 @@ class ReasonRadio extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: selected
-                          ? AppColors.teal
-                          : const Color(0x4D1B3354),
+                      color: selected ? AppColors.teal : AppColors.sky1B3354A30,
                       width: 2,
                     ),
                   ),
@@ -247,10 +245,10 @@ class NeededFromField extends StatelessWidget {
     children: [
       Expanded(
         child: Material(
-          color: Colors.white,
+          color: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: Color(0x331B3354), width: 1.5),
+            side: const BorderSide(color: AppColors.sky1B3354A20, width: 1.5),
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -295,10 +293,10 @@ class NeededFromField extends StatelessWidget {
 
 /// Tint of a status banner.
 enum ReplacementTone {
-  review(Color(0xFFB45309), Color(0xFFD97706)),
-  good(Color(0xFF1B3354), Color(0xFF124E52)),
-  bad(Color(0xFF9F1239), Color(0xFFE11D48)),
-  neutral(Color(0xFF475569), Color(0xFF64748B));
+  review(AppColors.warnIcon, AppColors.warn),
+  good(AppColors.navyDeep, AppColors.actionDeepTeal),
+  bad(AppColors.rose800, AppColors.rose600),
+  neutral(AppColors.slate, AppColors.slate400);
 
   const ReplacementTone(this.from, this.to);
   final Color from;
@@ -347,7 +345,7 @@ class ReplacementBanner extends StatelessWidget {
             fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.4,
-            color: Colors.white,
+            color: AppColors.surface,
           ),
         ),
         const SizedBox(height: 8),
@@ -355,7 +353,7 @@ class ReplacementBanner extends StatelessWidget {
           header: true,
           child: Text(
             title,
-            style: authSerif(24, 1.2).copyWith(color: Colors.white),
+            style: authSerif(24, 1.2).copyWith(color: AppColors.surface),
           ),
         ),
         if (body != null)
@@ -366,7 +364,7 @@ class ReplacementBanner extends StatelessWidget {
               style: AppText.body.copyWith(
                 fontSize: 15,
                 height: 1.45,
-                color: Colors.white,
+                color: AppColors.surface,
               ),
             ),
           ),
@@ -436,9 +434,9 @@ class _Node extends StatelessWidget {
   Widget build(BuildContext context) {
     final (fill, line) = switch (state) {
       SnTimelineState.done => (AppColors.teal, AppColors.teal),
-      SnTimelineState.current => (const Color(0xFFFEF3C7), AppColors.amber),
-      SnTimelineState.failed => (const Color(0xFFFFE4E6), _rose),
-      SnTimelineState.upcoming => (Colors.white, const Color(0xFFCBD5E1)),
+      SnTimelineState.current => (AppColors.warnBg, AppColors.amber),
+      SnTimelineState.failed => (AppColors.rose100, _rose),
+      SnTimelineState.upcoming => (AppColors.surface, AppColors.slate300),
     };
     return Container(
       width: 22,
@@ -449,7 +447,7 @@ class _Node extends StatelessWidget {
         border: Border.all(color: line, width: 2),
       ),
       child: state == SnTimelineState.done
-          ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
+          ? const Icon(Icons.check_rounded, size: 14, color: AppColors.surface)
           : null,
     );
   }
@@ -471,11 +469,11 @@ class ReplacementAction extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: 10),
     child: Material(
-      color: danger ? Colors.transparent : const Color(0xCCFFFFFF),
+      color: danger ? Colors.transparent : AppColors.whiteA80xCC,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: danger ? Colors.transparent : const Color(0x381B3354),
+          color: danger ? Colors.transparent : AppColors.sky1B3354A22,
           width: 1.5,
         ),
       ),
@@ -533,7 +531,7 @@ class AlternativePick extends StatelessWidget {
       padding: const EdgeInsets.only(top: 10),
       child: DiscoverGlass(
         radius: 22,
-        borderColor: selected ? AppColors.teal : const Color(0xE6FFFFFF),
+        borderColor: selected ? AppColors.teal : AppColors.whiteA90xE6,
         borderWidth: selected ? 2 : 1,
         child: Material(
           type: MaterialType.transparency,

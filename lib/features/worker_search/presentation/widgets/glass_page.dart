@@ -84,7 +84,7 @@ class _FindGlassPageState extends ConsumerState<FindGlassPage>
                   blur: 26,
                   gradient: _barGradient,
                   border: const Border(
-                    bottom: BorderSide(color: Color(0xE6FFFFFF)),
+                    bottom: BorderSide(color: AppColors.whiteA90xE6),
                   ),
                   shadow: [
                     BoxShadow(
@@ -150,7 +150,7 @@ class _FindGlassPageState extends ConsumerState<FindGlassPage>
                     blur: 26,
                     gradient: _barGradient,
                     border: const Border(
-                      top: BorderSide(color: Color(0xE6FFFFFF)),
+                      top: BorderSide(color: AppColors.whiteA90xE6),
                     ),
                     shadow: [
                       BoxShadow(
@@ -181,7 +181,7 @@ class _FindGlassPageState extends ConsumerState<FindGlassPage>
   static const _barGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xD6FFFFFF), Color(0x99FFFFFF)],
+    colors: [AppColors.whiteA84xD6, AppColors.whiteA60x99],
   );
 }
 
@@ -267,16 +267,16 @@ class GlassCircleButton extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE11D48),
+                  color: AppColors.rose600,
                   borderRadius: BorderRadius.circular(9),
                 ),
                 child: Text(
                   '$badge',
                   style: AppText.body.copyWith(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                     height: 1,
-                    color: Colors.white,
+                    color: AppColors.surface,
                   ),
                 ),
               ),
@@ -292,7 +292,7 @@ class SheenSweep extends StatelessWidget {
   const SheenSweep({
     this.periodMs = 6000,
     this.band = 0.26,
-    this.peak = const Color(0x80FFFFFF),
+    this.peak = AppColors.whiteA50x80,
     super.key,
   });
   final double periodMs;
@@ -323,9 +323,9 @@ class SheenSweep extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            const Color(0x00FFFFFF),
+                            AppColors.whiteClear,
                             peak,
-                            const Color(0x00FFFFFF),
+                            AppColors.whiteClear,
                           ],
                         ),
                       ),
@@ -400,7 +400,7 @@ class RingAvatar extends StatelessWidget {
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: AppColors.surface, width: 2),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -427,7 +427,7 @@ class RingAvatar extends StatelessWidget {
                           style: AppText.body.copyWith(
                             fontSize: fontSize,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: AppColors.surface,
                           ),
                         ),
                 ),
@@ -443,7 +443,10 @@ class RingAvatar extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.teal,
-                          border: Border.all(color: Colors.white, width: 3),
+                          border: Border.all(
+                            color: AppColors.surface,
+                            width: 3,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.teal.withValues(alpha: 0.45),
@@ -455,7 +458,7 @@ class RingAvatar extends StatelessWidget {
                         child: const Icon(
                           Icons.check_rounded,
                           size: 18,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),
@@ -532,9 +535,9 @@ String workerInitials(String? initials, String title) {
 const kAvatarGradients = <List<Color>>[
   [AppColors.teal, dsNavy],
   [dsNavy, dsSky],
-  [Color(0xFFB45309), AppColors.amber],
-  [Color(0xFF475569), Color(0xFF94A3B8)],
-  [Color(0xFF9F1239), Color(0xFFF43F5E)],
+  [AppColors.warnIcon, AppColors.amber],
+  [AppColors.slate, AppColors.slate400Light],
+  [AppColors.rose800, AppColors.redF43F5E],
 ];
 
 List<Color> avatarGradientFor(String id) =>

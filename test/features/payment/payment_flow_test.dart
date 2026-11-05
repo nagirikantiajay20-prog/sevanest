@@ -41,6 +41,9 @@ class _Repo implements PaymentRepository {
   Object? startFails;
   Object? verifyFails;
 
+  /// Holds `start` open so the loading state can be observed.
+  Completer<void>? startGate;
+
   /// Verify succeeds server-side but the answer is lost.
   bool loseVerifyAnswer = false;
 
@@ -64,6 +67,7 @@ class _Repo implements PaymentRepository {
   }) async {
     startCalls++;
     startKeys.add(idempotencyKey);
+    await startGate?.future;
     final f = startFails;
     if (f != null) throw f;
     final first = firstStart;
@@ -473,6 +477,64 @@ void main() {
       await tapKey(t, 'payment_pay_btn');
       expect(repo.verifyKeys.length, 1);
       expect(repo.verifyKeys.single.length, inInclusiveRange(8, 100));
+    });
+  });
+
+  group('loading, duplicate submission, outcomes (requirement coverage)', () {
+    testWidgets('loading: spinner while the payment is created, no Pay yet', (
+      t,
+    ) async {
+      repo.startGate = Completer();
+      final env = await launchDiscover(
+        t,
+        overrides: [
+          bookingRepositoryProvider.overrideWithValue(bookings),
+          paymentRepositoryProvider.overrideWithValue(repo),
+          paymentServiceProvider.overrideWithValue(svc),
+        ],
+      );
+      env.unawaitedPush('/payments/new?bookingId=$_bookingId');
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 400));
+      expect(k('payment_loading'), findsOneWidget);
+      expect(k('payment_pay_btn'), findsNothing);
+      repo.startGate!.complete();
+      await settle(t);
+      expect(k('payment_loading'), findsNothing);
+      expect(k('payment_pay_btn'), findsOneWidget);
+      expect(repo.startCalls, 1);
+    });
+
+    testWidgets('taps while verifying cannot submit a second verification', (
+      t,
+    ) async {
+      repo.verifyGate = Completer();
+      await open(t);
+      await t.tap(k('payment_pay_btn'));
+      await t.pump(const Duration(seconds: 1));
+      expect(k('payment_verifying'), findsOneWidget);
+      expect(k('payment_pay_btn'), findsNothing); // nothing left to tap twice
+      expect(svc.calls, 1);
+      expect(repo.verifyCalls, 1);
+      repo.verifyGate!.complete();
+      await settle(t);
+      expect(repo.verifyCalls, 1);
+      expect(svc.calls, 1);
+      expect(find.text('Payment successful'), findsOneWidget);
+    });
+
+    testWidgets('success then failure on retry: each outcome has its own view', (
+      t,
+    ) async {
+      svc.outcome = const PaymentSdkFailed('BAD_REQUEST');
+      await open(t);
+      await tapKey(t, 'payment_pay_btn');
+      expect(find.text("Payment didn't go through"), findsOneWidget);
+      svc.outcome = null;
+      await tapKey(t, 'payment_retry_btn');
+      await tapKey(t, 'payment_pay_btn');
+      expect(find.text('Payment successful'), findsOneWidget);
+      expect(find.text("Payment didn't go through"), findsNothing);
     });
   });
 

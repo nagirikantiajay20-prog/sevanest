@@ -405,7 +405,7 @@ class _Editors extends StatelessWidget {
                             label: l10n.timingHoursChip(h),
                             selected: dur == h * 60,
                             accent: AppColors.teal,
-                            selectedFill: const Color(0xFFE2EEEC),
+                            selectedFill: AppColors.pillActive,
                             weight: FontWeight.w700,
                             onTap: () => onHours(h),
                           ),

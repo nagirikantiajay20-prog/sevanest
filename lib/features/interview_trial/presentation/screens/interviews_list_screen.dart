@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
+import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/widgets/async_value_view.dart';
@@ -67,8 +68,8 @@ class _State extends ConsumerState<InterviewsListScreen> {
         isEmpty: (p) => p.items.isEmpty,
         empty: GlassEmpty(
           icon: Icons.event_note_rounded,
-          iconColor: const Color(0xFF0F766E),
-          discColors: const [Color(0xFFE2EEEC), Colors.white],
+          iconColor: AppColors.teal,
+          discColors: const [AppColors.pillActive, AppColors.surface],
           title: l10n.interviewsEmptyTitle,
           body: l10n.interviewsEmptyBody,
           actionLabel: l10n.interviewsFind,
@@ -192,7 +193,7 @@ class _List extends ConsumerWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
-                      color: const Color(0xFF475569),
+                      color: AppColors.slate,
                     ),
                   ),
                 ),
@@ -206,7 +207,7 @@ class _List extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     style: AppText.body.copyWith(
                       fontSize: 15,
-                      color: const Color(0xFF475569),
+                      color: AppColors.slate,
                     ),
                   ),
                 ),

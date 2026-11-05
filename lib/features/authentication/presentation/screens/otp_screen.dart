@@ -45,8 +45,14 @@ final _backdropStyle = RoomBackdropStyle(
     ),
   ],
   glows: const [
-    AuthGlow(Color(0x520F766E), 260, top: -60, left: -80),
-    AuthGlow(Color(0x4DF59E0B), 260, top: 520, right: -90, delayMs: 6000),
+    AuthGlow(AppColors.teal0F766EA32, 260, top: -60, left: -80),
+    AuthGlow(
+      AppColors.orangeF59E0BA30,
+      260,
+      top: 520,
+      right: -90,
+      delayMs: 6000,
+    ),
   ],
 );
 
@@ -291,13 +297,17 @@ class _OtpScreenState extends ConsumerState<OtpScreen>
 const _glassGradient = LinearGradient(
   begin: Alignment(-0.64, -0.77),
   end: Alignment(0.64, 0.77),
-  colors: [Color(0x9EFFFFFF), Color(0x57FFFFFF)],
+  colors: [AppColors.whiteA62x9E, AppColors.whiteA34x57],
 );
 const _glassBorder = Border.fromBorderSide(
-  BorderSide(color: Color(0xD9FFFFFF)),
+  BorderSide(color: AppColors.whiteA85xD9),
 );
 const _glassShadow = [
-  BoxShadow(color: Color(0x2E1B3354), blurRadius: 44, offset: Offset(0, 18)),
+  BoxShadow(
+    color: AppColors.sky1B3354A18,
+    blurRadius: 44,
+    offset: Offset(0, 18),
+  ),
 ];
 
 /// Back button, logo and wordmark.
@@ -486,8 +496,8 @@ class _TimerRing extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 gradient: RadialGradient(
                                   colors: [
-                                    Color(0x5C0F766E),
-                                    Color(0x000F766E),
+                                    AppColors.teal0F766EA36,
+                                    AppColors.teal0F766EA0,
                                   ],
                                   stops: [0, 0.68],
                                 ),
@@ -506,7 +516,7 @@ class _TimerRing extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: const Color(0x660F766E),
+                                color: AppColors.teal0F766EA40,
                                 width: 2,
                               ),
                             ),
@@ -538,29 +548,32 @@ class _TimerRing extends StatelessWidget {
                 gradient: _glassGradient,
                 border: _glassBorder,
                 shadow: _glassShadow,
-                child: SizedBox(
-                  width: 92,
-                  height: 92,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.mobile_friendly_rounded,
-                        color: AppColors.teal,
-                        size: 22,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        time,
-                        style: AppText.body.copyWith(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                          color: authNavy,
-                          fontFeatures: const [FontFeature.tabularFigures()],
+                // The dial is a fixed 92 dp disc: its countdown does not grow with the system font.
+                child: MediaQuery.withNoTextScaling(
+                  child: SizedBox(
+                    width: 92,
+                    height: 92,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.mobile_friendly_rounded,
+                          color: AppColors.teal,
+                          size: 22,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 2),
+                        Text(
+                          time,
+                          style: AppText.body.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                            color: authNavy,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -588,7 +601,7 @@ class _RingPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 7
-        ..color = const Color(0x1F1B3354),
+        ..color = AppColors.sky1B3354A12,
     );
     canvas.drawArc(
       arc,
@@ -602,7 +615,7 @@ class _RingPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.teal, Color(0xFF38BDF8)],
+          colors: [AppColors.teal, AppColors.sky400],
         ).createShader(rect),
     );
   }
@@ -649,11 +662,11 @@ class _DemoOtpCard extends StatelessWidget {
                 height: 44,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(13),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0x241B3354),
+                      color: AppColors.sky1B3354A14,
                       blurRadius: 10,
                       offset: Offset(0, 4),
                     ),
@@ -838,7 +851,7 @@ class _Status extends StatelessWidget {
                       key: const Key('otp_error_text'),
                       style: AppText.body.copyWith(
                         fontSize: 14,
-                        color: const Color(0xFFB91C1C),
+                        color: AppColors.red700,
                       ),
                     ),
                   ),
@@ -976,11 +989,11 @@ class _Box extends StatelessWidget {
       _BoxStyle.error => AppColors.danger,
       _BoxStyle.success => AppColors.success,
       _ when focused => AppColors.teal,
-      _ => const Color(0xF2FFFFFF),
+      _ => AppColors.whiteA95xF2,
     };
     final fill = style == _BoxStyle.locked
-        ? const Color(0xB3E2E8F0)
-        : const Color(0x9EFFFFFF);
+        ? AppColors.grayE2E8F0A70
+        : AppColors.whiteA62x9E;
     return AspectRatio(
       aspectRatio: 48 / 56,
       child: Container(

@@ -263,7 +263,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                         counterText: '',
                         isDense: true,
                         filled: true,
-                        fillColor: Colors.white.withValues(alpha: 0.8),
+                        fillColor: AppColors.surface.withValues(alpha: 0.8),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 10,
@@ -391,8 +391,8 @@ class _Row extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFE2EEEC),
-              border: Border.all(color: Colors.white, width: 2),
+              color: AppColors.pillActive,
+              border: Border.all(color: AppColors.surface, width: 2),
               boxShadow: [
                 BoxShadow(
                   color: dsNavy.withValues(alpha: 0.16),
@@ -445,7 +445,7 @@ class _Row extends StatelessWidget {
                 minimumSize: const Size(0, 44),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 foregroundColor: AppColors.teal,
-                backgroundColor: Colors.white.withValues(alpha: 0.8),
+                backgroundColor: AppColors.surface.withValues(alpha: 0.8),
                 side: BorderSide(
                   color: AppColors.teal.withValues(alpha: 0.45),
                   width: 1.5,

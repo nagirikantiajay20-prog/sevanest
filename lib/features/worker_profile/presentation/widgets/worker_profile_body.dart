@@ -97,11 +97,11 @@ class WorkerProfileBody extends ConsumerWidget {
                         : l10n.workerVerificationInProgress,
                     icon: worker.verified ? Icons.check_rounded : null,
                     bg: worker.verified
-                        ? const Color(0xFFD6EFEA)
-                        : const Color(0xFFFEF3C7),
+                        ? AppColors.tealD6EFEA
+                        : AppColors.warnBg,
                     fg: worker.verified
-                        ? const Color(0xFF0B5A53)
-                        : const Color(0xFF8A4B06),
+                        ? AppColors.teal0B5A53
+                        : AppColors.orange8A4B06,
                   ),
                 ],
                 TextButton(
@@ -337,7 +337,7 @@ class WorkerProfileBody extends ConsumerWidget {
       showModalBottomSheet<void>(
         context: context,
         backgroundColor: Colors.transparent,
-        barrierColor: const Color(0x591B3354),
+        barrierColor: AppColors.sky1B3354A35,
         elevation: 0,
         builder: (ctx) => DecoratedBox(
           decoration: BoxDecoration(
@@ -345,7 +345,7 @@ class WorkerProfileBody extends ConsumerWidget {
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xF5FFFFFF), Color(0xF5FAF8F5)],
+              colors: [AppColors.whiteA96xF5, AppColors.whiteFAF8F5A96],
             ),
             boxShadow: [
               BoxShadow(
@@ -380,7 +380,7 @@ class WorkerProfileBody extends ConsumerWidget {
                         height: 48,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFD6EFEA),
+                          color: AppColors.tealD6EFEA,
                         ),
                         child: const Icon(
                           Icons.verified_user_outlined,
@@ -539,9 +539,9 @@ class _SoftPill extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     alignment: Alignment.center,
     decoration: BoxDecoration(
-      color: const Color(0xBFFFFFFF),
+      color: AppColors.whiteA75xBF,
       borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: const Color(0xF2FFFFFF)),
+      border: Border.all(color: AppColors.whiteA95xF2),
       boxShadow: [
         BoxShadow(
           color: dsNavy.withValues(alpha: 0.06),

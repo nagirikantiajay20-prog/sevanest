@@ -51,7 +51,7 @@ class NavyGlass extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.navyDeep.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(radius),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+          border: Border.all(color: AppColors.surface.withValues(alpha: 0.28)),
         ),
         child: child,
       ),
@@ -139,9 +139,9 @@ class HomeHero extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x8C08182B),
-                    Color(0x1A08182B),
-                    Color(0xEB08182B),
+                    AppColors.sky08182BA55,
+                    AppColors.sky08182BA10,
+                    AppColors.sky08182BA92,
                   ],
                   stops: [0, 0.35, 1],
                 ),
@@ -168,7 +168,7 @@ class HomeHero extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFFFDE68A),
+                        color: AppColors.warnLine,
                       ),
                     ),
                   ),
@@ -183,7 +183,7 @@ class HomeHero extends StatelessWidget {
                           fontSize: 31,
                           height: 1.12,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: AppColors.surface,
                         ),
                       ),
                     ),
@@ -216,7 +216,7 @@ class HomeHero extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.location_on_outlined,
-                      color: Colors.white,
+                      color: AppColors.surface,
                       size: 22,
                     ),
                     const SizedBox(width: 10),
@@ -228,11 +228,11 @@ class HomeHero extends StatelessWidget {
                           Text(
                             l10n.homeDeliveringTo,
                             style: const TextStyle(
-                              fontSize: 10,
+                              fontSize: 12,
                               height: 1.15,
                               letterSpacing: 1,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFFCBD5E1),
+                              color: AppColors.slate300,
                             ),
                           ),
                           Row(
@@ -246,14 +246,14 @@ class HomeHero extends StatelessWidget {
                                     fontSize: 14,
                                     height: 1.15,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                                    color: AppColors.surface,
                                   ),
                                 ),
                               ),
                               const Icon(
                                 Icons.keyboard_arrow_down,
                                 size: 18,
-                                color: Colors.white,
+                                color: AppColors.surface,
                               ),
                             ],
                           ),
@@ -286,7 +286,10 @@ class HomeHero extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  const Icon(Icons.notifications_none, color: Colors.white),
+                  const Icon(
+                    Icons.notifications_none,
+                    color: AppColors.surface,
+                  ),
                   if (unread > 0)
                     const Positioned(
                       top: 11,
@@ -328,7 +331,7 @@ class HomeHero extends StatelessWidget {
                       const Icon(
                         Icons.search,
                         size: 20,
-                        color: Color(0xFFE2E8F0),
+                        color: AppColors.hairline,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -338,7 +341,7 @@ class HomeHero extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontSize: 14,
-                            color: Color(0xFFE2E8F0),
+                            color: AppColors.hairline,
                           ),
                         ),
                       ),
@@ -362,7 +365,11 @@ class HomeHero extends StatelessWidget {
             child: const SizedBox(
               width: 52,
               height: 52,
-              child: Icon(Icons.arrow_forward, color: Colors.white, size: 22),
+              child: Icon(
+                Icons.arrow_forward,
+                color: AppColors.surface,
+                size: 22,
+              ),
             ),
           ),
         ),
