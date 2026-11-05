@@ -134,6 +134,9 @@ class NotificationRepositoryMock implements NotificationRepository {
   }) => mockCall(_state(), () => tokens.add(token));
 
   @override
+  Future<void> ack(String notificationId, String deliveryStatus) async {}
+
+  @override
   Future<void> unregisterDeviceToken() =>
       mockCall(_state(), () => tokens.clear());
 }

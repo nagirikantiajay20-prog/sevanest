@@ -81,6 +81,16 @@ class NotificationRepositoryRemote implements NotificationRepository {
   }
 
   @override
+  Future<void> ack(String notificationId, String deliveryStatus) async {
+    await guarded(
+      () => _dio.post<dynamic>(
+        '/notifications/${Uri.encodeComponent(notificationId)}/ack',
+        data: {'eventType': deliveryStatus},
+      ),
+    );
+  }
+
+  @override
   Future<void> unregisterDeviceToken() async {
     await guarded(() => _dio.delete<dynamic>('/auth/device-token'));
   }

@@ -25,6 +25,7 @@ import 'package:sevanest_customer/features/home/presentation/screens/home_screen
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_detail_screen.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interview_request_screen.dart';
 import 'package:sevanest_customer/features/interview_trial/presentation/screens/interviews_list_screen.dart';
+import 'package:sevanest_customer/features/notifications/diagnostics/push_diagnostics_screen.dart';
 import 'package:sevanest_customer/features/notifications/presentation/screens/deep_link_screen.dart';
 import 'package:sevanest_customer/features/notifications/presentation/screens/notification_centre_screen.dart';
 import 'package:sevanest_customer/features/payment/presentation/screens/payment_screen.dart';
@@ -307,6 +308,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         GoRoute(
           path: Routes.devGallery,
           builder: (context, state) => const WidgetGalleryScreen(),
+        ),
+      if (!config.isProd)
+        GoRoute(
+          path: Routes.devPushDiagnostics,
+          builder: (context, state) => const PushDiagnosticsScreen(),
         ),
     ],
   );

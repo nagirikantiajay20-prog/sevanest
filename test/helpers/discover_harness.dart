@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/addresses/presentation/providers/address_providers.dart';
@@ -18,6 +19,7 @@ import 'package:sevanest_customer/features/service_discovery/presentation/provid
 import 'package:sevanest_customer/features/support/domain/support.dart';
 
 import 'fakes.dart';
+import 'notification_fakes.dart';
 
 const testHome = Address(
   id: 'h1',
@@ -104,6 +106,7 @@ Future<DiscoverEnv> launchDiscover(
   SupportRepository? support,
   SafetyRepository? safety,
   PushService? push,
+  AppConfig? config,
   CustomerProfileRepository? profiles,
   List<Override> overrides = const [],
 }) async {
@@ -119,6 +122,7 @@ Future<DiscoverEnv> launchDiscover(
   final auth = FakeAuthRepository()..onProfile = () async => true;
   await t.pumpWidget(
     testRootApp(
+      config: config,
       store: InMemorySessionStore((access: 'a', refresh: 'r')),
       repo: auth,
       home: FakeHomeRepository(const HomeData()),
@@ -128,7 +132,8 @@ Future<DiscoverEnv> launchDiscover(
       notifications: notifications,
       support: support,
       safety: safety,
-      push: push,
+      // A returning customer has already decided; no first-Home pre-prompt over the screens.
+      push: push ?? FakePushService(state: PushPermission.granted),
       overrides: [
         ...overrides,
         addressRepositoryProvider.overrideWithValue(addr),

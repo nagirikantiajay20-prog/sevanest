@@ -65,6 +65,7 @@ abstract final class Routes {
 
   // Dev only (never registered in prod)
   static const devGallery = '/dev/gallery';
+  static const devPushDiagnostics = '/dev/push';
 
   /// Builds a concrete path, e.g. `Routes.path(Routes.bookingDetail, {'id': '7'})`.
   static String path(String pattern, Map<String, String> params) =>

@@ -4264,6 +4264,36 @@ abstract class AppLocalizations {
   /// **'Booking cancelled'**
   String get bookingHeadCancelled;
 
+  /// No description provided for @bookingHeadNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your worker'**
+  String get bookingHeadNew;
+
+  /// No description provided for @bookingHeadMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: set up an interview'**
+  String get bookingHeadMatched;
+
+  /// No description provided for @bookingHeadScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Your meeting is booked'**
+  String get bookingHeadScheduled;
+
+  /// No description provided for @bookingHeadInterviewDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Your decision'**
+  String get bookingHeadInterviewDone;
+
+  /// No description provided for @bookingStatusRematched.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched again'**
+  String get bookingStatusRematched;
+
   /// No description provided for @bookingCopyRef.
   ///
   /// In en, this message translates to:
@@ -7954,23 +7984,59 @@ abstract class AppLocalizations {
   /// **'You can book up to {days} days ahead.'**
   String interviewDateHorizon(int days);
 
-  /// No description provided for @interviewMorning.
+  /// No description provided for @interviewTimeChoose.
   ///
   /// In en, this message translates to:
-  /// **'Morning'**
-  String get interviewMorning;
+  /// **'Choose a time'**
+  String get interviewTimeChoose;
 
-  /// No description provided for @interviewAfternoon.
+  /// No description provided for @interviewTimeChooseHint.
   ///
   /// In en, this message translates to:
-  /// **'Afternoon & evening'**
-  String get interviewAfternoon;
+  /// **'Pick any hour and minute'**
+  String get interviewTimeChooseHint;
 
-  /// No description provided for @interviewSlotMeta.
+  /// No description provided for @interviewTimeSet.
   ///
   /// In en, this message translates to:
-  /// **'{period} · {minutes} min'**
-  String interviewSlotMeta(String period, int minutes);
+  /// **'Set'**
+  String get interviewTimeSet;
+
+  /// No description provided for @interviewTimeChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get interviewTimeChange;
+
+  /// No description provided for @interviewTimeLength.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min visit'**
+  String interviewTimeLength(int minutes);
+
+  /// No description provided for @interviewTimeWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Available: {windows}'**
+  String interviewTimeWindows(String windows);
+
+  /// No description provided for @interviewTimePast.
+  ///
+  /// In en, this message translates to:
+  /// **'That time has already passed. Pick a later time.'**
+  String get interviewTimePast;
+
+  /// No description provided for @interviewTimeTooEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Too soon: the earliest time you can book is {time}.'**
+  String interviewTimeTooEarly(String time);
+
+  /// No description provided for @interviewTimeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The worker is not available then. Pick a time inside the available hours.'**
+  String get interviewTimeUnavailable;
 
   /// No description provided for @interviewNoteTitle.
   ///
@@ -8121,6 +8187,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'(required)'**
   String get hintRequired;
+
+  /// No description provided for @pushDiagTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Push diagnostics'**
+  String get pushDiagTitle;
+
+  /// No description provided for @pushDiagEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Push diagnostics (dev)'**
+  String get pushDiagEntry;
+
+  /// No description provided for @pushDiagSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test push'**
+  String get pushDiagSend;
+
+  /// No description provided for @pushDiagRunAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Run again'**
+  String get pushDiagRunAgain;
+
+  /// No description provided for @pushDiagRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running…'**
+  String get pushDiagRunning;
+
+  /// No description provided for @pushDiagCopyReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy full report'**
+  String get pushDiagCopyReport;
+
+  /// No description provided for @pushDiagCopyToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy token'**
+  String get pushDiagCopyToken;
+
+  /// No description provided for @pushDiagCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get pushDiagCopied;
+
+  /// No description provided for @pushDiagOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open app settings'**
+  String get pushDiagOpenSettings;
+
+  /// No description provided for @pushDiagIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap “Send test push” to check every step from this device to FCM and back.'**
+  String get pushDiagIdle;
+
+  /// No description provided for @pushDiagOk.
+  ///
+  /// In en, this message translates to:
+  /// **'FCM working end to end'**
+  String get pushDiagOk;
+
+  /// No description provided for @pushDiagFailedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed at: {step} [{source}]'**
+  String pushDiagFailedAt(String step, String source);
+
+  /// No description provided for @pushDiagSrcFlutter.
+  ///
+  /// In en, this message translates to:
+  /// **'FLUTTER/DEVICE'**
+  String get pushDiagSrcFlutter;
+
+  /// No description provided for @pushDiagSrcNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'NETWORK'**
+  String get pushDiagSrcNetwork;
+
+  /// No description provided for @pushDiagSrcBackend.
+  ///
+  /// In en, this message translates to:
+  /// **'BACKEND'**
+  String get pushDiagSrcBackend;
+
+  /// No description provided for @pushDiagSrcFcm.
+  ///
+  /// In en, this message translates to:
+  /// **'FCM'**
+  String get pushDiagSrcFcm;
+
+  /// No description provided for @pushDiagPass.
+  ///
+  /// In en, this message translates to:
+  /// **'PASS'**
+  String get pushDiagPass;
+
+  /// No description provided for @pushDiagFail.
+  ///
+  /// In en, this message translates to:
+  /// **'FAIL'**
+  String get pushDiagFail;
+
+  /// No description provided for @pushDiagSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'SKIPPED'**
+  String get pushDiagSkipped;
+
+  /// No description provided for @pushDiagStepFirebase.
+  ///
+  /// In en, this message translates to:
+  /// **'Firebase'**
+  String get pushDiagStepFirebase;
+
+  /// No description provided for @pushDiagStepPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission'**
+  String get pushDiagStepPermission;
+
+  /// No description provided for @pushDiagStepChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification channel'**
+  String get pushDiagStepChannel;
+
+  /// No description provided for @pushDiagStepToken.
+  ///
+  /// In en, this message translates to:
+  /// **'FCM token'**
+  String get pushDiagStepToken;
+
+  /// No description provided for @pushDiagStepRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend registration'**
+  String get pushDiagStepRegister;
+
+  /// No description provided for @pushDiagStepTrigger.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger test push'**
+  String get pushDiagStepTrigger;
+
+  /// No description provided for @pushDiagStepDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get pushDiagStepDelivery;
+
+  /// No description provided for @pushDiagStepAck.
+  ///
+  /// In en, this message translates to:
+  /// **'Ack'**
+  String get pushDiagStepAck;
 }
 
 class _AppLocalizationsDelegate

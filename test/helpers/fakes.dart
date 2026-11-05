@@ -156,12 +156,13 @@ Widget testRootApp({
   SafetyRepository? safety,
   PushService? push,
   bool splashChoice = false,
+  AppConfig? config,
   List<Override> overrides = const [],
 }) => SessionResetHost(
   overrides: [
     splashHoldProvider.overrideWithValue(Duration.zero),
     splashChoiceProvider.overrideWithValue(splashChoice),
-    appConfigProvider.overrideWithValue(AppConfig.mock),
+    appConfigProvider.overrideWithValue(config ?? AppConfig.mock),
     mockApiProvider.overrideWith(SeededMockApi.new),
     sessionStoreProvider.overrideWithValue(store),
     authRepositoryProvider.overrideWithValue(repo),

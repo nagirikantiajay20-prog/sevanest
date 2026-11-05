@@ -6,11 +6,15 @@ import 'package:sevanest_customer/app/router/app_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
+import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
+import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
+import 'package:sevanest_customer/features/interview_trial/presentation/providers/interview_providers.dart';
 import 'package:sevanest_customer/features/notifications/domain/notification.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
+import 'package:sevanest_customer/features/notifications/presentation/push_prompt.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// Push plumbing above the router (docs/modules/13):
@@ -29,6 +33,8 @@ class PushHost extends ConsumerStatefulWidget {
 class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
   final _subs = <StreamSubscription<Object?>>[];
   String? _pending;
+  var _asked = false;
+  final _acked = <String>{};
   PushMessage? _banner;
   var _bannerSeq = 0;
   Timer? _bannerTimer;
@@ -59,7 +65,18 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
     if (!mounted) return;
     _subs
       ..add(service.onForeground.listen(_onForeground))
-      ..add(service.onOpened.listen((m) => _request(routeForPushData(m.data))))
+      ..add(
+        service.onOpened.listen((m) {
+          _ack(m, 'TAPPED');
+          _request(routeForPushData(m.data));
+        }),
+      )
+      ..add(
+        ref.read(pushDisplayProvider).onTap.listen((m) {
+          _ack(m, 'TAPPED');
+          _request(routeForPushData(m.data));
+        }),
+      )
       ..add(
         service.onTokenRefresh.listen(
           (t) =>
@@ -67,9 +84,13 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
         ),
       );
     final first = await service.initialMessage();
-    if (first != null) _request(routeForPushData(first.data));
+    if (first != null) {
+      _ack(first, 'TAPPED');
+      _request(routeForPushData(first.data));
+    }
     if (ref.read(authProvider) == AuthStatus.authenticated) {
       unawaited(ref.read(pushControllerProvider).registerIfAllowed());
+      _askOnce();
     }
   }
 
@@ -78,13 +99,36 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
     if (state != AppLifecycleState.resumed) return;
     if (ref.read(authProvider) != AuthStatus.authenticated) return;
     ref.invalidate(notificationUnreadProvider);
+    _refreshBookings();
     // The customer may have changed the permission in the system settings.
     unawaited(ref.read(pushPermissionProvider.notifier).refresh());
     unawaited(ref.read(pushControllerProvider).registerIfAllowed());
   }
 
-  void _onForeground(PushMessage m) {
+  /// A push means a booking or interview probably changed: lists and Home read again, so the
+  /// status is right without a restart (open detail screens listen to the tick instead).
+  void _refreshBookings() => ref
+    ..invalidate(bookingListProvider)
+    ..invalidate(interviewListProvider)
+    ..invalidate(homeProvider);
+
+  /// Delivery telemetry for a push that carries `notificationId`; never blocks or throws.
+  void _ack(PushMessage m, String status) {
+    final id = m.data['notificationId'];
+    if (id is! String || id.isEmpty) return;
+    if (!_acked.add('$id:$status')) return; // one event per notification
+    unawaited(
+      ref
+          .read(notificationRepositoryProvider)
+          .ack(id, status)
+          .catchError((_) {}),
+    );
+  }
+
+  Future<void> _onForeground(PushMessage m) async {
     if (ref.read(authProvider) != AuthStatus.authenticated || !mounted) return;
+    _refreshBookings();
+    _ack(m, 'RECEIVED');
     ref
       ..invalidate(notificationUnreadProvider)
       ..invalidate(notificationListProvider(false))
@@ -93,6 +137,12 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
     ref.read(notificationTickProvider.notifier).bump();
     final muted = ref.read(mutedCategoriesProvider).value ?? const <String>{};
     if (!bannerAllowed(muted, routeForPushData(m.data))) return;
+    // System heads-up first; DISPLAYED only once the OS took it. The in-app banner is the fallback.
+    if (await ref.read(pushDisplayProvider).show(m)) {
+      _ack(m, 'DISPLAYED');
+      return;
+    }
+    if (!mounted) return;
     _bannerTimer?.cancel();
     setState(() {
       _banner = m;
@@ -116,6 +166,27 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
   bool get _ready =>
       ref.read(authProvider) == AuthStatus.authenticated &&
       ref.read(profileCompleteProvider) == true;
+
+  /// Once per sign-in, when the customer reaches Home: the permission pre-prompt (the same one the
+  /// interview request offers; it stays silent if already decided or deferred).
+  void _askOnce() {
+    if (_asked || _pending != null || !_ready) return;
+    _asked = true;
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) {
+        final c = ref
+            .read(appRouterProvider)
+            .routerDelegate
+            .navigatorKey
+            .currentState
+            ?.overlay
+            ?.context;
+        if (mounted && c != null && c.mounted) {
+          unawaited(askForPushAfterAction(c, ref.read(pushControllerProvider)));
+        }
+      })
+      ..scheduleFrame();
+  }
 
   void _flush() {
     final route = _pending;
@@ -151,12 +222,17 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
         if (next == AuthStatus.authenticated) {
           unawaited(ref.read(pushControllerProvider).registerIfAllowed());
           _flush();
+          _askOnce();
         } else {
+          _asked = false;
           ref.read(pushControllerProvider).forget();
           _hideBanner();
         }
       })
-      ..listen(profileCompleteProvider, (_, _) => _flush());
+      ..listen(profileCompleteProvider, (_, _) {
+        _flush();
+        _askOnce();
+      });
     final banner = _banner;
     return Stack(
       children: [
@@ -174,6 +250,7 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
                   message: banner,
                   onTap: () {
                     _hideBanner();
+                    _ack(banner, 'TAPPED');
                     _request(routeForPushData(banner.data));
                   },
                   onClose: _hideBanner,

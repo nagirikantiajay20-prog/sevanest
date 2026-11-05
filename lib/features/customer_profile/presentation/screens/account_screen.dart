@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
+import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_profile.dart';
@@ -215,6 +216,13 @@ class AccountScreen extends ConsumerWidget {
                 subtitle: notifStatus,
                 subtitleKey: const Key('account_notifications_status'),
               ),
+              if (!ref.watch(appConfigProvider).isProd)
+                row(
+                  'account_push_diag_btn',
+                  Icons.bug_report_outlined,
+                  l10n.pushDiagEntry,
+                  () => context.push(Routes.devPushDiagnostics),
+                ),
               row(
                 'account_terms_btn',
                 Icons.description_outlined,

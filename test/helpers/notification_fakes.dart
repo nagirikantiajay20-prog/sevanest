@@ -26,6 +26,14 @@ class FakeNotificationRepository implements NotificationRepository {
   final readIds = <String>[];
   final registered = <({String token, String platform})>[];
   Object? registerFails;
+  final acks = <({String id, String status})>[];
+  Object? ackFails;
+
+  @override
+  Future<void> ack(String notificationId, String deliveryStatus) async {
+    if (ackFails != null) throw ackFails!;
+    acks.add((id: notificationId, status: deliveryStatus));
+  }
 
   @override
   Future<NotificationPage> list({

@@ -52,6 +52,23 @@ abstract interface class PushService {
   String get platform;
 }
 
+/// Shows a system (heads-up) notification for a message that arrives in the foreground, where FCM
+/// itself never draws one. [show] is true only once the OS accepted it, so DISPLAYED is honest.
+abstract interface class PushDisplay {
+  Future<bool> show(PushMessage m);
+
+  /// The customer tapped a notification this class drew.
+  Stream<PushMessage> get onTap;
+}
+
+class NoopPushDisplay implements PushDisplay {
+  const NoopPushDisplay();
+  @override
+  Future<bool> show(PushMessage m) async => false;
+  @override
+  Stream<PushMessage> get onTap => const Stream.empty();
+}
+
 /// Used when Firebase is not configured (no `google-services.json` / `GoogleService-Info.plist`)
 /// and in dev mock mode. The app runs normally; there are just no pushes.
 class NoopPushService implements PushService {

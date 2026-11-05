@@ -3,6 +3,7 @@ import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/features/notifications/data/firebase_push_service.dart';
+import 'package:sevanest_customer/features/notifications/data/local_push_display.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,13 @@ final pushServiceProvider = Provider<PushService>(
   (ref) => ref.watch(mockApiProvider.select((s) => s.live))
       ? FirebasePushService()
       : const NoopPushService(),
+);
+
+/// System heads-up for foreground pushes (FCM draws none itself). Nothing in dev mock mode.
+final pushDisplayProvider = Provider<PushDisplay>(
+  (ref) => ref.watch(mockApiProvider.select((s) => s.live))
+      ? LocalPushDisplay()
+      : const NoopPushDisplay(),
 );
 
 /// Days to wait before the pre-prompt is offered again after "Not now" (docs/modules/13: "ask

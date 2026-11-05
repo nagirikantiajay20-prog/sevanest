@@ -2,12 +2,15 @@
 // NOT-09 (a missing target says so, with a way Home), NOT-10 (the entity is read fresh, not taken
 // from the payload), cold start, background tap, foreground arrival (a banner, never a jump).
 // A real device is needed for the Firebase side (NOT-11): see docs/PROGRESS.md.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_prefs.dart';
+import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/features/support/domain/support.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -145,6 +148,28 @@ void main() {
   });
 
   group('tapping a notification', () {
+    testWidgets(
+      'delivery is acked: RECEIVED in the foreground, TAPPED on tap',
+      (t) async {
+        await open(t);
+        const withId = {
+          'notificationId': 'n1',
+          'routeType': 'booking',
+          'routeId': 'bk_1',
+        };
+        push.foreground.add(
+          const PushMessage(title: 'T', body: 'B', data: withId),
+        );
+        await settle(t);
+        push.opened.add(const PushMessage(title: 'T', body: 'B', data: withId));
+        await settle(t);
+        expect(inbox.acks.map((a) => (a.id, a.status)), [
+          ('n1', 'RECEIVED'),
+          ('n1', 'TAPPED'),
+        ]);
+      },
+    );
+
     testWidgets('from the background: the target opens over Home', (t) async {
       final env = await open(t);
       push.opened.add(msgFor('ticket', 'tk_1'));
@@ -339,4 +364,83 @@ void main() {
       expect(find.text('Booking confirmed'), findsNothing);
     });
   });
+}
+
+class _FakeDisplay implements PushDisplay {
+  _FakeDisplay({this.shows = true});
+  final bool shows;
+  final shown = <PushMessage>[];
+  final tap = StreamController<PushMessage>.broadcast();
+  @override
+  Future<bool> show(PushMessage m) async {
+    if (shows) shown.add(m);
+    return shows;
+  }
+
+  @override
+  Stream<PushMessage> get onTap => tap.stream;
+}
+
+void displayTests() {
+  const msg = PushMessage(
+    title: 'Hi',
+    body: 'There',
+    data: {'notificationId': 'n1', 'routeType': 'booking', 'routeId': 'b1'},
+  );
+
+  Future<(DiscoverEnv, FakeNotificationRepository, FakePushService)> boot(
+    WidgetTester t,
+    PushDisplay display,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final push = FakePushService(state: PushPermission.granted);
+    final inbox = FakeNotificationRepository()..unreadFails = false;
+    final env = await launchDiscover(
+      t,
+      height: 1400,
+      push: push,
+      notifications: inbox,
+      overrides: [pushDisplayProvider.overrideWithValue(display)],
+    );
+    await settle(t);
+    return (env, inbox, push);
+  }
+
+  testWidgets(
+    'foreground: system notification, RECEIVED then DISPLAYED once, no banner',
+    (t) async {
+      final d = _FakeDisplay();
+      final (_, inbox, push) = await boot(t, d);
+      push.foreground
+        ..add(msg)
+        ..add(msg);
+      await settle(t);
+      expect(d.shown, hasLength(2));
+      expect(find.byKey(const Key('notif_banner_1')), findsNothing);
+      expect(inbox.acks.map((a) => a.status), ['RECEIVED', 'DISPLAYED']);
+    },
+  );
+
+  testWidgets('foreground: display refused -> banner, no DISPLAYED ack', (
+    t,
+  ) async {
+    final (_, inbox, push) = await boot(t, _FakeDisplay(shows: false));
+    push.foreground.add(msg);
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 400));
+    expect(find.byKey(const Key('notif_banner_1')), findsOneWidget);
+    expect(inbox.acks.map((a) => a.status), ['RECEIVED']);
+  });
+
+  testWidgets(
+    'tapping the system notification acks TAPPED and opens the target',
+    (t) async {
+      final d = _FakeDisplay();
+      final (env, inbox, _) = await boot(t, d);
+      d.tap.add(msg);
+      await settle(t);
+      expect(inbox.acks.map((a) => a.status), ['TAPPED']);
+      expect(env.where, isNot('/home'));
+    },
+  );
 }

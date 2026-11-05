@@ -104,6 +104,10 @@ abstract interface class NotificationRepository {
     required String platform,
   });
 
+  /// `POST /notifications/{id}/ack`: delivery telemetry (`RECEIVED`, `DISPLAYED` or `TAPPED`).
+  /// Best effort: callers ignore a failure.
+  Future<void> ack(String notificationId, String deliveryStatus);
+
   /// `DELETE /auth/device-token`: unbinds the push token of the current session only.
   Future<void> unregisterDeviceToken();
 }
@@ -135,6 +139,8 @@ String routeForNotification(String? type, String? id) {
     'ticket' ||
     'support' ||
     'support_ticket' => Routes.path(Routes.supportDetail, {'id': i}),
+    // The id is the booking being rated; the rating screen checks eligibility itself.
+    'rating' => Routes.path(Routes.rating, {'id': i}),
     _ => Routes.notifications,
   };
 }

@@ -1209,6 +1209,11 @@
     }
   },
   "bookingHeadCancelled": "Booking cancelled",
+  "bookingHeadNew": "Finding your worker",
+  "bookingHeadMatched": "Next: set up an interview",
+  "bookingHeadScheduled": "Your meeting is booked",
+  "bookingHeadInterviewDone": "Your decision",
+  "bookingStatusRematched": "Matched again",
   "bookingCopyRef": "Copy",
   "bookingRefCopied": "Reference copied",
   "bookingCopyScheduledAt": "{kind} on {date}, {time}",
@@ -2203,19 +2208,36 @@
       }
     }
   },
-  "interviewMorning": "Morning",
-  "interviewAfternoon": "Afternoon & evening",
-  "interviewSlotMeta": "{period} · {minutes} min",
-  "@interviewSlotMeta": {
+  "interviewTimeChoose": "Choose a time",
+  "interviewTimeChooseHint": "Pick any hour and minute",
+  "interviewTimeSet": "Set",
+  "interviewTimeChange": "Change",
+  "interviewTimeLength": "{minutes} min visit",
+  "@interviewTimeLength": {
     "placeholders": {
-      "period": {
-        "type": "String"
-      },
       "minutes": {
         "type": "int"
       }
     }
   },
+  "interviewTimeWindows": "Available: {windows}",
+  "@interviewTimeWindows": {
+    "placeholders": {
+      "windows": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewTimePast": "That time has already passed. Pick a later time.",
+  "interviewTimeTooEarly": "Too soon: the earliest time you can book is {time}.",
+  "@interviewTimeTooEarly": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "interviewTimeUnavailable": "The worker is not available then. Pick a time inside the available hours.",
   "interviewNoteTitle": "Add a note",
   "interviewNowPickTime": "Now pick a time",
   "interviewReadyToSend": "Ready to send",
@@ -2259,5 +2281,33 @@
     "placeholders": { "name": { "type": "String" } }
   },
   "hintOptional": "(optional)",
-  "hintRequired": "(required)"
+  "hintRequired": "(required)",
+  "pushDiagTitle": "Push diagnostics",
+  "pushDiagEntry": "Push diagnostics (dev)",
+  "pushDiagSend": "Send test push",
+  "pushDiagRunAgain": "Run again",
+  "pushDiagRunning": "Running…",
+  "pushDiagCopyReport": "Copy full report",
+  "pushDiagCopyToken": "Copy token",
+  "pushDiagCopied": "Copied",
+  "pushDiagOpenSettings": "Open app settings",
+  "pushDiagIdle": "Tap “Send test push” to check every step from this device to FCM and back.",
+  "pushDiagOk": "FCM working end to end",
+  "pushDiagFailedAt": "Failed at: {step} [{source}]",
+  "@pushDiagFailedAt": { "placeholders": { "step": { "type": "String" }, "source": { "type": "String" } } },
+  "pushDiagSrcFlutter": "FLUTTER/DEVICE",
+  "pushDiagSrcNetwork": "NETWORK",
+  "pushDiagSrcBackend": "BACKEND",
+  "pushDiagSrcFcm": "FCM",
+  "pushDiagPass": "PASS",
+  "pushDiagFail": "FAIL",
+  "pushDiagSkipped": "SKIPPED",
+  "pushDiagStepFirebase": "Firebase",
+  "pushDiagStepPermission": "Notification permission",
+  "pushDiagStepChannel": "Notification channel",
+  "pushDiagStepToken": "FCM token",
+  "pushDiagStepRegister": "Backend registration",
+  "pushDiagStepTrigger": "Trigger test push",
+  "pushDiagStepDelivery": "Delivery",
+  "pushDiagStepAck": "Ack"
 }

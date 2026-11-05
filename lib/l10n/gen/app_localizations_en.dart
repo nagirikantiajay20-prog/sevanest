@@ -2316,6 +2316,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingHeadCancelled => 'Booking cancelled';
 
   @override
+  String get bookingHeadNew => 'Finding your worker';
+
+  @override
+  String get bookingHeadMatched => 'Next: set up an interview';
+
+  @override
+  String get bookingHeadScheduled => 'Your meeting is booked';
+
+  @override
+  String get bookingHeadInterviewDone => 'Your decision';
+
+  @override
+  String get bookingStatusRematched => 'Matched again';
+
+  @override
   String get bookingCopyRef => 'Copy';
 
   @override
@@ -4382,15 +4397,39 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get interviewMorning => 'Morning';
+  String get interviewTimeChoose => 'Choose a time';
 
   @override
-  String get interviewAfternoon => 'Afternoon & evening';
+  String get interviewTimeChooseHint => 'Pick any hour and minute';
 
   @override
-  String interviewSlotMeta(String period, int minutes) {
-    return '$period · $minutes min';
+  String get interviewTimeSet => 'Set';
+
+  @override
+  String get interviewTimeChange => 'Change';
+
+  @override
+  String interviewTimeLength(int minutes) {
+    return '$minutes min visit';
   }
+
+  @override
+  String interviewTimeWindows(String windows) {
+    return 'Available: $windows';
+  }
+
+  @override
+  String get interviewTimePast =>
+      'That time has already passed. Pick a later time.';
+
+  @override
+  String interviewTimeTooEarly(String time) {
+    return 'Too soon: the earliest time you can book is $time.';
+  }
+
+  @override
+  String get interviewTimeUnavailable =>
+      'The worker is not available then. Pick a time inside the available hours.';
 
   @override
   String get interviewNoteTitle => 'Add a note';
@@ -4473,4 +4512,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hintRequired => '(required)';
+
+  @override
+  String get pushDiagTitle => 'Push diagnostics';
+
+  @override
+  String get pushDiagEntry => 'Push diagnostics (dev)';
+
+  @override
+  String get pushDiagSend => 'Send test push';
+
+  @override
+  String get pushDiagRunAgain => 'Run again';
+
+  @override
+  String get pushDiagRunning => 'Running…';
+
+  @override
+  String get pushDiagCopyReport => 'Copy full report';
+
+  @override
+  String get pushDiagCopyToken => 'Copy token';
+
+  @override
+  String get pushDiagCopied => 'Copied';
+
+  @override
+  String get pushDiagOpenSettings => 'Open app settings';
+
+  @override
+  String get pushDiagIdle =>
+      'Tap “Send test push” to check every step from this device to FCM and back.';
+
+  @override
+  String get pushDiagOk => 'FCM working end to end';
+
+  @override
+  String pushDiagFailedAt(String step, String source) {
+    return 'Failed at: $step [$source]';
+  }
+
+  @override
+  String get pushDiagSrcFlutter => 'FLUTTER/DEVICE';
+
+  @override
+  String get pushDiagSrcNetwork => 'NETWORK';
+
+  @override
+  String get pushDiagSrcBackend => 'BACKEND';
+
+  @override
+  String get pushDiagSrcFcm => 'FCM';
+
+  @override
+  String get pushDiagPass => 'PASS';
+
+  @override
+  String get pushDiagFail => 'FAIL';
+
+  @override
+  String get pushDiagSkipped => 'SKIPPED';
+
+  @override
+  String get pushDiagStepFirebase => 'Firebase';
+
+  @override
+  String get pushDiagStepPermission => 'Notification permission';
+
+  @override
+  String get pushDiagStepChannel => 'Notification channel';
+
+  @override
+  String get pushDiagStepToken => 'FCM token';
+
+  @override
+  String get pushDiagStepRegister => 'Backend registration';
+
+  @override
+  String get pushDiagStepTrigger => 'Trigger test push';
+
+  @override
+  String get pushDiagStepDelivery => 'Delivery';
+
+  @override
+  String get pushDiagStepAck => 'Ack';
 }

@@ -395,10 +395,23 @@ void main() {
   });
 
   group('Home bell', () {
+    testWidgets('first Home offers the notification pre-prompt', (t) async {
+      final push = FakePushService(state: PushPermission.notDetermined);
+      await launchDiscover(t, notifications: repo, push: push);
+      await settle(t);
+      expect(k('notif_prompt'), findsOneWidget);
+      await tap(t, 'notif_prompt_allow_btn');
+      expect(push.requestCalls, 1);
+    });
     testWidgets(
       'the badge follows the unread count and clears after Mark all',
       (t) async {
-        final env = await launchDiscover(t, notifications: repo);
+        // Permission already decided: no first-Home pre-prompt over the bell.
+        final env = await launchDiscover(
+          t,
+          notifications: repo,
+          push: FakePushService(state: PushPermission.granted),
+        );
         await settle(t);
         expect(k('home_bell_badge'), findsOneWidget);
         await tap(t, 'home_bell_btn');
