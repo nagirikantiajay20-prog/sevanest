@@ -56,6 +56,22 @@ void main() {
     },
   );
 
+  test('401 on PUT /auth/device-token refreshes and retries it', () async {
+    final dio = build((o) async {
+      if (o.path == '/auth/token/refresh') {
+        return jsonBody(
+          '{"accessToken":"new","refreshToken":"ref-2","tokenType":"Bearer","expiresIn":900}',
+          200,
+        );
+      }
+      final ok = o.headers['Authorization'] == 'Bearer new';
+      return jsonBody(ok ? '{}' : '{"code":"UNAUTHENTICATED"}', ok ? 200 : 401);
+    });
+    final res = await dio.put<dynamic>('/auth/device-token');
+    expect(res.statusCode, 200);
+    expect(await store.read(), (access: 'new', refresh: 'ref-2'));
+  });
+
   test(
     '401 -> refresh via /auth/token/refresh, rotated tokens stored, request retried',
     () async {

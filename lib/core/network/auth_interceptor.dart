@@ -8,7 +8,6 @@ import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 const demoTokenPrefix = 'demo-';
 
 const _retriedKey = 'auth_retried';
-const _authPathPrefix = '/auth/';
 // Endpoints that must NOT carry a bearer token. Everything else under /auth/ (logout,
 // sessions, device-token) is authenticated.
 const _publicAuthPaths = [
@@ -38,7 +37,6 @@ class AuthInterceptor extends Interceptor {
 
   Future<String?>? _refreshing;
 
-  bool _isAuthCall(RequestOptions o) => o.path.startsWith(_authPathPrefix);
   bool _isPublicAuthCall(RequestOptions o) =>
       _publicAuthPaths.any(o.path.startsWith);
 
@@ -63,7 +61,9 @@ class AuthInterceptor extends Interceptor {
   ) async {
     final req = err.requestOptions;
     if (err.response?.statusCode != 401 ||
-        _isAuthCall(req) ||
+        // Only the public auth calls (OTP, refresh) must not refresh: device-token, logout and
+        // sessions are authenticated, so an expired access token is refreshed and they are retried.
+        _isPublicAuthCall(req) ||
         req.extra[_retriedKey] == true) {
       return handler.next(err);
     }
@@ -98,7 +98,7 @@ class AuthInterceptor extends Interceptor {
       final tokens = await store.read();
       if (tokens == null) return null;
       final res = await refreshDio.post<Map<String, dynamic>>(
-        '${_authPathPrefix}token/refresh',
+        '/auth/token/refresh',
         data: {'refreshToken': tokens.refresh},
       );
       final body = res.data;
