@@ -109,6 +109,8 @@ class _Spy implements BookingRepository {
 }
 
 void main() {
+  dedupeTimelineTests();
+  noopTimelineTests();
   Future<DiscoverEnv> open(
     WidgetTester t, {
     required String route,
@@ -579,5 +581,73 @@ void main() {
       await settle(t);
       expect(env.where, '/bookings/iv_302');
     });
+  });
+}
+
+void dedupeTimelineTests() {
+  group('dedupeTimeline', () {
+    BookingTimelineEntry e(BookingStatus s, int day, [String? n]) =>
+        BookingTimelineEntry(s, DateTime(2026, 11, day), n);
+
+    test('collapses consecutive repeats into the newest', () {
+      final out = dedupeTimeline([
+        e(BookingStatus.newRequest, 1),
+        e(BookingStatus.matched, 2, 'first'),
+        e(BookingStatus.matched, 3),
+        e(BookingStatus.interviewTrialScheduled, 4),
+        e(BookingStatus.interviewTrialScheduled, 5),
+      ]);
+      expect(out.map((x) => x.status), [
+        BookingStatus.newRequest,
+        BookingStatus.matched,
+        BookingStatus.interviewTrialScheduled,
+      ]);
+      expect(out[1].at, DateTime(2026, 11, 3));
+      expect(out[1].note, 'first');
+      expect(out[2].at, DateTime(2026, 11, 5));
+    });
+
+    test('keeps a real re-match after other stages', () {
+      final out = dedupeTimeline([
+        e(BookingStatus.matched, 1),
+        e(BookingStatus.interviewTrialCompleted, 2),
+        e(BookingStatus.matched, 3),
+      ]);
+      expect(out, hasLength(3));
+    });
+  });
+}
+
+void noopTimelineTests() {
+  test('timeline drops from == to audit rows', () {
+    final b = Booking.fromJson({
+      'id': 'b1',
+      'status': 'INTERVIEW_TRIAL_SCHEDULED',
+      'timeline': [
+        {'from': null, 'to': 'MATCHED', 'at': '2026-11-01T10:00:00Z'},
+        {
+          'from': 'MATCHED',
+          'to': 'INTERVIEW_TRIAL_SCHEDULED',
+          'at': '2026-11-02T10:00:00Z',
+        },
+        {
+          'from': 'INTERVIEW_TRIAL_SCHEDULED',
+          'to': 'INTERVIEW_TRIAL_SCHEDULED',
+          'note': 'accepted the proposed time',
+          'at': '2026-11-03T10:00:00Z',
+        },
+      ],
+    })!;
+    expect(b.timeline.map((e) => e.status), [
+      BookingStatus.matched,
+      BookingStatus.interviewTrialScheduled,
+    ]);
+    expect(
+      b.timeline.last.at,
+      DateTime.parse('2026-11-02T10:00:00Z').toLocal(),
+    );
+  });
+  test('ACCEPTED interview reads as scheduled', () {
+    expect(interviewStatusFrom('ACCEPTED'), InterviewStatus.scheduled);
   });
 }

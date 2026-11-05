@@ -21,16 +21,18 @@ enum InterviewStatus {
   unknown,
 }
 
-InterviewStatus interviewStatusFrom(Object? code) =>
-    switch (code is String ? code.toUpperCase() : null) {
-      'REQUESTED' => InterviewStatus.requested,
-      'CONFIRMED' => InterviewStatus.scheduled,
-      'RESCHEDULE_PROPOSED' => InterviewStatus.rescheduleProposed,
-      'COMPLETED' => InterviewStatus.completed,
-      'CANCELLED' || 'CANCELED' => InterviewStatus.cancelled,
-      'DECLINED' => InterviewStatus.declined,
-      _ => InterviewStatus.unknown,
-    };
+InterviewStatus interviewStatusFrom(Object? code) => switch (code is String
+    ? code.toUpperCase()
+    : null) {
+  'REQUESTED' => InterviewStatus.requested,
+  // The OpenAPI says CONFIRMED; the backend code names the same state ACCEPTED.
+  'CONFIRMED' || 'ACCEPTED' => InterviewStatus.scheduled,
+  'RESCHEDULE_PROPOSED' => InterviewStatus.rescheduleProposed,
+  'COMPLETED' => InterviewStatus.completed,
+  'CANCELLED' || 'CANCELED' => InterviewStatus.cancelled,
+  'DECLINED' => InterviewStatus.declined,
+  _ => InterviewStatus.unknown,
+};
 
 /// What the customer may do right now. The UI shows exactly these, nothing inferred. The backend's
 /// `allowedActions` are reschedule, cancel, complete, accept-proposal and reject-proposal;
@@ -241,6 +243,51 @@ List<InterviewSlot> generateInterviewSlots({
     for (var m = from; m + 60 <= to; m += 60)
       if (m >= earliest) InterviewSlot(slotId(m)),
   ];
+}
+
+/// Outcome of checking a customer-chosen start time (see [checkInterviewTime]).
+enum TimeCheck { ok, past, tooEarly, unavailable }
+
+/// The worker's free stretches (minutes since midnight, start to end) on one day: the slots the
+/// backend returned, merged where they touch.
+List<({int start, int end})> freeWindows(List<InterviewSlot> slots) {
+  final sorted = [...slots]
+    ..sort((a, b) => a.startMinutes.compareTo(b.startMinutes));
+  final out = <({int start, int end})>[];
+  for (final s in sorted) {
+    if (out.isNotEmpty && s.startMinutes <= out.last.end) {
+      final last = out.removeLast();
+      out.add((
+        start: last.start,
+        end: s.endMinutes > last.end ? s.endMinutes : last.end,
+      ));
+    } else {
+      out.add((start: s.startMinutes, end: s.endMinutes));
+    }
+  }
+  return out;
+}
+
+/// Is a visit starting at [minutes] (since midnight) on [date] bookable? It must be in the future
+/// and the whole visit ([InterviewSlot.minutes] long) must sit inside the worker's free windows
+/// from the backend, so any minute is allowed, not just the hour marks.
+TimeCheck checkInterviewTime({
+  required int minutes,
+  required DateTime date,
+  required DateTime now,
+  required List<InterviewSlot> slots,
+}) {
+  final isToday =
+      DateTime(date.year, date.month, date.day) ==
+      DateTime(now.year, now.month, now.day);
+  if (isToday && minutes <= now.hour * 60 + now.minute) return TimeCheck.past;
+  if (slots.isEmpty) return TimeCheck.unavailable;
+  final end = minutes + slots.first.minutes;
+  if (minutes < freeWindows(slots).first.start) return TimeCheck.tooEarly;
+  final fits = freeWindows(
+    slots,
+  ).any((w) => minutes >= w.start && end <= w.end);
+  return fits ? TimeCheck.ok : TimeCheck.unavailable;
 }
 
 /// The interview screens' view of a booking (see `InterviewRepositoryOverBookings`).

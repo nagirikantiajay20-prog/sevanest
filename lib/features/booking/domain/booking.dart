@@ -275,10 +275,29 @@ class Booking {
   }
 }
 
-List<BookingTimelineEntry> _timeline(Object? raw) => [
+/// The backend logs every transition, so a reschedule (SCHEDULED -> SCHEDULED) or a repeated
+/// action adds the same stage again. One stage once: consecutive repeats collapse into the newest
+/// (its time and note win; an older note is kept when the newest has none).
+List<BookingTimelineEntry> dedupeTimeline(List<BookingTimelineEntry> entries) {
+  final out = <BookingTimelineEntry>[];
+  for (final e in entries) {
+    if (out.isNotEmpty && out.last.status == e.status) {
+      final prev = out.removeLast();
+      out.add(
+        BookingTimelineEntry(e.status, e.at ?? prev.at, e.note ?? prev.note),
+      );
+    } else {
+      out.add(e);
+    }
+  }
+  return out;
+}
+
+List<BookingTimelineEntry> _timeline(Object? raw) => dedupeTimeline([
   if (raw is List)
     for (final e in raw)
-      if (e is Map)
+      // `from == to` is the backend's audit note on a stage (a time accepted or kept), not a stage.
+      if (e is Map && !_noopStep(e))
         BookingTimelineEntry(
           // The deployed `TimelineEntry` is `{from, to, by, note, at}`: the stage reached is `to`.
           bookingStatusFrom(
@@ -287,7 +306,12 @@ List<BookingTimelineEntry> _timeline(Object? raw) => [
           _date(e['at'] ?? e['createdAt'] ?? e['occurredAt']),
           _s(e['note'] ?? e['reason']),
         ),
-];
+]);
+
+bool _noopStep(Map<dynamic, dynamic> e) =>
+    e['from'] != null &&
+    bookingStatusFrom(e['from']) == bookingStatusFrom(e['to']) &&
+    bookingStatusFrom(e['to']) != BookingStatus.unknown;
 
 String? _s(Object? v) => v is String && v.isNotEmpty ? v : null;
 

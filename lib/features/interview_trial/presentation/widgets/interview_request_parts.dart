@@ -5,6 +5,7 @@ import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
     show AuthCta, authSerif;
 import 'package:sevanest_customer/features/interview_trial/domain/interview.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -393,211 +394,162 @@ class DateStrip extends StatelessWidget {
   }
 }
 
-/// Free times for the chosen day, grouped Morning / Afternoon & evening, two per row.
-class SlotGrid extends StatelessWidget {
-  const SlotGrid({
-    required this.slots,
-    required this.selected,
-    required this.onSelect,
+/// The customer's own start time: a tile that opens the platform time picker (hour, minute, AM/PM),
+/// with the worker's free windows and any problem with the chosen time under it.
+class InterviewTimeField extends StatelessWidget {
+  const InterviewTimeField({
+    required this.minutes,
+    required this.visitMinutes,
+    required this.windows,
+    required this.check,
+    required this.onTap,
     super.key,
   });
-  final List<InterviewSlot> slots;
-  final String? selected;
-  final ValueChanged<InterviewSlot>? onSelect;
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final morning = slots.where((s) => s.startMinutes < 12 * 60).toList();
-    final later = slots.where((s) => s.startMinutes >= 12 * 60).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (morning.isNotEmpty)
-          _group(
-            Icons.wb_sunny_outlined,
-            AppColors.amber,
-            l10n.interviewMorning,
-            morning,
-          ),
-        if (later.isNotEmpty)
-          _group(
-            Icons.nightlight_outlined,
-            dsNavy,
-            l10n.interviewAfternoon,
-            later,
-            first: morning.isEmpty,
-          ),
-      ],
-    );
-  }
+  /// Chosen start (minutes since midnight), or null.
+  final int? minutes;
+  final int visitMinutes;
+  final List<({int start, int end})> windows;
 
-  Widget _group(
-    IconData icon,
-    Color color,
-    String label,
-    List<InterviewSlot> list, {
-    bool first = true,
-  }) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: EdgeInsets.only(top: first ? 0 : 14, bottom: 8),
-        child: Row(
-          children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 8),
-            Text(
-              label.toUpperCase(),
-              style: AppText.body.copyWith(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.6,
-                color: const Color(0xFF475569),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: dsNavy.withValues(alpha: 0.14),
-              ),
-            ),
-          ],
-        ),
-      ),
-      LayoutBuilder(
-        builder: (context, box) {
-          final w = (box.maxWidth - 10) / 2;
-          return Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              for (final s in list)
-                SizedBox(
-                  width: w,
-                  child: _SlotTile(
-                    slot: s,
-                    on: selected == s.id,
-                    onTap: onSelect == null ? null : () => onSelect!(s),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    ],
-  );
-}
-
-class _SlotTile extends StatelessWidget {
-  const _SlotTile({required this.slot, required this.on, required this.onTap});
-  final InterviewSlot slot;
-  final bool on;
+  /// Verdict on [minutes]; ignored while it is null.
+  final TimeCheck check;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final h24 = slot.startMinutes ~/ 60;
-    final m = slot.startMinutes % 60;
-    final h = h24 % 12 == 0 ? 12 : h24 % 12;
-    final clock = '$h:${m.toString().padLeft(2, '0')}';
-    final span = DateFormat.jm().format(DateTime(2000, 1, 1, h24, m));
-    final fg = on ? Colors.white : dsNavy;
-    return Semantics(
-      button: true,
-      selected: on,
-      label: span,
-      excludeSemantics: true,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: on
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.teal, dsSky],
-                )
-              : null,
-          color: on ? null : const Color(0xBFFFFFFF),
-          border: Border.all(
-            color: on ? Colors.transparent : dsNavy.withValues(alpha: 0.16),
-            width: 1.5,
-          ),
-          boxShadow: on
-              ? [
-                  BoxShadow(
-                    color: AppColors.teal.withValues(alpha: 0.4),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : null,
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            key: Key('interview_slot_${slot.id}'),
-            borderRadius: BorderRadius.circular(16),
-            onTap: onTap,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 64),
-              child: Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          clock,
-                          style: authSerif(24, 1.1).copyWith(color: fg),
-                        ),
-                        Text(
-                          l10n.interviewSlotMeta(
-                            h24 < 12 ? 'AM' : 'PM',
-                            slot.minutes,
-                          ),
-                          style: AppText.body.copyWith(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            color: on ? Colors.white : dsMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: AnimatedScale(
-                      scale: on ? 1 : 0,
-                      duration: const Duration(milliseconds: 350),
-                      curve: Curves.easeOutBack,
-                      child: Container(
-                        width: 20,
-                        height: 20,
+    final locale = Localizations.localeOf(context).toString();
+    final m = minutes;
+    final bad = m != null && check != TimeCheck.ok;
+    final hasTime = m != null;
+    final accent = bad ? const Color(0xFFB3261E) : AppColors.teal;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          button: true,
+          selected: hasTime && !bad,
+          label: hasTime ? formatTime(m) : l10n.interviewTimeChoose,
+          excludeSemantics: true,
+          child: Material(
+            color: const Color(0xBFFFFFFF),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: bad ? accent : dsNavy.withValues(alpha: 0.16),
+                width: 1.5,
+              ),
+            ),
+            child: InkWell(
+              key: const Key('interview_time_btn'),
+              borderRadius: BorderRadius.circular(18),
+              onTap: onTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 72),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: Color(0xFFE2EEEC),
                         ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          size: 13,
+                        child: Icon(
+                          Icons.schedule_rounded,
+                          size: 22,
+                          color: accent,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              hasTime
+                                  ? DateFormat.jm(locale).format(
+                                      DateTime(2000, 1, 1, m ~/ 60, m % 60),
+                                    )
+                                  : l10n.interviewTimeChoose,
+                              key: const Key('interview_time_value'),
+                              style: authSerif(
+                                hasTime ? 26 : 20,
+                                1.1,
+                              ).copyWith(color: dsNavy),
+                            ),
+                            Text(
+                              hasTime
+                                  ? l10n.interviewTimeLength(visitMinutes)
+                                  : l10n.interviewTimeChooseHint,
+                              style: AppText.body.copyWith(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: dsMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        hasTime
+                            ? l10n.interviewTimeChange
+                            : l10n.interviewTimeSet,
+                        style: AppText.body.copyWith(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
                           color: AppColors.teal,
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
-      ),
+        if (bad)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.error_outline_rounded, size: 18, color: accent),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    switch (check) {
+                      TimeCheck.past => l10n.interviewTimePast,
+                      TimeCheck.tooEarly => l10n.interviewTimeTooEarly(
+                        formatTime(windows.first.start),
+                      ),
+                      _ => l10n.interviewTimeUnavailable,
+                    },
+                    key: const Key('interview_time_error'),
+                    style: AppText.body.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: accent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (windows.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              l10n.interviewTimeWindows(
+                windows.map((w) => formatTimeSpan(w.start, w.end)).join(', '),
+              ),
+              key: const Key('interview_time_windows'),
+              style: AppText.body.copyWith(fontSize: 13, color: dsMuted),
+            ),
+          ),
+      ],
     );
   }
 }

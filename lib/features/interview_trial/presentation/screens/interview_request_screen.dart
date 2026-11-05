@@ -72,7 +72,49 @@ class _State extends ConsumerState<InterviewRequestScreen> {
       (_date != null ||
           _slot != null ||
           _note.text != ref.read(requirementNoteProvider));
-  bool get _canSubmit => _date != null && _slot != null && !_busy;
+  bool get _canSubmit =>
+      _date != null && _slot != null && !_busy && _check == TimeCheck.ok;
+
+  /// Verdict on the chosen time against now and the worker's free windows from the backend; null
+  /// until a date, a time and that day's availability are all known.
+  TimeCheck? get _check {
+    final date = _date;
+    final m = parseSlot(_slot);
+    if (date == null || m == null) return null;
+    final free = ref
+        .read(interviewSlotsProvider((workerId: widget.workerId, date: date)))
+        .value;
+    if (free == null) return null;
+    return checkInterviewTime(
+      minutes: m,
+      date: date,
+      now: ref.read(nowProvider)(),
+      slots: free,
+    );
+  }
+
+  Future<void> _pickTime(List<InterviewSlot> free) async {
+    final l10n = AppLocalizations.of(context);
+    final now = ref.read(nowProvider)();
+    final date = _date!;
+    final isToday = DateTime(date.year, date.month, date.day) == _today();
+    // Start on the chosen time, else the first free time that is not already past.
+    final first = free
+        .map((s) => s.startMinutes)
+        .where((m) => !isToday || m > now.hour * 60 + now.minute)
+        .firstOrNull;
+    final start = parseSlot(_slot) ?? first ?? free.first.startMinutes;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: start ~/ 60, minute: start % 60),
+      helpText: l10n.interviewSlotLabel,
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _slot = slotId(picked.hour * 60 + picked.minute);
+      _error = null;
+    });
+  }
 
   @override
   void initState() {
@@ -88,8 +130,8 @@ class _State extends ConsumerState<InterviewRequestScreen> {
   }
 
   void _pickDate(DateTime d) => setState(() {
+    // The chosen time stays: it is re-checked against the new day's availability.
     _date = d;
-    _slot = null;
     _error = null;
   });
 
@@ -315,7 +357,7 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         onBack: () => Navigator.of(context).maybePop(),
         body: _form(context, l10n, worker, slots, date),
         bottom: RequestSubmitBar(
-          summary: date == null || _slot == null
+          summary: date == null || _slot == null || _check != TimeCheck.ok
               ? null
               : _summary(date, locale),
           hint: date == null
@@ -364,12 +406,11 @@ class _State extends ConsumerState<InterviewRequestScreen> {
   /// "Thu, 29 Oct · 10 AM – 11 AM".
   String _summary(DateTime date, String locale) {
     final start = parseSlot(_slot) ?? 0;
-    final length = _slotLength[_slot] ?? const InterviewSlot('00:00').minutes;
-    return '${formatDate(date, locale)} · ${formatTimeSpan(start, start + length)}';
+    return '${formatDate(date, locale)} · ${formatTimeSpan(start, start + _visitMinutes)}';
   }
 
-  /// Length of each loaded slot by id, for the summary line.
-  final _slotLength = <String, int>{};
+  /// Visit length from the loaded availability, for the summary line.
+  int _visitMinutes = const InterviewSlot('00:00').minutes;
 
   Widget _form(
     BuildContext context,
@@ -514,24 +555,21 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         ),
       ),
       data: (list) {
-        _slotLength
-          ..clear()
-          ..addEntries(list.map((s) => MapEntry(s.id, s.minutes)));
-        return list.isEmpty
-            ? SlotHint(
-                l10n.interviewNoSlots,
-                key: const Key('interview_no_slots'),
-              )
-            : SlotGrid(
-                slots: list,
-                selected: _slot,
-                onSelect: _busy
-                    ? null
-                    : (s) => setState(() {
-                        _slot = _slot == s.id ? null : s.id;
-                        _error = null;
-                      }),
-              );
+        if (list.isEmpty) {
+          return SlotHint(
+            l10n.interviewNoSlots,
+            key: const Key('interview_no_slots'),
+          );
+        }
+        _visitMinutes = list.first.minutes;
+        final m = parseSlot(_slot);
+        return InterviewTimeField(
+          minutes: m,
+          visitMinutes: _visitMinutes,
+          windows: freeWindows(list),
+          check: _check ?? TimeCheck.ok,
+          onTap: _busy ? null : () => _pickTime(list),
+        );
       },
     );
   }

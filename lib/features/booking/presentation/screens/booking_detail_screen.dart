@@ -243,6 +243,17 @@ class _State extends ConsumerState<BookingDetailScreen>
         ),
       );
     }
+    // Worker matched, nothing booked yet: the next step is the interview/trial request.
+    if (b.workerId != null &&
+        a.contains(BookingAction.schedule) &&
+        b.scheduledAt == null) {
+      return _Primary(
+        const Key('booking_schedule_btn'),
+        l10n.bookingSchedule,
+        () => _interview(b, reschedule: true),
+        icon: Icons.event_available_rounded,
+      );
+    }
     if (a.contains(BookingAction.viewService)) {
       return _Primary(
         const Key('booking_view_service_btn'),
@@ -317,29 +328,36 @@ class _Body extends ConsumerWidget {
   /// Backend events when it sends them (unknown ones read "Updated"); otherwise the happy path
   /// with the current state marked.
   List<TimelineStep> _timeline(AppLocalizations l, String locale) {
-    if (booking.timeline.isNotEmpty) {
-      final last = booking.timeline.length - 1;
+    // Deduped again here so a booking built elsewhere (cache, mock) cannot show a stage twice.
+    final tl = dedupeTimeline(booking.timeline);
+    if (tl.isNotEmpty) {
+      final last = tl.length - 1;
       final when = booking.scheduledAt;
       // Only the newest "scheduled" entry carries the time the backend holds now.
-      final scheduledIdx = booking.timeline.lastIndexWhere(
+      final scheduledIdx = tl.lastIndexWhere(
         (e) => e.status == BookingStatus.interviewTrialScheduled,
       );
+      final firstMatched = tl.indexWhere(
+        (e) => e.status == BookingStatus.matched,
+      );
       return [
-        for (var i = 0; i < booking.timeline.length; i++)
+        for (var i = 0; i < tl.length; i++)
           TimelineStep(
-            bookingStatusLabel(l, booking.timeline[i].status),
-            booking.timeline[i].status == BookingStatus.cancelled
+            // A MATCHED entry after the first one is "not a fit, matched again".
+            tl[i].status == BookingStatus.matched && i != firstMatched
+                ? l.bookingStatusRematched
+                : bookingStatusLabel(l, tl[i].status),
+            tl[i].status == BookingStatus.cancelled
                 ? TimelineState.failed
                 : i == last && !bookingIsPast(booking.status)
                 ? TimelineState.current
                 : TimelineState.done,
             [
-              booking.timeline[i].note ??
+              tl[i].note ??
                   (i == scheduledIdx && when != null
                       ? '${interviewTypeName(l, booking.scheduleType ?? InterviewType.interview)} · ${_stamp(when, locale)}'
                       : null),
-              if (booking.timeline[i].at != null)
-                _stamp(booking.timeline[i].at!, locale),
+              if (tl[i].at != null) _stamp(tl[i].at!, locale),
             ].whereType<String>().join(' · '),
           ),
       ];
@@ -551,7 +569,9 @@ class _Body extends ConsumerWidget {
                   ),
                 // Nothing booked yet: offer to schedule. Once the backend holds a time, the
                 // interview details lead and the same transition is only a reschedule.
-                if (canMove && at == null)
+                if (canMove &&
+                    at == null &&
+                    primaryKey != const Key('booking_schedule_btn'))
                   outline(
                     'booking_schedule_btn',
                     l10n.bookingSchedule,

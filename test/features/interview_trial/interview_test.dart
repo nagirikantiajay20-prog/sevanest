@@ -51,6 +51,7 @@ class _Spy implements InterviewRepository {
   final InterviewRepositoryOverBookings inner;
   final keys = <String>[];
   var createCalls = 0;
+  InterviewRequest? lastRequest;
   var cancelCalls = 0;
   var declineCalls = 0;
   var completeCalls = 0;
@@ -74,6 +75,7 @@ class _Spy implements InterviewRepository {
     required String idempotencyKey,
   }) async {
     createCalls++;
+    lastRequest = r;
     keys.add(idempotencyKey);
     await gate?.future;
     final once = createFailsOnce;
@@ -366,6 +368,41 @@ void main() {
     expect(noWindow.first.id, '09:00');
   });
 
+  test(
+    'checkInterviewTime: any minute inside the free windows, never past',
+    () {
+      final slots = [
+        const InterviewSlot('09:00'),
+        const InterviewSlot('10:00'),
+        const InterviewSlot('14:00'),
+      ]; // free 09:00-11:00 and 14:00-15:00
+      final day = DateTime(2026, 10, 10);
+      final now = DateTime(2026, 10, 9, 10, 30);
+      TimeCheck c(int m, {DateTime? d}) => checkInterviewTime(
+        minutes: m,
+        date: d ?? day,
+        now: now,
+        slots: slots,
+      );
+      expect(freeWindows(slots), [
+        (start: 540, end: 660),
+        (start: 840, end: 900),
+      ]);
+      expect(c(9 * 60 + 25), TimeCheck.ok);
+      expect(c(10 * 60 + 0), TimeCheck.ok); // ends 11:00 exactly
+      expect(c(10 * 60 + 1), TimeCheck.unavailable); // would run past 11:00
+      expect(c(12 * 60), TimeCheck.unavailable); // gap
+      expect(c(8 * 60 + 59), TimeCheck.tooEarly);
+      final today = DateTime(2026, 10, 9);
+      expect(c(10 * 60 + 30, d: today), TimeCheck.past); // not after now
+      expect(c(14 * 60, d: today), TimeCheck.ok);
+      expect(
+        checkInterviewTime(minutes: 600, date: day, now: now, slots: const []),
+        TimeCheck.unavailable,
+      );
+    },
+  );
+
   group('screens', () {
     // cook-4 is not in the seeded bookings, so a request for it is not a duplicate.
     const newRoute = '/interviews/new?workerId=cook-4';
@@ -396,13 +433,40 @@ void main() {
       await settle(t);
     }
 
+    /// Opens the time picker, types [hhmm] ("16:25", 24 h) with its AM/PM toggle and confirms.
+    Future<void> pickTime(WidgetTester t, String hhmm) async {
+      final h24 = int.parse(hhmm.split(':')[0]);
+      final min = int.parse(hhmm.split(':')[1]);
+      await tapKey(t, 'interview_time_btn');
+      final toggle = find.byIcon(Icons.keyboard_outlined);
+      if (toggle.evaluate().isNotEmpty) {
+        await t.tap(toggle);
+        await t.pumpAndSettle();
+      }
+      final fields = find.descendant(
+        of: find.byType(Dialog),
+        matching: find.byType(TextField),
+      );
+      await t.enterText(fields.at(0), '${h24 % 12 == 0 ? 12 : h24 % 12}');
+      await t.enterText(fields.at(1), '$min');
+      await t.tap(find.text(h24 < 12 ? 'AM' : 'PM'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('OK'));
+      await settle(t);
+    }
+
+    String shownTime(WidgetTester t) => t
+        .widget<Text>(find.byKey(const Key('interview_time_value')))
+        .data!
+        .replaceAll(' ', ' ');
+
     /// Picks tomorrow (second chip of the date strip) and a slot.
     Future<void> pickDateAndSlot(
       WidgetTester t, {
       String slot = '10:00',
     }) async {
       await tapKey(t, 'interview_date_1');
-      await tapKey(t, 'interview_slot_$slot');
+      await pickTime(t, slot);
     }
 
     /// Text inside the status chip (the progress bar repeats the stage names).
@@ -435,10 +499,53 @@ void main() {
           );
           await tapKey(t, 'interview_date_1');
           expect(submitEnabled(t), isFalse); // date alone is not enough
-          await tapKey(t, 'interview_slot_10:00');
+          await pickTime(t, '10:00');
           expect(submitEnabled(t), isTrue);
         },
       );
+
+      testWidgets('any minute and AM/PM can be chosen and is shown', (t) async {
+        await open(t, route: newRoute);
+        await tapKey(t, 'interview_date_1');
+        await pickTime(t, '16:25');
+        expect(shownTime(t), '4:25 PM');
+        expect(submitEnabled(t), isTrue);
+        await pickTime(t, '09:40');
+        expect(shownTime(t), '9:40 AM');
+        expect(submitEnabled(t), isTrue);
+      });
+
+      testWidgets('a time outside the free hours is refused with a message', (
+        t,
+      ) async {
+        await open(t, route: newRoute);
+        await tapKey(t, 'interview_date_1');
+        await pickTime(t, '03:15');
+        expect(find.byKey(const Key('interview_time_error')), findsOneWidget);
+        expect(submitEnabled(t), isFalse);
+        await pickTime(t, '11:05');
+        expect(find.byKey(const Key('interview_time_error')), findsNothing);
+        expect(submitEnabled(t), isTrue);
+      });
+
+      testWidgets('today: a time that has passed cannot be sent', (t) async {
+        await open(t, route: newRoute);
+        await tapKey(t, 'interview_date_0'); // now is 10:00
+        await pickTime(t, '09:30');
+        expect(find.byKey(const Key('interview_time_error')), findsOneWidget);
+        expect(submitEnabled(t), isFalse);
+      });
+
+      testWidgets('trial type is sent with the chosen time', (t) async {
+        final spy = _Spy();
+        await open(t, route: newRoute, spy: spy);
+        await tapKey(t, 'interview_type_trial');
+        await pickDateAndSlot(t, slot: '14:35');
+        await tapKey(t, 'interview_submit_btn');
+        expect(spy.createCalls, 1);
+        expect(spy.lastRequest?.type, InterviewType.trial);
+        expect(spy.lastRequest?.slot, '14:35');
+      });
 
       testWidgets('INT-11 the date strip runs from today to 13 days on', (
         t,
@@ -529,7 +636,7 @@ void main() {
           );
           expect(env.where, '/interviews/new');
           expect(submitEnabled(t), isFalse);
-          await tapKey(t, 'interview_slot_16:00');
+          await pickTime(t, '16:00');
           await tapKey(t, 'interview_submit_btn');
           await viewRequest(t);
           expect(env.where, startsWith('/interviews/iv_'));
