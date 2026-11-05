@@ -11,7 +11,9 @@ import 'package:sevanest_customer/features/booking/data/booking_repository_mock.
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/payment/data/payment_repository_mock.dart';
+import 'package:sevanest_customer/features/payment/data/receipt_pdf_service.dart';
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
+import 'package:sevanest_customer/features/payment/domain/receipt_document.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -149,12 +151,32 @@ class _Svc implements PaymentService {
   }
 }
 
+/// Stands in for the PDF service: records what it was asked to print, optionally waits or fails.
+class _FakePdf implements ReceiptPdfService {
+  final saved = <ReceiptDocument>[];
+  final shared = <String>[];
+  Completer<void>? gate;
+  bool fails = false;
+
+  @override
+  Future<File> save(ReceiptDocument doc) async {
+    saved.add(doc);
+    await gate?.future;
+    if (fails) throw const FileSystemException('disk full');
+    return File(doc.fileName);
+  }
+
+  @override
+  Future<void> share(File file, String subject) async => shared.add(file.path);
+}
+
 const _bookingId = 'bk_2100'; // seeded in PENDING_PAYMENT
 
 void main() {
   late BookingRepositoryMock bookings;
   late _Repo repo;
   late _Svc svc;
+  late _FakePdf pdf;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -171,6 +193,7 @@ void main() {
       ),
     );
     svc = _Svc();
+    pdf = _FakePdf();
   });
 
   Future<DiscoverEnv> open(WidgetTester t, {String? route}) async {
@@ -180,6 +203,7 @@ void main() {
         bookingRepositoryProvider.overrideWithValue(bookings),
         paymentRepositoryProvider.overrideWithValue(repo),
         paymentServiceProvider.overrideWithValue(svc),
+        receiptPdfServiceProvider.overrideWithValue(pdf),
         paymentPollDelaysProvider.overrideWithValue(
           List.filled(3, const Duration(milliseconds: 10)),
         ),
@@ -736,6 +760,83 @@ void main() {
         find.text('Refunded on'),
         findsOneWidget,
       ); // from the payment's refundedAt
+    });
+
+    testWidgets('Download PDF prints the receipt data and offers to share', (
+      t,
+    ) async {
+      await open(t, route: '/transactions/pay_1900');
+      await tapKey(t, 'txn_download_pdf_btn');
+      expect(pdf.saved, hasLength(1));
+      final doc = pdf.saved.single;
+      expect(doc.receiptNumber, 'SN-R-1900');
+      expect(doc.fileName, 'SevaNest_Receipt_SN-R-1900.pdf');
+      final values = doc.rows.map((r) => r.value);
+      expect(values, contains('pay_mock1900'));
+      expect(values, contains('Card · Visa **** 4242'));
+      expect(find.textContaining('Receipt PDF saved'), findsOneWidget);
+      await t.tap(find.text('Share'));
+      await settle(t);
+      expect(pdf.shared, ['SevaNest_Receipt_SN-R-1900.pdf']);
+    });
+
+    testWidgets('repeated taps while the PDF is being made save it once', (
+      t,
+    ) async {
+      pdf.gate = Completer();
+      await open(t, route: '/transactions/pay_1900');
+      await t.tap(k('txn_download_pdf_btn'));
+      await t.pump();
+      expect(find.text('Preparing PDF…'), findsOneWidget);
+      await t.tap(k('txn_download_pdf_btn'), warnIfMissed: false);
+      await t.pump();
+      expect(pdf.saved, hasLength(1));
+      pdf.gate!.complete();
+      await settle(t);
+      expect(pdf.saved, hasLength(1));
+      expect(find.text('Download PDF'), findsOneWidget);
+    });
+
+    testWidgets('a failed save shows an error and allows another try', (
+      t,
+    ) async {
+      pdf.fails = true;
+      await open(t, route: '/transactions/pay_1900');
+      await tapKey(t, 'txn_download_pdf_btn');
+      expect(
+        find.textContaining("Couldn't create the receipt PDF"),
+        findsOneWidget,
+      );
+      await t.pump(const Duration(seconds: 9)); // snackbar clears the button
+      await settle(t);
+      pdf.fails = false;
+      await tapKey(t, 'txn_download_pdf_btn');
+      expect(pdf.saved, hasLength(2));
+    });
+
+    testWidgets('receipt lays out without overflow on a small phone', (
+      t,
+    ) async {
+      t.view.physicalSize = const Size(320 * 3, 568 * 3);
+      t.view.devicePixelRatio = 3;
+      addTearDown(t.view.reset);
+      await open(t, route: '/transactions/pay_1900');
+      expect(t.takeException(), isNull);
+      expect(k('txn_amount'), findsOneWidget);
+      expect(k('txn_download_pdf_btn'), findsOneWidget);
+    });
+
+    testWidgets('an unpaid payment has no PDF to make', (t) async {
+      final p = (await t.runAsync(
+        () => repo.inner.start(_bookingId, idempotencyKey: 'seed-key-0002'),
+      ))!;
+      await open(t, route: '/transactions/${p.id}');
+      await tapKey(t, 'txn_download_pdf_btn');
+      expect(pdf.saved, isEmpty);
+      expect(
+        find.textContaining('available once the payment is complete'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('receipt not readable: the payment itself is shown', (t) async {

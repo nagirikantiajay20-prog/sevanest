@@ -2638,6 +2638,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get txnReceiptCopied => 'Receipt details copied';
 
   @override
+  String get txnDownloadPdf => 'Download PDF';
+
+  @override
+  String get txnPdfPreparing => 'Preparing PDF…';
+
+  @override
+  String get txnPdfSaved => 'Receipt PDF saved';
+
+  @override
+  String get txnPdfShare => 'Share';
+
+  @override
+  String get txnPdfFailed =>
+      'Couldn\'t create the receipt PDF. Please try again.';
+
+  @override
+  String get txnPdfShareFailed =>
+      'Couldn\'t open the share sheet. The PDF is saved on your phone.';
+
+  @override
+  String get txnPdfUnavailable =>
+      'The receipt PDF is available once the payment is complete.';
+
+  @override
+  String get pdfReceiptHeading => 'Payment receipt';
+
+  @override
+  String get pdfTotalPaid => 'Total paid';
+
+  @override
+  String get pdfStatusRow => 'Payment status';
+
+  @override
+  String get pdfWorkerRow => 'Worker';
+
+  @override
+  String get pdfServiceRow => 'Service';
+
+  @override
+  String get pdfBookingTypeRow => 'Booking type';
+
+  @override
+  String get pdfStartDateRow => 'Start date';
+
+  @override
+  String get pdfFooter =>
+      'This is a system-generated receipt from SevaNest. Verified Help. Trusted Homes.';
+
+  @override
   String txnRefundTitle(String amount) {
     return 'Refund of $amount on its way';
   }

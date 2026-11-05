@@ -4870,6 +4870,96 @@ abstract class AppLocalizations {
   /// **'Receipt details copied'**
   String get txnReceiptCopied;
 
+  /// No description provided for @txnDownloadPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Download PDF'**
+  String get txnDownloadPdf;
+
+  /// No description provided for @txnPdfPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing PDF…'**
+  String get txnPdfPreparing;
+
+  /// No description provided for @txnPdfSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt PDF saved'**
+  String get txnPdfSaved;
+
+  /// No description provided for @txnPdfShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get txnPdfShare;
+
+  /// No description provided for @txnPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the receipt PDF. Please try again.'**
+  String get txnPdfFailed;
+
+  /// No description provided for @txnPdfShareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the share sheet. The PDF is saved on your phone.'**
+  String get txnPdfShareFailed;
+
+  /// No description provided for @txnPdfUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt PDF is available once the payment is complete.'**
+  String get txnPdfUnavailable;
+
+  /// No description provided for @pdfReceiptHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment receipt'**
+  String get pdfReceiptHeading;
+
+  /// No description provided for @pdfTotalPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Total paid'**
+  String get pdfTotalPaid;
+
+  /// No description provided for @pdfStatusRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment status'**
+  String get pdfStatusRow;
+
+  /// No description provided for @pdfWorkerRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Worker'**
+  String get pdfWorkerRow;
+
+  /// No description provided for @pdfServiceRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Service'**
+  String get pdfServiceRow;
+
+  /// No description provided for @pdfBookingTypeRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking type'**
+  String get pdfBookingTypeRow;
+
+  /// No description provided for @pdfStartDateRow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date'**
+  String get pdfStartDateRow;
+
+  /// No description provided for @pdfFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a system-generated receipt from SevaNest. Verified Help. Trusted Homes.'**
+  String get pdfFooter;
+
   /// No description provided for @txnRefundTitle.
   ///
   /// In en, this message translates to:

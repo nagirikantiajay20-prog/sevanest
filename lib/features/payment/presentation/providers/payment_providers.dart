@@ -9,6 +9,7 @@ import 'package:sevanest_customer/features/home/presentation/providers/home_prov
 import 'package:sevanest_customer/features/payment/data/payment_repository_mock.dart';
 import 'package:sevanest_customer/features/payment/data/payment_repository_remote.dart';
 import 'package:sevanest_customer/features/payment/data/payment_services.dart';
+import 'package:sevanest_customer/features/payment/data/receipt_pdf_service.dart';
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
 import 'package:sevanest_customer/shared/models/paged_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -92,6 +93,11 @@ void refreshAfterPayment(WidgetRef ref, String bookingId) {
     ..invalidate(homeProvider)
     ..invalidate(transactionListProvider);
 }
+
+/// Builds, saves and shares receipt PDFs; overridden in tests.
+final receiptPdfServiceProvider = Provider<ReceiptPdfService>(
+  (ref) => const ReceiptPdfService(),
+);
 
 /// One payment (receipt screen).
 final paymentProvider = FutureProvider.autoDispose.family<Payment, String>((

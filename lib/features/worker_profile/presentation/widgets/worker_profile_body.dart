@@ -466,7 +466,7 @@ class _Section extends StatelessWidget {
                 children: [
                   if (title != null)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 10),
                       child: Row(
                         children: [
                           Expanded(
@@ -535,8 +535,8 @@ class _SoftPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: 36),
-    padding: const EdgeInsets.symmetric(horizontal: 14),
+    constraints: const BoxConstraints(minHeight: 30),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     alignment: Alignment.center,
     decoration: BoxDecoration(
       color: const Color(0xBFFFFFFF),
@@ -544,16 +544,17 @@ class _SoftPill extends StatelessWidget {
       border: Border.all(color: const Color(0xF2FFFFFF)),
       boxShadow: [
         BoxShadow(
-          color: dsNavy.withValues(alpha: 0.08),
-          blurRadius: 8,
-          offset: const Offset(0, 3),
+          color: dsNavy.withValues(alpha: 0.06),
+          blurRadius: 6,
+          offset: const Offset(0, 2),
         ),
       ],
     ),
     child: Text(
       label,
       style: AppText.body.copyWith(
-        fontSize: 14,
+        fontSize: 13,
+        height: 1.25,
         fontWeight: FontWeight.w600,
         color: dsNavy,
       ),

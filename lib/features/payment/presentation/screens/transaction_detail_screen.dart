@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,8 +9,10 @@ import 'package:sevanest_customer/core/widgets/async_value_view.dart';
 import 'package:sevanest_customer/features/booking/domain/booking.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
+import 'package:sevanest_customer/features/payment/domain/receipt_document.dart';
 import 'package:sevanest_customer/features/payment/presentation/payment_labels.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
+import 'package:sevanest_customer/features/payment/presentation/receipt_document_factory.dart';
 import 'package:sevanest_customer/features/payment/presentation/widgets/payment_parts.dart';
 import 'package:sevanest_customer/features/payment/presentation/widgets/transaction_parts.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
@@ -18,9 +22,10 @@ import 'package:sevanest_customer/features/worker_search/presentation/widgets/gl
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
 /// `/transactions/:id` (module 09, screen 9.4): the receipt, rendered from
-/// `GET /payments/{id}/receipt` once the payment has succeeded (there is no PDF yet) and from the
-/// payment itself otherwise or when the receipt cannot be read. The bottom button copies the
-/// receipt details as text, since there is no file to download.
+/// `GET /payments/{id}/receipt` once the payment has succeeded and from the payment itself
+/// otherwise or when the receipt cannot be read. The bottom button saves the receipt as a PDF
+/// (built from the same data, never marking anything paid) and offers to share it; copying the
+/// details as text stays available beneath it.
 class TransactionDetailScreen extends ConsumerStatefulWidget {
   const TransactionDetailScreen({required this.paymentId, super.key});
   final String paymentId;
@@ -30,6 +35,60 @@ class TransactionDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _DetailState extends ConsumerState<TransactionDetailScreen> {
+  bool _busy = false;
+
+  /// Renders, saves and offers to share the PDF; a second tap while one runs does nothing.
+  Future<void> _download(ReceiptDocument? doc) async {
+    if (_busy) return;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    if (doc == null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.txnPdfUnavailable)));
+      return;
+    }
+    final service = ref.read(receiptPdfServiceProvider);
+    setState(() => _busy = true);
+    File? file;
+    try {
+      file = await service.save(doc);
+    } on Object {
+      file = null;
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    final saved = file;
+    messenger.hideCurrentSnackBar();
+    if (saved == null) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.txnPdfFailed),
+          duration: const Duration(seconds: 8),
+        ),
+      );
+      return;
+    }
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('${l10n.txnPdfSaved}: ${doc.fileName}'),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: l10n.txnPdfShare,
+          onPressed: () async {
+            try {
+              await service.share(saved, doc.fileName);
+            } on Object {
+              messenger.showSnackBar(
+                SnackBar(content: Text(l10n.txnPdfShareFailed)),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
   Future<void> _copy(String text, String done) async {
     final messenger = ScaffoldMessenger.of(context);
     await Clipboard.setData(ClipboardData(text: text));
@@ -53,10 +112,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
     final receiptNo = r?.receiptNumber ?? p?.receiptNumber;
     final reference = r?.gatewayReference ?? p?.gatewayReference;
     final paidAt = (r?.paidAt ?? p?.paidAt)?.toLocal();
-    final paidText = paidAt == null
-        ? null
-        : '${formatDate(paidAt, locale)}, '
-              '${formatTime(paidAt.hour * 60 + paidAt.minute)}';
+    final paidText = paidAt == null ? null : receiptPaidText(paidAt, locale);
     final method = p == null
         ? null
         : paymentMethodText(
@@ -94,7 +150,7 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
                         statusLabel: paymentStatusLabel(l10n, p.status),
                         amount: paymentAmount(p),
                         amountKey: const Key('txn_amount'),
-                        subtitle: paymentTitle(booking, ''),
+                        subtitle: booking?.categoryName ?? '',
                       ),
                       ReceiptBody(
                         rows: [
@@ -195,23 +251,45 @@ class _DetailState extends ConsumerState<TransactionDetailScreen> {
       ),
       bottom: p == null
           ? null
-          : PayButton(
-              key: const Key('txn_copy_receipt_btn'),
-              label: l10n.txnCopyReceipt,
-              icon: Icons.copy_rounded,
-              onPressed: () => _copy(
-                _summary(
-                  l10n,
-                  locale,
-                  p,
-                  receiptNo,
-                  paidText,
-                  method,
-                  reference,
-                  booking,
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PayButton(
+                  key: const Key('txn_download_pdf_btn'),
+                  label: _busy ? l10n.txnPdfPreparing : l10n.txnDownloadPdf,
+                  icon: Icons.picture_as_pdf_outlined,
+                  loading: _busy,
+                  onPressed: _busy
+                      ? null
+                      : () => _download(
+                          buildReceiptDocument(
+                            l10n,
+                            locale,
+                            payment: p,
+                            receipt: r,
+                            booking: booking,
+                          ),
+                        ),
                 ),
-                l10n.txnReceiptCopied,
-              ),
+                TextButton.icon(
+                  key: const Key('txn_copy_receipt_btn'),
+                  onPressed: () => _copy(
+                    _summary(
+                      l10n,
+                      locale,
+                      p,
+                      receiptNo,
+                      paidText,
+                      method,
+                      reference,
+                      booking,
+                    ),
+                    l10n.txnReceiptCopied,
+                  ),
+                  icon: const Icon(Icons.copy_rounded, size: 16),
+                  label: Text(l10n.txnCopyReceipt),
+                ),
+              ],
             ),
     );
   }

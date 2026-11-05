@@ -365,59 +365,99 @@ class ReceiptHero extends StatelessWidget {
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-              child: Column(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   GlassAvatar(
                     title: name,
                     gradient: gradient,
-                    size: 64,
-                    fontSize: 21,
+                    size: 52,
+                    fontSize: 18,
                   ),
-                  const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: tone.bg,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Row(
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_rounded, size: 15, color: tone.fg),
-                        const SizedBox(width: 6),
                         Text(
-                          statusLabel,
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: AppText.body.copyWith(
-                            fontSize: 13.5,
+                            fontSize: 16,
+                            height: 1.25,
                             fontWeight: FontWeight.w700,
-                            color: tone.fg,
+                            color: Colors.white,
                           ),
                         ),
+                        if (subtitle.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.body.copyWith(
+                              fontSize: 13.5,
+                              height: 1.3,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.82),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    amount,
-                    key: amountKey,
-                    style: authSerif(46, 1).copyWith(color: Colors.white),
-                  ),
-                  if (subtitle.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      textAlign: TextAlign.center,
-                      style: AppText.body.copyWith(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: tone.bg,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check_rounded, size: 14, color: tone.fg),
+                            const SizedBox(width: 4),
+                            Text(
+                              statusLabel,
+                              style: AppText.body.copyWith(
+                                fontSize: 12.5,
+                                height: 1.2,
+                                fontWeight: FontWeight.w700,
+                                color: tone.fg,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 128),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            amount,
+                            key: amountKey,
+                            style: authSerif(
+                              30,
+                              1,
+                            ).copyWith(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -476,7 +516,7 @@ class ReceiptBody extends StatelessWidget {
         DiscoverGlass(
           corners: const BorderRadius.vertical(bottom: Radius.circular(30)),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 22, 16, 6),
+            padding: const EdgeInsets.fromLTRB(16, 20, 8, 4),
             child: Column(
               children: [
                 for (final (i, r) in rows.indexed) ...[
@@ -507,8 +547,9 @@ class _RowTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 12),
+    padding: const EdgeInsets.symmetric(vertical: 9),
     child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           width: 32,
@@ -519,25 +560,28 @@ class _RowTile extends StatelessWidget {
           ),
           child: Icon(r.icon, size: 16, color: _teal),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 r.label,
                 style: AppText.body.copyWith(
                   fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                  fontWeight: FontWeight.w600,
                   color: dsMuted,
                 ),
               ),
+              const SizedBox(height: 1),
               Text(
                 r.value,
                 key: r.valueKey,
                 style: AppText.body.copyWith(
                   fontSize: 15,
-                  height: 1.4,
+                  height: 1.3,
                   fontWeight: FontWeight.w700,
                   color: dsNavy,
                 ),
@@ -547,6 +591,7 @@ class _RowTile extends StatelessWidget {
                   r.note!,
                   style: AppText.body.copyWith(
                     fontSize: 13,
+                    height: 1.3,
                     fontWeight: FontWeight.w600,
                     color: dsMuted,
                   ),
@@ -554,21 +599,20 @@ class _RowTile extends StatelessWidget {
             ],
           ),
         ),
-        if (r.onCopy != null)
-          TextButton.icon(
-            onPressed: r.onCopy,
-            style: TextButton.styleFrom(
-              foregroundColor: _teal,
-              minimumSize: const Size(44, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              textStyle: AppText.body.copyWith(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            icon: const Icon(Icons.copy_rounded, size: 16),
-            label: Text(r.copyLabel ?? ''),
-          ),
+        // Fixed 40px slot so every value column ends at the same x, with or without Copy.
+        SizedBox(
+          width: 40,
+          height: 40,
+          child: r.onCopy == null
+              ? null
+              : IconButton(
+                  onPressed: r.onCopy,
+                  tooltip: r.copyLabel,
+                  padding: EdgeInsets.zero,
+                  color: _teal,
+                  icon: const Icon(Icons.copy_rounded, size: 18),
+                ),
+        ),
       ],
     ),
   );
