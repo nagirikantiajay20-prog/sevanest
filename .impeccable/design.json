@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T00:00:00Z",
+  "title": "Design System: SevaNest Customer",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Care Teal", "canonical": "#0F766E", "tonalRamp": ["#0A3F3B", "#0D655E", "#0F766E", "#0F8F87", "#38A69B", "#5EEAD4", "#CCFBF1", "#F0FDFA"] },
+      "navy-ink": { "role": "secondary", "displayName": "Threshold Navy", "canonical": "#1E3A5F", "tonalRamp": ["#0F1D30", "#1B3354", "#1E3A5F", "#234367", "#576C88", "#94A3B8", "#E2E8F0", "#EFF3F8"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Welcome and hero lines (serif)." },
+      "body": { "displayName": "Body", "purpose": "Operational copy in Inter." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 1px 2px #1E3A5F0D, 0 4px 12px #1E3A5F0D", "purpose": "Resting cards." },
+      { "name": "raised", "value": "0 2px 6px #1E3A5F12, 0 12px 28px #1E3A5F14", "purpose": "Featured elements." },
+      { "name": "floating", "value": "0 -6px 24px #1E3A5F1A", "purpose": "Bottom sheets and sticky bars." },
+      { "name": "brand", "value": "0 6px 16px #0F766E38", "purpose": "Primary CTA glow." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Default easing; press 120ms, base 180ms, sheet 250ms." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button", "kind": "button", "refersTo": "button-primary",
+      "description": "Full-width main action.",
+      "html": "<button class=\"ds-btn-primary\">Get OTP</button>",
+      "css": ".ds-btn-primary{background:#0F766E;color:#fff;font:700 16px Inter,sans-serif;min-height:52px;padding:0 24px;border:0;border-radius:16px;width:100%;transition:background .12s}.ds-btn-primary:hover,.ds-btn-primary:active{background:#0D655E}.ds-btn-primary:focus-visible{outline:3px solid #0F766E33;outline-offset:2px}"
+    },
+    {
+      "name": "Input", "kind": "input", "refersTo": "input",
+      "description": "Text field.",
+      "html": "<input class=\"ds-input\" placeholder=\"Mobile number\">",
+      "css": ".ds-input{background:#fff;color:#1E3A5F;font:400 15px Inter,sans-serif;padding:14px 16px;border:1px solid #E2E8F0;border-radius:14px;width:100%;box-sizing:border-box}.ds-input::placeholder{color:#64748B}.ds-input:focus{outline:0;border:1.5px solid #0F766E}"
+    },
+    {
+      "name": "Chip", "kind": "chip", "refersTo": "chip",
+      "description": "Filter or choice pill.",
+      "html": "<span class=\"ds-chip\">Cook</span>",
+      "css": ".ds-chip{display:inline-block;background:#fff;color:#1E3A5F;font:600 13px Inter,sans-serif;padding:8px 14px;border:1px solid #E2E8F0;border-radius:999px}.ds-chip:hover{background:#EAF8F5}"
+    },
+    {
+      "name": "Card", "kind": "card", "refersTo": "card",
+      "description": "Content container.",
+      "html": "<div class=\"ds-card\"><strong>Verified worker</strong><p>Background checked</p></div>",
+      "css": ".ds-card{background:#fff;color:#475569;font:400 14px Inter,sans-serif;padding:16px;border:1px solid #E2E8F0;border-radius:20px;box-shadow:0 1px 2px #1E3A5F0D,0 4px 12px #1E3A5F0D}.ds-card strong{color:#1E3A5F;font-weight:600;font-size:16px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trusted Threshold",
+    "overview": "The app is the doorstep where a household decides whether to let someone in. Navy carries authority, teal carries reassurance, and quiet white surfaces let trust cues be the loudest thing on screen.",
+    "keyCharacteristics": ["Navy headings, teal actions, slate body text.", "Generous radii (14-20px) with hairline borders.", "Serif headings, sans body.", "Navy-tinted ambient shadows, never black.", "48px minimum touch targets."],
+    "rules": [
+      { "name": "The Quiet Canvas Rule", "body": "Teal appears on actions and selection only; large areas stay white or cool-grey.", "section": "colors" },
+      { "name": "The Semantic Status Rule", "body": "Green, amber, red mean success, caution, error, never decoration.", "section": "colors" },
+      { "name": "The Serif-for-Welcome Rule", "body": "Serif is for headings only; prices, statuses, fees and form text are always Inter.", "section": "typography" },
+      { "name": "The Navy Shadow Rule", "body": "Shadows are navy-tinted, never black, one level per element.", "section": "elevation" }
+    ],
+    "dos": ["Do keep Threshold Navy for headings and Care Teal for actions and selection.", "Do show trust cues and fees at decision points in plain language.", "Do use the 48px minimum touch target and the 16px gutter.", "Do use tokens from lib/app/theme; no hard-coded colours in screens."],
+    "donts": ["Don't use countdowns, flashing discount banners, or neon gradients.", "Don't use black or neutral-grey shadows.", "Don't set prices, fees, or statuses in the serif face.", "Don't copy competitor branding, assets, or layouts."]
+  }
+}
