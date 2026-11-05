@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "278092283826",
-    "project_id": "sevanest-47cef",
-    "storage_bucket": "sevanest-47cef.firebasestorage.app"
+    "project_number": "669725240903",
+    "project_id": "sevanest-ab168",
+    "storage_bucket": "sevanest-ab168.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:278092283826:android:e0e70bc642caf5c262eeab",
+        "mobilesdk_app_id": "1:669725240903:android:97a75b1b5de754d8b08b62",
         "android_client_info": {
           "package_name": "com.sevanest.customer"
         }
@@ -15,26 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBCX1hJYOX2JsnZawcZ7EKx0Tovhe4rGnY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:278092283826:android:2fefc05f12af796f62eeab",
-        "android_client_info": {
-          "package_name": "com.sevanest.worker.sevanest_worker_app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBCX1hJYOX2JsnZawcZ7EKx0Tovhe4rGnY"
+          "current_key": "AIzaSyAPuYVek9zzywQ7T3GS8JGNqAoOvZGNHqg"
         }
       ],
       "services": {
