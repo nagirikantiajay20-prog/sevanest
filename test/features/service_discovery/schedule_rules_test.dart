@@ -1,6 +1,7 @@
 // UNIT tests: timing / start-date / budget rules, the days helper and the draft clearing rules.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
+import 'package:sevanest_customer/features/booking/data/booking_repository_remote.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/draft_validation.dart';
@@ -138,9 +139,68 @@ void main() {
   });
 
   group('start date', () {
-    test('today is too soon; tomorrow is the first selectable day', () {
-      expect(validateStartDate(_today, _today, _cfg), StartDateIssue.tooSoon);
+    test('today is the first selectable day; tomorrow and later too', () {
+      expect(firstStartDate(_today, _cfg), DateTime(2026, 10, 9));
+      expect(validateStartDate(_today, _today, _cfg), isNull);
       expect(validateStartDate(DateTime(2026, 10, 10), _today, _cfg), isNull);
+      expect(validateStartDate(DateTime(2026, 11, 20), _today, _cfg), isNull);
+    });
+
+    test('yesterday is rejected', () {
+      expect(
+        validateStartDate(DateTime(2026, 10, 8), _today, _cfg),
+        StartDateIssue.tooSoon,
+      );
+    });
+
+    test('a config with min lead 1 still disables today', () {
+      const c = ScheduleConfig(
+        windows: {},
+        minDuration: {},
+        maxShiftMinutes: 720,
+        shiftHours: [8],
+        minLeadDays: 1,
+        maxLeadDays: 60,
+      );
+      expect(validateStartDate(_today, _today, c), StartDateIssue.tooSoon);
+    });
+
+    group('India calendar day (Asia/Kolkata, UTC+5:30)', () {
+      // 18:30 UTC = 00:00 IST next day: the midnight boundary.
+      final before = DateTime.utc(2026, 10, 9, 18, 29); // 23:59 IST on 9 Oct
+      final after = DateTime.utc(2026, 10, 9, 18, 30); // 00:00 IST on 10 Oct
+
+      test('istDate follows India midnight, not UTC midnight', () {
+        expect(istDate(before), DateTime(2026, 10, 9));
+        expect(istDate(after), DateTime(2026, 10, 10));
+        expect(istDate(DateTime.utc(2026, 10, 9, 0, 1)), DateTime(2026, 10, 9));
+      });
+
+      test('9 Oct is selectable at 23:59 IST, rejected at 00:00 IST', () {
+        final d = DateTime(2026, 10, 9);
+        expect(validateStartDate(d, before, _cfg), isNull);
+        expect(validateStartDate(d, after, _cfg), StartDateIssue.tooSoon);
+        expect(validateStartDate(DateTime(2026, 10, 10), after, _cfg), isNull);
+      });
+
+      test('shortcuts roll over at India midnight', () {
+        expect(
+          startDateShortcuts(before, _cfg).first.date,
+          DateTime(2026, 10, 10),
+        );
+        expect(
+          startDateShortcuts(after, _cfg).first.date,
+          DateTime(2026, 10, 11),
+        );
+      });
+
+      test('a date-only value serializes as-is (no UTC shift)', () {
+        expect(
+          BookingRepositoryRemote.day(DateTime(2026, 10, 9)),
+          '2026-10-09',
+        );
+        expect(BookingRepositoryRemote.day(DateTime(2026, 1, 5)), '2026-01-05');
+      });
     });
 
     test('past dates are rejected', () {
@@ -157,18 +217,6 @@ void main() {
         validateStartDate(DateTime(2026, 12, 9), _today, _cfg),
         StartDateIssue.tooFar,
       );
-    });
-
-    test('a config with min lead 0 allows today', () {
-      const c = ScheduleConfig(
-        windows: {},
-        minDuration: {},
-        maxShiftMinutes: 720,
-        shiftHours: [8],
-        minLeadDays: 0,
-        maxLeadDays: 60,
-      );
-      expect(validateStartDate(_today, _today, c), isNull);
     });
 
     test('null is missing; time of day is ignored', () {
@@ -390,7 +438,7 @@ void main() {
         DraftGapReason.noStartDate,
       );
       expect(
-        gap(ready().withStartDate(DateTime(2026, 10, 9)))?.reason,
+        gap(ready().withStartDate(DateTime(2026, 10, 8)))?.reason,
         DraftGapReason.startDateOutOfRange,
       );
       expect(

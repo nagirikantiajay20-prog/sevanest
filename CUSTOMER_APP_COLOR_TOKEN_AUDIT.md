@@ -66,3 +66,31 @@ Result (share of pixels differing by more than 40/255, best of two current captu
 Status: PARTIALLY VERIFIED. No batch is marked verified-with-zero-difference. Only B was compared; A and C were not. Account, home and a few others were not re-checked with the sheen disabled.
 
 Open question for design sign-off (unchanged, not acted on): the 169 hue+hex tokens (e.g. `sky1B3354A12`) keep their exact-value names; semantic names need sign-off.
+
+---
+
+## Source-level equivalence check (2026-11-06, no screenshots)
+
+Question: did the token migration (commit 730632a) change any colour, and what explains the pixel differences at the A / C checkpoints and on hero cards?
+
+Method (`tool/token_equivalence.py <old> <new>`, scratch, not committed): for every `lib/` file changed between `7ef756b` (before) and `730632a` (after), replace each `AppColors.<name>` with its literal value from `tokens.dart`, turn `Color(0x..)` and `Colors.white` into the same canonical form, drop comments, `const`, whitespace and trailing commas, then compare. A colour change cannot hide in that comparison.
+
+| Result | Count |
+|---|---|
+| Files identical after normalisation | 80 |
+| Files that differ | 15 |
+| Existing token values changed or removed (55 old tokens) | 0 |
+| Duplicate-value tokens (aliases) | 2 (`teal` / `primary`, `slate` / `slate600`) |
+
+The 15 differing files contain only non-colour edits that the same commit or the pass before it made on purpose: caption sizes 10 / 10.5 / 11 / 11.5 to 12 sp (`home_hero`, `home_promo_carousel`, `home_widgets`, `interview_list_parts`, `notification_parts`, `payment_parts`, `glass_page`, `result_worker_card`), the 44 dp interview-row hit area, the OTP ring dial, Confirm worker date row and the removed invented fee (`booking_quote`, `confirm_worker_screen`, `booking_confirm_parts`), splash short-phone layout, and the nullable photo in `address_form_screen`. The home hero card differs only by its 10 to 12 sp caption.
+
+Conclusion: the migration is value-identical for colours. The earlier pixel differences on the dark hero cards come from the sheen animation (not frozen by the animator scale) and from the 10 to 12 sp caption; layout differences at A (360x640) and C (1.3x text) came from the deliberate layout fixes in 730632a and af65a1e, not from tokens. This is a static proof for colour values only; typography, shadows and spacing were not touched by the migration and were not compared by pixels.
+
+Also checked from `730632a` to `HEAD`: only layout edits (login trust strip, splash short-phone sizes, 1.3x label widths).
+
+## Follow-up fixes
+
+- One raw colour survived: `Color(\n 0xFF1B3354,\n)` in the splash dots painter (the earlier literal grep matched single-line literals only). It is now `AppColors.navyDeep`; same value.
+- `test/core/color_token_guard_test.dart` fails if any `Color(0x........)` (also across lines) or `Colors.white` appears in `lib/` outside `tokens.dart` and generated l10n. `PdfColors.white` in the receipt builder is the `pdf` package's type, not a Flutter colour.
+- Still open (design sign-off, unchanged): the 169 hue + hex token names are not semantic.
+- Still not done: per-batch before / after screenshots, and A / C screenshot comparison (not allowed in this pass).

@@ -405,7 +405,7 @@ Numbers match our message.
 - **Video interview join**: no video provider in V1 (V2). Button hidden until then.
 - **Bookings search**, **budget guidance** ("typical for a part-time cook"): not served.
 - **Worker detail**: worker display name, distance, About text, price/month, jobs done, repeat-customer %, per-check verification list, and `canRequestInterview` / `verification: PENDING` on `GET /search/workers/{id}` are not served (UI reads them when present, else hides). Customer photo endpoint, worker total count / price / distance on search, address serviceability flag, `BookingQuote` endpoint and `/workers/{id}/reviews` also still needed.
-- **BookingQuote**: `POST /bookings/quote` (fee, taxes, total, expiry) is not served. The Confirm booking screen uses `bookingQuote()` in `lib/features/booking/domain/booking_quote.dart`, a marked mock (fee Rs 500, 18% tax) unless `GET /fees/booking` returns a fee. Replace that one function when the endpoint exists.
+- **BookingQuote**: `POST /bookings/quote` (fee, taxes, total, expiry) is not served (checked against `docs/backend_openapi_2026-10-13.json`, 2026-11-06). The Confirm booking screen shows only a fee that `GET /fees/booking` returns (that path is also absent from the spec, which has only `/admin/fees*`: please confirm it exists for customers); otherwise it says the fee is shown on the payment step. No fee or tax is invented. See `lib/features/booking/domain/booking_quote.dart`.
 
 ## Backend reply 2026-10-26: worker names, Home, Shortlist (built in the app)
 

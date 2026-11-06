@@ -280,16 +280,28 @@ void main() {
       expect(env.where, '/discover/budget');
     });
 
-    testWidgets('date sheet: today is disabled, closing keeps the old date', (
-      t,
-    ) async {
+    testWidgets(
+      'date sheet: yesterday is disabled, closing keeps the old date',
+      (t) async {
+        final env = await open(t, EngagementType.hourly);
+        await env.tapKey('discover_date_btn');
+        await t.tap(find.byKey(const Key('calendar_day_20261008')));
+        await t.pumpAndSettle();
+        expect(find.text('Select a date'), findsOneWidget);
+        await env.tapKey('date_sheet_close');
+        expect(env.container.read(requirementDraftProvider).startDate, isNull);
+      },
+    );
+
+    testWidgets('date sheet: today is selectable', (t) async {
       final env = await open(t, EngagementType.hourly);
       await env.tapKey('discover_date_btn');
-      await t.tap(find.byKey(const Key('calendar_day_20261009')));
-      await t.pumpAndSettle();
-      expect(find.text('Select a date'), findsOneWidget);
-      await env.tapKey('date_sheet_close');
-      expect(env.container.read(requirementDraftProvider).startDate, isNull);
+      await env.tapKey('calendar_day_20261009');
+      await env.tapKey('date_sheet_set_btn');
+      expect(
+        env.container.read(requirementDraftProvider).startDate,
+        DateTime(2026, 10, 9),
+      );
     });
   });
 

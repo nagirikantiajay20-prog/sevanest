@@ -25,6 +25,8 @@ import 'package:sevanest_customer/features/interview_trial/presentation/widgets/
 import 'package:sevanest_customer/features/interview_trial/presentation/widgets/interview_request_parts.dart'
     show RequestSection;
 import 'package:sevanest_customer/features/payment/presentation/payment_labels.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/timing.dart'
+    show istDate;
 import 'package:sevanest_customer/features/service_discovery/presentation/engagement_labels.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/schedule_format.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
@@ -54,10 +56,7 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
   /// Set once the backend accepted the worker: the day the booking starts, shown on the ticket.
   DateTime? _confirmedFor;
 
-  DateTime _today() {
-    final n = ref.read(nowProvider)();
-    return DateTime(n.year, n.month, n.day);
-  }
+  DateTime _today() => istDate(ref.read(nowProvider)());
 
   DateTime _effectiveStart(Booking b) {
     final today = _today();

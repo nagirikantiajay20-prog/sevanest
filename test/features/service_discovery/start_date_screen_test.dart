@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
+import 'package:sevanest_customer/features/service_discovery/domain/requirement_draft.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:sevanest_customer/features/service_discovery/presentation/providers/requirement_draft_provider.dart';
 
@@ -51,12 +52,44 @@ void main() {
     expect(env.nextEnabled, isFalse);
   });
 
-  testWidgets('past dates and today are disabled', (t) async {
+  testWidgets('past dates are disabled (yesterday, earlier)', (t) async {
     final env = await open(t);
     await t.tap(find.byKey(const Key('calendar_day_20261005')));
-    await t.tap(find.byKey(const Key('calendar_day_20261009')));
+    await t.tap(find.byKey(const Key('calendar_day_20261008')));
     await t.pump();
     expect(picked(env), isNull);
+  });
+
+  testWidgets('today is selectable and stays selected', (t) async {
+    final env = await open(t);
+    await env.tapKey('calendar_day_20261009');
+    expect(picked(env), DateTime(2026, 10, 9));
+    expect(find.text('Continue with Fri, 9 Oct'), findsOneWidget);
+    await t.pump(const Duration(milliseconds: 500));
+    expect(picked(env), DateTime(2026, 10, 9));
+    // Tomorrow and a later date are still selectable.
+    await env.tapKey('calendar_day_20261010');
+    expect(picked(env), DateTime(2026, 10, 10));
+    await env.tapKey('calendar_day_20261030');
+    expect(picked(env), DateTime(2026, 10, 30));
+  });
+
+  testWidgets('today survives Continue and Back; state is not bumped', (
+    t,
+  ) async {
+    final env = await open(t);
+    await env.tapKey('calendar_day_20261009');
+    await env.tapKey('discover_next_btn');
+    expect(env.where, '/discover/budget');
+    await env.go('/discover/start-date');
+    expect(picked(env), DateTime(2026, 10, 9));
+    expect(find.text('Continue with Fri, 9 Oct'), findsOneWidget);
+  });
+
+  test('restored draft keeps today (JSON round trip)', () {
+    final d = RequirementDraft(startDate: DateTime(2026, 10, 9));
+    final back = RequirementDraft.fromJson(d.toJson());
+    expect(back.startDate, DateTime(2026, 10, 9));
   });
 
   testWidgets('a date selected: label, shortcut check, Continue to Budget', (

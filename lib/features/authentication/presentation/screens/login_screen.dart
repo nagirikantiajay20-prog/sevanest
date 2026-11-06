@@ -712,24 +712,28 @@ class _TrustStrip extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Flexible(
-                child: Text.rich(
-                  textAlign: TextAlign.center,
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: head,
-                        style: AppText.body.copyWith(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          color: authNavy,
+                // Scales down a little instead of breaking "professionals" at 1.3x text on 360 dp.
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text.rich(
+                    textAlign: TextAlign.center,
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: head,
+                          style: AppText.body.copyWith(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: authNavy,
+                          ),
                         ),
+                        if (tail.isNotEmpty) TextSpan(text: '\n$tail'),
+                      ],
+                      style: AppText.body.copyWith(
+                        fontSize: 11.5,
+                        height: 1.2,
+                        color: AppColors.slate600,
                       ),
-                      if (tail.isNotEmpty) TextSpan(text: '\n$tail'),
-                    ],
-                    style: AppText.body.copyWith(
-                      fontSize: 11.5,
-                      height: 1.2,
-                      color: AppColors.slate600,
                     ),
                   ),
                 ),

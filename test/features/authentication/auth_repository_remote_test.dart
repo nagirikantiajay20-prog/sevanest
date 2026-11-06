@@ -203,6 +203,28 @@ void main() {
       );
     });
 
+    test(
+      'an OTP error whose message is a list is still an OtpFailure',
+      () async {
+        build(
+          (o) async => jsonBody(
+            jsonEncode({
+              'code': 'OTP_INVALID',
+              'message': ['otp must be 6 digits'],
+              'requestId': 'r',
+            }),
+            400,
+          ),
+        );
+        await expectLater(
+          repo.verifyOtp('9876543210', '000000'),
+          throwsA(
+            isA<OtpFailure>().having((f) => f.error, 'error', OtpError.invalid),
+          ),
+        );
+      },
+    );
+
     test('lock-out style code -> OtpFailure.locked', () async {
       build((o) async => jsonBody(_err('OTP_ATTEMPTS_EXCEEDED'), 400));
       await expectLater(

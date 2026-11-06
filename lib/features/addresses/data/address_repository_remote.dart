@@ -178,22 +178,25 @@ Address? parseAddress(Object? body) {
   if (id == null) return null;
   String s(String k) => body[k] is String ? body[k] as String : '';
   double? n(String k) => body[k] is num ? (body[k] as num).toDouble() : null;
+  // A field of an unexpected type reads as absent; a cast would throw out of the whole list.
+  String? o(String k) =>
+      _nullIfBlank(body[k] is String ? body[k] as String : null);
   return Address(
     id: '$id',
     line: s('line'),
     area: s('area'),
     city: s('city'),
     pincode: s('pincode'),
-    label: _nullIfBlank(body['label'] as String?),
-    line2: _nullIfBlank(body['line2'] as String?),
-    state: _nullIfBlank(body['state'] as String?),
+    label: o('label'),
+    line2: o('line2'),
+    state: o('state'),
     latitude: n('latitude'),
     longitude: n('longitude'),
     isDefault: body['isDefault'] == true,
-    photoUrl: _nullIfBlank(body['photoUrl'] as String?),
+    photoUrl: o('photoUrl'),
     isServiceable: body['isServiceable'] is bool
         ? body['isServiceable'] as bool
         : null,
-    unserviceableReason: _nullIfBlank(body['unserviceableReason'] as String?),
+    unserviceableReason: o('unserviceableReason'),
   );
 }

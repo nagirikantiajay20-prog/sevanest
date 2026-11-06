@@ -49,7 +49,7 @@ void main() {
       final r = ScheduleRepositoryMock(() => s);
       final c = await r.config();
       expect(c.maxLeadDays, 60);
-      expect(c.minLeadDays, 1);
+      expect(c.minLeadDays, 0);
       s = _s(MockMode.error);
       await expectLater(r.config(), throwsA(isA<ServerFailure>()));
     });

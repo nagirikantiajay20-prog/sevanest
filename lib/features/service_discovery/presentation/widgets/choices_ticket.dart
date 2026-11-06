@@ -214,10 +214,10 @@ class _Cell extends StatelessWidget {
         color: dsMuted,
       ),
     );
+    // No line limit: a long value wraps at larger text sizes (the cells share an IntrinsicHeight
+    // row, so the ticket grows) instead of ending in "...".
     final name = Text(
       cell.name,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
       style: AppText.body.copyWith(
         fontSize: grid
             ? 14

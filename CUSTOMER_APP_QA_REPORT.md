@@ -71,3 +71,36 @@ Test-environment notes: the emulator needed 4 GB RAM and software GL; the first 
 - `flutter build apk --release --flavor dev -t lib/main_dev.dart`: built `build/app/outputs/flutter-apk/app-dev-release.apk`, 78,468,084 bytes (74.8 MB), same path, flavor and signing as before.
 - Visual QA: 240 screenshots over A/B/C, plus 12 re-captures after fixes; see UI_UX audit for the per-screen list. No new widget tests were added for the 7 fixes (they were verified on the emulator only).
 - Not run: real device, Razorpay, FCM.
+
+---
+
+## Master QA gap closure run (2026-11-06)
+
+No emulator, app launch, screenshot or integration test was run in this pass (instructed). `integration_test/customer_booking_flow_test.dart` from the earlier pass was not re-run.
+
+| Check | Command | Result |
+|---|---|---|
+| Static analysis | `flutter analyze` | No issues found (run before the build, after all edits) |
+| Full suite | `flutter test` | **1139 passed, 12 skipped (live-backend tests), 0 failed** (about 31 min). Previous recorded run: 1075 passed. The count includes tests added by another editor working in the same checkout during this pass |
+| New test files | `flutter test` on the 5 files below | **51 passed** |
+| Dev release APK | `flutter build apk --release --flavor dev -t lib/main_dev.dart` | Built, `build/app/outputs/flutter-apk/app-dev-release.apk`, 78,468,084 bytes (74.8 MB), same path, flavor and signing as before (built 14:07 IST, after the last code change). Not installed or launched |
+
+New tests (all added this pass):
+
+| File | Tests | Covers |
+|---|---|---|
+| `test/features/module_states_test.dart` | 10 | Favourites loading / empty / error / offline / stale refresh with Retry; Workers search no query, loading, error + Retry, query change, filters to empty + Reset |
+| `test/features/visual_qa_regression_test.dart` | 11 | the seven earlier visual-QA fixes at 1.3x with real fonts |
+| `test/features/service_discovery/summary_chips_test.dart` | 21 | summary cells at 320 / 360 / 393 / 430 dp, 1.0x and 1.3x |
+| `test/features/authentication/splash_a11y_test.dart` | 7 | Worker App link position / size / label / tap, WCAG ratios from colour values |
+| `test/core/color_token_guard_test.dart` | 2 | no raw colour literal in `lib/` |
+| plus 2 in existing files | 2 | `auth_repository_remote_test.dart` (list-valued OTP message), `backend_contract_2026_10_13_test.dart` (tolerant address parsing) |
+
+Test-suite notes:
+- A `Some tests failed` first run of the new splash tests was an artefact: images not yet decoded in the first test of a file make the layout shorter. The tests now pre-decode the logo and load the real fonts (`test/helpers/real_fonts.dart`).
+- While the full suite ran, other files in the checkout (timing, schedule rules, payment flow, confirm worker, `docs/DECISIONS.md`) were being edited by someone else. They are not part of this pass, were left as found, and their tests are inside the 1139.
+- `[api] ... 400` lines in the log come from fakes, as before.
+
+Not executed, so not claimed: any device or emulator run, Razorpay SDK, FCM delivery, real SMS, live backend (12 skipped), TalkBack, screenshots, the integration test.
+
+Completion (evidence-based, this pass only): the 6 original gap groups are FIXED (D, E, F, C-code) or VERIFIED (A, B) with automated evidence; 7 of 7 earlier fixes are regression-tested and 1 of them (login trust strip) was found incomplete and fixed. 7 external items are BLOCKED. PRD-level completion numbers above are unchanged: this pass closed no device-dependent requirement.

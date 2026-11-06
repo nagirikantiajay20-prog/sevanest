@@ -85,3 +85,58 @@ Defects found and fixed in `lib/` (re-captured at C afterwards, checked in the n
 Splash/welcome verified from a signed-out cold state at A, B, C (A after the fix). Open, not fixed: tagline sits over the photo (busy background, contrast not measured); "Worker App" link on A may need a scroll (not checked after the fix); Discover summary chips truncate ("Madh...") at C; Timing 8-12 shows "Choose at least 6 hours" because the harness draft used a 4 h window (the validation is correct).
 
 State coverage (B only): loading, empty, error, offline for Bookings, Booking detail, Favourites, History, Home, Interviews, Notifications, Support, Transactions, Addresses, Workers. Favourites, Notifications, Support, Transactions and Addresses do not follow the mock modes (live or device-backed repositories), so their empty/error/loading cannot be shown this way: NEEDS VERIFICATION. Workers search states cannot be toggled after the first request (the search provider does not watch the mock mode); empty state is covered by a widget test only. Success states (payment success, booking confirmed) need Razorpay / a real flow: NOT CAPTURED.
+
+---
+
+## Master QA gap closure (2026-11-06): contrast, footer, summary chips
+
+No emulator, launch or screenshot in this pass. Everything below is measured from colour values, the bundled photo's pixels, or widget tests with the real Inter / Source Serif fonts loaded. Note for readers of older results: the default widget-test font (Ahem) is about 1.7x wider than Inter, so earlier 1.3x tests were pessimistic about wrapping; the new tests load the real fonts (`test/helpers/real_fonts.dart`).
+
+### Splash text contrast (WCAG 2.1 AA: 4.5:1 normal text, 3:1 large text)
+
+Colours: navy `#1B3354` (tagline, trust row, link), teal `#0F766E` (tagline accent "your home", 26 sp bold = large text), slate600 `#475569` (brand caption, version), slate400 `#64748B` (old version colour).
+
+On the plain backdrop (`#FFFFFF` / `#FBF9F6` / `#F4EFE8`, computed from the colour values):
+
+| Text | white | cream | `F4EFE8` | Verdict |
+|---|---|---|---|---|
+| navy | 12.74 | 12.12 | 11.14 | pass |
+| teal | 5.47 | 5.21 | 4.78 | pass |
+| slate600 | 7.58 | 7.21 | 6.62 | pass |
+| slate400 (old version label) | 4.76 | 4.53 | **4.16** | fail on the `F4EFE8` end, now slate600 |
+
+Over the photo (`assets/splash/photo.jpg`, positioned with the screen geometry used by `_photo()`, top cream scrim applied; tagline rectangle estimated from the layout):
+
+| Phone | Tagline background luminance (darkest / 5th percentile / mean) | Navy contrast, worst pixel / p5 / mean |
+|---|---|---|
+| 360x640 | 0.004 / 0.136 / 0.738 | 0.66 / 2.26 / 9.56 |
+| 393x852 | 0.085 / 0.272 / 0.762 | 1.64 / 3.91 / 9.86 |
+| 412x915 | 0.090 / 0.322 / 0.772 | 1.70 / 4.51 / 9.97 |
+
+The 250 dp cream scrim ends where the tagline starts on tall phones, and on phones under 700 dp the hero is collapsed so the photo is full screen from the start. Dark parts of the photo therefore reached the tagline. Fix: a light plate (`AppColors.whiteA90xE6`, rounded) behind the caption and tagline (`splash_text_plate`). Floor over a pure black pixel: navy 10.21:1, teal accent 4.39:1 (large text, needs 3), slate600 6.07:1. Over the plain backdrop the plate is nearly invisible. Branding (fonts, colours, copy) unchanged. Not checked: how the plate looks on screen (no screenshots).
+
+Covered by `splash_a11y_test.dart` (ratios computed from `AppColors` values; the black-pixel floor).
+
+### Worker App footer link
+
+Measured with real fonts and the decoded logo, 24 dp status and gesture bars:
+
+| Phone | Before | After |
+|---|---|---|
+| 360x640 | link bottom 663 dp, 23 dp below the fold | on screen |
+| 393x852 | link bottom 846 dp, inside the gesture bar | on screen |
+| 320x568 | needs a scroll | scroll reaches it; Get Started on screen |
+
+Changes: hero gap minimum 96 to 24 dp under 700 dp and 190 to 130 dp above; header block (halo 130 dp) shrinks under 560 dp; link target 40 to 48 dp (`kMinTapTarget`). Tests: visible, 48 dp, labelled button with tap action, no overflow at 1.0x and 1.3x, tap with no configured URL shows "Worker app link ..." and stays.
+
+### Summary chips ("Your choices so far")
+
+`ChoicesTicket` / `ChoicesGrid` cells limited the value to one line with an ellipsis; at 1.3x on a 393 dp phone "Madhapur" became "Madh...". The value now wraps (no line limit; the cells share an `IntrinsicHeight` row so the ticket grows). Tested at 320 / 360 / 393 / 430 dp, 1.0x and 1.3x, 3 cells and 4 cells, long labels ("Elderly Care Helper", "Weekdays 6 AM to 10 AM"); no value is cut and nothing overflows. A word wider than its column can still break inside the word (not seen in the tested strings).
+
+### Login trust strip (found by the regression tests)
+
+At 360 dp and 1.3x "professionals" still broke as "professional/s" although the earlier fix put the icon above the text. The text block is now scaled down slightly instead (`FittedBox`), tested at 360 and 393 dp.
+
+### Not done
+
+Screenshots (forbidden this pass), on-device TalkBack, and any visual check of the plate on the photo.

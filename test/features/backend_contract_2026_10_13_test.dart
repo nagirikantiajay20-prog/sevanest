@@ -317,6 +317,27 @@ void main() {
       expect((seen.last.data as Map)['label'], isNull);
     });
 
+    test('optional fields of an unexpected type read as absent, no throw', () {
+      final a = parseAddress({
+        'id': 'ad9',
+        'line': '1, Road',
+        'area': 'Madhapur',
+        'city': 'Hyderabad',
+        'pincode': '500081',
+        'label': 42,
+        'line2': {'x': 1},
+        'state': ['TS'],
+        'photoUrl': true,
+        'unserviceableReason': 7,
+      })!;
+      expect(a.label, isNull);
+      expect(a.line2, isNull);
+      expect(a.state, isNull);
+      expect(a.photoUrl, isNull);
+      expect(a.unserviceableReason, isNull);
+      expect(a.line, '1, Road');
+    });
+
     test('parsed back: label, line2, state, full line and title', () {
       final a = parseAddress({
         'id': 'ad1',

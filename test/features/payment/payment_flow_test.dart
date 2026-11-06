@@ -523,19 +523,20 @@ void main() {
       expect(find.text('Payment successful'), findsOneWidget);
     });
 
-    testWidgets('success then failure on retry: each outcome has its own view', (
-      t,
-    ) async {
-      svc.outcome = const PaymentSdkFailed('BAD_REQUEST');
-      await open(t);
-      await tapKey(t, 'payment_pay_btn');
-      expect(find.text("Payment didn't go through"), findsOneWidget);
-      svc.outcome = null;
-      await tapKey(t, 'payment_retry_btn');
-      await tapKey(t, 'payment_pay_btn');
-      expect(find.text('Payment successful'), findsOneWidget);
-      expect(find.text("Payment didn't go through"), findsNothing);
-    });
+    testWidgets(
+      'success then failure on retry: each outcome has its own view',
+      (t) async {
+        svc.outcome = const PaymentSdkFailed('BAD_REQUEST');
+        await open(t);
+        await tapKey(t, 'payment_pay_btn');
+        expect(find.text("Payment didn't go through"), findsOneWidget);
+        svc.outcome = null;
+        await tapKey(t, 'payment_retry_btn');
+        await tapKey(t, 'payment_pay_btn');
+        expect(find.text('Payment successful'), findsOneWidget);
+        expect(find.text("Payment didn't go through"), findsNothing);
+      },
+    );
   });
 
   group('errors and back', () {

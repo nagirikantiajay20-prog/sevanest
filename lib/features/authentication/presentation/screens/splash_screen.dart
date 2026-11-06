@@ -221,16 +221,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     clock: _now,
                     tagline: l10n.splashTagline,
                     compact: box.maxHeight < 700,
+                    tiny: box.maxHeight < 560,
                   ),
                   const SizedBox(height: 14),
                   Expanded(
                     child: ConstrainedBox(
                       // The failure card needs the room; the photo then just fills the screen.
-                      // Short phones (about 640 dp) shrink the photo so Get Started stays on screen.
+                      // Short phones (about 640 dp) give the gap up so Get Started and Worker App stay on screen.
                       constraints: BoxConstraints(
                         minHeight: failed
                             ? 0
-                            : (box.maxHeight < 700 ? 96 : 190),
+                            : (box.maxHeight < 700 ? 24 : 130),
                       ),
                       child: SizedBox(key: _heroKey, width: double.infinity),
                     ),
@@ -249,7 +250,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       l10n.versionLabel(version),
                       style: AppText.body.copyWith(
                         fontSize: 12,
-                        color: AppColors.slate400,
+                        color: AppColors.slate600,
                       ),
                     )
                   else
@@ -698,9 +699,7 @@ class _DotsPainter extends CustomPainter {
     final fadeEnd = size.height * 0.7;
     final p = Paint();
     for (var y = 9.0; y < fadeEnd; y += 18) {
-      p.color = const Color(
-        0xFF1B3354,
-      ).withValues(alpha: 0.09 * (1 - y / fadeEnd));
+      p.color = AppColors.navyDeep.withValues(alpha: 0.09 * (1 - y / fadeEnd));
       for (var x = 9.0; x < size.width; x += 18) {
         canvas.drawCircle(Offset(x, y), 0.7, p);
       }
@@ -817,6 +816,7 @@ class _Header extends StatelessWidget {
     required this.clock,
     required this.tagline,
     this.compact = false,
+    this.tiny = false,
   });
   final ValueListenable<double> clock;
   final String tagline;
@@ -824,9 +824,13 @@ class _Header extends StatelessWidget {
   /// Short phones (about 640 dp): smaller logo and tagline so Get Started stays on screen.
   final bool compact;
 
+  /// Very short viewports (about 560 dp or less once the system bars are removed): smaller still.
+  final bool tiny;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final halo = tiny ? 100.0 : 130.0;
     const accent = 'your home';
     final i = tagline.indexOf(accent);
     final base = TextStyle(
@@ -871,10 +875,10 @@ class _Header extends StatelessWidget {
                       opacity: 0.5 + 0.5 * h,
                       child: Transform.scale(
                         scale: 1 + 0.16 * h,
-                        child: const SizedBox(
-                          width: 130,
-                          height: 130,
-                          child: DecoratedBox(
+                        child: SizedBox(
+                          width: halo,
+                          height: halo,
+                          child: const DecoratedBox(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
@@ -895,7 +899,11 @@ class _Header extends StatelessWidget {
                         scale: 0.86 + 0.14 * p,
                         child: Image.asset(
                           'assets/splash/logo.webp',
-                          width: compact ? 120 : 170,
+                          width: tiny
+                              ? 92
+                              : compact
+                              ? 120
+                              : 170,
                         ),
                       ),
                     ),
@@ -905,28 +913,50 @@ class _Header extends StatelessWidget {
             ),
           ),
         ),
-        Rise(
-          clock: clock,
-          start: _introAt + 100,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              l10n.brandCaption,
-              style: AppText.body.copyWith(
-                fontSize: 11,
-                letterSpacing: 2.2,
-                fontWeight: FontWeight.w600,
-                color: AppColors.slate600,
-              ),
-            ),
+        // A soft light plate keeps the caption and tagline readable once the arch has zoomed and
+        // the photo fills the screen behind them (dark parts of the photo reach the tagline).
+        // Over the plain backdrop it is almost invisible.
+        DecoratedBox(
+          key: const Key('splash_text_plate'),
+          decoration: BoxDecoration(
+            color: AppColors.whiteA90xE6,
+            borderRadius: BorderRadius.circular(18),
           ),
-        ),
-        Rise(
-          clock: clock,
-          start: _introAt + 200,
           child: Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text.rich(heading, textAlign: TextAlign.center, style: base),
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Rise(
+                  clock: clock,
+                  start: _introAt + 100,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      l10n.brandCaption,
+                      style: AppText.body.copyWith(
+                        fontSize: 11,
+                        letterSpacing: 2.2,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.slate600,
+                      ),
+                    ),
+                  ),
+                ),
+                Rise(
+                  clock: clock,
+                  start: _introAt + 200,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text.rich(
+                      heading,
+                      textAlign: TextAlign.center,
+                      style: base,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -1128,7 +1158,7 @@ class _EntryButtons extends StatelessWidget {
           label: Text(l10n.workerAppShort),
           style: TextButton.styleFrom(
             foregroundColor: AppColors.navyDeep,
-            minimumSize: const Size(48, 40),
+            minimumSize: const Size(kMinTapTarget, kMinTapTarget),
             textStyle: AppText.body.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,

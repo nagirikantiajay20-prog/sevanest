@@ -306,67 +306,6 @@ class _Footer extends StatelessWidget {
   );
 }
 
-/// The "Cook  Change" chips under the progress bar (steps 2+).
-class SelectionChip extends StatelessWidget {
-  const SelectionChip({
-    required this.label,
-    required this.onChange,
-    this.icon,
-    this.changeKey,
-    super.key,
-  });
-
-  final String label;
-  final IconData? icon;
-  final VoidCallback onChange;
-  final Key? changeKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      padding: const EdgeInsets.only(left: AppSpacing.s12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-        border: Border.all(color: AppColors.hairline),
-        boxShadow: AppShadows.card,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 18, color: AppColors.teal),
-            const SizedBox(width: AppSpacing.sm),
-          ],
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppText.card.copyWith(fontSize: 14),
-            ),
-          ),
-          const Text('·', style: AppText.body),
-          TextButton(
-            key: changeKey,
-            onPressed: onChange,
-            style: TextButton.styleFrom(
-              minimumSize: const Size(kMinTapTarget, kMinTapTarget),
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s12),
-              foregroundColor: AppColors.teal,
-            ),
-            child: Text(
-              l10n.discoverChange,
-              style: AppText.label.copyWith(fontSize: 13),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Heading + sub-copy block used by every step.
 class StepHeading extends StatelessWidget {
   const StepHeading({required this.heading, this.sub, super.key});

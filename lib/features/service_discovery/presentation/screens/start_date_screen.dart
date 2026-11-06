@@ -69,7 +69,7 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
       final shortcuts = startDateShortcuts(now, config);
       final isShortcut = shortcuts.any((s) => s.date == selected);
       final last = lastStartDate(now, config);
-      final lead = selected?.difference(DateUtils.dateOnly(now)).inDays;
+      final lead = selected?.difference(istDate(now)).inDays;
       body = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -121,7 +121,7 @@ class _StartDateScreenState extends ConsumerState<StartDateScreen> {
               child: GlassCalendar(
                 firstDate: firstStartDate(now, config),
                 lastDate: last,
-                today: now,
+                today: istDate(now),
                 selected: selected,
                 marked: usesDays && days.isNotEmpty
                     ? (d) => !isOnSelectedDays(d, days)

@@ -45,7 +45,7 @@ class ScheduleConfig {
   /// "Hours per day" chips of the full-time layout.
   final List<int> shiftHours;
 
-  /// Earliest start = today + [minLeadDays] (design: today itself is not selectable).
+  /// Earliest start = today + [minLeadDays] (0 = today is selectable, per FRD).
   final int minLeadDays;
 
   /// Latest start = today + [maxLeadDays] (the 60-day limit).
@@ -67,7 +67,7 @@ class ScheduleConfig {
     },
     maxShiftMinutes: 720,
     shiftHours: [6, 8, 10, 12],
-    minLeadDays: 1,
+    minLeadDays: 0, // FRD: start date is today or later (was 1 = tomorrow)
     maxLeadDays: 60,
   );
 }
@@ -204,11 +204,18 @@ enum StartDateIssue { missing, tooSoon, tooFar }
 
 DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
+/// The India (Asia/Kolkata, fixed UTC+5:30, no DST) calendar day of an instant, as a date-only
+/// value. Booking rules ("today") are India days whatever the phone's timezone is.
+DateTime istDate(DateTime instant) {
+  final i = instant.toUtc().add(const Duration(hours: 5, minutes: 30));
+  return DateTime(i.year, i.month, i.day);
+}
+
 /// Earliest and latest selectable start dates.
 DateTime firstStartDate(DateTime today, ScheduleConfig c) =>
-    dateOnly(today).add(Duration(days: c.minLeadDays));
+    istDate(today).add(Duration(days: c.minLeadDays));
 DateTime lastStartDate(DateTime today, ScheduleConfig c) =>
-    dateOnly(today).add(Duration(days: c.maxLeadDays));
+    istDate(today).add(Duration(days: c.maxLeadDays));
 
 StartDateIssue? validateStartDate(
   DateTime? date,
@@ -232,7 +239,7 @@ List<({ShortcutKind kind, DateTime date})> startDateShortcuts(
   DateTime today,
   ScheduleConfig config,
 ) {
-  final t = dateOnly(today);
+  final t = istDate(today);
   final next = t.add(const Duration(days: 7));
   final monday = next.add(Duration(days: (8 - next.weekday) % 7));
   final raw = [

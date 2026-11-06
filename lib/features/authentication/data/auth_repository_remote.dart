@@ -97,7 +97,9 @@ OtpFailure? _otpFailure(DioException e) {
   if (data is! Map) return null;
   final code = data['code'];
   if (code is! String || !code.contains('OTP')) return null;
-  final message = data['message'] as String?;
+  // Validation errors can send a list of messages; only a plain string is shown.
+  final raw = data['message'];
+  final message = raw is String ? raw : null;
   if (code.contains('EXPIRED')) return OtpFailure(OtpError.expired, message);
   if (RegExp('LOCK|ATTEMPT|MAX|TOO_MANY').hasMatch(code)) {
     return OtpFailure(OtpError.locked, message);

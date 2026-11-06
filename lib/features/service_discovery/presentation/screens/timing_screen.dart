@@ -63,7 +63,7 @@ class _TimingScreenState extends ConsumerState<TimingScreen> {
       context,
       firstDate: firstStartDate(now, c),
       lastDate: lastStartDate(now, c),
-      today: now,
+      today: istDate(now),
       selected: ref.read(requirementDraftProvider).startDate,
     );
     if (picked != null && mounted) {

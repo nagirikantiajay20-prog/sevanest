@@ -158,6 +158,35 @@ void main() {
     });
   });
 
+  group('same-day start date payload', () {
+    final today = DateTime(2026, 10, 9);
+
+    test('POST /bookings sends today as the India calendar date', () async {
+      final repo = BookingRepositoryRemote(
+        dio((o) async => jsonBody('{"id":"b2","status":"NEW_REQUEST"}', 201)),
+      );
+      await repo.create(
+        BookingRequest(
+          category: 'COOK',
+          areaId: 'a1',
+          addressId: 'ad1',
+          startDate: today,
+        ),
+        idempotencyKey: 'k-today',
+      );
+      expect((seen.single.data as Map)['startDate'], '2026-10-09');
+    });
+
+    test('confirm-worker sends the chosen date unchanged', () async {
+      final repo = BookingRepositoryRemote(
+        dio((o) async => jsonBody('{"id":"b1","status":"NEW_REQUEST"}', 200)),
+      );
+      await repo.confirmWorker('b1', today);
+      expect(seen.first.path, '/bookings/b1/confirm-worker');
+      expect((seen.first.data as Map)['startDate'], '2026-10-09');
+    });
+  });
+
   group('rebook', () {
     test('POST /bookings/rebook (not /bookings/{id}/rebook)', () async {
       final repo = BookingRepositoryRemote(
