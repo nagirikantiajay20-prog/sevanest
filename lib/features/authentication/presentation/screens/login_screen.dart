@@ -697,7 +697,8 @@ class _TrustStrip extends StatelessWidget {
                 ? null
                 : const Border(left: BorderSide(color: AppColors.hairline)),
           ),
-          child: Row(
+          // Icon above the text: the full item width is kept for the words (no mid-word breaks).
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
@@ -709,9 +710,10 @@ class _TrustStrip extends StatelessWidget {
                 ),
                 child: Icon(icon, color: AppColors.teal, size: 18),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(height: 4),
               Flexible(
                 child: Text.rich(
+                  textAlign: TextAlign.center,
                   TextSpan(
                     children: [
                       TextSpan(

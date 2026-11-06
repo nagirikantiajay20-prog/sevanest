@@ -255,7 +255,14 @@ class _Footer extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  SizedBox(width: ctaWidth, child: _cta()),
+                  SizedBox(
+                    // Grows with the text size so the label is not cut to "Review requir...".
+                    width:
+                        ctaWidth *
+                        MediaQuery.textScalerOf(context).scale(16) /
+                        16,
+                    child: _cta(),
+                  ),
                 ],
               )
             : Column(

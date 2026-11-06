@@ -92,7 +92,10 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen> {
     ];
 
     return FindGlassPage(
-      title: l10n.resultsTitle(category?.name ?? '', area),
+      // A deep link without a requirement has no service or area: do not show " near ".
+      title: category == null || area.isEmpty
+          ? l10n.discoverTitle
+          : l10n.resultsTitle(category.name, area),
       backLabel: l10n.back,
       onBack: _editRequirement,
       trailing: GlassCircleButton(

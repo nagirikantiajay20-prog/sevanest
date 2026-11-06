@@ -62,3 +62,15 @@ Date: 2026-11-05. Priorities: P0 critical, P1 high, P2 medium, P3 low. IDs refer
 No new integration code was written for these.
 
 **Still open:** all device/live items from the earlier table; 75 of 81 captured screens not inspected; no per-batch token screenshot comparison; token names are not semantic; draft-dependent discovery screens, loading/empty states not visually captured; welcome-screen fix not re-captured.
+
+## Contract recheck (2026-11-06)
+
+Newest spec is still `docs/backend_openapi_2026-10-13.json` (215 paths). Nothing new to implement.
+| Item | Contract | Status |
+|---|---|---|
+| Booking quote | no path | BLOCKED |
+| Booking reschedule | none under `/bookings`; only `POST /interviews/{id}/reschedule` (already integrated) | BLOCKED |
+| Server receipt PDF | payment schemas carry `receiptNumber` only; no document path | BLOCKED (app builds its own PDF from payment data) |
+| `GET /fees/booking` | app calls it (`booking_providers.dart`); spec has only `/admin/fees*` | NEEDS VERIFICATION with backend |
+| Legal URLs | `LegalDocumentView.url` is nullable and null on the backend | none hardcoded |
+New gaps from this pass: mock modes do not reach Favourites, Notifications, Support, Transactions, Addresses (harness/tooling); worker search states untestable by toggle; token-comparison remainder (see token audit).

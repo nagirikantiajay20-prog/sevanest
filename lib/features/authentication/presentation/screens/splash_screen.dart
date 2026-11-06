@@ -217,7 +217,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               padding: const EdgeInsets.fromLTRB(18, 24, 18, 12),
               child: Column(
                 children: [
-                  _Header(clock: _now, tagline: l10n.splashTagline),
+                  _Header(
+                    clock: _now,
+                    tagline: l10n.splashTagline,
+                    compact: box.maxHeight < 700,
+                  ),
                   const SizedBox(height: 14),
                   Expanded(
                     child: ConstrainedBox(
@@ -809,18 +813,25 @@ class _BootCover extends StatelessWidget {
 
 /// Logo with its breathing halo, caption and heading.
 class _Header extends StatelessWidget {
-  const _Header({required this.clock, required this.tagline});
+  const _Header({
+    required this.clock,
+    required this.tagline,
+    this.compact = false,
+  });
   final ValueListenable<double> clock;
   final String tagline;
+
+  /// Short phones (about 640 dp): smaller logo and tagline so Get Started stays on screen.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     const accent = 'your home';
     final i = tagline.indexOf(accent);
-    const base = TextStyle(
+    final base = TextStyle(
       fontFamily: AppFonts.heading,
-      fontSize: 26,
+      fontSize: compact ? 22 : 26,
       height: 1.15,
       fontWeight: FontWeight.w700,
       color: AppColors.navyDeep,
@@ -884,7 +895,7 @@ class _Header extends StatelessWidget {
                         scale: 0.86 + 0.14 * p,
                         child: Image.asset(
                           'assets/splash/logo.webp',
-                          width: 170,
+                          width: compact ? 120 : 170,
                         ),
                       ),
                     ),

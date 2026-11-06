@@ -261,7 +261,10 @@ class _BreakdownRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            SizedBox(width: 30, child: Text('$score★', style: style)),
+            SizedBox(
+              width: 30 * MediaQuery.textScalerOf(context).scale(13) / 13,
+              child: Text('$score★', style: style),
+            ),
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),

@@ -64,3 +64,24 @@ Fixed by widget tests at 1.3x (found real overflows): OTP countdown ring (12 px,
 Inspected 10 of the 81 harness screenshots (A login/home/bookings/interview request/worker profile/add address, C account/payment/new ticket/confirm worker). No new layout defects: no clipping or overflow at 1.0x or 1.3x; the floating nav only overlaps scrolled content as designed.
 Harness artifacts, not app defects: `login` shows Home (session already signed in); Payment and Confirm worker show their error states because mock mode has no Razorpay and the seeded draft is not loaded; Account header has no name because the mock profile is not loaded.
 Still NOT verified: the welcome-screen fix (needs a signed-out launch; the harness build was not relaunched), and about 70 screenshots remain uninspected.
+
+## Visual QA pass 3 (2026-11-06)
+
+Method: emulator-5554 (debug, `tool/shots/main_mock.dart`, scratch harness, not committed), configs A 360x640 @1.0, B 393x852 @1.0, C 393x852 @1.3 text. 240 screenshots captured and inspected via contact sheets (every capture was looked at; per-screen notes below are what was seen, not a pixel audit).
+
+Harness artifacts (not app bugs), now handled in the harness: booking detail "Something went wrong" = mock API seeded as a new customer (no bookings) -> NotFound; Account without a name = demo profile was never created; Payment shows the real screen (Razorpay itself cannot run in mock mode); Confirm worker loads. Harness now seeds profile, address, returning-user bookings, a full draft (Cook / Monthly, because the mock Cook catalog offers only Part-time and Monthly), signed-out reset and mock modes (loading/empty/error/offline).
+
+Defects found and fixed in `lib/` (re-captured at C afterwards, checked in the new shots):
+| Screen | Config | Defect | Fix |
+|---|---|---|---|
+| Interview detail | C | "Your requirement" label broke mid-word ("requiremen/t") | label column scales with text size |
+| Interview detail hero | C | step captions ran together ("RequestedScheduled") | 3 dp padding per caption |
+| Worker reviews | C | rating bar label "4 / ★" wrapped | label column scales with text size |
+| Budget / Review footer | C | CTA cut to "Review requir..." | CTA width scales with text size |
+| Login trust strip | B, C | words broke mid-word ("profession/als", "Dedicate/d") | icon above text, full item width |
+| Welcome (splash) | A | Get Started was below the fold; only a sliver showed | smaller logo and tagline under 700 dp height; CTA now on screen (checked by pixel scan: CTA rows 1515-1614 of 1680) |
+| Workers results | any | title read " near " with no service/area (deep link) | falls back to "Find a worker" |
+
+Splash/welcome verified from a signed-out cold state at A, B, C (A after the fix). Open, not fixed: tagline sits over the photo (busy background, contrast not measured); "Worker App" link on A may need a scroll (not checked after the fix); Discover summary chips truncate ("Madh...") at C; Timing 8-12 shows "Choose at least 6 hours" because the harness draft used a 4 h window (the validation is correct).
+
+State coverage (B only): loading, empty, error, offline for Bookings, Booking detail, Favourites, History, Home, Interviews, Notifications, Support, Transactions, Addresses, Workers. Favourites, Notifications, Support, Transactions and Addresses do not follow the mock modes (live or device-backed repositories), so their empty/error/loading cannot be shown this way: NEEDS VERIFICATION. Workers search states cannot be toggled after the first request (the search provider does not watch the mock mode); empty state is covered by a widget test only. Success states (payment success, booking confirmed) need Razorpay / a real flow: NOT CAPTURED.

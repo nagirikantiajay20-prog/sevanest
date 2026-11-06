@@ -148,14 +148,17 @@ class InterviewHero extends StatelessWidget {
                     children: [
                       for (final (i, l) in labels.indexed)
                         Expanded(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: i == 0
-                                ? Alignment.centerLeft
-                                : i == labels.length - 1
-                                ? Alignment.centerRight
-                                : Alignment.center,
-                            child: Text(l, style: small),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: i == 0
+                                  ? Alignment.centerLeft
+                                  : i == labels.length - 1
+                                  ? Alignment.centerRight
+                                  : Alignment.center,
+                              child: Text(l, style: small),
+                            ),
                           ),
                         ),
                     ],
@@ -450,7 +453,9 @@ class InterviewInfoCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 100,
+                    // Grows with the text size so a label like "Your requirement" never breaks mid-word.
+                    width:
+                        100 * MediaQuery.textScalerOf(context).scale(13) / 13,
                     child: Text(
                       r.$1,
                       style: AppText.body.copyWith(

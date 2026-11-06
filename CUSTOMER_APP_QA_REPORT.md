@@ -62,3 +62,12 @@ Code-complete (completed + partial + needs verification) is 45 of 51 (88%), but 
 
 Defects found by the new tests and fixed: OTP ring overflow at 1.3x, Confirm worker date row overflow at 1.3x, profile-setup address save crash with the photo feature off.
 Test-environment notes: the emulator needed 4 GB RAM and software GL; the first integration runs failed from emulator memory pressure and from a shared-helper assumption about a tall surface, not from app code.
+
+## Verification run (2026-11-06)
+
+- `flutter analyze`: No issues found.
+- `flutter test`: 1075 passed, 12 skipped, 0 failed.
+- `flutter test integration_test/customer_booking_flow_test.dart -d emulator-5554 --flavor dev --no-enable-impeller`: 1 test, passed (~100 s).
+- `flutter build apk --release --flavor dev -t lib/main_dev.dart`: built `build/app/outputs/flutter-apk/app-dev-release.apk`, 78,468,084 bytes (74.8 MB), same path, flavor and signing as before.
+- Visual QA: 240 screenshots over A/B/C, plus 12 re-captures after fixes; see UI_UX audit for the per-screen list. No new widget tests were added for the 7 fixes (they were verified on the emulator only).
+- Not run: real device, Razorpay, FCM.

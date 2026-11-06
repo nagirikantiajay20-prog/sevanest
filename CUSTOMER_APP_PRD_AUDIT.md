@@ -86,3 +86,7 @@ No requirement was moved to COMPLETED in this pass.
 | R38 (Razorpay) | Payment loading / duplicate / failure states tested with fakes only | NEEDS VERIFICATION on a device |
 | UI polish | 81 screenshots captured, 6 inspected | PARTIALLY COMPLETED |
 | Color tokens | Raw colors -> 0 outside `tokens.dart`; names not semantic; no per-batch screenshots | PARTIALLY COMPLETED |
+
+## Status update (2026-11-06)
+
+No requirement changed status to COMPLETED in this pass. Changes: seven UI defects fixed (see UI/UX audit), analyze/test/integration green, APK rebuilt. Visual QA: PARTIALLY COMPLETED (states for five screens and success states not capturable in mock mode). Color-token migration: PARTIALLY VERIFIED (B only, hero-card screens unresolved). Booking quote, reschedule, server receipt: BLOCKED. `/fees/booking`: NEEDS VERIFICATION. Razorpay and FCM: need a real device, NOT VERIFIED.
