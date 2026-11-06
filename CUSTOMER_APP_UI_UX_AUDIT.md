@@ -58,3 +58,9 @@ Findings from the inspected screens:
 Fixed by widget tests at 1.3x (found real overflows): OTP countdown ring (12 px, now text-scale-free fixed dial) and Confirm worker start-date row (52 px, now scales down). Also found by the integration test: saving the profile-setup address with the photo feature off crashed on `_photo!` (now nullable).
 
 **Remaining / not done:** 75 captured screens uninspected; no per-fix recapture except none; draft-dependent discovery steps (engagement, timing, start date, budget, review) were not captured; loading / empty / success states not captured visually; keyboard and safe-area behavior on device not inspected.
+
+## Visual QA follow-up (2026-11-06)
+
+Inspected 10 of the 81 harness screenshots (A login/home/bookings/interview request/worker profile/add address, C account/payment/new ticket/confirm worker). No new layout defects: no clipping or overflow at 1.0x or 1.3x; the floating nav only overlaps scrolled content as designed.
+Harness artifacts, not app defects: `login` shows Home (session already signed in); Payment and Confirm worker show their error states because mock mode has no Razorpay and the seeded draft is not loaded; Account header has no name because the mock profile is not loaded.
+Still NOT verified: the welcome-screen fix (needs a signed-out launch; the harness build was not relaunched), and about 70 screenshots remain uninspected.
