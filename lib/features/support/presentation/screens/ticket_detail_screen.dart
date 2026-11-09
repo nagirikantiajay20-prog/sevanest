@@ -138,7 +138,7 @@ class _State extends ConsumerState<TicketDetailScreen>
       if (!mounted) return;
       _failed = _Failed(body, key);
       _text.clear();
-      if (e is NetworkFailure) _offline = true;
+      if (isOffline(e)) _offline = true;
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -252,7 +252,7 @@ class _State extends ConsumerState<TicketDetailScreen>
     final stale =
         _offline ||
         (ref.watch(ticketProvider(_id)).hasError &&
-            ref.watch(ticketProvider(_id)).error is NetworkFailure);
+            isOffline(ref.watch(ticketProvider(_id)).error));
     final children = <Widget>[];
     DateTime? last;
     for (final r in rows) {

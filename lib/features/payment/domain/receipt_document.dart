@@ -1,3 +1,5 @@
+import 'package:sevanest_customer/core/storage/receipt_files.dart';
+
 /// Everything the receipt PDF prints, already formatted and localised. Built from the same
 /// backend data as the Receipt screen (see `buildReceiptDocument`), so the file and the screen
 /// can never disagree. Pure data: no Flutter, no I/O.
@@ -24,5 +26,5 @@ class ReceiptDocument {
 
   /// `SevaNest_Receipt_RCPT-XXXXXXXX.pdf`; anything unsafe in the number is replaced.
   String get fileName =>
-      'SevaNest_Receipt_${receiptNumber.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_')}.pdf';
+      '$receiptFilePrefix${receiptNumber.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_')}.pdf';
 }

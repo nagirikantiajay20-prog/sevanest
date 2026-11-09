@@ -21,6 +21,8 @@ import 'package:sevanest_customer/features/authentication/presentation/screens/s
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/motion.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/location_widgets.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:sevanest_customer/shared/utils/validators.dart';
 
@@ -203,7 +205,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
   late double? _lat = widget.prefill?.latitude;
   late double? _lng = widget.prefill?.longitude;
   bool _locating = false;
-  bool _locationOff = false;
+  LocationOutcome? _locationProblem;
   bool _defaultTouched = false;
 
   /// A photo chosen in this session (uploaded on save) / the saved one removed by the customer.
@@ -296,13 +298,14 @@ class _AddressFormState extends ConsumerState<_AddressForm>
 
   Future<void> _confirmLeave() async {
     final l10n = AppLocalizations.of(context);
-    final discard = await confirmDialog(
+    final discard = await showDiscoverDiscard(
       context,
       title: l10n.discardTitle,
       body: l10n.discardBody,
-      confirmLabel: l10n.discard,
-      cancelLabel: l10n.keepEditing,
-      confirmKey: const Key('address_discard_confirm_btn'),
+      keep: l10n.keepEditing,
+      discard: l10n.discard,
+      keepKey: const Key('dialog_cancel_btn'),
+      discardKey: const Key('address_discard_confirm_btn'),
     );
     if (discard && mounted) _leave();
   }
@@ -313,7 +316,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
     if (_locating) return;
     setState(() {
       _locating = true;
-      _locationOff = false;
+      _locationProblem = null;
       _locationFound = false;
     });
     final res = await ref.read(locationServiceProvider).currentAddress();
@@ -321,7 +324,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
     setState(() => _locating = false);
     final found = res.input;
     if (res.outcome != LocationOutcome.found || found == null) {
-      setState(() => _locationOff = true);
+      setState(() => _locationProblem = res.outcome);
       return;
     }
     final known = ref.read(serviceAreasProvider).asData?.value ?? const [];
@@ -446,7 +449,7 @@ class _AddressFormState extends ConsumerState<_AddressForm>
             failure is! ConflictFailure
         ? failureMessage(l10n, failure)
         // Conflict on save (not delete) is a business rule: show the backend's message.
-        : failure is ConflictFailure && failure.message != null
+        : failure is ConflictFailure && isCustomerSafe(failure.message)
         ? failure.message
         : null;
     final areas = ref.watch(serviceAreasProvider);
@@ -474,22 +477,18 @@ class _AddressFormState extends ConsumerState<_AddressForm>
                       clock: _clock,
                       locating: _locating,
                       found: _locationFound,
-                      failed: _locationOff,
+                      failed: _locationProblem != null,
                       onTap: form.busy || _locating
                           ? null
                           : _useCurrentLocation,
                     ),
-                    if (_locationOff)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.sm),
-                        child: Text(
-                          l10n.addressLocationFailed,
-                          key: const Key('address_location_error'),
-                          style: const TextStyle(
-                            color: AppColors.red700,
-                            fontSize: 13,
-                            height: 1.45,
-                          ),
+                    if (_locationProblem case final problem?)
+                      _LocationProblemNote(
+                        outcome: problem,
+                        onAction: () => runLocationProblemAction(
+                          ref.read(locationServiceProvider),
+                          problem,
+                          _useCurrentLocation,
                         ),
                       ),
                     if (_locationFound) ...[
@@ -743,6 +742,42 @@ class _AddressFormState extends ConsumerState<_AddressForm>
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Why "Use my current location" failed, in plain words, with the one action that helps. The form
+/// stays fully usable: the address can always be typed in.
+class _LocationProblemNote extends StatelessWidget {
+  const _LocationProblemNote({required this.outcome, required this.onAction});
+  final LocationOutcome outcome;
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    final info = locationProblemInfo(AppLocalizations.of(context), outcome);
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            info.body,
+            key: const Key('address_location_error'),
+            style: const TextStyle(
+              color: AppColors.red700,
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          TextButton(
+            key: const Key('address_location_action_btn'),
+            onPressed: onAction,
+            style: TextButton.styleFrom(minimumSize: const Size(0, 44)),
+            child: Text(info.action),
           ),
         ],
       ),

@@ -9,6 +9,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/config/app_config.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/security/safe_url.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
@@ -157,7 +158,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   /// The worker app is a separate application: open its configured link, never a made-up one.
   Future<void> _openWorkerApp() async {
     final url = ref.read(appConfigProvider).workerAppUrl;
-    final uri = url.isEmpty ? null : Uri.tryParse(url);
+    final uri = parseAllowedUri(url, schemes: storeSchemes);
     var opened = false;
     if (uri != null) {
       try {

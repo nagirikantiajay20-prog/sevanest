@@ -40,6 +40,7 @@ class InterviewDetailScreen extends ConsumerStatefulWidget {
 
 class _State extends ConsumerState<InterviewDetailScreen> {
   bool _busy = false;
+  bool _failed = false;
 
   /// Runs one action once (double taps are ignored), then re-reads the interview so the buttons
   /// follow the new `allowedActions`.
@@ -50,7 +51,10 @@ class _State extends ConsumerState<InterviewDetailScreen> {
     if (_busy) return;
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _failed = false;
+    });
     try {
       final updated = await call(ref.read(interviewRepositoryProvider));
       ref
@@ -69,6 +73,7 @@ class _State extends ConsumerState<InterviewDetailScreen> {
       // Keep the screen in step even before the refetch lands.
       ref.read(interviewProvider(updated.id));
     } on Object catch (e) {
+      _failed = true;
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(failureMessage(l10n, e))));
@@ -117,6 +122,8 @@ class _State extends ConsumerState<InterviewDetailScreen> {
     );
     if (!yes || !mounted) return;
     await _act((r) => r.decline(widget.interviewId), l10n.interviewDeclined);
+    // reopen-matching succeeded (a failure keeps this screen): carry on to the worker search.
+    if (mounted && !_failed) context.go(Routes.workers);
   }
 
   /// Opens a pre-filled calendar entry for the interview in the phone's calendar / browser.

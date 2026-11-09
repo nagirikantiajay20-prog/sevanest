@@ -1,9 +1,25 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 
-enum LocationOutcome { found, denied, deniedForever, unavailable }
+enum LocationOutcome {
+  found,
+  denied,
+  deniedForever,
+
+  /// The phone's location switch (GPS) is off.
+  gpsOff,
+
+  /// A temporary failure: no fix in time, or nothing found for the position.
+  unavailable,
+
+  /// The address lookup could not reach the network.
+  network,
+}
 
 class LocationResult {
   const LocationResult(this.outcome, [this.input]);
@@ -17,6 +33,9 @@ class LocationResult {
 abstract interface class LocationService {
   Future<LocationResult> currentAddress();
   Future<void> openSettings();
+
+  /// The phone's location (GPS) switch.
+  Future<void> openLocationSettings();
 }
 
 class GeolocatorLocationService implements LocationService {
@@ -24,7 +43,7 @@ class GeolocatorLocationService implements LocationService {
   Future<LocationResult> currentAddress() async {
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
-        return const LocationResult(LocationOutcome.denied);
+        return const LocationResult(LocationOutcome.gpsOff);
       }
       var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied) {
@@ -63,6 +82,19 @@ class GeolocatorLocationService implements LocationService {
           longitude: pos.longitude,
         ),
       );
+    } on SocketException {
+      return const LocationResult(LocationOutcome.network);
+    } on PlatformException catch (e) {
+      // geocoding reports a failed network lookup as IO_ERROR
+      return LocationResult(
+        e.code == 'IO_ERROR'
+            ? LocationOutcome.network
+            : LocationOutcome.unavailable,
+      );
+    } on LocationServiceDisabledException {
+      return const LocationResult(LocationOutcome.gpsOff);
+    } on PermissionDeniedException {
+      return const LocationResult(LocationOutcome.denied);
     } on Object {
       return const LocationResult(LocationOutcome.unavailable);
     }
@@ -71,6 +103,11 @@ class GeolocatorLocationService implements LocationService {
   @override
   Future<void> openSettings() async {
     await Geolocator.openAppSettings();
+  }
+
+  @override
+  Future<void> openLocationSettings() async {
+    await Geolocator.openLocationSettings();
   }
 }
 

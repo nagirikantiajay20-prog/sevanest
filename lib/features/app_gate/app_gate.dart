@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
+import 'package:sevanest_customer/core/security/safe_url.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Launch / resume gate (OPEN_QUESTIONS #30): `GET /app-config` -> `customer.minVersion` and
@@ -82,8 +83,11 @@ final appGateFetcherProvider = Provider<Future<AppGate> Function()>((ref) {
     final running = await ref.read(runningVersionProvider)();
     if (!isBelowMinVersion(running, min)) return AppGate.open;
     final url = customer is Map ? customer['storeUrl'] : null;
-    final ok = url is String && Uri.tryParse(url.trim())?.hasScheme == true;
-    return AppGate(AppGateKind.forceUpdate, storeUrl: ok ? url.trim() : null);
+    // Only an https store page or a market: link is ever opened (never intent:, file:, custom schemes).
+    final store = url is String
+        ? parseAllowedUri(url, schemes: storeSchemes)
+        : null;
+    return AppGate(AppGateKind.forceUpdate, storeUrl: store?.toString());
   };
 });
 
@@ -116,10 +120,9 @@ final appGateProvider = NotifierProvider<AppGateNotifier, AppGate>(
 final openStoreProvider = Provider<Future<bool> Function(String url)>(
   (ref) => (url) async {
     try {
-      return await launchUrl(
-        Uri.parse(url),
-        mode: LaunchMode.externalApplication,
-      );
+      final uri = parseAllowedUri(url, schemes: storeSchemes);
+      if (uri == null) return false;
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } on Object {
       return false;
     }

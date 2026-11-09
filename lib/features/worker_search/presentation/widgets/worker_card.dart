@@ -50,8 +50,12 @@ class WorkerAvatar extends StatelessWidget {
                 image: worker.photoUrl == null
                     ? null
                     : DecorationImage(
-                        image: NetworkImage(worker.photoUrl!),
+                        image: ResizeImage(
+                          NetworkImage(worker.photoUrl!),
+                          width: 300,
+                        ),
                         fit: BoxFit.cover,
+                        onError: (_, _) {},
                       ),
               ),
               child: worker.photoUrl != null

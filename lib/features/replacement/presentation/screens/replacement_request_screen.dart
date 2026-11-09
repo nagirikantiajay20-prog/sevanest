@@ -214,7 +214,7 @@ class _State extends ConsumerState<ReplacementRequestScreen> {
         _markCreated(open);
       } else {
         setState(() {
-          if (e is NetworkFailure) {
+          if (isOffline(e)) {
             _offline = true;
           } else {
             _failed = true;

@@ -1,5 +1,6 @@
 // Thin test of the real GeolocatorLocationService over a mocked geolocator platform channel and a
 // stand-in geocoder: every outcome the UI reacts to (module 3 DISC-10).
+import 'dart:io';
 import 'dart:ui' show Locale;
 
 import 'package:flutter/services.dart';
@@ -112,10 +113,25 @@ void main() {
     expect(r.input?.area, 'Secunderabad');
   });
 
-  test('location services off -> denied', () async {
+  test('location services off -> gpsOff', () async {
     serviceEnabled = false;
-    expect((await service.currentAddress()).outcome, LocationOutcome.denied);
+    expect((await service.currentAddress()).outcome, LocationOutcome.gpsOff);
   });
+
+  test(
+    'geocoder network failure -> network, other failure -> unavailable',
+    () async {
+      _FakeGeocoding.error = PlatformException(code: 'IO_ERROR');
+      expect((await service.currentAddress()).outcome, LocationOutcome.network);
+      _FakeGeocoding.error = const SocketException('offline');
+      expect((await service.currentAddress()).outcome, LocationOutcome.network);
+      _FakeGeocoding.error = StateError('boom');
+      expect(
+        (await service.currentAddress()).outcome,
+        LocationOutcome.unavailable,
+      );
+    },
+  );
 
   test('asks once when undecided; refusing -> denied', () async {
     permission = 0;

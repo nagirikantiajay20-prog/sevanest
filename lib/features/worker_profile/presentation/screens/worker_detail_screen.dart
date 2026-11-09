@@ -105,7 +105,7 @@ class WorkerDetailScreen extends ConsumerWidget {
                 actionKey: const Key('worker_find_another_btn'),
                 onAction: () => _findAnother(context, ref),
               )
-            : e is NetworkFailure
+            : isOffline(e)
             ? SnOfflineState(
                 message: failureMessage(l10n, e),
                 onRetry: () => ref.invalidate(workerDetailProvider(workerId)),

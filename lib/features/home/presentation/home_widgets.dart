@@ -415,7 +415,10 @@ class _BookingTile extends StatelessWidget {
                     backgroundColor: AppColors.warnBg,
                     foregroundImage: booking.photoUrl == null
                         ? null
-                        : NetworkImage(booking.photoUrl!),
+                        : ResizeImage(
+                            NetworkImage(booking.photoUrl!),
+                            width: 200,
+                          ),
                     onForegroundImageError: booking.photoUrl == null
                         ? null
                         : (_, _) {},

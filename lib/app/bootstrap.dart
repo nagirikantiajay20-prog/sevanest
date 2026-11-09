@@ -9,6 +9,9 @@ import 'package:sevanest_customer/core/config/app_config.dart';
 
 Future<void> bootstrap(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Fail closed: a stg/prod build without its own backend must not start (and not hit dev).
+  final problem = config.problem;
+  if (problem != null) throw StateError('Invalid app configuration: $problem');
   // Crashlytics + Analytics run in stg and prod only; dev stays silent. A Firebase failure never blocks launch.
   if (config.env != AppEnv.dev) {
     try {

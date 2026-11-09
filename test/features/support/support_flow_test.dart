@@ -103,7 +103,8 @@ void main() {
         support: repo,
         overrides: [
           paymentServiceProvider.overrideWithValue(
-            FakePaymentService(outcome: const PaymentSdkFailed('BAD_REQUEST')),
+            // A refused signature is a backend-confirmed failure.
+            FakePaymentService(outcome: const PaymentPaid('bad', 'sig')),
           ),
           paymentPollDelaysProvider.overrideWithValue([
             const Duration(milliseconds: 10),

@@ -403,6 +403,27 @@ void main() {
     },
   );
 
+  test(
+    'trial needs the whole visit inside free hours; 7 Nov 4 PM in 4-7 PM',
+    () {
+      final slots = [
+        const InterviewSlot('16:00'),
+        const InterviewSlot('17:00'),
+        const InterviewSlot('18:00'),
+      ]; // worker free 16:00-19:00
+      final day = DateTime(2026, 11, 7);
+      final now = DateTime(2026, 11, 6, 9);
+      TimeCheck c(int m) =>
+          checkInterviewTime(minutes: m, date: day, now: now, slots: slots);
+      expect(c(16 * 60), TimeCheck.ok);
+      expect(c(18 * 60), TimeCheck.ok); // ends 19:00 exactly
+      expect(c(18 * 60 + 1), TimeCheck.unavailable);
+      expect(c(15 * 60), TimeCheck.tooEarly);
+      expect(istInstant(day, '16:00'), DateTime.utc(2026, 11, 7, 10, 30));
+      expect(istInstant(day, '00:15'), DateTime.utc(2026, 11, 6, 18, 45));
+    },
+  );
+
   group('screens', () {
     // cook-4 is not in the seeded bookings, so a request for it is not a duplicate.
     const newRoute = '/interviews/new?workerId=cook-4';
@@ -565,7 +586,7 @@ void main() {
       });
 
       testWidgets(
-        'the first request offers notifications once, via the pre-prompt',
+        'the first request asks the OS for notifications once, no custom dialog',
         (t) async {
           SharedPreferences.setMockInitialValues({});
           final push = FakePushService();
@@ -573,10 +594,11 @@ void main() {
           await pickDateAndSlot(t);
           await tapKey(t, 'interview_submit_btn');
           await viewRequest(t);
-          expect(find.byKey(const Key('notif_prompt')), findsOneWidget);
-          expect(push.requestCalls, 0);
-          await tapKey(t, 'notif_prompt_allow_btn');
-          expect(push.requestCalls, 1);
+          expect(find.byKey(const Key('notif_prompt')), findsNothing);
+          expect(
+            push.requestCalls,
+            1,
+          ); // however many places ask, the OS is asked once
         },
       );
 
@@ -614,34 +636,39 @@ void main() {
         await t.tap(btn);
         await t.pump();
         await t.tap(btn, warnIfMissed: false);
-        await t.pump();
+        // The availability is re-read first, so the request reaches the repository a moment later.
+        for (var i = 0; i < 30 && spy.createCalls == 0; i++) {
+          await t.pump(const Duration(milliseconds: 100));
+        }
+        await t.tap(btn, warnIfMissed: false);
+        await t.pump(const Duration(milliseconds: 100));
         expect(spy.createCalls, 1);
         spy.gate!.complete();
         await settle(t);
         expect(spy.createCalls, 1);
       });
 
-      testWidgets(
-        'INT-05 slot taken: message, slot cleared, still on the form',
-        (t) async {
-          final spy = _Spy()
-            ..createFailsOnce = const ConflictFailure('taken', 'SLOT_TAKEN');
-          final env = await open(t, route: newRoute, spy: spy);
-          await pickDateAndSlot(t, slot: '17:00');
-          await tapKey(t, 'interview_submit_btn');
-          expect(find.byKey(const Key('interview_error')), findsOneWidget);
-          expect(
-            find.text('That time is no longer available. Pick another.'),
-            findsOneWidget,
-          );
-          expect(env.where, '/interviews/new');
-          expect(submitEnabled(t), isFalse);
-          await pickTime(t, '16:00');
-          await tapKey(t, 'interview_submit_btn');
-          await viewRequest(t);
-          expect(env.where, startsWith('/interviews/iv_'));
-        },
-      );
+      testWidgets('INT-05 slot taken: message, choices kept, still on the form', (
+        t,
+      ) async {
+        final spy = _Spy()
+          ..createFailsOnce = const ConflictFailure('taken', 'SLOT_TAKEN');
+        final env = await open(t, route: newRoute, spy: spy);
+        await pickDateAndSlot(t, slot: '17:00');
+        await tapKey(t, 'interview_submit_btn');
+        expect(find.byKey(const Key('interview_error')), findsOneWidget);
+        expect(
+          find.text('That time is no longer available. Pick another.'),
+          findsOneWidget,
+        );
+        expect(env.where, '/interviews/new');
+        // The date and time stay chosen, so the same request can simply be sent again.
+        expect(submitEnabled(t), isTrue);
+        await pickTime(t, '16:00');
+        await tapKey(t, 'interview_submit_btn');
+        await viewRequest(t);
+        expect(env.where, startsWith('/interviews/iv_'));
+      });
 
       testWidgets('an open request with this worker already exists', (t) async {
         // cook-2 already has the seeded booking iv_301.

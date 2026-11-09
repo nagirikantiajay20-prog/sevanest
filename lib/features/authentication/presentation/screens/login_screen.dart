@@ -11,6 +11,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
+import 'package:sevanest_customer/core/security/safe_url.dart';
 import 'package:sevanest_customer/features/authentication/domain/auth_repository.dart';
 import 'package:sevanest_customer/features/authentication/presentation/providers/auth_providers.dart';
 import 'package:sevanest_customer/features/authentication/presentation/screens/splash_screen.dart'
@@ -111,12 +112,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     } on Object {
       url = null;
     }
-    if (url != null) {
+    final uri = parseAllowedUri(url);
+    if (uri != null) {
       try {
-        opened = await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-        );
+        opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       } on Object {
         opened = false;
       }
@@ -982,11 +981,9 @@ class _Feedback extends StatelessWidget {
     }
     if (failure == null) return const SizedBox.shrink();
     return _card(
-      icon: failure is NetworkFailure
-          ? Icons.wifi_off_rounded
-          : Icons.error_outline,
+      icon: isOffline(failure) ? Icons.wifi_off_rounded : Icons.error_outline,
       title: l10n.sendFailedTitle,
-      message: failure is NetworkFailure
+      message: isOffline(failure)
           ? l10n.sendFailedNetwork
           : failureMessage(l10n, failure),
     );

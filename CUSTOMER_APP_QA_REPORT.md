@@ -104,3 +104,41 @@ Test-suite notes:
 Not executed, so not claimed: any device or emulator run, Razorpay SDK, FCM delivery, real SMS, live backend (12 skipped), TalkBack, screenshots, the integration test.
 
 Completion (evidence-based, this pass only): the 6 original gap groups are FIXED (D, E, F, C-code) or VERIFIED (A, B) with automated evidence; 7 of 7 earlier fixes are regression-tested and 1 of them (login trust strip) was found incomplete and fixed. 7 external items are BLOCKED. PRD-level completion numbers above are unchanged: this pass closed no device-dependent requirement.
+
+## UX regression pass (2026-11-08)
+
+`flutter analyze`: No issues found. `flutter test`: 1156 passed, 12 skipped, 0 failed (automated only; no emulator, no screenshots, no real-device or OS-dialog verification).
+
+| # | Issue | Root cause | Fix | Status |
+|---|---|---|---|---|
+| 1 | Two notification prompts | `askForPushAfterAction` showed the custom "Stay in the loop" `AlertDialog`, then `FirebaseMessaging.requestPermission()` | Custom dialog removed. `PushController.shouldAsk()` is true only while the OS state is undecided **and** the one-time `push_permission_asked` flag is unset; `allow()` sets the flag, calls the native request once, then binds the token. Granted, denied, permanently denied and previously granted never re-ask. FCM `start()`, token registration/refresh and unregister are unchanged. Files: `push_prompt.dart`, `push_providers.dart`, `push_host.dart`, `interview_request_screen.dart` | FIXED (automated) |
+| 2 | Confusing location errors | `GeolocatorLocationService` mapped GPS-off to `denied` and every exception to `unavailable`; both screens showed one generic text | New outcomes `gpsOff` and `network` (SocketException / geocoder `IO_ERROR`), `openLocationSettings()`, one `locationProblemInfo` mapping used by the address form and the Location step. Messages and actions follow the spec table (Open Settings / Location Settings / Try again). Manual entry stays available; no technical text shown | FIXED (automated) |
+| 3 | Technical text in messages | `failureMessage` showed any backend message, including `UnknownFailure('cancelled')`; 404 and 429 fell to generic | `failureMessage` now maps NotFound and RateLimited (with retry seconds) and shows backend text only for Validation/Conflict failures when `isCustomerSafe` (no exception names, SQL, JSON, status codes, > 200 chars). `confirm_worker_screen` and the address-form conflict banner use the same check | FIXED (automated) |
+| 4 | Outdated Discard dialog (Add Address, Profile) | Used the Material `confirmDialog` | Both now use the navy `showDiscoverDiscard` (same keys kept); body scrolls so 1.3x text on a short phone does not overflow | FIXED (automated) |
+| 5 | Minute picker had 00/15/30/45 | Hard-coded list and `/15` snapping | 12 items `00..55`, snapping and index use 5; the API contract is untouched (Q-141 still open) | FIXED (automated) |
+| 6 | Duration row overflow in Timing | `Row` with unconstrained `Text` (found by the tests) | Text wrapped in `Flexible` | FIXED (automated) |
+
+Tests: new `test/regression/customer_ux_regression_test.dart` (single native request, message mapping, five location outcomes with actions and retry, Discard keep/discard and 1.3x, all 12 minutes, 12 AM/PM, AM/PM change); updated `location_service_test`, `push_test`, `notification_centre_test`, `interview_test`, `discover_steps_test`, `timing_screen_test`.
+
+Follow-up (same day): the shared `confirmDialog` (delete address, leave payment, block) now uses the navy dialog too, and the unused `notifPrompt*` strings were removed. A grep found no other place where an exception or backend message reaches the UI unfiltered. `flutter analyze` clean, `flutter test` 1156 passed / 12 skipped / 0 failed.
+
+Limitations (OPEN / not verified): the real Android/iOS permission dialogs and the Android 13 "denied once" state are not exercised (fakes only); the one-time flag is what prevents repeat requests. `infoDialog` (two callers) keeps the plain Material style. Integration tests and on-device checks were not run.
+
+
+## Interview / Trial / availability / contact (2026-11-08)
+
+**Rules.** Regular booking: unchanged (requirement hours checked by the backend at `POST /bookings`). Interview and Trial: `GET /search/workers/{id}/slots` is the one published rule for both ("interview or trial start times", one-hour slots minus held bookings and confirmed interviews, 14 days). The app checks the picked time against those windows plus "not in the past"; a Trial additionally needs the whole visit inside the free windows. The contract has no separate interview-only rule, so none was invented. Worker acceptance and conflicts stay with the backend.
+
+| # | Issue | Root cause | Fix | Status |
+|---|---|---|---|---|
+| 1 | "The worker is not available for this requirement." on Trial 7 Nov 4 PM (free 4-7 PM) | Every request first makes a regular `POST /bookings` carrying the customer's requirement hours; the backend checks the worker against those hours (422 `WORKER_NOT_ELIGIBLE`), not the interview time. Intermittent = depends on whether requirement hours overlap the worker's | None possible in the app without altering the requirement. App now shows a specific message and keeps every choice; no list lookup after a definite 422. Backend change documented in `docs/BACKEND_REQUESTS.md` | BLOCKED (backend) |
+| 2 | Time zone | `preferredAt` was built from the phone's local zone; worker hours and the slot list are India time | `istInstant` builds the UTC instant from the India wall time (4 PM = `10:30Z`); responses read back as India wall time | FIXED (tests) |
+| 3 | Stale availability | Slot list could be old at submit | Slots are re-read right before sending; a taken time is reported without sending | FIXED (tests) |
+| 4 | Selections lost / retry | Slot cleared on conflict; interview key reused for a changed time; a retry after the interview step failed made a second booking | Selections kept; interview key follows the payload (same request = same key, changed time = new); the booking made for a form is reused on retry | FIXED (tests) |
+| 5 | Customer phone masked for workers | Not in this app; worker booking and interview views carry no customer contact at all | Documented endpoint, field and authorization | BLOCKED (backend + worker app) |
+
+Files: `interview.dart`, `interview_repository_remote.dart`, `interview_request_screen.dart`, `app_en.arb` (+ generated), tests `interview_remote_test.dart`, `interview_test.dart`, `test/regression/customer_contact_privacy_test.dart`.
+
+OPEN: the picker still allows any minute inside a free window (earlier decision); if the backend only accepts hour starts it will refuse 16:30. No real booking, payment or backend write was made; the app was not launched.
+
+Results (2026-11-08): `flutter analyze` no issues. `flutter test` 1164 passed / 12 skipped / 0 failed (the live auth test failed once in an earlier run, passed in the final one; it needs the network). New tests: 7 in `interview_remote_test.dart` (IST payload, INTERVIEW type, retry/keys, 422 refusal) plus a trial window test in `interview_test.dart` and 2 in `customer_contact_privacy_test.dart`; INT-04 and INT-05 updated.

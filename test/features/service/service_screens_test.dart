@@ -357,6 +357,57 @@ void main() {
       expect(find.text('Exception'), findsWidgets);
     });
 
+    Future<void> fillDay(WidgetTester t, String note) async {
+      await open(t, '/services/current?bookingId=a1');
+      await tapKey(t, 'service_report_missing_btn');
+      await t.tap(k('exception_date_btn'));
+      await settle(t);
+      await t.tap(find.text('OK'));
+      await settle(t);
+      await t.enterText(k('exception_note_field'), note);
+      await t.pump();
+    }
+
+    testWidgets('report a missing day: a note of only spaces cannot be sent', (
+      t,
+    ) async {
+      await fillDay(t, '     ');
+      expect(t.widget<SnButton>(k('exception_submit_btn')).onPressed, isNull);
+      await t.tap(k('exception_submit_btn'), warnIfMissed: false);
+      await settle(t);
+      expect(att.raised, isEmpty);
+    });
+
+    testWidgets('report a missing day: the note is sent trimmed', (t) async {
+      await fillDay(t, '   Did not come  ');
+      await t.tap(k('exception_submit_btn'));
+      await settle(t);
+      expect(att.raised.single.$3, 'Did not come');
+    });
+
+    testWidgets('report a missing day: the note field stops at 500', (t) async {
+      await fillDay(t, 'a' * 600);
+      expect(
+        t.widget<TextField>(k('exception_note_field')).controller!.text.length,
+        500,
+      );
+    });
+
+    testWidgets('report a missing day: a timeout says so and keeps the note', (
+      t,
+    ) async {
+      att.raiseFails = const NetworkFailure(null, true);
+      await fillDay(t, 'Did not come');
+      await t.tap(k('exception_submit_btn'));
+      await settle(t);
+      expect(
+        t.widget<Text>(k('exception_error')).data,
+        "We're taking a little longer than expected. Please try again.",
+      );
+      expect(find.text('Did not come'), findsOneWidget);
+      expect(k('exception_submit_btn'), findsOneWidget);
+    });
+
     testWidgets('a 409 on the day shows the reason and keeps the form', (
       t,
     ) async {

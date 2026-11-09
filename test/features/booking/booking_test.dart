@@ -35,6 +35,8 @@ class _Spy implements BookingRepository {
   var getCalls = 0;
   var cancelCalls = 0;
   var confirmCalls = 0;
+  var reopenCalls = 0;
+  Object? reopenFails;
   String? lastReason;
   DateTime? lastStart;
   Object? confirmFails;
@@ -84,7 +86,12 @@ class _Spy implements BookingRepository {
   }
 
   @override
-  Future<Booking> reopenMatching(String id) => inner.reopenMatching(id);
+  Future<Booking> reopenMatching(String id) async {
+    reopenCalls++;
+    final f = reopenFails;
+    if (f != null) throw f;
+    return inner.reopenMatching(id);
+  }
 
   @override
   Future<Booking> rebook(String bookingId, {DateTime? startDate}) =>
@@ -349,6 +356,78 @@ void main() {
       final env = await open(t, route: '/bookings/iv_302');
       await tapKey(t, 'booking_confirm_worker_btn');
       expect(env.where, '/bookings/confirm');
+    });
+
+    testWidgets(
+      'interview done: Confirm, Find another and Cancel, no replacement',
+      (t) async {
+        await open(t, route: '/bookings/iv_302');
+        expect(
+          find.byKey(const Key('booking_confirm_worker_btn')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('booking_reopen_matching_btn')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('booking_cancel_btn')), findsOneWidget);
+        expect(find.byKey(const Key('booking_replace_btn')), findsNothing);
+      },
+    );
+
+    testWidgets('a backend replace on a non-ACTIVE booking is not offered', (
+      t,
+    ) async {
+      final spy = _Spy()
+        ..forced = Booking.fromJson({
+          'id': 'bk_x',
+          'status': 'INTERVIEW_TRIAL_COMPLETED',
+          'allowedActions': ['replace', 'confirm-worker', 'reopen-matching'],
+        });
+      await open(t, route: '/bookings/bk_x', spy: spy);
+      expect(find.byKey(const Key('booking_replace_btn')), findsNothing);
+      expect(
+        find.byKey(const Key('booking_reopen_matching_btn')),
+        findsOneWidget,
+      );
+      final confirmed = Booking.fromJson({
+        'id': 'b',
+        'status': 'CONFIRMED',
+        'allowedActions': ['replace'],
+      })!;
+      expect(confirmed.actions, isNot(contains(BookingAction.replace)));
+      final active = Booking.fromJson({
+        'id': 'b',
+        'status': 'ACTIVE',
+        'allowedActions': ['replace'],
+      })!;
+      expect(active.actions, contains(BookingAction.replace));
+    });
+
+    testWidgets(
+      'Find another asks first, calls reopen-matching once, opens the search',
+      (t) async {
+        final spy = _Spy();
+        final env = await open(t, route: '/bookings/iv_302', spy: spy);
+        await tapKey(t, 'booking_reopen_matching_btn');
+        expect(spy.reopenCalls, 0);
+        await tapKey(t, 'booking_find_another_confirm_btn');
+        expect(spy.reopenCalls, 1);
+        expect(env.where, '/workers');
+      },
+    );
+
+    testWidgets('Find another failing stays on the booking', (t) async {
+      final spy = _Spy()..reopenFails = const NetworkFailure();
+      final env = await open(t, route: '/bookings/iv_302', spy: spy);
+      await tapKey(t, 'booking_reopen_matching_btn');
+      await tapKey(t, 'booking_find_another_confirm_btn');
+      expect(spy.reopenCalls, 1);
+      expect(env.where, '/bookings/iv_302');
+      expect(
+        find.byKey(const Key('booking_reopen_matching_btn')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('BOOK-14 refetches when the app resumes', (t) async {

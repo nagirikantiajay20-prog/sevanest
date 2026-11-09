@@ -82,7 +82,7 @@ class _Card extends StatelessWidget {
                     backgroundColor: AppColors.tealWash,
                     foregroundImage: w.photoUrl == null
                         ? null
-                        : NetworkImage(w.photoUrl!),
+                        : ResizeImage(NetworkImage(w.photoUrl!), width: 160),
                     onForegroundImageError: w.photoUrl == null
                         ? null
                         : (_, _) {},

@@ -140,3 +140,7 @@ At 360 dp and 1.3x "professionals" still broke as "professional/s" although the 
 ### Not done
 
 Screenshots (forbidden this pass), on-device TalkBack, and any visual check of the plate on the photo.
+
+### Discard dialog and time picker (2026-11-08)
+
+The "Discard changes?" dialog on Add Address and Profile now uses the shared navy `showDiscoverDiscard` (navy primary "Keep editing", red text "Discard", 48-52 dp targets, scrollable at 1.3x). The Start/End time wheel offers `00, 05 ... 55`. Location failures show the cause-specific text and one action. Automated tests only; no visual check was done. See `CUSTOMER_APP_QA_REPORT.md`, "UX regression pass".

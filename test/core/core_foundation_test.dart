@@ -22,8 +22,38 @@ void main() {
       expect(AppConfig.prod.useMocks, isFalse);
     });
 
-    test('prod base url is https', () {
-      expect(AppConfig.prod.apiBaseUrl, startsWith('https://'));
+    test('dev is valid; stg/prod fail closed without API_BASE_URL', () {
+      expect(AppConfig.dev.problem, isNull);
+      // No --dart-define in tests, so stg/prod have no host and must refuse to start.
+      expect(AppConfig.stg.problem, contains('API_BASE_URL'));
+      expect(AppConfig.prod.problem, contains('API_BASE_URL'));
+    });
+
+    test('stg/prod can never use the dev backend or mocks', () {
+      const devHost = AppConfig(
+        env: AppEnv.prod,
+        apiBaseUrl: AppConfig.devApiUrl,
+        useMocks: false,
+      );
+      expect(devHost.problem, contains('dev backend'));
+      const http = AppConfig(
+        env: AppEnv.stg,
+        apiBaseUrl: 'http://x.example/api',
+        useMocks: false,
+      );
+      expect(http.problem, isNotNull);
+      const mocks = AppConfig(
+        env: AppEnv.prod,
+        apiBaseUrl: 'https://prod.example/api/v1',
+        useMocks: true,
+      );
+      expect(mocks.problem, contains('mock'));
+      const ok = AppConfig(
+        env: AppEnv.prod,
+        apiBaseUrl: 'https://prod.example/api/v1',
+        useMocks: false,
+      );
+      expect(ok.problem, isNull);
     });
   });
 

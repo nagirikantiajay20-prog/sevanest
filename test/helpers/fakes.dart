@@ -500,6 +500,7 @@ class FakeLocationService implements LocationService {
   Future<void>? gate;
   int calls = 0;
   int settingsCalls = 0;
+  int locationSettingsCalls = 0;
 
   @override
   Future<LocationResult> currentAddress() async {
@@ -510,6 +511,9 @@ class FakeLocationService implements LocationService {
 
   @override
   Future<void> openSettings() async => settingsCalls++;
+
+  @override
+  Future<void> openLocationSettings() async => locationSettingsCalls++;
 }
 
 /// Fixed "now" for date rules: Friday 9 Oct 2026, as in the design screens.

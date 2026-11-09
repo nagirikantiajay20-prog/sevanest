@@ -136,7 +136,7 @@ class _State extends ConsumerState<NotificationCentreScreen>
     int unread,
   ) {
     final banners = <Widget>[
-      if (list.hasValue && list.hasError && list.error is NetworkFailure)
+      if (list.hasValue && list.hasError && isOffline(list.error))
         NotificationBanner(
           key: const Key('notif_offline_banner'),
           icon: Icons.wifi_off_rounded,

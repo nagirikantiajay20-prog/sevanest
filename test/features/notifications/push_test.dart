@@ -5,15 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sevanest_customer/app/theme/app_theme.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
-import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/features/notifications/domain/push_service.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/notification_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/providers/push_providers.dart';
 import 'package:sevanest_customer/features/notifications/presentation/push_prompt.dart';
-import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/discover_harness.dart';
@@ -52,12 +49,12 @@ void main() {
     });
 
     testWidgets('nothing is registered without permission', (t) async {
-      final push = FakePushService();
+      final push = FakePushService()..allowResult = PushPermission.denied;
       final repo = FakeNotificationRepository();
       await launchDiscover(t, push: push, notifications: repo);
       await settle(t);
       expect(repo.registered, isEmpty);
-      expect(push.requestCalls, 0);
+      expect(push.requestCalls, 1); // the OS dialog only, asked once
     });
 
     testWidgets('a refreshed token is registered again, the same one is not', (
@@ -154,122 +151,59 @@ void main() {
     });
   });
 
-  group('NOT-06 permission pre-prompt', () {
+  group('NOT-06 single native permission request', () {
     late FakePushService push;
     late FakeNotificationRepository repo;
-    var nowValue = DateTime(2026, 10, 9, 10);
-
-    Future<void> pumpHost(WidgetTester t) async {
-      nowValue = DateTime(2026, 10, 9, 10);
-      await t.pumpWidget(
-        ProviderScope(
-          overrides: [
-            pushServiceProvider.overrideWithValue(push),
-            notificationRepositoryProvider.overrideWithValue(repo),
-            authProvider.overrideWith(_Signed.new),
-            nowProvider.overrideWithValue(() => nowValue),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Consumer(
-              builder: (context, ref, _) => Scaffold(
-                body: Center(
-                  child: TextButton(
-                    key: const Key('first_action'),
-                    onPressed: () => askForPushAfterAction(
-                      context,
-                      ref.read(pushControllerProvider),
-                    ),
-                    child: const Text('go'),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
+    late ProviderContainer c;
 
     setUp(() {
       push = FakePushService();
       repo = FakeNotificationRepository();
+      c = ProviderContainer(
+        overrides: [
+          pushServiceProvider.overrideWithValue(push),
+          notificationRepositoryProvider.overrideWithValue(repo),
+          authProvider.overrideWith(_Signed.new),
+        ],
+      );
+      addTearDown(c.dispose);
     });
 
-    testWidgets('Allow: the OS dialog is requested and the token is bound', (
-      t,
-    ) async {
-      await pumpHost(t);
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsOneWidget);
-      expect(find.text('Stay in the loop'), findsOneWidget);
-      expect(push.requestCalls, 0); // the pre-prompt itself asks nothing
-      await t.tap(k('notif_prompt_allow_btn'));
-      await settle(t);
-      expect(push.requestCalls, 1);
-      expect(repo.registered.length, 1);
-      expect(k('notif_prompt'), findsNothing);
-    });
+    Future<void> ask() => askForPushAfterAction(c.read(pushControllerProvider));
 
-    testWidgets('Allow, but the OS says no: no token, no loop', (t) async {
+    test(
+      'asks the OS once, with no custom dialog, and binds the token',
+      () async {
+        await ask();
+        expect(push.requestCalls, 1);
+        expect(repo.registered.length, 1);
+      },
+    );
+
+    test('denied: no token, and never requested again', () async {
       push.allowResult = PushPermission.denied;
-      await pumpHost(t);
-      await t.tap(k('first_action'));
-      await settle(t);
-      await t.tap(k('notif_prompt_allow_btn'));
-      await settle(t);
+      await ask();
       expect(push.requestCalls, 1);
       expect(repo.registered, isEmpty);
-      // Denied is never asked again.
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsNothing);
+      await ask();
+      expect(push.requestCalls, 1);
     });
 
-    testWidgets('Later: no OS request, and the re-ask window is honoured', (
-      t,
-    ) async {
-      await pumpHost(t);
-      await t.tap(k('first_action'));
-      await settle(t);
-      await t.tap(k('notif_prompt_later_btn'));
-      await settle(t);
-      expect(push.requestCalls, 0);
-      // Same day: not asked again.
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsNothing);
-      // After the window it is offered again.
-      nowValue = nowValue.add(const Duration(days: 4));
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsOneWidget);
-    });
+    test(
+      'undecided but already requested before: not requested again',
+      () async {
+        await c.read(pushPromptStoreProvider).markAsked();
+        await ask();
+        expect(push.requestCalls, 0);
+      },
+    );
 
-    testWidgets('dismissing the dialog counts as Later', (t) async {
-      await pumpHost(t);
-      await t.tap(k('first_action'));
-      await settle(t);
-      await t.tapAt(const Offset(5, 5));
-      await settle(t);
-      expect(push.requestCalls, 0);
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsNothing);
-    });
-
-    testWidgets('already granted or unavailable: no prompt at all', (t) async {
+    test('already granted or unavailable: nothing requested', () async {
       push.state = PushPermission.granted;
-      await pumpHost(t);
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsNothing);
+      await ask();
       push.state = PushPermission.unavailable;
-      await t.tap(k('first_action'));
-      await settle(t);
-      expect(k('notif_prompt'), findsNothing);
+      await ask();
+      expect(push.requestCalls, 0);
     });
   });
 
@@ -302,7 +236,11 @@ void main() {
     });
 
     testWidgets('not asked yet reads "Not turned on"', (t) async {
-      final env = await launchDiscover(t, push: FakePushService());
+      // The OS dialog was dismissed without an answer: still undecided.
+      final env = await launchDiscover(
+        t,
+        push: FakePushService()..allowResult = PushPermission.notDetermined,
+      );
       await env.go('/account');
       await settle(t);
       expect(find.text('Not turned on'), findsOneWidget);

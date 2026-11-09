@@ -65,6 +65,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       auth: ref.read(authProvider),
       profileComplete: ref.read(profileCompleteProvider),
       location: state.uri.path,
+      uri: state.uri,
+      allowDev: !config.isProd,
     ),
     routes: [
       GoRoute(

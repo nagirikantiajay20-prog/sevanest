@@ -182,7 +182,7 @@ class _State extends ConsumerState<PushHost> with WidgetsBindingObserver {
             ?.overlay
             ?.context;
         if (mounted && c != null && c.mounted) {
-          unawaited(askForPushAfterAction(c, ref.read(pushControllerProvider)));
+          unawaited(askForPushAfterAction(ref.read(pushControllerProvider)));
         }
       })
       ..scheduleFrame();

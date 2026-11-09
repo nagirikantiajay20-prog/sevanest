@@ -60,7 +60,7 @@ class AsyncValueView<T> extends StatelessWidget {
 
     if (value.hasError) {
       // No connection reads differently from a server problem (global offline state).
-      return value.error is NetworkFailure
+      return isOffline(value.error)
           ? SnOfflineState(
               message: failureMessage(l10n, value.error!),
               onRetry: onRetry,

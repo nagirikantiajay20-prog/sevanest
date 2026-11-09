@@ -74,3 +74,93 @@ Amount, currency, status, payment method (masked), gateway reference, booking li
 | PAY-16 | U | Receipt URL and payment payload absent from logs |
 | PAY-17 | I | **Flow E (complete)** with FakePaymentService success; **Flow F** failure → retry → no duplicate booking (repo createBooking call count == 1) |
 | PAY-18 | M | Razorpay sandbox on real Android + iOS: UPI intent, card, netbanking, user cancel, kill app mid-payment |
+
+## Payment lifecycle as implemented (2026-11-08 audit)
+
+**Owner:** `PaymentFlow` (`lib/features/payment/presentation/providers/payment_flow.dart`, `paymentFlowProvider`).
+`PaymentScreen` only renders its state and forwards taps. `PaymentRecoveryHost` keeps the provider
+listened to for the whole app (Riverpod pauses an unlistened provider and with it the connectivity
+hook) and still does the app-start / resume snackbar for a payment the customer is not looking at.
+Real gateway: `RazorpayPaymentService`; `FakePaymentService` only when the mock API is on.
+
+**Status mapping** (backend values only; nothing is invented in Flutter):
+
+| Backend `status` | `PaymentStatus` | Flow phase |
+|---|---|---|
+| `CREATED` | created | start again once (`POST /payments`), then pending |
+| `PENDING` + `checkout` | pending | `ready` (pay), or `pending` if its checkout was opened before (store holds the id) |
+| `PENDING` after the SDK reported | pending | `pending` ("confirming"), polling |
+| `SUCCEEDED` | succeeded | `success` (payment) |
+| `FAILED` | failed | `failed` (retry allowed) |
+| `REFUND_PENDING` / `REFUNDED` / `REFUND_FAILED` | same | paid, shown with refund chip on receipt |
+| anything else | unknown | `pending` (never failed, never success) |
+
+`CANCELLED`, `EXPIRED`, `PROCESSING`, `REFUND_PROCESSING` **do not exist in the backend contract**;
+they read as unknown. See the backend dependencies below.
+
+**Transitions.** `loading -> ready -> paying (gateway) -> verifying -> success | failed | pending`.
+`pending` is left only by a backend answer: `SUCCEEDED -> success`, `FAILED -> failed`, or the customer
+choosing Pay again on a payment that is still payable. No timer, timeout, lost connection or SDK
+error moves a payment to `failed`.
+
+**Payment vs booking.** `success` means the *payment* is SUCCEEDED. After it the booking is read
+separately (`GET /bookings/{id}`); "Your booking is confirmed." shows only when the backend says
+CONFIRMED / ACTIVE. Otherwise the screen says "Payment received. We're confirming your booking." and
+the booking is looked at again on the poll schedule; an unreadable booking is never "confirmed".
+
+**Verification and polling.** The SDK result (`PaymentPaid`) is kept in memory only. It is sent to
+`POST /payments/{id}/verify` with one idempotency key; if the answer is lost the same payload is
+re-sent with the **same key** on every following check until the backend answers, then the payment is
+read with `GET /payments/{id}`. Checks: right after the gateway returns, then after 3, 6, 10, 15, 30,
+60, 120 s (`paymentPollDelaysProvider`), one at a time, cancelled on settle/dispose. The schedule
+ending does not fail the payment; Check again, the app resuming (`WidgetsBindingObserver`) or the
+connection returning (`onlineProvider` false -> true) restarts it. Reachability comes from the real
+call result (`NetworkFailure` = offline), not from the radio state alone.
+
+**Offline.** A failed read sets `offline`; the pending screen then says "You're offline. Your payment
+status will be checked when your connection returns." with no Pay button. Reconnecting checks the
+payment; it never starts another one.
+
+**App restart.** `PendingPaymentStore` (SharedPreferences) keeps the payment id, booking id, first-saved
+time and last status seen: identifiers only, never card data, UPI PIN, tokens, secrets or the SDK
+signature. It is written when the checkout opens and cleared on SUCCEEDED / FAILED / a cancelled
+checkout. On restart the stored id is read from the backend (the backend is the truth; the stored
+status is only a hint). If the checkout was opened before, the payment reads "confirming" with Check
+again / Pay again instead of the Pay button. If the app was killed before the SDK answer reached the
+backend, the verify payload is lost and the backend webhook is what settles it (dependency below).
+
+**UPI return.** Returning from GPay / PhonePe / Paytm without a result (`PaymentSdkFailed`) is treated
+as unknown: the payment is read; paid -> success, failed -> failed, still payable -> "confirming" with
+Pay again (same Razorpay order, so it cannot be charged twice), unreachable -> offline-pending.
+`PaymentCancelled` (customer backed out) with an unpaid payment returns to the Pay button.
+
+**Duplicate prevention (frontend).** Synchronous `_busy` guard (one start / gateway / verify at a time),
+`pay()` only from `ready`, one status read at a time, `open()` ignored while a gateway/verify is
+running, start key kept while the outcome of a start is unknown (a retry after a lost answer reuses
+it) and renewed only after the start was answered or after a confirmed FAILED. Backend idempotency
+(`Idempotency-Key` on `POST /payments` and `/verify`) is what makes this safe; see dependencies.
+
+**Retry rules.** Try again is offered only on the `failed` phase (backend FAILED or refused signature)
+and starts a new payment with a new key while the booking is PENDING_PAYMENT. Not offered while
+pending; changing method happens inside the Razorpay sheet on the same order.
+
+**Refunds.** Read only from `refundStatus` / REFUND_* statuses / `refundedAt` as the backend returns
+them (receipt and transaction detail). Nothing is simulated; no REFUND_PROCESSING exists.
+
+**Tests.** `test/features/payment/payment_lifecycle_test.dart` (notifier, fakes, no gateway) and
+`payment_flow_test.dart` (screens): success, pending, failed, unknown, cancelled, offline during/after
+the gateway, reconnect, timeout, resume, restart, stale local state, UPI return, duplicate taps,
+retry rules, start-key reuse, polling stop, timer cancel, payment/booking split, refund mapping.
+Live gateway behaviour (UPI intents, kill mid-payment) is device/sandbox testing only (PAY-18).
+
+### Backend dependencies and limitations (frontend cannot fix these)
+
+| # | Capability | Status | Production blocker? |
+|---|---|---|---|
+| B1 | Webhook settles a payment the app never verified (app killed after paying) | Stated in BACKEND_REQUESTS #20; not verifiable from the app | **Yes** until confirmed in staging |
+| B2 | Idempotent `POST /payments` and `/verify` (same key -> same payment) | Contract says so; app relies on it for lost-answer retries | **Yes** until confirmed |
+| B3 | Does Razorpay `payment.failed` mark a payment FAILED, or only the order expiring? Until then an SDK error reads "confirming" | Unknown | No (safe, but may show "confirming" longer) |
+| B4 | Payment expiry: no `EXPIRED` / `CANCELLED` status, no `expiresAt` | Missing | No; documented as a limitation |
+| B5 | `PROCESSING` / `REFUND_PROCESSING` statuses | Missing | No |
+| B6 | Booking <-> payment reconciliation if payment SUCCEEDED but booking stays PENDING_PAYMENT; `BookingView` has no `paymentId` | Missing | **Yes** (needs a backend reconciler) |
+| B7 | Fee quote before payment | Missing (BACKEND_REQUESTS) | No |

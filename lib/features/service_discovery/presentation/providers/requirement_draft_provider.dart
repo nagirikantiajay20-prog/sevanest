@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/core/session/auth_state.dart';
+import 'package:sevanest_customer/core/storage/account_data_cleaner.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/budget.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
@@ -8,13 +10,28 @@ import 'package:sevanest_customer/features/service_discovery/domain/requirement_
 import 'package:sevanest_customer/features/service_discovery/domain/timing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _draftKey = 'requirement_draft_v1';
+const _draftKey = requirementDraftPrefKey;
 
 /// Single source of truth for the requirement being built. Every change is persisted so the app
 /// can resume after being killed mid-requirement (call [restore] on start).
+///
+/// The draft belongs to the signed-in customer: it is dropped (memory and storage) the moment the
+/// session ends, including an expiry that does not rebuild the provider scope, and it is only
+/// restored while a session exists.
 class RequirementDraftNotifier extends Notifier<RequirementDraft> {
   @override
-  RequirementDraft build() => const RequirementDraft();
+  RequirementDraft build() {
+    ref.listen<AuthStatus>(authProvider, (_, next) {
+      if (next == AuthStatus.unauthenticated) _discard();
+    });
+    return const RequirementDraft();
+  }
+
+  void _discard() {
+    ref.read(requirementNoteProvider.notifier).set('');
+    state = const RequirementDraft();
+    _persist(); // empty draft => removes the stored copy (also covers an in-flight write)
+  }
 
   void _set(RequirementDraft d) {
     state = d;
@@ -57,7 +74,10 @@ class RequirementDraftNotifier extends Notifier<RequirementDraft> {
 
   Future<void> restore() async {
     try {
+      if (ref.read(authProvider) != AuthStatus.authenticated) return;
       final raw = (await SharedPreferences.getInstance()).getString(_draftKey);
+      // The session may have ended while the read was pending: never revive a stale draft.
+      if (ref.read(authProvider) != AuthStatus.authenticated) return;
       if (raw != null && state.isEmpty) {
         state = RequirementDraft.fromJson(
           jsonDecode(raw) as Map<String, dynamic>,

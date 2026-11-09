@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
-import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/features/notifications/data/firebase_push_service.dart';
 import 'package:sevanest_customer/features/notifications/data/local_push_display.dart';
@@ -23,24 +22,16 @@ final pushDisplayProvider = Provider<PushDisplay>(
       : const NoopPushDisplay(),
 );
 
-/// Days to wait before the pre-prompt is offered again after "Not now" (docs/modules/13: "ask
-/// again after N days/config").
-final pushReaskDaysProvider = Provider<int>((ref) => 3);
-
-/// When "Not now" was last chosen. Only a time is stored, never a token.
+/// Remembers that the OS permission dialog was already shown once, so it is never requested on
+/// every launch. Only a flag is stored, never a token.
 class PushPromptStore {
-  static const _key = 'push_prompt_later_until';
+  static const _key = 'push_permission_asked';
 
-  Future<DateTime?> laterUntil() async {
-    final ms = (await SharedPreferences.getInstance()).getInt(_key);
-    return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
-  }
+  Future<bool> asked() async =>
+      (await SharedPreferences.getInstance()).getBool(_key) ?? false;
 
-  Future<void> setLaterUntil(DateTime t) async =>
-      (await SharedPreferences.getInstance()).setInt(
-        _key,
-        t.millisecondsSinceEpoch,
-      );
+  Future<void> markAsked() async =>
+      (await SharedPreferences.getInstance()).setBool(_key, true);
 }
 
 final pushPromptStoreProvider = Provider<PushPromptStore>(
@@ -117,26 +108,18 @@ class PushController {
     }
   }
 
-  /// True when the pre-prompt should be shown now: permission not asked yet and "Not now" was
-  /// not chosen within the re-ask window.
+  /// True when the OS dialog should be requested now: permission undecided and not requested
+  /// before (the OS itself owns the only prompt; there is no custom pre-prompt).
   Future<bool> shouldAsk() async {
     if (await _service.permission() != PushPermission.notDetermined) {
       return false;
     }
-    final until = await _ref.read(pushPromptStoreProvider).laterUntil();
-    return until == null || !_ref.read(nowProvider)().isBefore(until);
+    return !await _ref.read(pushPromptStoreProvider).asked();
   }
 
-  Future<void> defer() => _ref
-      .read(pushPromptStoreProvider)
-      .setLaterUntil(
-        _ref
-            .read(nowProvider)()
-            .add(Duration(days: _ref.read(pushReaskDaysProvider))),
-      );
-
-  /// The pre-prompt's Allow: the OS dialog, then bind the token if it was granted.
+  /// Requests the native permission dialog once, then binds the token if it was granted.
   Future<PushPermission> allow() async {
+    await _ref.read(pushPromptStoreProvider).markAsked();
     final result = await _service.requestPermission();
     if (result == PushPermission.granted) await registerIfAllowed();
     _ref.invalidate(pushPermissionProvider);

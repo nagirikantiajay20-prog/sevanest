@@ -37,30 +37,54 @@ final paymentServiceProvider = Provider<PaymentService>(
       : FakePaymentService(),
 );
 
-/// Waits between status reads after a payment is reported, ~60 s in all (docs/modules/09).
+/// Waits between status reads while a payment is unresolved: 3, 6, 10, 15 s, then slower. After
+/// the last wait polling stops (no aggressive loop); a manual check, the app resuming or the
+/// connection returning starts it again. A timer running out never marks a payment failed.
 final paymentPollDelaysProvider = Provider<List<Duration>>(
   (ref) => const [
-    Duration(seconds: 2),
-    Duration(seconds: 4),
-    Duration(seconds: 8),
-    Duration(seconds: 16),
+    Duration(seconds: 3),
+    Duration(seconds: 6),
+    Duration(seconds: 10),
+    Duration(seconds: 15),
     Duration(seconds: 30),
+    Duration(seconds: 60),
+    Duration(seconds: 120),
   ],
 );
 
-/// The id of a payment whose result the app has not seen yet (the app may be killed while the
-/// gateway is open). An id is not sensitive; no card or token data is ever stored.
+/// What the app keeps to find a payment again after it is killed while the gateway is open: the
+/// payment id, its booking, when it was stored and the last status seen. Identifiers only; never a
+/// card, UPI PIN, token or gateway secret. The backend stays the source of truth: a stored status
+/// is a hint that every recovery replaces with a fresh read.
 class PendingPaymentStore {
   static const _key = 'pending_payment_id';
+  static const _bookingKey = 'pending_payment_booking_id';
+  static const _atKey = 'pending_payment_saved_at';
+  static const _statusKey = 'pending_payment_last_status';
 
   Future<String?> read() async =>
       (await SharedPreferences.getInstance()).getString(_key);
 
-  Future<void> write(String id) async =>
-      (await SharedPreferences.getInstance()).setString(_key, id);
+  /// The booking of the stored payment, when it was stored with one.
+  Future<String?> readBookingId() async =>
+      (await SharedPreferences.getInstance()).getString(_bookingKey);
 
-  Future<void> clear() async =>
-      (await SharedPreferences.getInstance()).remove(_key);
+  Future<void> write(String id, {String? bookingId, String? status}) async {
+    final p = await SharedPreferences.getInstance();
+    await p.setString(_key, id);
+    if (bookingId != null) await p.setString(_bookingKey, bookingId);
+    if (p.getString(_atKey) == null) {
+      await p.setString(_atKey, DateTime.now().toUtc().toIso8601String());
+    }
+    if (status != null) await p.setString(_statusKey, status);
+  }
+
+  Future<void> clear() async {
+    final p = await SharedPreferences.getInstance();
+    for (final k in [_key, _bookingKey, _atKey, _statusKey]) {
+      await p.remove(k);
+    }
+  }
 }
 
 final pendingPaymentStoreProvider = Provider<PendingPaymentStore>(
@@ -85,7 +109,7 @@ final unconfirmedPaymentProvider = FutureProvider.autoDispose<Payment?>((
 });
 
 /// Everything a settled payment changes on screen: the booking, the lists, Home, transactions.
-void refreshAfterPayment(WidgetRef ref, String bookingId) {
+void refreshAfterPayment(Ref ref, String bookingId) {
   ref
     ..invalidate(unconfirmedPaymentProvider)
     ..invalidate(bookingProvider(bookingId))

@@ -8,6 +8,7 @@ import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/time_format.dart';
+import 'package:sevanest_customer/core/security/safe_url.dart';
 import 'package:sevanest_customer/core/services/clock.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
     show AuthCta, authSerif;
@@ -64,6 +65,7 @@ class _State extends ConsumerState<SupportHomeScreen>
   }
 
   Future<void> _open(Uri uri) async {
+    if (!isAllowedUri(uri, schemes: {...contactSchemes, ...webSchemes})) return;
     try {
       await launchUrl(uri);
     } on Object {
@@ -77,8 +79,7 @@ class _State extends ConsumerState<SupportHomeScreen>
     final categories = ref.watch(supportCategoriesProvider);
     final tickets = ref.watch(ticketListProvider);
     final contact = ref.watch(supportContactProvider).value;
-    final offline =
-        categories.error is NetworkFailure || tickets.error is NetworkFailure;
+    final offline = isOffline(categories.error) || isOffline(tickets.error);
     return FindGlassPage(
       title: l10n.supTitle,
       backLabel: l10n.back,

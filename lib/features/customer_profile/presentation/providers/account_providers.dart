@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sevanest_customer/core/mock/mock_api.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
+import 'package:sevanest_customer/core/security/safe_url.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// `GET /app-config` -> `legal.terms.url`, `legal.privacy.url`, `languages`. Null URLs mean the
@@ -35,7 +36,7 @@ class PolicyConfig {
 
     String? url(String k) {
       final v = s(k);
-      return v != null && Uri.tryParse(v)?.hasScheme == true ? v : null;
+      return parseAllowedUri(v)?.toString();
     }
 
     return PolicyConfig(
@@ -72,9 +73,7 @@ final accountConfigProvider = FutureProvider.autoDispose<AccountConfig>((
   if (data is! Map) return const AccountConfig();
   String? url(Object? doc) {
     final u = doc is Map ? doc['url'] : null;
-    return u is String && Uri.tryParse(u.trim())?.hasScheme == true
-        ? u.trim()
-        : null;
+    return u is String ? parseAllowedUri(u)?.toString() : null;
   }
 
   final legal = data['legal'];
@@ -93,7 +92,9 @@ final accountConfigProvider = FutureProvider.autoDispose<AccountConfig>((
 final openInAppBrowserProvider = Provider<Future<bool> Function(String url)>(
   (ref) => (url) async {
     try {
-      return await launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+      final uri = parseAllowedUri(url);
+      if (uri == null) return false;
+      return await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
     } on Object {
       return false;
     }

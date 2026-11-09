@@ -160,6 +160,36 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Please try again.'**
   String get errorGeneric;
 
+  /// No description provided for @errorTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re taking a little longer than expected. Please try again.'**
+  String get errorTimeout;
+
+  /// No description provided for @errorConflictGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'This was already updated. Please refresh to see the latest status.'**
+  String get errorConflictGeneric;
+
+  /// No description provided for @errorWorkerUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This worker is no longer available. Please choose another worker.'**
+  String get errorWorkerUnavailable;
+
+  /// No description provided for @errorDuplicateBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have this request in progress. Please check your bookings.'**
+  String get errorDuplicateBooking;
+
+  /// No description provided for @errorOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Connect to the internet to do this - nothing was sent.'**
+  String get errorOffline;
+
   /// No description provided for @errorNetwork.
   ///
   /// In en, this message translates to:
@@ -171,6 +201,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please sign in again.'**
   String get errorSessionExpired;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find that. It may have been removed. Go back and try again.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re trying too fast. Please wait a moment and try again.'**
+  String get errorRateLimited;
+
+  /// No description provided for @errorRateLimitedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re trying too fast. Please try again in {seconds, plural, =1{1 second} other{{seconds} seconds}}.'**
+  String errorRateLimitedIn(int seconds);
 
   /// No description provided for @errorForbidden.
   ///
@@ -1951,26 +1999,80 @@ abstract class AppLocalizations {
   /// No description provided for @locationOffBody.
   ///
   /// In en, this message translates to:
-  /// **'Turn it on in Settings, or choose a saved address.'**
+  /// **'Location access is turned off. Allow location permission to find your current address.'**
   String get locationOffBody;
 
   /// No description provided for @locationOpenSettings.
   ///
   /// In en, this message translates to:
-  /// **'Open settings'**
+  /// **'Open Settings'**
   String get locationOpenSettings;
+
+  /// No description provided for @locationForeverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is disabled'**
+  String get locationForeverTitle;
+
+  /// No description provided for @locationForeverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is disabled. Enable it in your phone settings to use your current location.'**
+  String get locationForeverBody;
+
+  /// No description provided for @locationGpsOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone\'s location is off'**
+  String get locationGpsOffTitle;
+
+  /// No description provided for @locationGpsOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone\'s location is turned off. Please enable location services and try again.'**
+  String get locationGpsOffBody;
+
+  /// No description provided for @locationGpsOffAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Settings'**
+  String get locationGpsOffAction;
+
+  /// No description provided for @locationTempTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t find your location'**
+  String get locationTempTitle;
+
+  /// No description provided for @locationTempBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find your location right now. Please try again.'**
+  String get locationTempBody;
+
+  /// No description provided for @locationNetworkTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get your address'**
+  String get locationNetworkTitle;
+
+  /// No description provided for @locationNetworkBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to retrieve your address. Check your internet connection and try again.'**
+  String get locationNetworkBody;
+
+  /// No description provided for @locationRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get locationRetry;
 
   /// No description provided for @locationChooseSaved.
   ///
   /// In en, this message translates to:
-  /// **'Choose a saved address'**
+  /// **'Continue manually'**
   String get locationChooseSaved;
-
-  /// No description provided for @locationFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t get your location. Choose a saved address instead.'**
-  String get locationFailed;
 
   /// No description provided for @locationNoAddressTitle.
   ///
@@ -3184,12 +3286,6 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load reviews.'**
   String get reviewsLoadFailed;
 
-  /// No description provided for @addressLocationFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t get your location. Check the location permission, or fill in the address yourself.'**
-  String get addressLocationFailed;
-
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
@@ -4318,6 +4414,12 @@ abstract class AppLocalizations {
   /// **'{range} {period}'**
   String bookingBudgetRange(String range, String period);
 
+  /// No description provided for @interviewWorkerNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'This worker can\'t take this request for the hours in your requirement. Your choices are saved: change the requirement hours or pick another worker.'**
+  String get interviewWorkerNotEligible;
+
   /// No description provided for @interviewDuplicate.
   ///
   /// In en, this message translates to:
@@ -4471,7 +4573,7 @@ abstract class AppLocalizations {
   /// No description provided for @payFailedBody.
   ///
   /// In en, this message translates to:
-  /// **'Your booking is still waiting for payment. You can try again.'**
+  /// **'We couldn\'t complete your payment. You can try again.'**
   String get payFailedBody;
 
   /// No description provided for @payFailedDebitNote.
@@ -4507,7 +4609,7 @@ abstract class AppLocalizations {
   /// No description provided for @payPendingBody.
   ///
   /// In en, this message translates to:
-  /// **'This can take a few minutes. Your booking will update when it\'s done.'**
+  /// **'Your payment is taking longer than expected. If the amount was deducted, please don\'t pay again. We\'re checking your transaction.'**
   String get payPendingBody;
 
   /// No description provided for @payRefresh.
@@ -4515,6 +4617,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check again'**
   String get payRefresh;
+
+  /// No description provided for @payOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline'**
+  String get payOfflineTitle;
+
+  /// No description provided for @payOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Your payment status will be checked when your connection returns. Please don\'t pay again.'**
+  String get payOfflineBody;
+
+  /// No description provided for @payBookingPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received. We\'re confirming your booking.'**
+  String get payBookingPendingBody;
+
+  /// No description provided for @payViewTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'View transaction'**
+  String get payViewTransaction;
 
   /// No description provided for @payAgain.
   ///
@@ -7011,30 +7137,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View booking details'**
   String get serviceViewBooking;
-
-  /// No description provided for @notifPromptTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Stay in the loop'**
-  String get notifPromptTitle;
-
-  /// No description provided for @notifPromptBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Get a heads-up about interviews, payments and replies from support. You can change this any time in your phone\'s settings.'**
-  String get notifPromptBody;
-
-  /// No description provided for @notifPromptAllow.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow notifications'**
-  String get notifPromptAllow;
-
-  /// No description provided for @notifPromptLater.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get notifPromptLater;
 
   /// No description provided for @notifAccountTitle.
   ///

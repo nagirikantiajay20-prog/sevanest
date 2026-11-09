@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sevanest_customer/core/storage/account_data_cleaner.dart';
 import 'package:sevanest_customer/core/storage/secure_session_store.dart';
 
 enum AuthStatus { unknown, unauthenticated, authenticated }
@@ -17,13 +18,22 @@ class AuthNotifier extends Notifier<AuthStatus> {
         : AuthStatus.authenticated;
   }
 
+  /// The last local-data cleanup started by [signIn] / [signOut]. Cleanup runs beside the session
+  /// change (it must never delay or block it); tests await this to see its result.
+  Future<void> pendingCleanup = Future<void>.value();
+
   Future<void> signIn({required String access, required String refresh}) async {
+    // A new session never inherits an unfinished requirement, even if the last cleanup failed.
+    pendingCleanup = ref.read(accountDataCleanerProvider).clearDraft();
     await _store.write(access: access, refresh: refresh);
     state = AuthStatus.authenticated;
   }
 
+  /// The one way a session ends: explicit logout, expired refresh token, "sign in again" on the
+  /// splash. Account data on the device goes with it (best effort, never blocks sign-out).
   Future<void> signOut() async {
     await _store.clear();
+    pendingCleanup = ref.read(accountDataCleanerProvider).clear();
     ref.read(profileCompleteProvider.notifier).set(null);
     state = AuthStatus.unauthenticated;
   }

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart'
+    show uploadBaseOptions;
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 
@@ -8,7 +10,7 @@ import 'package:sevanest_customer/features/customer_profile/domain/customer_phot
 /// the request and response shapes are the worker ones (docs/BACKEND_REQUESTS.md).
 class CustomerPhotoRepositoryRemote implements CustomerPhotoRepository {
   CustomerPhotoRepositoryRemote(this._dio, {Dio? uploader})
-    : _uploader = uploader ?? Dio();
+    : _uploader = uploader ?? Dio(uploadBaseOptions());
 
   final Dio _dio;
 

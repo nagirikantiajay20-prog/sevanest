@@ -1,12 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
+import 'package:sevanest_customer/core/network/dio_provider.dart'
+    show uploadBaseOptions;
 import 'package:sevanest_customer/core/network/guarded.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 
 class AddressRepositoryRemote implements AddressRepository {
   AddressRepositoryRemote(this._dio, {Dio? uploader})
-    : _uploader = uploader ?? Dio();
+    : _uploader = uploader ?? Dio(uploadBaseOptions());
   final Dio _dio;
 
   /// The upload link is pre-signed: it must not carry our bearer token or base URL.

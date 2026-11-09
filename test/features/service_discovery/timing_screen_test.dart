@@ -146,7 +146,7 @@ void main() {
       final env = await open(t, EngagementType.partTime);
       await env.tapKey('discover_window_morning');
       await env.tapKey('discover_time_start_btn');
-      // Hour wheel: 8 -> 9; minute wheel: 00 -> 15.
+      // Hour wheel: 8 -> 9; minute wheel: 00 -> 05.
       await t.drag(
         find.byKey(const Key('time_picker_hour')),
         const Offset(0, -44),
@@ -160,9 +160,9 @@ void main() {
       await env.tapKey('time_picker_set_btn');
       expect(
         env.container.read(requirementDraftProvider).timing?.startMinutes,
-        9 * 60 + 15,
+        9 * 60 + 5,
       );
-      expect(find.textContaining('9:15 AM – 12 PM'), findsOneWidget);
+      expect(find.textContaining('9:05 AM – 12 PM'), findsOneWidget);
     });
 
     testWidgets('the end time sheet is titled End time', (t) async {

@@ -7,7 +7,7 @@ import 'package:sevanest_customer/features/authentication/presentation/widgets/a
 import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
-/// Frosted bottom sheet with hour / minute / AM-PM wheels in 15-minute steps (design: Find a
+/// Frosted bottom sheet with hour / minute / AM-PM wheels in 5-minute steps (design: Find a
 /// Worker 4, time sheet). Returns minutes since midnight, or null when closed.
 Future<int?> showTimePickerSheet(
   BuildContext context, {
@@ -33,9 +33,9 @@ class _TimeSheet extends StatefulWidget {
 
 class _TimeSheetState extends State<_TimeSheet> {
   static const _itemExtent = 44.0;
-  late final int _snapped = ((widget.initialMinutes / 15).round() * 15) % 1440;
+  late final int _snapped = ((widget.initialMinutes / 5).round() * 5) % 1440;
   late int _hour = (_snapped ~/ 60) % 12 == 0 ? 11 : (_snapped ~/ 60) % 12 - 1;
-  late int _minute = (_snapped % 60) ~/ 15;
+  late int _minute = (_snapped % 60) ~/ 5;
   late int _period = _snapped ~/ 60 >= 12 ? 1 : 0;
 
   late final _hourCtrl = FixedExtentScrollController(initialItem: _hour);
@@ -50,7 +50,7 @@ class _TimeSheetState extends State<_TimeSheet> {
     super.dispose();
   }
 
-  int get _minutes => ((_hour + 1) % 12 + _period * 12) * 60 + _minute * 15;
+  int get _minutes => ((_hour + 1) % 12 + _period * 12) * 60 + _minute * 5;
 
   Widget _wheel({
     required Key key,
@@ -177,7 +177,10 @@ class _TimeSheetState extends State<_TimeSheet> {
                           key: const Key('time_picker_minute'),
                           label: l10n.timeSheetMinute,
                           controller: _minuteCtrl,
-                          items: const ['00', '15', '30', '45'],
+                          items: [
+                            for (var m = 0; m < 60; m += 5)
+                              m.toString().padLeft(2, '0'),
+                          ],
                           onChanged: (i) => _minute = i,
                         ),
                         const SizedBox(width: 6),

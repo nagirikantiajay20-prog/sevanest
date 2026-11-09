@@ -71,20 +71,34 @@ class InterviewRepositoryRemote extends InterviewRepositoryOverBookings {
   }
 
   static String _iso(DateTime date, String slot) =>
-      InterviewRepositoryOverBookings.at(date, slot).toUtc().toIso8601String();
+      istInstant(date, slot).toIso8601String();
+
+  /// The booking made for a form, by its key: a retry after the interview step failed reuses it
+  /// instead of making (and being refused) a second booking for the same worker and service.
+  final _bookingByKey = <String, Booking>{};
 
   @override
   Future<Interview> create(
     InterviewRequest r, {
     required String idempotencyKey,
   }) async {
-    final booking = await createBooking(r, '$idempotencyKey-booking');
-    return _post('/interviews', {
+    final booking = _bookingByKey[idempotencyKey] ??= await createBooking(
+      r,
+      '$idempotencyKey-booking',
+    );
+    final body = {
       'bookingId': booking.id,
       'type': r.type == InterviewType.trial ? 'TRIAL' : 'INTERVIEW',
       'preferredAt': _iso(r.date, r.slot),
       if (r.note != null && r.note!.isNotEmpty) 'note': r.note,
-    }, key: '$idempotencyKey-interview');
+    };
+    // The key follows the content: the same request retried is deduplicated, while a changed
+    // time or type is a new request and must not collide with the failed one.
+    return _post(
+      '/interviews',
+      body,
+      key: '$idempotencyKey-interview-${body.toString().hashCode}',
+    );
   }
 
   @override

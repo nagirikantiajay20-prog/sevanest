@@ -53,8 +53,9 @@ class GlassAvatar extends StatelessWidget {
         image: photoUrl == null
             ? null
             : DecorationImage(
-                image: NetworkImage(photoUrl!),
+                image: ResizeImage(NetworkImage(photoUrl!), width: 240),
                 fit: BoxFit.cover,
+                onError: (_, _) {},
               ),
         boxShadow: [
           BoxShadow(
@@ -363,7 +364,7 @@ class GlassAsyncView<T> extends StatelessWidget {
         ),
       );
     }
-    final offline = value.error is NetworkFailure;
+    final offline = isOffline(value.error);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),

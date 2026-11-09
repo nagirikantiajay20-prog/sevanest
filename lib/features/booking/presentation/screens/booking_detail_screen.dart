@@ -32,6 +32,8 @@ import 'package:sevanest_customer/features/service_discovery/presentation/widget
 import 'package:sevanest_customer/features/support/presentation/widgets/safety_actions.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/providers/worker_search_providers.dart';
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_page.dart';
+import 'package:sevanest_customer/features/worker_search/presentation/widgets/glass_parts.dart'
+    show showGlassConfirm;
 import 'package:sevanest_customer/features/worker_search/presentation/widgets/worker_card.dart'
     show experienceLabel, ratingText;
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -88,6 +90,45 @@ class _State extends ConsumerState<BookingDetailScreen>
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.cancelRequested)));
+  }
+
+  bool _reopening = false;
+
+  /// "Find another worker" after the interview: `reopen-matching`, then the worker search. Asks
+  /// first; a double tap is ignored; the booking is re-read from the server afterwards.
+  Future<void> _findAnother() async {
+    if (_reopening) return;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final yes = await showGlassConfirm(
+      context,
+      title: l10n.interviewDeclineTitle,
+      body: l10n.interviewDeclineBody,
+      confirmLabel: l10n.interviewDeclineConfirm,
+      keepLabel: l10n.cancel,
+      confirmKey: const Key('booking_find_another_confirm_btn'),
+    );
+    if (!yes || !mounted) return;
+    _reopening = true;
+    try {
+      await ref
+          .read(bookingRepositoryProvider)
+          .reopenMatching(widget.bookingId);
+      ref
+        ..invalidate(bookingProvider(widget.bookingId))
+        ..invalidate(bookingListProvider)
+        ..invalidate(interviewProvider(widget.bookingId))
+        ..invalidate(interviewListProvider)
+        ..invalidate(homeProvider);
+      if (mounted) context.go(Routes.workers);
+    } on Object catch (e) {
+      ref.invalidate(bookingProvider(widget.bookingId));
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(failureMessage(l10n, e))));
+    } finally {
+      _reopening = false;
+    }
   }
 
   /// The paid payment of this booking (`GET /payments?bookingId=`); the list when none is found.
@@ -199,6 +240,7 @@ class _State extends ConsumerState<BookingDetailScreen>
             onCopy: () => _copyReference(b),
             onSchedule: () => _interview(b, reschedule: true),
             onViewInterview: () => _interview(b, reschedule: false),
+            onFindAnother: _findAnother,
           ),
         ),
       ),
@@ -300,6 +342,7 @@ class _Body extends ConsumerWidget {
     required this.onCopy,
     required this.onSchedule,
     required this.onViewInterview,
+    required this.onFindAnother,
   });
   final Booking booking;
 
@@ -310,6 +353,7 @@ class _Body extends ConsumerWidget {
   final VoidCallback onCopy;
   final VoidCallback onSchedule;
   final VoidCallback onViewInterview;
+  final VoidCallback onFindAnother;
 
   static const _path = [
     BookingStatus.newRequest,
@@ -592,6 +636,13 @@ class _Body extends ConsumerWidget {
                     'booking_reschedule_btn',
                     l10n.interviewReschedule,
                     onSchedule,
+                  ),
+                if (a.contains(BookingAction.reopenMatching) &&
+                    b.status == BookingStatus.interviewTrialCompleted)
+                  outline(
+                    'booking_reopen_matching_btn',
+                    l10n.workerFindAnother,
+                    onFindAnother,
                   ),
                 if (a.contains(BookingAction.viewService) &&
                     primaryKey != const Key('booking_view_service_btn'))

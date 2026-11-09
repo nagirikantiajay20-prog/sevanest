@@ -285,8 +285,12 @@ class NextInterviewCard extends StatelessWidget {
                               image: photoUrl == null
                                   ? null
                                   : DecorationImage(
-                                      image: NetworkImage(photoUrl!),
+                                      image: ResizeImage(
+                                        NetworkImage(photoUrl!),
+                                        width: 240,
+                                      ),
                                       fit: BoxFit.cover,
+                                      onError: (_, _) {},
                                     ),
                               boxShadow: const [
                                 BoxShadow(

@@ -5,7 +5,18 @@ sealed class AppFailure implements Exception {
 }
 
 final class NetworkFailure extends AppFailure {
-  const NetworkFailure([super.message]);
+  const NetworkFailure([
+    super.message,
+    this.timedOut = false,
+    this.offline = false,
+  ]);
+
+  /// True when a write was refused up front because the device has no network. Nothing was sent.
+  final bool offline;
+
+  /// True when the device was online but the server did not answer in time. The outcome of a write
+  /// is then unknown, so callers must not claim failure or blindly retry (see failureMessage).
+  final bool timedOut;
 }
 
 final class UnauthorizedFailure extends AppFailure {
@@ -61,3 +72,7 @@ final class OtpFailure extends AppFailure {
   const OtpFailure(this.error, [super.message]);
   final OtpError error;
 }
+
+/// True only when the device has no connection. A timeout is not "offline": the server may have
+/// received the request, so screens must not say "you're offline" for it.
+bool isOffline(Object? e) => e is NetworkFailure && !e.timedOut;

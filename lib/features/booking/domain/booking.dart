@@ -263,9 +263,18 @@ class Booking {
       },
       note: _s(j['requirementNote']),
       timeline: _timeline(j['timeline'] ?? j['events'] ?? j['history']),
-      actions: allowed is List
-          ? bookingActionsFrom(allowed)
-          : derivedBookingActions(status),
+      // `replace` is the ACTIVE-booking replacement (POST /replacement-requests is 422 otherwise):
+      // never offered from an interview, payment or confirmed state, whatever the list says.
+      actions:
+          (allowed is List
+                  ? bookingActionsFrom(allowed)
+                  : derivedBookingActions(status))
+              .where(
+                (a) =>
+                    a != BookingAction.replace ||
+                    status == BookingStatus.active,
+              )
+              .toSet(),
       paymentId: _s(j['paymentId']),
       previousBookingId: _s(
         j['replacesBookingId'] ?? j['previousBookingId'] ?? j['replacedFromId'],

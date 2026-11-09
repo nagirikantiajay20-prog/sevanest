@@ -381,13 +381,15 @@ class _Editors extends StatelessWidget {
                           color: AppColors.teal,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          l10n.timingHoursPerDay(formatDuration(l10n, dur)),
-                          key: const Key('discover_duration'),
-                          style: AppText.body.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: dsNavy,
+                        Flexible(
+                          child: Text(
+                            l10n.timingHoursPerDay(formatDuration(l10n, dur)),
+                            key: const Key('discover_duration'),
+                            style: AppText.body.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: dsNavy,
+                            ),
                           ),
                         ),
                       ],

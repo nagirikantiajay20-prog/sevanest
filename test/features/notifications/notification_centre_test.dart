@@ -395,12 +395,13 @@ void main() {
   });
 
   group('Home bell', () {
-    testWidgets('first Home offers the notification pre-prompt', (t) async {
+    testWidgets('first Home asks the OS once, with no custom dialog', (
+      t,
+    ) async {
       final push = FakePushService(state: PushPermission.notDetermined);
       await launchDiscover(t, notifications: repo, push: push);
       await settle(t);
-      expect(k('notif_prompt'), findsOneWidget);
-      await tap(t, 'notif_prompt_allow_btn');
+      expect(k('notif_prompt'), findsNothing);
       expect(push.requestCalls, 1);
     });
     testWidgets(

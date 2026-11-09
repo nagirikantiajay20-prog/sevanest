@@ -449,3 +449,26 @@ Numbers match our message.
 
 - Backend has no column, route or `photoUrl` for address photos, and it is not in the SRS. Registered as backend Q-138; they build nothing until product answers scope, one-or-many, malware scan, who may read, size and types.
 - App: `addressPhotoEnabled` (address.dart) is **false**, so the field is hidden and no longer required to save an address. Flip it when the backend ships the routes.
+
+## Interview / Trial availability and customer phone (2026-11-08)
+
+- **Observed:** a Trial for 7 Nov 4 PM (worker shown free 4-7 PM) was refused with "The worker is not available for this requirement." That text is the backend's, not the app's. The app sends two writes: `POST /bookings` (with `workerId`, the customer's requirement hours as `availableFrom/availableTo`, or the worker's own window when the requirement is flexible) and then `POST /interviews {bookingId,type,preferredAt}`. The wording ("requirement") and the 422 `WORKER_NOT_ELIGIBLE` code point at the **booking** step, which checks the worker against the requirement hours, not the interview time. `GET /search/workers/{id}/slots` (the interview rule) had already listed 4 PM as free.
+- **BLOCKED (backend decision):** an interview needs a MATCHED booking, and `POST /bookings` applies the regular requirement-availability check. To make Interview independent of service availability the backend must either (a) skip the requirement-hours eligibility check when the booking is created only to host an `INTERVIEW`, or (b) allow `POST /interviews` for a worker without a prior MATCHED booking. The app cannot do this: sending different hours would change the customer's real requirement.
+- **Needed to confirm the diagnosis:** the exact 422 body of the failing `POST /bookings` (`code`, `message`, `details`) and the request body (`availableFrom/To`, `workerId`) for that attempt. The app does not log payloads.
+- **Customer phone for workers: BLOCKED / not in this app.** This repo is the customer app; it has no worker screens (no `/workers/me/*` call). `WorkerBookingView` (`GET /workers/me/bookings[/{id}]`) and the worker interview views contain **no** customer name or mobile ("the customer is not identified"), so a worker app cannot show any number today, masked or not. Required for a worker app: add `customerMobile` (E.164, e.g. `+919876543210`, unmasked) to `GET /workers/me/bookings/{bookingId}` only. Authorization: the caller is the worker assigned to that booking (`booking.workerId == me`) and the booking status is `INTERVIEW_TRIAL_SCHEDULED` or later (interview/trial accepted, or confirmed/active). Expected: assigned worker -> full number; another worker -> 404 (as today); `NEW_REQUEST`/`MATCHED` offers, list endpoints and logs -> never the number. Customer app: nothing to change; it never receives other users' numbers.
+
+### Worker change by stage (audit 2026-11-08, client-side only)
+
+| Booking status | What the customer gets | Replacement API |
+|---|---|---|
+| `INTERVIEW_TRIAL_COMPLETED` | Confirm worker, **Find another worker** (`reopen-matching`, asks first, then opens the worker search), Cancel | Not offered. The app drops `replace` from `allowedActions` unless the booking is ACTIVE |
+| `PENDING_PAYMENT` / `CONFIRMED` (before service) | Pay / Cancel | Not offered. No pre-service "change worker" request exists in the OpenAPI; nothing is simulated |
+| `ACTIVE` | **Request Replacement** only when `allowedActions` has `replace` | Full flow in module 11 |
+| `REPLACEMENT_REQUESTED` | Request status, withdraw if allowed | No second request (409 `REPLACEMENT_ALREADY_OPEN` opens the open one) |
+
+Open questions (the app assumes none of these):
+- **Q-A. `reopen-matching` result.** The booking stays MATCHED with the same worker (mock/test note) or returns to NEW_REQUEST (our early assumption)? Is the old booking closed when the customer then books a different worker, or does it stay open? Unanswered since BACKEND_REQUESTS 9.
+- **Q-B. Pre-service worker change.** Should CONFIRMED / PENDING_PAYMENT bookings allow a change-worker request? Needs a business rule plus an endpoint, its eligibility, and refund/pricing effect.
+- **Q-C. Alternatives route.** Section "Module 9" says `GET /replacement-requests/{id}/alternatives` shipped in commit `ad37f66`, but `docs/backend_openapi_2026-10-13.json` has no such path (it predates 2026-10-14). Please publish the current OpenAPI.
+- **Q-D. Reason list (Q-54) and notes limit.** No approved reason list; the app sends free text from its own list. Design says notes 500, backend allows 2000; the app uses 2000 (`replacementNotesMaxProvider`). Client must pick.
+- **Q-E. Money.** No rule for fee, refund or re-payment when a replacement booking is created; the app creates no payment and changes no amount.

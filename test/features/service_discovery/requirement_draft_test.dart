@@ -1,6 +1,7 @@
 // UNIT tests: draft rules and persistence (the app resumes mid-requirement).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sevanest_customer/core/session/auth_state.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/catalog.dart';
 import 'package:sevanest_customer/features/service_discovery/domain/requirement_draft.dart';
@@ -19,8 +20,11 @@ const _addr = Address(
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  /// A signed-in customer: the draft is only saved and restored while a session exists.
   ProviderContainer make() {
-    final c = ProviderContainer();
+    final c = ProviderContainer(
+      overrides: [authProvider.overrideWith(_SignedIn.new)],
+    );
     addTearDown(c.dispose);
     return c;
   }
@@ -99,4 +103,9 @@ void main() {
     await c2.read(requirementDraftProvider.notifier).restore();
     expect(c2.read(requirementDraftProvider).serviceId, 'maid');
   });
+}
+
+class _SignedIn extends AuthNotifier {
+  @override
+  AuthStatus build() => AuthStatus.authenticated;
 }

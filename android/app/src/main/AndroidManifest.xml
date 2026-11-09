@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
+        android:allowBackup="false"
         android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -24,6 +25,13 @@
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
+              />
+            <!-- No other app may choose the screen this activity opens: the app has no URL scheme or
+                 app link, and notification taps are routed inside the app after validation.
+                 Without this, Flutter turns the data URI of an incoming intent into a route. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false"
               />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

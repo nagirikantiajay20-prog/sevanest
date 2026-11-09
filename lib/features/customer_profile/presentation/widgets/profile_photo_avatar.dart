@@ -8,7 +8,7 @@ import 'package:sevanest_customer/core/errors/app_failure.dart';
 import 'package:sevanest_customer/core/localization/failure_message.dart';
 import 'package:sevanest_customer/core/widgets/sn_bottom_sheet.dart';
 import 'package:sevanest_customer/features/addresses/presentation/widgets/home_photo_field.dart'
-    show isSupportedPhoto;
+    show PhotoCheck, checkPhoto;
 import 'package:sevanest_customer/features/customer_profile/domain/customer_photo.dart';
 import 'package:sevanest_customer/features/customer_profile/presentation/providers/customer_photo_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
@@ -17,6 +17,10 @@ String profileInitials(String name) {
   final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
   return parts.take(2).map((p) => p[0].toUpperCase()).join();
 }
+
+/// Test seam: replaces the platform picker (it cannot run in a widget test).
+@visibleForTesting
+Future<XFile?> Function(ImageSource source)? debugPickProfilePhoto;
 
 /// Asks Camera or Gallery, then returns the chosen photo (resized on the device so the upload
 /// stays small); null when they back out. Throws when the camera or photo access is denied.
@@ -51,15 +55,24 @@ Future<PickedPhoto?> pickProfilePhoto(BuildContext context) async {
     ),
   );
   if (source == null) return null;
-  final file = await picker.pickImage(
-    source: source,
-    maxWidth: 1024,
-    maxHeight: 1024,
-    imageQuality: 85,
-  );
+  final file =
+      await debugPickProfilePhoto?.call(source) ??
+      await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
   if (file == null) return null;
   final bytes = await file.readAsBytes();
-  if (!isSupportedPhoto(bytes)) throw const FormatException('photo format');
+  switch (checkPhoto(bytes)) {
+    case PhotoCheck.badFormat:
+      throw const FormatException('photo format');
+    case PhotoCheck.tooBig:
+      throw const FormatException('photo too big');
+    case PhotoCheck.ok:
+      break;
+  }
   return PickedPhoto.fromBytes(bytes);
 }
 
@@ -100,10 +113,18 @@ class _ProfilePhotoAvatarState extends ConsumerState<ProfilePhotoAvatar> {
     final PickedPhoto? picked;
     try {
       picked = await pickProfilePhoto(context);
-    } on FormatException {
+    } on FormatException catch (e) {
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.homePhotoBadFormat)));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              e.message == 'photo too big'
+                  ? l10n.homePhotoTooBig
+                  : l10n.homePhotoBadFormat,
+            ),
+          ),
+        );
       return;
     } on Object {
       // Denied camera / photo permission surfaces as a platform exception.

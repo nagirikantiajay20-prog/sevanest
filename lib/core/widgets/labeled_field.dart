@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
+import 'package:sevanest_customer/features/service_discovery/presentation/widgets/discover_chrome.dart';
 
 /// Bold label above a bordered field, with a helper line that turns into a red error (design: screens 04, 08).
 /// The field is keyed [name]; its error text is keyed `${name}_error`.
@@ -256,31 +257,17 @@ Future<bool> confirmDialog(
   required Key confirmKey,
   Key cancelKey = const Key('dialog_cancel_btn'),
   bool destructive = false,
-}) async {
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(title),
-      content: Text(body),
-      actions: [
-        TextButton(
-          key: cancelKey,
-          onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(cancelLabel),
-        ),
-        FilledButton(
-          key: confirmKey,
-          style: FilledButton.styleFrom(
-            minimumSize: const Size(0, kMinTapTarget),
-            backgroundColor: destructive ? AppColors.danger : null,
-          ),
-          onPressed: () => Navigator.of(ctx).pop(true),
-          child: Text(confirmLabel),
-        ),
-      ],
-    ),
+}) {
+  // One navy confirmation style app-wide: the cancel action is primary, the confirm text is red.
+  return showDiscoverDiscard(
+    context,
+    title: title,
+    body: body,
+    keep: cancelLabel,
+    discard: confirmLabel,
+    keepKey: cancelKey,
+    discardKey: confirmKey,
   );
-  return ok ?? false;
 }
 
 /// Single-button information dialog.

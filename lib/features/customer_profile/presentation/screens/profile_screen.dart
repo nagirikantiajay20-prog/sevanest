@@ -77,13 +77,14 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
 
   Future<bool> _confirmDiscard() {
     final l10n = AppLocalizations.of(context);
-    return confirmDialog(
+    return showDiscoverDiscard(
       context,
       title: l10n.discardTitle,
       body: l10n.discardBody,
-      confirmLabel: l10n.discard,
-      cancelLabel: l10n.keepEditing,
-      confirmKey: const Key('profile_discard_confirm_btn'),
+      keep: l10n.keepEditing,
+      discard: l10n.discard,
+      keepKey: const Key('dialog_cancel_btn'),
+      discardKey: const Key('profile_discard_confirm_btn'),
     );
   }
 

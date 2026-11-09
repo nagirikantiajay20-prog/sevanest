@@ -53,12 +53,18 @@ void main() {
     },
   );
 
-  test('list: empty body / unexpected body -> empty list, no throw', () async {
-    respond('[]', 200);
-    expect(await repo.list(), isEmpty);
-    respond('{"unexpected":true}', 200);
-    expect(await repo.list(), isEmpty);
-  });
+  test(
+    'list: valid empty body -> empty list; unexpected body -> ServerFailure',
+    () async {
+      respond('[]', 200);
+      expect(await repo.list(), isEmpty);
+      respond('{"items":[]}', 200);
+      expect(await repo.list(), isEmpty);
+      // A broken contract must not read as "no addresses saved".
+      respond('{"unexpected":true}', 200);
+      await expectLater(repo.list(), throwsA(isA<ServerFailure>()));
+    },
+  );
 
   test(
     'create = POST with the address fields; unset label/line2/state go as null',

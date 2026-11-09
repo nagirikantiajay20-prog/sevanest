@@ -42,11 +42,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneric => 'Something went wrong. Please try again.';
 
   @override
+  String get errorTimeout =>
+      'We\'re taking a little longer than expected. Please try again.';
+
+  @override
+  String get errorConflictGeneric =>
+      'This was already updated. Please refresh to see the latest status.';
+
+  @override
+  String get errorWorkerUnavailable =>
+      'This worker is no longer available. Please choose another worker.';
+
+  @override
+  String get errorDuplicateBooking =>
+      'You already have this request in progress. Please check your bookings.';
+
+  @override
+  String get errorOffline =>
+      'You\'re offline. Connect to the internet to do this - nothing was sent.';
+
+  @override
   String get errorNetwork =>
       'Couldn\'t reach SevaNest. Check your connection and try again.';
 
   @override
   String get errorSessionExpired => 'Please sign in again.';
+
+  @override
+  String get errorNotFound =>
+      'We couldn\'t find that. It may have been removed. Go back and try again.';
+
+  @override
+  String get errorRateLimited =>
+      'You\'re trying too fast. Please wait a moment and try again.';
+
+  @override
+  String errorRateLimitedIn(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '$seconds seconds',
+      one: '1 second',
+    );
+    return 'You\'re trying too fast. Please try again in $_temp0.';
+  }
 
   @override
   String get errorForbidden => 'You don\'t have access to this.';
@@ -1026,17 +1065,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationOffBody =>
-      'Turn it on in Settings, or choose a saved address.';
+      'Location access is turned off. Allow location permission to find your current address.';
 
   @override
-  String get locationOpenSettings => 'Open settings';
+  String get locationOpenSettings => 'Open Settings';
 
   @override
-  String get locationChooseSaved => 'Choose a saved address';
+  String get locationForeverTitle => 'Location permission is disabled';
 
   @override
-  String get locationFailed =>
-      'Couldn\'t get your location. Choose a saved address instead.';
+  String get locationForeverBody =>
+      'Location permission is disabled. Enable it in your phone settings to use your current location.';
+
+  @override
+  String get locationGpsOffTitle => 'Your phone\'s location is off';
+
+  @override
+  String get locationGpsOffBody =>
+      'Your phone\'s location is turned off. Please enable location services and try again.';
+
+  @override
+  String get locationGpsOffAction => 'Location Settings';
+
+  @override
+  String get locationTempTitle => 'Couldn\'t find your location';
+
+  @override
+  String get locationTempBody =>
+      'We couldn\'t find your location right now. Please try again.';
+
+  @override
+  String get locationNetworkTitle => 'Couldn\'t get your address';
+
+  @override
+  String get locationNetworkBody =>
+      'Unable to retrieve your address. Check your internet connection and try again.';
+
+  @override
+  String get locationRetry => 'Try again';
+
+  @override
+  String get locationChooseSaved => 'Continue manually';
 
   @override
   String get locationNoAddressTitle => 'Add your first address';
@@ -1739,10 +1808,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reviewsLoadFailed => 'Couldn\'t load reviews.';
 
   @override
-  String get addressLocationFailed =>
-      'Couldn\'t get your location. Check the location permission, or fill in the address yourself.';
-
-  @override
   String get logout => 'Log out';
 
   @override
@@ -2346,6 +2411,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get interviewWorkerNotEligible =>
+      'This worker can\'t take this request for the hours in your requirement. Your choices are saved: change the requirement hours or pick another worker.';
+
+  @override
   String get interviewDuplicate =>
       'You already have an open request with this worker.';
 
@@ -2429,7 +2498,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payFailedBody =>
-      'Your booking is still waiting for payment. You can try again.';
+      'We couldn\'t complete your payment. You can try again.';
 
   @override
   String get payFailedDebitNote =>
@@ -2449,10 +2518,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get payPendingBody =>
-      'This can take a few minutes. Your booking will update when it\'s done.';
+      'Your payment is taking longer than expected. If the amount was deducted, please don\'t pay again. We\'re checking your transaction.';
 
   @override
   String get payRefresh => 'Check again';
+
+  @override
+  String get payOfflineTitle => 'You\'re offline';
+
+  @override
+  String get payOfflineBody =>
+      'You\'re offline. Your payment status will be checked when your connection returns. Please don\'t pay again.';
+
+  @override
+  String get payBookingPendingBody =>
+      'Payment received. We\'re confirming your booking.';
+
+  @override
+  String get payViewTransaction => 'View transaction';
 
   @override
   String get payAgain => 'I haven\'t paid, pay again';
@@ -3785,19 +3868,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serviceViewBooking => 'View booking details';
-
-  @override
-  String get notifPromptTitle => 'Stay in the loop';
-
-  @override
-  String get notifPromptBody =>
-      'Get a heads-up about interviews, payments and replies from support. You can change this any time in your phone\'s settings.';
-
-  @override
-  String get notifPromptAllow => 'Allow notifications';
-
-  @override
-  String get notifPromptLater => 'Not now';
 
   @override
   String get notifAccountTitle => 'Notifications';

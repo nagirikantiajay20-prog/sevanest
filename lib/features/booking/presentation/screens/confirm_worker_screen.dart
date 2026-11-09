@@ -122,7 +122,9 @@ class _State extends ConsumerState<ConfirmWorkerScreen> {
         setState(
           () => _error = isNotServiceable(e)
               ? failureMessage(l10n, e)
-              : e.message ?? l10n.confirmDateInvalid,
+              : isCustomerSafe(e.message)
+              ? e.message
+              : l10n.confirmDateInvalid,
         );
       }
     } on ConflictFailure {

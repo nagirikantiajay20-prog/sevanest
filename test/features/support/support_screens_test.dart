@@ -864,6 +864,27 @@ void main() {
       },
     );
 
+    testWidgets('a reply of only spaces is never sent', (t) async {
+      repo.tickets = [inProgress()];
+      await open(t, '/support/tk_1');
+      await typeIn(t, 'ticket_reply_field', '      ');
+      await t.tap(k('ticket_reply_btn'), warnIfMissed: false);
+      await t.pump();
+      expect(repo.postCalls, 0);
+      expect(k('ticket_failed_message'), findsNothing);
+    });
+
+    testWidgets('Timeout: failed bubble kept, no "offline" banner', (t) async {
+      repo.tickets = [inProgress()];
+      repo.postFail = const NetworkFailure(null, true);
+      await open(t, '/support/tk_1');
+      await typeIn(t, 'ticket_reply_field', 'Still there?');
+      await tapKey(t, 'ticket_reply_btn');
+      expect(k('ticket_offline_banner'), findsNothing);
+      expect(k('ticket_failed_message'), findsOneWidget);
+      expect(find.text('Still there?'), findsOneWidget);
+    });
+
     testWidgets('a lost answer is not sent twice', (t) async {
       repo.tickets = [inProgress()];
       repo

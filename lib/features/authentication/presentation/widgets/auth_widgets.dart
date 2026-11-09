@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/core/network/dio_provider.dart';
+import 'package:sevanest_customer/core/security/safe_url.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -150,7 +151,7 @@ Future<void> openSupport(BuildContext context, WidgetRef ref) async {
     target = null;
   }
   var opened = false;
-  if (target != null) {
+  if (target != null && isAllowedUri(target, schemes: contactSchemes)) {
     try {
       opened = await launchUrl(target);
     } on Object {

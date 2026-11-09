@@ -59,7 +59,7 @@ class HomeAttendance extends StatelessWidget {
               backgroundColor: AppColors.tealWash,
               foregroundImage: a.photoUrl == null
                   ? null
-                  : NetworkImage(a.photoUrl!),
+                  : ResizeImage(NetworkImage(a.photoUrl!), width: 160),
               onForegroundImageError: a.photoUrl == null ? null : (_, _) {},
               child: Text(
                 a.workerName.isEmpty ? '' : a.workerName[0].toUpperCase(),

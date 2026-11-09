@@ -388,6 +388,17 @@ void main() {
       expect(submitEnabled(t), isTrue);
     });
 
+    testWidgets('REP-02 Other: a note of only spaces is still missing', (
+      t,
+    ) async {
+      await open(t, '/replacements/new?bookingId=b1');
+      await submitReason(t, 'replacement_reason_other');
+      await t.ensureVisible(k('replacement_notes_field'));
+      await t.enterText(k('replacement_notes_field'), '     ');
+      await t.pumpAndSettle();
+      expect(submitEnabled(t), isFalse);
+    });
+
     testWidgets('Safety concern shows the support card and links to support', (
       t,
     ) async {
@@ -569,6 +580,19 @@ void main() {
       expect(rep.createCalls, 2);
       expect(rep.createKeys[0], rep.createKeys[1]);
       expect(k('replacement_received'), findsOneWidget);
+    });
+
+    testWidgets('a timeout is not shown as offline; answers are kept', (
+      t,
+    ) async {
+      rep.createFails = const NetworkFailure(null, true);
+      await open(t, '/replacements/new?bookingId=b1');
+      await submitReason(t, 'replacement_reason_workQuality', note: 'Late');
+      await tapKey(t, 'replacement_submit_btn');
+      await tapKey(t, 'replacement_confirm_btn');
+      expect(k('replacement_offline_banner'), findsNothing);
+      expect(k('replacement_error_card'), findsOneWidget);
+      expect(find.text('Late'), findsOneWidget);
     });
 
     testWidgets('editing after a failure gets a new key', (t) async {
@@ -1201,6 +1225,51 @@ void main() {
       expect(k('replacement_banner_scheduled'), findsOneWidget);
       expect(k('replacement_select_error'), findsNothing);
     });
+
+    testWidgets(
+      'TIMEOUT but the select went through: the latest state is shown, no second request',
+      (t) async {
+        books.items['b2'] = _booking(
+          'b2',
+          BookingStatus.matched,
+          startDate: DateTime(2026, 10, 12),
+        );
+        rep.items['rp1'] = ready();
+        rep.selectFails = const NetworkFailure(null, true);
+        rep.onSelect = (r) => r.items['rp1'] = _r(
+          id: 'rp1',
+          status: ReplacementStatus.completed,
+          replacementBookingId: 'b2',
+        );
+        await open(t, '/replacements/rp1');
+        await tapKey(t, 'replacement_alt_cook-5');
+        await tapKey(t, 'replacement_select_btn');
+        await tapKey(t, 'replacement_select_confirm_btn');
+        expect(k('replacement_banner_scheduled'), findsOneWidget);
+        expect(k('replacement_select_error'), findsNothing);
+        expect(k('replacement_offline_banner'), findsNothing);
+        expect(rep.selectCalls, 1);
+      },
+    );
+
+    testWidgets(
+      'TIMEOUT and nothing changed: not offline, says it could not confirm, no automatic resend',
+      (t) async {
+        rep.items['rp1'] = ready();
+        rep.selectFails = const NetworkFailure(null, true);
+        await open(t, '/replacements/rp1');
+        await tapKey(t, 'replacement_alt_cook-5');
+        await tapKey(t, 'replacement_select_btn');
+        await tapKey(t, 'replacement_select_confirm_btn');
+        expect(k('replacement_offline_banner'), findsNothing);
+        expect(
+          find.text("We couldn't confirm the replacement. Please try again."),
+          findsOneWidget,
+        );
+        expect(k('replacement_alt_cook-5'), findsOneWidget);
+        expect(rep.selectCalls, 1);
+      },
+    );
 
     testWidgets(
       'a server error that changed nothing says it could not confirm',

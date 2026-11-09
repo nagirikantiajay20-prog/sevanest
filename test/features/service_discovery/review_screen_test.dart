@@ -66,4 +66,16 @@ void main() {
     env.draftNotifier.reset();
     expect(env.container.read(requirementNoteProvider), isEmpty);
   });
+
+  testWidgets('a note of only spaces is stored as empty', (t) async {
+    final env = await open(t);
+    await t.enterText(find.byKey(const Key('discover_review_note')), '     ');
+    expect(env.container.read(requirementNoteProvider), isEmpty);
+  });
+
+  testWidgets('the note field stops at 300 characters', (t) async {
+    final env = await open(t);
+    await t.enterText(find.byKey(const Key('discover_review_note')), 'a' * 350);
+    expect(env.container.read(requirementNoteProvider).length, 300);
+  });
 }

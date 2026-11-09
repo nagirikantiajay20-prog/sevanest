@@ -2,13 +2,27 @@ name: CI
 on:
   push:
     branches: [main, master]
+  # Plain pull_request (never pull_request_target): fork PRs get a read-only token and no secrets.
   pull_request:
+
+# Least privilege: the job only reads the repository. Nothing here writes, releases or signs.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
+      # Actions are pinned to a major tag; pin to a commit SHA (and a Flutter version) once the
+      # release pipeline gains secrets or publishing steps.
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

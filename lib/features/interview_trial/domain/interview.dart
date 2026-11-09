@@ -171,10 +171,29 @@ class Interview {
   }
 }
 
-/// ISO time to local time, or null.
+/// India (Asia/Kolkata) is a fixed UTC+5:30 with no DST, and worker hours are India wall times.
+const _istOffset = Duration(hours: 5, minutes: 30);
+
+/// The instant of an India wall-clock [date] + `HH:mm` [slot], sent as UTC. It does not depend on
+/// the phone's timezone, so the time shown is the time the backend checks.
+DateTime istInstant(DateTime date, String slot) {
+  final m = parseSlot(slot) ?? 0;
+  return DateTime.utc(
+    date.year,
+    date.month,
+    date.day,
+    m ~/ 60,
+    m % 60,
+  ).subtract(_istOffset);
+}
+
+/// ISO time as an India wall-clock value (so it reads back as the slot that was picked), or null.
 DateTime? _time(Object? v) {
   final d = v is String ? DateTime.tryParse(v) : null;
-  return d == null ? null : (d.isUtc ? d.toLocal() : d);
+  if (d == null) return null;
+  if (!d.isUtc) return d;
+  final i = d.add(_istOffset);
+  return DateTime(i.year, i.month, i.day, i.hour, i.minute);
 }
 
 /// "17:30" -> 1050, or null when malformed.

@@ -419,6 +419,8 @@ Future<bool> showDiscoverDiscard(
   required String body,
   required String keep,
   required String discard,
+  Key keepKey = const Key('discover_discard_cancel_btn'),
+  Key discardKey = const Key('discover_discard_confirm_btn'),
 }) async {
   final yes = await showGeneralDialog<bool>(
     context: context,
@@ -450,72 +452,77 @@ Future<bool> showDiscoverDiscard(
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.warnBg,
-                    ),
-                    child: const Icon(
-                      Icons.warning_amber_rounded,
-                      size: 26,
-                      color: AppColors.warnIcon,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: authSerif(22, 1.2),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    body,
-                    textAlign: TextAlign.center,
-                    style: AppText.body.copyWith(fontSize: 14.5, color: dsText),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      key: const Key('discover_discard_cancel_btn'),
-                      onPressed: () => Navigator.of(ctx).pop(false),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: dsNavy,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        textStyle: AppText.body.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.warnBg,
                       ),
-                      child: Text(keep),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: TextButton(
-                      key: const Key('discover_discard_confirm_btn'),
-                      onPressed: () => Navigator.of(ctx).pop(true),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.red700,
-                        textStyle: AppText.body.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        size: 26,
+                        color: AppColors.warnIcon,
                       ),
-                      child: Text(discard),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: authSerif(22, 1.2),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      body,
+                      textAlign: TextAlign.center,
+                      style: AppText.body.copyWith(
+                        fontSize: 14.5,
+                        color: dsText,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        key: keepKey,
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: dsNavy,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: AppText.body.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: Text(keep),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: TextButton(
+                        key: discardKey,
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.red700,
+                          textStyle: AppText.body.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: Text(discard),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

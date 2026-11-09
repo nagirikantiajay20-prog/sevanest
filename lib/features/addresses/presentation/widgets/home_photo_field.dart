@@ -19,6 +19,15 @@ bool isSupportedPhoto(Uint8List b) =>
     ((b[0] == 0xFF && b[1] == 0xD8 && b[2] == 0xFF) ||
         (b[0] == 0x89 && b[1] == 0x50 && b[2] == 0x4E && b[3] == 0x47));
 
+enum PhotoCheck { ok, badFormat, tooBig }
+
+/// Client-side photo rules shared by every photo upload (JPEG/PNG, [maxHomePhotoBytes]).
+PhotoCheck checkPhoto(Uint8List b) => !isSupportedPhoto(b)
+    ? PhotoCheck.badFormat
+    : b.length > maxHomePhotoBytes
+    ? PhotoCheck.tooBig
+    : PhotoCheck.ok;
+
 /// "Upload Home Photo": empty tile -> gallery / camera sheet; with a photo -> preview plus
 /// Replace and Remove. [url] is the photo already saved with the address.
 class HomePhotoField extends StatefulWidget {
@@ -94,9 +103,10 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
           );
       if (file == null) return;
       final bytes = await file.readAsBytes();
-      if (!isSupportedPhoto(bytes)) {
+      final check = checkPhoto(bytes);
+      if (check == PhotoCheck.badFormat) {
         error = l10n.homePhotoBadFormat;
-      } else if (bytes.length > maxHomePhotoBytes) {
+      } else if (check == PhotoCheck.tooBig) {
         error = l10n.homePhotoTooBig;
       } else {
         if (mounted) setState(() => _error = null);
@@ -122,6 +132,12 @@ class _HomePhotoFieldState extends State<HomePhotoField> {
         ? Image.network(
             url!,
             fit: BoxFit.cover,
+            cacheWidth: 900,
+            loadingBuilder: (_, child, progress) => progress == null
+                ? child
+                : const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
             errorBuilder: (_, _, _) => const Center(
               child: Icon(Icons.broken_image_outlined, color: AppColors.slate),
             ),

@@ -229,6 +229,18 @@ void main() {
       expect(find.text('YOUR SPOT'), findsOneWidget);
     });
 
+    testWidgets('a search of only spaces still lists every service', (t) async {
+      await launch(t);
+      await start(t);
+      await t.enterText(find.byKey(const Key('discover_search_field')), '   ');
+      await t.pump(const Duration(milliseconds: 400));
+      expect(
+        find.byKey(const Key('discover_category_tile_cook')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('discover_empty')), findsNothing);
+    });
+
     testWidgets('search filters, no-result offers Clear search', (t) async {
       await launch(t);
       await start(t);
@@ -589,12 +601,19 @@ void main() {
       },
     );
 
-    testWidgets('location unavailable -> snackbar, flow continues', (t) async {
+    testWidgets('location unavailable -> card with Try again, flow continues', (
+      t,
+    ) async {
       await launch(t);
       await toLocation(t);
       location.result = const LocationResult(LocationOutcome.unavailable);
       await tapKey(t, 'discover_use_location_btn');
-      expect(find.textContaining("Couldn't get your location"), findsOneWidget);
+      expect(
+        find.textContaining("couldn't find your location right now"),
+        findsOneWidget,
+      );
+      await tapKey(t, 'discover_retry_location_btn');
+      expect(location.calls, 2);
       expect(where(t), '/discover/location');
     });
 

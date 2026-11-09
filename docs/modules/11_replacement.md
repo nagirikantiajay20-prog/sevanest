@@ -8,6 +8,7 @@ Status `REQUESTED | APPROVED | REJECTED | CANCELLED | COMPLETED`. No reason list
 ~~Assumed (not deployed): `POST /bookings/{id}/replacement`, `GET /replacements/{id}`, `/alternatives`, `/replacements/{id}/select`, `GET /catalog/replacement-reasons`.~~
 **UI (design 25 / 26 wins):** Request received screen after submit (Track request replaces the form with the status); choose a card on the status screen, then "Confirm replacement" (dialog); worker detail "Choose" mode is NOT built.
 **Routes:** `/replacements/new?bookingId=`, `/replacements/:id`.
+**Stage rule (audit 2026-11-08):** replacement is for ACTIVE bookings only. After an interview (`INTERVIEW_TRIAL_COMPLETED`) the booking detail offers Confirm worker / Find another worker (`booking_reopen_matching_btn` → confirm → `reopen-matching` → `/workers`) / Cancel, never Request Replacement; `Booking.fromJson` removes `replace` for any non-ACTIVE status. Pre-service change: unsupported, see BACKEND_REQUESTS "Worker change by stage".
 **Rules:** customer only *requests*; Support/Admin decides (AGENTS §45, §80.4). Eligibility = backend (`allowedActions.replace`). Previous engagement stays visible. Status enum is backend-owned (`ReplacementStatusMapper` + unknown fallback).
 
 Conceptual UI states: `requested → under_review → approved → alternatives_available → replacement_selected → replacement_confirmed`; terminal `rejected`, `closed`.

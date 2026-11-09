@@ -322,10 +322,8 @@ void main() {
       );
     });
 
-    test('dev/stg/prod all use https and TLS checks are not bypassed', () {
-      for (final c in [AppConfig.dev, AppConfig.stg, AppConfig.prod]) {
-        expect(c.apiBaseUrl, startsWith('https://'));
-      }
+    test('dev uses https and TLS checks are not bypassed', () {
+      expect(AppConfig.dev.apiBaseUrl, startsWith('https://'));
       final container = ProviderContainer(
         overrides: [
           appConfigProvider.overrideWithValue(AppConfig.dev),

@@ -207,7 +207,7 @@ class _State extends ConsumerState<NewTicketScreen> {
         _done(lost);
       } else {
         setState(() {
-          if (e is NetworkFailure) {
+          if (isOffline(e)) {
             _offline = true;
           } else {
             _failed = true;

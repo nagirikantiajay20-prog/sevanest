@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sevanest_customer/app/router/app_router.dart';
 import 'package:sevanest_customer/app/router/routes.dart';
 import 'package:sevanest_customer/core/session/auth_state.dart';
+import 'package:sevanest_customer/core/widgets/offline_banner.dart';
 import 'package:sevanest_customer/features/booking/presentation/providers/booking_providers.dart';
 import 'package:sevanest_customer/features/home/presentation/providers/home_providers.dart';
 import 'package:sevanest_customer/features/payment/domain/payment.dart';
+import 'package:sevanest_customer/features/payment/presentation/providers/payment_flow.dart';
 import 'package:sevanest_customer/features/payment/presentation/providers/payment_providers.dart';
 import 'package:sevanest_customer/l10n/gen/app_localizations.dart';
 
@@ -113,9 +115,16 @@ class _State extends ConsumerState<PaymentRecoveryHost>
   @override
   Widget build(BuildContext context) {
     // The first check may run before the session is restored: look again once signed in.
-    ref.listen(authProvider, (_, s) {
-      if (s == AuthStatus.authenticated) unawaited(_recover());
-    });
+    ref
+      // Keeps the payment flow (its connectivity and resume hooks) alive between screens.
+      ..listen(paymentFlowProvider, (_, _) {})
+      ..listen(authProvider, (_, s) {
+        if (s == AuthStatus.authenticated) unawaited(_recover());
+      })
+      // Connection back: look at an unresolved payment again (never pays again by itself).
+      ..listen(onlineProvider, (prev, next) {
+        if (prev?.value == false && next.value == true) unawaited(_recover());
+      });
     return widget.child;
   }
 }

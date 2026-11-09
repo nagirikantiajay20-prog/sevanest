@@ -393,6 +393,69 @@ void main() {
       },
     );
 
+    testWidgets('edit: a name of only spaces keeps Save disabled', (t) async {
+      profiles.stored = existing;
+      await launch(t, complete: true);
+      await openProfile(t);
+      await t.tap(find.byKey(const Key('profile_edit_btn')));
+      await t.pumpAndSettle();
+      await t.enterText(find.byKey(_name), '     ');
+      await t.pump();
+      expect(fb(t, const Key('profile_save_btn')).onPressed, isNull);
+      expect(profiles.updateCalls, 0);
+    });
+
+    testWidgets('edit: double tap on Save sends one request', (t) async {
+      final gate = Completer<void>();
+      profiles.stored = existing;
+      await launch(t, complete: true);
+      await openProfile(t);
+      await t.tap(find.byKey(const Key('profile_edit_btn')));
+      await t.pumpAndSettle();
+      profiles.gate = gate.future;
+      await t.enterText(find.byKey(_name), 'Asha K Rao');
+      await t.pump();
+      await t.tap(find.byKey(const Key('profile_save_btn')));
+      await t.pump();
+      await t.tap(
+        find.byKey(const Key('profile_save_btn')),
+        warnIfMissed: false,
+      );
+      await t.pump();
+      expect(profiles.updateCalls, 1);
+      gate.complete();
+      await t.pumpAndSettle();
+      expect(profiles.updateCalls, 1);
+    });
+
+    for (final f in [
+      const NetworkFailure(),
+      const NetworkFailure(null, true),
+    ]) {
+      testWidgets(
+        'edit: ${f.timedOut ? 'timeout' : 'offline'} keeps the typed name, edit mode and a retry',
+        (t) async {
+          profiles.stored = existing;
+          await launch(t, complete: true);
+          await openProfile(t);
+          await t.tap(find.byKey(const Key('profile_edit_btn')));
+          await t.pumpAndSettle();
+          profiles.failNext = f;
+          await t.enterText(find.byKey(_name), 'Asha K Rao');
+          await t.pump();
+          await t.tap(find.byKey(const Key('profile_save_btn')));
+          await t.pumpAndSettle();
+          expect(find.text('Asha K Rao'), findsWidgets);
+          expect(find.byKey(const Key('profile_save_btn')), findsOneWidget);
+          expect(find.text('Profile updated'), findsNothing);
+          await t.tap(find.byKey(const Key('profile_save_btn')));
+          await t.pumpAndSettle();
+          expect(profiles.updateCalls, 2);
+          expect(find.text('Profile updated'), findsOneWidget);
+        },
+      );
+    }
+
     testWidgets('Cancel with changes asks to discard, then reverts', (t) async {
       profiles.stored = existing;
       await launch(t, complete: true);

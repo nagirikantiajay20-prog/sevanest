@@ -33,7 +33,7 @@ class LocationScreen extends ConsumerStatefulWidget {
 
 class _LocationScreenState extends ConsumerState<LocationScreen> {
   bool _finding = false;
-  bool _permissionOff = false;
+  LocationOutcome? _problem;
   bool _seeded = false;
 
   /// Default selection: the draft's address, else the Home chip choice, else the default address.
@@ -67,7 +67,7 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
     if (_finding) return;
     setState(() {
       _finding = true;
-      _permissionOff = false;
+      _problem = null;
     });
     final res = await ref.read(locationServiceProvider).currentAddress();
     if (!mounted) return;
@@ -88,16 +88,8 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
                   longitude: found.longitude,
                 ),
         );
-      case LocationOutcome.denied || LocationOutcome.deniedForever:
-        setState(() => _permissionOff = true);
-      case LocationOutcome.unavailable:
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context).locationFailed),
-            ),
-          );
+      case _:
+        setState(() => _problem = res.outcome);
     }
   }
 
@@ -257,11 +249,15 @@ class _LocationScreenState extends ConsumerState<LocationScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          if (_permissionOff) ...[
+          if (_problem case final problem?) ...[
             PermissionOffCard(
-              onOpenSettings: () =>
-                  ref.read(locationServiceProvider).openSettings(),
-              onChooseSaved: () => setState(() => _permissionOff = false),
+              outcome: problem,
+              onAction: () => runLocationProblemAction(
+                ref.read(locationServiceProvider),
+                problem,
+                _useCurrentLocation,
+              ),
+              onChooseSaved: () => setState(() => _problem = null),
             ),
             const SizedBox(height: 12),
           ],

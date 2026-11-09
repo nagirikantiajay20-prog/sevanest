@@ -159,6 +159,24 @@ class _State extends ConsumerState<InterviewRequestScreen> {
       _error = null;
     });
     try {
+      // Availability is read again right before sending: the list on screen may be old, and a
+      // time that was taken meanwhile is reported here instead of being sent and refused.
+      final provider = interviewSlotsProvider((
+        workerId: widget.workerId,
+        date: date,
+      ));
+      ref.invalidate(provider);
+      final fresh = await ref.read(provider.future);
+      final verdict = checkInterviewTime(
+        minutes: parseSlot(slot)!,
+        date: date,
+        now: ref.read(nowProvider)(),
+        slots: fresh,
+      );
+      if (verdict != TimeCheck.ok) {
+        if (mounted) setState(() => _error = l10n.interviewSlotTaken);
+        return;
+      }
       final Interview result;
       if (_isReschedule) {
         result = await repo.reschedule(
@@ -199,14 +217,19 @@ class _State extends ConsumerState<InterviewRequestScreen> {
       ref.invalidate(
         interviewSlotsProvider((workerId: widget.workerId, date: date)),
       );
-      if (mounted) {
-        setState(() {
-          _slot = null;
-          _error = l10n.interviewSlotTaken;
-        });
-      }
+      // The date, time and note stay; the time now shows as unavailable until another is picked.
+      if (mounted) setState(() => _error = l10n.interviewSlotTaken);
     } on NotFoundFailure {
       gone = true;
+    } on ValidationFailure catch (e) {
+      // A definite refusal, not a lost answer: nothing was created, so keep every choice.
+      if (mounted) {
+        setState(
+          () => _error = e.code == 'WORKER_NOT_ELIGIBLE'
+              ? l10n.interviewWorkerNotEligible
+              : failureMessage(l10n, e),
+        );
+      }
     } on Object catch (e) {
       // The request may have gone through even though the answer was lost: look before failing.
       final found = await _createdMeanwhile(date, slot, startedAt);
@@ -293,7 +316,7 @@ class _State extends ConsumerState<InterviewRequestScreen> {
         // The overlay sits below the navigator, so a dialog can find it.
         final c =
             router.routerDelegate.navigatorKey.currentState?.overlay?.context;
-        if (c != null && c.mounted) unawaited(askForPushAfterAction(c, push));
+        if (c != null && c.mounted) unawaited(askForPushAfterAction(push));
       })
       ..scheduleFrame();
   }

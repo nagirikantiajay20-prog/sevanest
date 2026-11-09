@@ -213,10 +213,13 @@ class _State extends ConsumerState<ReplacementStatusScreen>
     } on ValidationFailure catch (e) {
       // WORKER_NOT_ELIGIBLE, SAME_WORKER.
       _lost(e.code == 'SAME_WORKER' ? l10n.repSelectSame : l10n.repSelectGone);
-    } on NetworkFailure {
-      if (mounted) setState(() => _offline = true);
-    } on Object {
-      // The answer may have been lost: read the request again before saying it failed.
+    } on Object catch (e) {
+      if (isOffline(e)) {
+        if (mounted) setState(() => _offline = true);
+        return;
+      }
+      // The answer may have been lost (including a timeout): read the request again before
+      // saying it failed.
       try {
         final fresh = await ref.read(replacementRepositoryProvider).get(_id);
         if (fresh.status == ReplacementStatus.completed) {

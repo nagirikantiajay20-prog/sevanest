@@ -98,7 +98,7 @@ void main() {
     // A flexible requirement still sends the hours window the backend requires.
     expect((posts[0].data as Map)['availableFrom'], isNotNull);
     expect((posts[0].data as Map)['availableTo'], isNotNull);
-    expect(posts[1].headers['Idempotency-Key'], 'k1-interview');
+    expect(posts[1].headers['Idempotency-Key'], startsWith('k1-interview-'));
     final body = posts[1].data as Map;
     expect(body['bookingId'], 'bk1');
     expect(body['type'], 'TRIAL');
@@ -110,6 +110,113 @@ void main() {
     expect(iv.requirement?.serviceId, 'COOK');
     expect(iv.actions, {InterviewAction.cancel, InterviewAction.reschedule});
     expect(iv.timeline.map((e) => e.title), ['Requested', 'Answer']);
+  });
+
+  InterviewRequest req(InterviewType t, String slot, {int day = 7}) =>
+      InterviewRequest(
+        workerId: 'cook-1',
+        type: t,
+        date: DateTime(2026, 11, day),
+        slot: slot,
+        requirement: requirement,
+      );
+
+  test('trial 7 Nov 4 PM goes out as 16:00 India time (10:30 UTC)', () async {
+    await repo(
+      routes,
+    ).create(req(InterviewType.trial, '16:00'), idempotencyKey: 'k');
+    final body =
+        seen
+                .lastWhere((o) => o.method == 'POST' && o.path == '/interviews')
+                .data
+            as Map;
+    expect(body['type'], 'TRIAL');
+    expect(body['preferredAt'], '2026-11-07T10:30:00.000Z');
+    // Round trip: the backend's instant reads back as the same wall time.
+    final iv = Interview.fromJson({
+      'id': 'x',
+      'preferredAt': body['preferredAt'],
+    })!;
+    expect((iv.date, iv.slot), (DateTime(2026, 11, 7), '16:00'));
+  });
+
+  test(
+    'interview: type INTERVIEW, booking payload independent of the slot',
+    () async {
+      await repo(
+        routes,
+      ).create(req(InterviewType.interview, '18:00'), idempotencyKey: 'k');
+      final posts = seen.where((o) => o.method == 'POST').toList();
+      expect((posts[1].data as Map)['type'], 'INTERVIEW');
+      expect((posts[1].data as Map)['bookingId'], 'bk1');
+      final booking = posts[0].data as Map;
+      expect(booking['workerId'], 'cook-1');
+      // The booking carries the requirement's hours, never the interview time.
+      expect('$booking', isNot(contains('18:00')));
+      expect(booking['startDate'], '2026-11-05');
+    },
+  );
+
+  test(
+    'retry after the interview step failed: one booking, same key',
+    () async {
+      var fail = true;
+      final r = repo((o) async {
+        if (o.path == '/interviews' && o.method == 'POST' && fail) {
+          return jsonBody('{"code":"X"}', 503);
+        }
+        return routes(o);
+      });
+      final q = req(InterviewType.trial, '16:00');
+      await expectLater(r.create(q, idempotencyKey: 'k'), throwsA(anything));
+      fail = false;
+      await r.create(q, idempotencyKey: 'k');
+      final posts = seen.where((o) => o.method == 'POST').toList();
+      expect(posts.where((o) => o.path == '/bookings'), hasLength(1));
+      final keys = posts
+          .where((o) => o.path == '/interviews')
+          .map((o) => o.headers['Idempotency-Key'])
+          .toList();
+      expect(keys, hasLength(2));
+      expect(keys[0], keys[1]);
+    },
+  );
+
+  test('a changed time after a failure is a new interview request', () async {
+    final r = repo(routes);
+    await r.create(req(InterviewType.trial, '16:00'), idempotencyKey: 'k');
+    await r.create(req(InterviewType.trial, '17:00'), idempotencyKey: 'k');
+    final keys = seen
+        .where((o) => o.method == 'POST' && o.path == '/interviews')
+        .map((o) => o.headers['Idempotency-Key'])
+        .toSet();
+    expect(keys, hasLength(2));
+    expect(
+      seen.where((o) => o.method == 'POST' && o.path == '/bookings'),
+      hasLength(1),
+    );
+  });
+
+  test('backend refusal WORKER_NOT_ELIGIBLE surfaces with its code', () async {
+    final r = repo(
+      (o) async => o.path == '/bookings'
+          ? jsonBody(
+              '{"code":"WORKER_NOT_ELIGIBLE","message":"The worker is not available for this requirement."}',
+              422,
+            )
+          : routes(o),
+    );
+    await expectLater(
+      r.create(req(InterviewType.trial, '16:00'), idempotencyKey: 'k'),
+      throwsA(
+        isA<ValidationFailure>().having(
+          (e) => e.code,
+          'code',
+          'WORKER_NOT_ELIGIBLE',
+        ),
+      ),
+    );
+    expect(seen.where((o) => o.path == '/interviews'), isEmpty);
   });
 
   test(

@@ -1,3 +1,5 @@
+import 'dart:io' show SocketException;
+
 import 'package:dio/dio.dart';
 import 'package:sevanest_customer/core/analytics/telemetry.dart';
 import 'package:sevanest_customer/core/errors/app_failure.dart';
@@ -9,8 +11,14 @@ AppFailure mapDioError(DioException e) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
     case DioExceptionType.receiveTimeout:
+      return const NetworkFailure(null, true);
     case DioExceptionType.connectionError:
-      return const NetworkFailure();
+    case DioExceptionType.unknown when e.error is SocketException:
+      // The OfflineWriteGuard marks a refused write with message 'offline'.
+      return NetworkFailure(null, false, e.message == 'offline');
+    case DioExceptionType.unknown when e.error is FormatException:
+      // Body was not valid JSON: treat like a bad server reply, never show the parser text.
+      return const ServerFailure();
     case DioExceptionType.cancel:
       return const UnknownFailure('cancelled');
     default:
@@ -32,17 +40,19 @@ AppFailure mapDioError(DioException e) {
 }
 
 AppFailure _byStatus(int? status, Map<String, dynamic> body, DioException e) {
-  final message = body['message'] as String?;
+  final raw = body['message'];
+  final message = raw is String ? raw : null; // tolerate list/object messages
   return switch (status) {
     400 || 422 => ValidationFailure(
       message,
       _fieldErrors(body['details'] ?? body['fieldErrors']),
-      body['code'] as String?,
+      _code(body['code']),
     ),
     401 => UnauthorizedFailure(message),
     403 => ForbiddenFailure(message),
+    408 => const NetworkFailure(null, true),
     404 || 410 => NotFoundFailure(message),
-    409 => ConflictFailure(message, body['code'] as String?),
+    409 => ConflictFailure(message, _code(body['code'])),
     429 => RateLimitedFailure(message, _retryAfter(e.response, body)),
     final int s when s >= 500 => ServerFailure(message),
     _ => UnknownFailure(message),
@@ -74,3 +84,5 @@ int? _retryAfter(Response<dynamic>? res, Map<String, dynamic> body) {
   }
   return null;
 }
+
+String? _code(Object? v) => v is String ? v : null;

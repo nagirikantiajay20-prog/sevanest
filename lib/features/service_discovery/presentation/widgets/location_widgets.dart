@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:sevanest_customer/app/theme/tokens.dart';
 import 'package:sevanest_customer/app/theme/typography.dart';
+import 'package:sevanest_customer/core/services/location_service.dart';
 import 'package:sevanest_customer/core/widgets/sn_button.dart';
 import 'package:sevanest_customer/features/addresses/domain/address.dart';
 import 'package:sevanest_customer/features/authentication/presentation/widgets/auth_glass.dart'
@@ -156,18 +157,82 @@ class _Radar extends StatelessWidget {
 }
 
 /// Location permission is off: red icon, copy, Open settings and a link back to saved addresses.
+/// What the customer reads and can do for a failed "use my current location" (one place, so the
+/// address form and the location step say the same thing). Never shows a platform error.
+typedef LocationProblemInfo = ({
+  String title,
+  String body,
+  String action,
+  bool retry,
+});
+
+LocationProblemInfo locationProblemInfo(
+  AppLocalizations l10n,
+  LocationOutcome outcome,
+) => switch (outcome) {
+  LocationOutcome.deniedForever => (
+    title: l10n.locationForeverTitle,
+    body: l10n.locationForeverBody,
+    action: l10n.locationOpenSettings,
+    retry: false,
+  ),
+  LocationOutcome.gpsOff => (
+    title: l10n.locationGpsOffTitle,
+    body: l10n.locationGpsOffBody,
+    action: l10n.locationGpsOffAction,
+    retry: false,
+  ),
+  LocationOutcome.network => (
+    title: l10n.locationNetworkTitle,
+    body: l10n.locationNetworkBody,
+    action: l10n.locationRetry,
+    retry: true,
+  ),
+  LocationOutcome.unavailable => (
+    title: l10n.locationTempTitle,
+    body: l10n.locationTempBody,
+    action: l10n.locationRetry,
+    retry: true,
+  ),
+  _ => (
+    title: l10n.locationOffTitle,
+    body: l10n.locationOffBody,
+    action: l10n.locationOpenSettings,
+    retry: false,
+  ),
+};
+
+/// Runs the action [locationProblemInfo] names: settings for permission / GPS, retry otherwise.
+Future<void> runLocationProblemAction(
+  LocationService service,
+  LocationOutcome outcome,
+  VoidCallback retry,
+) async {
+  switch (outcome) {
+    case LocationOutcome.gpsOff:
+      await service.openLocationSettings();
+    case LocationOutcome.network || LocationOutcome.unavailable:
+      retry();
+    case _:
+      await service.openSettings();
+  }
+}
+
 class PermissionOffCard extends StatelessWidget {
   const PermissionOffCard({
-    required this.onOpenSettings,
+    required this.outcome,
+    required this.onAction,
     required this.onChooseSaved,
     super.key,
   });
-  final VoidCallback onOpenSettings;
+  final LocationOutcome outcome;
+  final VoidCallback onAction;
   final VoidCallback onChooseSaved;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final info = locationProblemInfo(l10n, outcome);
     return DiscoverRise(
       delayMs: 0,
       child: DiscoverGlass(
@@ -195,13 +260,13 @@ class PermissionOffCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.locationOffTitle,
+                      info.title,
                       key: const Key('discover_location_off'),
                       style: authSerif(18, 1.3),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.locationOffBody,
+                      info.body,
                       style: AppText.body.copyWith(
                         fontSize: 14,
                         height: 1.45,
@@ -215,8 +280,12 @@ class PermissionOffCard extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         OutlinedButton(
-                          key: const Key('discover_open_settings_btn'),
-                          onPressed: onOpenSettings,
+                          key: Key(
+                            info.retry
+                                ? 'discover_retry_location_btn'
+                                : 'discover_open_settings_btn',
+                          ),
+                          onPressed: onAction,
                           style: OutlinedButton.styleFrom(
                             minimumSize: const Size(0, 44),
                             padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -230,7 +299,7 @@ class PermissionOffCard extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          child: Text(l10n.locationOpenSettings),
+                          child: Text(info.action),
                         ),
                         TextButton(
                           key: const Key('discover_choose_saved_btn'),
